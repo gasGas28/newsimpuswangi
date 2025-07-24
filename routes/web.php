@@ -32,6 +32,9 @@ Route::get('/card', function () {
 Route::get('/pagination', function () {
     return Inertia::render('Templete/Pagination');
 })->name('pagination');
+
+Route::get('/mal-sehat', fn() => Inertia::render('MalSehat/Index'));
+
 // // DASHBOARD pakai ProductController
 // Route::get('/dashboard', [ProductController::class, 'index'])
 //     ->middleware(['auth', 'role:owner,admin,pelayanan'])

@@ -1,7 +1,7 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm border-bottom">
     <div class="container">
-      <Link href="/" class="navbar-brand fw-bold">MyApp</Link>
+      <Link href="/" class="navbar-brand fw-bold text-primary">Simpuswangi</Link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -22,10 +22,15 @@
               Loket
             </Link>
           </li>
+          <li class="nav-item">
+            <Link href="/mal-sehat" class="nav-link" :class="{ 'active': $page.url.startsWith('/mal-sehat') }">
+              Mal Sehat
+            </Link>
+          </li>
         </ul>
         <div class="d-flex align-items-center">
           <div class="dropdown">
-            <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
               <i class="bi bi-person-circle me-1"></i> User
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -51,8 +56,10 @@ import { Link } from '@inertiajs/vue3'
 .nav-link {
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
+  color: #333;
 }
-.nav-link:hover, .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.1);
+.nav-link:hover,
+.nav-link.active {
+  background-color: #f0f0f0;
 }
 </style>
