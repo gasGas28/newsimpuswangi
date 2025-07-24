@@ -17,8 +17,17 @@ Route::get('/admin', function () {
 Route::get('/loket', function () {
     return Inertia::render('Loket/Index');
 });
+Route::get('/formpdf', function () {
+    return Inertia::render('Loket/Pasien');
+});
+Route::get('/cari', function () {
+    return Inertia::render('Pasien/Search');
+});
 Route::get('/pasien', function () {
     return Inertia::render('Pasien/Index');
+});
+Route::get('/filter', function () {
+    return Inertia::render('Laporan/Filter');
 });
 
 // Grup route untuk template components
