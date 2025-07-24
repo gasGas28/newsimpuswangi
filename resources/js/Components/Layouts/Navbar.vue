@@ -8,7 +8,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <Link href="/template" class="nav-link" :class="{ 'active': $page.url.startsWith('/template') }">
+            <Link href="/" class="nav-link" :class="{ 'active': $page.url.startsWith('/template') }">
               Template
             </Link>
           </li>
@@ -22,6 +22,11 @@
               Loket
             </Link>
           </li>
+          <!-- <li class="nav-item">
+            <Link href="/pasien" class="nav-link" :class="{ 'active': $page.url.startsWith('/pasien') }">
+              Pasien
+            </Link>
+          </li> -->
         </ul>
         <div class="d-flex align-items-center">
           <div class="dropdown">

@@ -1,12 +1,14 @@
 <template>
-  <div>
-    <!-- Header -->
-    <div class="az-header">
-      <div class="container">
-        <div class="az-header-left">
-          <a href="#" class="az-logo"><span></span> azia</a>
-        </div>
-        <div class="az-header-menu">
+  <AppLayout>
+    
+    <div>
+      <!-- Header -->
+      <div class="az-header">
+        <div class="container">
+          <div class="az-header-left">
+            <a href="#" class="az-logo"><span></span> azia</a>
+          </div>
+          <div class="az-header-menu">
           <ul class="nav">
             <li class="nav-item active show">
               <a href="#" class="nav-link"><i class="typcn typcn-chart-area-outline"></i> Dashboard</a>
@@ -207,9 +209,11 @@
       </div>
     </div>
   </div>
+</AppLayout>
 </template>
 
 <script setup>
+import AppLayout from '@/Components/Layouts/AppLayouts.vue';
 // Jika ingin chart interaktif, tambahkan script JS chart di sini
 </script>
 

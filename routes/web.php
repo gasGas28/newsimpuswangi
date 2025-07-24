@@ -11,6 +11,15 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
 });
+Route::get('/admin', function () {
+    return Inertia::render('Admin/Index');
+});
+Route::get('/loket', function () {
+    return Inertia::render('Loket/Index');
+});
+Route::get('/pasien', function () {
+    return Inertia::render('Pasien/Index');
+});
 
 // Grup route untuk template components
 Route::get('/button', function () {
