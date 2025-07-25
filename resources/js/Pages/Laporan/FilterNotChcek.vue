@@ -1,12 +1,10 @@
 <template>
     <AppLayout>
-        <div class="ms-4 me-4">
-
-            <div class="card">
-                <div class="card-header fw-bold">Filter Laporan</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <!-- Kolom 1 -->
+        <div class="card">
+            <div class="card-header fw-bold">Filter Laporan</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Kolom 1 -->
                     <div class="col-md-3">
                         <div class="mb-2">
                             <label class="form-label fw-bold">Puskesmas</label>
@@ -38,12 +36,12 @@
                             <option>POSKESTREN</option>
                             <option>PONKESDES</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Asal</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Rujuk Lanjut</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
@@ -69,39 +67,39 @@
                                 type="text"
                                 class="form-control"
                                 placeholder="0"
-                                />
-                            </div>
-                            
+                            />
+                        </div>
+
                         <label class="form-label mt-2 fw-bold">Diagnosa</label>
                         <input
                             type="text"
                             class="form-control mb-2"
                             placeholder="0"
-                            />
-                            
-                            <label class="form-label mt-2 fw-bold">Tindakan</label>
-                            <select class="form-select mb-2">
-                                <option>- Pilih -</option>
+                        />
+
+                        <label class="form-label mt-2 fw-bold">Tindakan</label>
+                        <select class="form-select mb-2">
+                            <option>- Pilih -</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Kepesertaan</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Kategori</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
                     </div>
-                    
+
                     <!-- Kolom 3 -->
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Kecamatan</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Desa</label>
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
@@ -117,22 +115,22 @@
                             <option>Laki-laki</option>
                             <option>Perempuan</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Nama</label>
                         <input type="text" class="form-control" />
                     </div>
-                    
+
                     <!-- Kolom 4 -->
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Kode</label>
                         <input
-                        type="text"
+                            type="text"
                             class="form-control mb-2"
                             placeholder="0"
-                            />
-                            
-                            <label class="form-label mt-2 fw-bold">Poli</label>
-                            <select class="form-select mb-2">
+                        />
+
+                        <label class="form-label mt-2 fw-bold">Poli</label>
+                        <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
 
@@ -145,10 +143,10 @@
                         <select class="form-select mb-2">
                             <option>- Pilih -</option>
                         </select>
-                        
+
                         <label class="form-label mt-2 fw-bold">Isi Diagnosa</label>
                         <input
-                        type="text"
+                            type="text"
                             class="form-control mb-2"
                             placeholder="Diagnosa"
                         />
@@ -169,7 +167,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </AppLayout>
 </template>
 <script setup>
