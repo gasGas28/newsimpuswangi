@@ -21,6 +21,12 @@
             <Link href="/loket" class="nav-link" :class="{ 'active': $page.url.startsWith('/loket') }">
               Loket
             </Link>
+          </li class="nav-item">
+          <Link href="/simpus/poli" class="nav-link">
+            Ruang Layanan
+          </Link>
+          <li>
+
           </li>
         </ul>
         <div class="d-flex align-items-center">
