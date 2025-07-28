@@ -30,6 +30,12 @@
             </Link>
           </li>
 
+          <li class="nav-item">
+            <Link :href="route('filter')" class="nav-link d-flex align-items-center">
+              <i class="bi bi-filter-square-fill me-2"></i> Filter
+            </Link>
+          </li>
+
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="laporanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan

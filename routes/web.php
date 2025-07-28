@@ -17,6 +17,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/', fn() => Inertia::render('Admin/Index'))->name('admin.index');
 });
 
+// Grup Filter
+Route::prefix('filter')->group(function () {
+    Route::get('/filter', fn() => Inertia::render('Filter/Index'))->name('filter');
+});
+
 // Grup Loket
 Route::prefix('loket')->group(function () {
     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');

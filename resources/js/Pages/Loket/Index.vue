@@ -1,8 +1,8 @@
 <template>
     <AppLayout title="Loket">
         <div class="container py-4">
-            <div class="card">
-                <div class="card-body d-flex gap-2 justify-content-end">
+            <div>
+                <div class="mb-3 d-flex gap-2 justify-content-end">
                     <Link
                         :href="route('loket.search')"
                         class="btn btn-outline-primary"
@@ -13,7 +13,6 @@
                         class="btn btn-primary"
                         >Tambah Pasien</Link
                     >
-                    <a href="/filter" class="btn btn-success">Filter Laporan</a>
                 </div>
             </div>
             <!-- Form Section -->
