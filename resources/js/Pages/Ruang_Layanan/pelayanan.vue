@@ -97,7 +97,7 @@
         <div class="card-header p-4 d-flex gap-4 align-items-center">
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'subjective' }" @click.prevent="currentTab = 'subjective'">Subjective</a>
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'objective' }" @click.prevent="currentTab = 'objective'">Objective</a>
-          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'assessment' }" @click.prevent="currentTab = 'assessment'">Assessment</a>
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'assesment' }" @click.prevent="currentTab = 'assesment'">Assessment</a>
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'planning' }" @click.prevent="currentTab = 'planning'">Planning</a>
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'status_pasien' }" @click.prevent="currentTab = 'status_pasien'">Status Pasien</a>
           <Link href="#" class="btn btn-success">Kirim RME v.1 ke SATU SEHAT</Link>
@@ -350,7 +350,7 @@
         </div>
       </div>
 
-        <div class="container" v-if="currentTab === 'status_pasien'">
+      <div class="container" v-if="currentTab === 'status_pasien'">
         <div class="card">
         <div class="card-body">
       <form action="">
@@ -400,6 +400,122 @@
 
         </div>
       </div>
+
+      <div v-if="currentTab === 'assesment'"> 
+        <div class="row">
+          <div class="col-6">
+            <div class="row mb-3">
+              <div class="col-3">
+                <input type="text" class="form-control" placeholder="" disabled>
+              </div>
+              <div class="col-9">
+                <input type="text" class="form-control" placeholder="" disabled>
+              </div>
+            </div>
+             <div class="row  mb-3">
+              <div class="col-3 d-flex flex-column">
+                <label for=""> Alergi Makan</label>
+                <input class="form-control"  type="text">
+              </div>
+              <div class="col-3  d-flex flex-column">
+                <label for=""> Alergi Makan</label>
+                <input  class="form-control" type="text">
+              </div>
+              <div class="col-6 d-flex flex-column">
+                <label for=""> Alergi Makan</label>
+                <input  class="form-control" type="text">
+              </div>
+            </div>
+            <div class="row  mb-3">
+              <div class="col-3  d-flex flex-column">
+                <label for="">Kunjungan Khusus</label>
+                <select class="form-control" name="" id="">
+                  <option value="">Pilih</option>
+                </select>
+              </div>
+              <div class="col-9  d-flex flex-column">
+                <label for="">Keterangan</label>
+                <input  class="form-control" type="text">
+
+              </div>
+
+            </div>
+            <Link href="/surat-keterangan" class="btn btn-success">
+            <i class="far fa-envelope me-2"></i>SIMPAN DIAGNOSA MEDIS
+          </Link>
+          </div>
+          
+          <div class="col-6">
+            <div class="row mb-4">
+              <div class="col-5">
+                <Link href="/surat-keterangan" class="btn btn-info">
+                <i class="fas fa-bars me-2"></i>Laboratorium
+              </Link>
+              </div>
+              <div class="col-7 d-flex gap-3 flex-wrap">
+                <Link href="/surat-keterangan" class="btn btn-secondary">
+                <i class="far fa-envelope me-2"></i>Diare
+              </Link>
+              <Link href="/surat-keterangan" class="btn btn-secondary">
+                <i class="far fa-envelope me-2"></i>Katarak
+              </Link>
+              <Link href="/surat-keterangan" class="btn btn-secondary">
+                <i class="far fa-envelope me-2"></i>PTM
+              </Link>
+              <Link href="/surat-keterangan" class="btn btn-secondary">
+                <i class="far fa-envelope me-2"></i>Hipertensi
+              </Link>
+              </div>
+            </div>
+            <div class="row">   
+              <select class="form-control" name="" id="">
+                <option value="">pilih</option>
+              </select>
+              <Link href="/surat-keterangan" class="btn btn-success mt-4">
+                <i class="far fa-envelope me-2"></i>Simpan Diagnosa Keperawatan
+              </Link>
+            </div>
+          
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-6">
+              <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>	Nama Diagnosa Medis</th>
+                  <th>Keterangan</th>
+                  <th>Kasus</th>
+                  <th>Poli</th>
+                  <th>Action</th> 
+                </tr>
+
+              </thead>
+            </table>
+
+            </div>
+            <div class="col-6">
+              <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Diagnosa Asuhan Keperawatan</th>
+                  <th>Keterangan</th>
+                  <th>Kasus</th>
+                  <th>Poli</th>
+                  <th>Action</th> 
+                </tr>
+
+              </thead>
+            </table>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
 
   </form>
 </div>
