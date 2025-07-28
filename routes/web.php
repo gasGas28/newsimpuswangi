@@ -32,66 +32,23 @@ Route::prefix('templete')->group(function () {
     Route::get('/card', fn() => Inertia::render('Templete/Card'))->name('templete.card');
     Route::get('/pagination', fn() => Inertia::render('Templete/Pagination'))->name('templete.pagination');
 });
-// // DASHBOARD pakai ProductController
-// Route::get('/dashboard', [ProductController::class, 'index'])
-//     ->middleware(['auth', 'role:owner,admin,pelayanan'])
-//     ->name('dashboard');
 
-// Route::post('/products', [ProductController::class, 'store'])
-//     ->middleware(['auth', 'role:owner,admin,pelayanan']);
+// Grup Loket
+Route::prefix('loket')->group(function () {
+    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+});
 
-// Route::delete('/products/{id}', [ProductController::class, 'destroy'])
-//     ->middleware(['auth', 'role:owner,admin,pelayanan']);
-
-
-// // LOGIN & REGISTER tanpa role default
-// Route::get('/login', fn() => Inertia::render('Login'))
-//     ->name('login')
-//     ->middleware('guest');
-
-// Route::get('/register', fn() => Inertia::render('Register'))
-//     ->name('register')
-//     ->middleware('guest');
-// Route::post('/login', function (Request $request) {
-//     $credentials = $request->validate([
-//         'email' => ['required', 'email'],
-//         'password' => ['required'],
-//         // reCAPTCHA divalidasi di middleware, jadi gak perlu tulis di sini lagi
-//     ]);
-
-//     if (Auth::attempt($credentials)) {
-//         $request->session()->regenerate();
-//         return redirect()->intended('/dashboard');
-//     }
-
-//     return back()->withErrors([
-//         'email' => 'Email atau password salah.',
-//     ]);
-// })->middleware(['guest', 'verify.recaptcha']);
-
-
-// Route::post('/register', function (Request $request) {
-//     $validated = $request->validate([
-//         'name' => 'required|string|max:255',
-//         'email' => 'required|email|unique:users,email',
-//         'password' => 'required|confirmed|min:6',
-//     ]);
-
-//     // tanpa set role, biarkan NULL atau migration default
-//     $user = User::create([
-//         'name' => $validated['name'],
-//         'email' => $validated['email'],
-//         'password' => bcrypt($validated['password']),
-//     ]);
-
-//     Auth::login($user);
-//     return redirect('/dashboard');
-// })->middleware('guest');
-
-// // LOGOUT
-// Route::post('/logout', function () {
-//     Auth::logout();
-//     request()->session()->invalidate();
-//     request()->session()->regenerateToken();
-//     return redirect('/login');
-// })->middleware('auth');
+// Grup Laporan
+Route::prefix('laporan')->group(function () {
+    Route::inertia('loket', 'Laporan/Loket/Loket')->name('laporan.loket');
+    Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
+    Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
+    Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
+    Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
+    Route::inertia('lab', 'Laporan/Lab/Lab')->name('laporan.lab');
+    Route::inertia('kb', 'Laporan/Kb/Kb')->name('laporan.kb');
+    Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+    Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
+    Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
+    Route::inertia('kunjungan-sehat', 'Laporan/Kunjungan-sehat/Kunjungan-sehat')->name('laporan.kunjungan-sehat');
+});
