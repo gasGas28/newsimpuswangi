@@ -10,28 +10,26 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
+})->name('home');
+
+// Grup Admin
+Route::prefix('admin')->group(function () {
+    Route::get('/', fn() => Inertia::render('Admin/Index'))->name('admin.index');
 });
 
-// Grup route untuk template components
-Route::get('/button', function () {
-    return Inertia::render('Templete/Button');
-})->name('button');
+// Grup Loket
+Route::prefix('loket')->group(function () {
+    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+});
 
-Route::get('/form', function () {
-    return Inertia::render('Templete/Form');
-})->name('form');
-
-Route::get('/table', function () {
-    return Inertia::render('Templete/Table');
-})->name('table');
-
-Route::get('/card', function () {
-    return Inertia::render('Templete/Card');
-})->name('card');
-
-Route::get('/pagination', function () {
-    return Inertia::render('Templete/Pagination');
-})->name('pagination');
+// Grup Templete
+Route::prefix('templete')->group(function () {
+    Route::get('/button', fn() => Inertia::render('Templete/Button'))->name('templete.button');
+    Route::get('/form', fn() => Inertia::render('Templete/Form'))->name('templete.form');
+    Route::get('/table', fn() => Inertia::render('Templete/Table'))->name('templete.table');
+    Route::get('/card', fn() => Inertia::render('Templete/Card'))->name('templete.card');
+    Route::get('/pagination', fn() => Inertia::render('Templete/Pagination'))->name('templete.pagination');
+});
 // // DASHBOARD pakai ProductController
 // Route::get('/dashboard', [ProductController::class, 'index'])
 //     ->middleware(['auth', 'role:owner,admin,pelayanan'])
