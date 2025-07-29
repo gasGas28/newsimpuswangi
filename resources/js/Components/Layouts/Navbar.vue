@@ -35,50 +35,30 @@
             </Link>
           </li>
 
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="laporanDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="laporanDropdown">
-              <li>
-                <Link :href="route('laporan.loket')" class="dropdown-item">Loket</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.rujukan')" class="dropdown-item">Rujukan</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.umum')" class="dropdown-item">Umum</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.gigi')" class="dropdown-item">Gigi</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.kia')" class="dropdown-item">KIA</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.lab')" class="dropdown-item">Lab</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.kb')" class="dropdown-item">KB</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.ugd')" class="dropdown-item">UGD</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.rawat-inap')" class="dropdown-item">Rawat Inap</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.sanitasi')" class="dropdown-item">Sanitasi</Link>
-              </li>
-              <li>
-                <Link :href="route('laporan.kunjungan-sehat')" class="dropdown-item">Kunjungan Sehat</Link>
-              </li>
-            </ul>
+          <li class="nav-item">
+            <Link :href="route('filter')" class="nav-link d-flex align-items-center">
+              <i class="bi bi-filter-square-fill me-2"></i> Filter
+            </Link>
           </li>
 
-
-
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="laporanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="laporanDropdown">
+                <li><Link :href="route('laporan.loket')" class="dropdown-item">Loket</Link></li>
+                <li><Link :href="route('laporan.rujukan')" class="dropdown-item">Rujukan</Link></li>
+                <li><Link :href="route('laporan.umum')" class="dropdown-item">Umum</Link></li>
+                <li><Link :href="route('laporan.gigi')" class="dropdown-item">Gigi</Link></li>
+                <li><Link :href="route('laporan.kia')" class="dropdown-item">KIA</Link></li>
+                <li><Link :href="route('laporan.lab')" class="dropdown-item">Lab</Link></li>
+                <li><Link :href="route('laporan.kb')" class="dropdown-item">KB</Link></li>
+                <li><Link :href="route('laporan.ugd')" class="dropdown-item">UGD</Link></li>
+                <li><Link :href="route('laporan.rawat-inap')" class="dropdown-item">Rawat Inap</Link></li>
+                <li><Link :href="route('laporan.sanitasi')" class="dropdown-item">Sanitasi</Link></li>
+                <li><Link :href="route('laporan.kunjungan-sehat')" class="dropdown-item">Kunjungan Sehat</Link></li>
+              </ul>
+            </li>
         </ul>
       </div>
 
