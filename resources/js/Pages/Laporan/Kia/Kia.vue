@@ -1,16 +1,15 @@
 <template>
   <AppLayout title="Template Components">
     <div class="container py-4">
-      <div class="row mb-4">
-        <div class="col">
-          <h1 class="fw-bold">Halaman KIA</h1>
-          <p class="text-muted">Reusable components for your application</p>
-        </div>
-      </div>
+
 
       <div class="card mb-4">
   <div class="card-body">
-    <h5 class="mb-3 fw-bold">Filter Data Laporan Kia</h5>
+<h5 class="mb-3 fw-bold">
+  <span class="d-inline-block w-100 px-2 py-1 text-white" style="background-color: #198754;">
+    Filter Data Laporan Kia
+  </span>
+</h5>
     <form>
       <div class="row mb-2 align-items-center">
         <div class="col-md-2 fw-bold">Puskesmas</div>
@@ -69,18 +68,6 @@
 </div>
 
 
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title fw-bold">Buttons</h5>
-              <p class="card-text text-muted">Various button styles and variants.</p>
-              <Link href="/template/button" class="btn btn-outline-primary">View Buttons</Link>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
   </AppLayout>
 </template>
