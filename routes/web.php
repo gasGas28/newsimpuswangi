@@ -96,6 +96,3 @@ Route::get('/pagination', function () {
 //     request()->session()->regenerateToken();
 //     return redirect('/login');
 // })->middleware('auth');
-Route::get('/simpus/poli', [RuangLayananController::class, 'index']);
-Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli']);
-Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan']);
