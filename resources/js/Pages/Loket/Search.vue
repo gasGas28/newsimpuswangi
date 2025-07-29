@@ -1,7 +1,10 @@
 <template>
     <AppLayouts>
         <div class="card mx-auto" style="max-width: 1000px">
-            <div class="card-header fw-bold">Pencarian Pasien</div>
+            <div class="card-header bg-primary">
+                <h5 class="mb-0 text-white fw-bold">Pencarian Pasien</h5>
+            </div>
+
             <div class="card-body">
                 <form @submit.prevent="searchPasien">
                     <div class="row">
@@ -18,12 +21,10 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label
-                                    class="form-check-label"
-                                    :for="field.key"
-                                >
+                                <label class="form-check-label" :for="field.key">
                                     {{ field.label }}
                                 </label>
+
                                 <input
                                     v-if="field.type === 'text'"
                                     type="text"
@@ -47,37 +48,28 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label
-                                    class="form-check-label"
-                                    :for="field.key"
-                                >
+                                <label class="form-check-label" :for="field.key">
                                     {{ field.label }}
                                 </label>
 
-                                <template v-if="field.type === 'text'">
-                                    <input
-                                        type="text"
-                                        class="form-control mt-1"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    />
-                                </template>
+                                <input
+                                    v-if="field.type === 'text'"
+                                    type="text"
+                                    class="form-control mt-1"
+                                    v-model="form[field.key].value"
+                                    :disabled="!form[field.key].enabled"
+                                />
 
-                                <template v-else-if="field.type === 'select'">
-                                    <select
-                                        class="form-select mt-1"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    >
-                                        <option value="">- Pilih -</option>
-                                        <option value="Laki-laki">
-                                            Laki-laki
-                                        </option>
-                                        <option value="Perempuan">
-                                            Perempuan
-                                        </option>
-                                    </select>
-                                </template>
+                                <select
+                                    v-else-if="field.type === 'select'"
+                                    class="form-select mt-1"
+                                    v-model="form[field.key].value"
+                                    :disabled="!form[field.key].enabled"
+                                >
+                                    <option value="">- Pilih -</option>
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
                             </div>
                         </div>
 
@@ -94,48 +86,39 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label
-                                    class="form-check-label"
-                                    :for="field.key"
-                                >
+                                <label class="form-check-label" :for="field.key">
                                     {{ field.label }}
                                 </label>
 
-                                <template v-if="field.type === 'text'">
-                                    <input
-                                        type="text"
-                                        class="form-control mt-1"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    />
-                                </template>
+                                <input
+                                    v-if="field.type === 'text'"
+                                    type="text"
+                                    class="form-control mt-1"
+                                    v-model="form[field.key].value"
+                                    :disabled="!form[field.key].enabled"
+                                />
 
-                                <template v-else-if="field.type === 'select'">
-                                    <select
-                                        class="form-select mt-1"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    >
-                                        <option value="">- Pilih -</option>
-                                        <option value="Kecamatan A">
-                                            Kecamatan A
-                                        </option>
-                                        <option value="Kecamatan B">
-                                            Kecamatan B
-                                        </option>
-                                    </select>
-                                </template>
+                                <select
+                                    v-else-if="field.type === 'select'"
+                                    class="form-select mt-1"
+                                    v-model="form[field.key].value"
+                                    :disabled="!form[field.key].enabled"
+                                >
+                                    <option value="">- Pilih -</option>
+                                    <option value="Kecamatan A">Kecamatan A</option>
+                                    <option value="Kecamatan B">Kecamatan B</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
                     <hr />
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-primary" type="submit">
-                            🔍 CARI PASIEN
-                        </button>
-                        <a href="/pasien" class="btn btn-success">
-                            ➕ TAMBAH PASIEN BARU
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="#" class="btn btn-primary bi bi-search-heart-fill">
+                            CARI PASIEN
+                        </a>
+                        <a href="#" class="btn btn-success bi bi-plus-circle">
+                            TAMBAH PASIEN BARU
                         </a>
                     </div>
                 </form>
@@ -143,11 +126,12 @@
         </div>
     </AppLayouts>
 </template>
+
 <script setup>
 import AppLayouts from "@/Components/Layouts/AppLayouts.vue";
-import { Link } from "@inertiajs/vue3";
 import { reactive } from "vue";
 
+// Form data dengan flag enabled dan nilai
 const form = reactive({
     nama: { enabled: false, value: "" },
     nik: { enabled: false, value: "" },
@@ -158,7 +142,7 @@ const form = reactive({
     alamat: { enabled: false, value: "" },
 });
 
-// Grup kolom untuk looping
+// Grup field berdasarkan kolom
 const kolom1 = [
     { key: "nama", label: "Nama", type: "text" },
     { key: "nik", label: "NIK", type: "text" },
@@ -173,12 +157,11 @@ const kolom3 = [
     { key: "alamat", label: "ALAMAT", type: "text" },
 ];
 
-// Placeholder function untuk submit
+// Fungsi submit pencarian
 function searchPasien() {
     const filtered = Object.fromEntries(
         Object.entries(form).filter(([_, f]) => f.enabled)
     );
     console.log("Data yang dikirim:", filtered);
-    // Di sini bisa kirim pakai Inertia post/get, dsb.
 }
 </script>

@@ -1,10 +1,10 @@
 <template>
     <AppLayouts>
-        <div class="ms-4 me-4">
-            <div class="card">
-                <h6 class="card-header bg-primary text-light text-start">
+        <div class="container py-4">
+            <div class="card mt-4 mb-4">
+                <h5 class="card-header bg-primary text-light text-start">
                     Data Pasien
-                </h6>
+                </h5>
                 <div class="card-body">
                     <div class="container">
                         <form>
@@ -84,15 +84,7 @@
                                                 class="form-control"
                                                 placeholder="Tempat"
                                             />
-                                            <select class="form-select">
-                                                <option>24</option>
-                                            </select>
-                                            <select class="form-select">
-                                                <option>Juli</option>
-                                            </select>
-                                            <select class="form-select">
-                                                <option>2024</option>
-                                            </select>
+                                            <input type="date" class="form-control">
                                         </div>
                                     </div>
 
