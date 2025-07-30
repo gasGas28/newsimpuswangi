@@ -109,6 +109,7 @@
                                     <option value="Kecamatan A">Kecamatan A</option>
                                     <option value="Kecamatan B">Kecamatan B</option>
                                 </select>
+                                
                             </div>
                         </div>
                     </div>
@@ -140,6 +141,7 @@ const form = reactive({
     no_bpjs: { enabled: false, value: "" },
     jenis_kelamin: { enabled: false, value: "" },
     kecamatan: { enabled: false, value: "" },
+    desa: { enabled: false, value: "" },
     alamat: { enabled: false, value: "" },
 });
 
@@ -155,6 +157,7 @@ const kolom2 = [
 ];
 const kolom3 = [
     { key: "kecamatan", label: "Kecamatan", type: "select" },
+    { key: "desa", label: "Desa", type: "select" },
     { key: "alamat", label: "Alamat", type: "text" },
 ];
 
