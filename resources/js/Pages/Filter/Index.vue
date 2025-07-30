@@ -11,6 +11,7 @@
                             <div class="row">
                                 <!-- Kolom Pertama -->
                                 <div class="col-md-4">
+
                                     <div class="row mb-2 align-items-center">
                                         <label
                                             class="col-sm-4 col-form-label fw-bold"
@@ -329,4 +330,5 @@ const handleSelect = (item) => {
     selectedTindakan.value = `${item.kode} - ${item.nama}`;
     openModal.value = false;
 };
+
 </script>
