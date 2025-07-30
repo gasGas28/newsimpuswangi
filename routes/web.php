@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -129,3 +130,17 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
 });
+
+Route::prefix('ruang_layanan')->group(function () {
+    // Menampilkan halaman poli
+    Route::get('/simpus/poli', [RuangLayananController::class, 'index'])
+        ->name('ruang-layanan.poli');
+
+    // Menampilkan data pasien poli umum
+    Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli'])
+        ->name('ruang-layanan.umum');
+
+    // Menampilkan pelayanan
+    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])
+        ->name('ruang-layanan-umum.pelayanan');
+    });
