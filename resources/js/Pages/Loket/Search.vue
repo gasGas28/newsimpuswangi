@@ -49,6 +49,7 @@
                                     v-model="form[field.key].enabled"
                                 />
                                 <label class="form-check-label fw-bold" :for="field.key">
+
                                     {{ field.label }}
                                 </label>
 
