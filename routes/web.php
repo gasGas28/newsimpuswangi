@@ -19,7 +19,8 @@ Route::prefix('admin')->group(function () {
 
 // Grup Filter
 Route::prefix('filter')->group(function () {
-    Route::get('/filter', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/modal', fn() => Inertia::render('Filter/Modal'))->name('filter.modal');
 });
 
 // Grup Loket

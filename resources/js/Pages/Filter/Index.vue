@@ -236,15 +236,47 @@
                                         </div>
                                     </div>
                                     <div class="row mb-2">
-                                        <label class="col-sm-4 col-form-label fw-bold">Diagnosa</label>
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Diagnosa</label
+                                        >
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                v-model="selectedTindakan"
+                                                @click="isModalOpen = true"
+                                                readonly
+                                            />
+                                            <Modal
+                                                :show="isModalOpen"
+                                                title="Pilih Tindakan"
+                                                :items="dataTindakan"
+                                                @close="isModalOpen = false"
+                                                @select="handleSelect"
+                                            />
                                         </div>
                                     </div>
                                     <div class="row mb-2">
-                                        <label class="col-sm-4 col-form-label fw-bold">Tindakan</label>
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Tindakan</label
+                                        >
                                         <div class="col-sm-8">
-                                            <input type="text" class="form-control">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                readonly
+                                                v-model="selectedTindakan"
+                                                @click="isModalOpen = true"
+                                            />
+                                            <Modal
+                                                :show="isModalOpen"
+                                                title="Pilih Tindakan"
+                                                :items="dataTindakan"
+                                                @close="isModalOpen = false"
+                                                @select="handleSelect"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -273,7 +305,28 @@
     </AppLayout>
 </template>
 <script setup>
+import { ref } from "vue";
 import AppLayout from "@/Components/Layouts/AppLayouts.vue";
 import { reactive } from "vue";
 import Modal from "@/Components/Layouts/Modal.vue";
+const isModalOpen = ref(false);
+const selectedTindakan = ref("");
+const dataTindakan = ref([
+    {
+        kode: "00.01",
+        nama: "Therapeutic ultrasound of vessels of head and neck",
+        translate: "USG Terapi pembuluh kepala dan leher",
+    },
+    {
+        kode: "00.02",
+        nama: "Therapeutic ultrasound of heart",
+        translate: "USG Terapi hati",
+    },
+    // Tambahkan data lainnya sesuai kebutuhan
+]);
+
+const handleSelect = (item) => {
+    selectedTindakan.value = `${item.kode} - ${item.nama}`;
+    openModal.value = false;
+};
 </script>

@@ -21,7 +21,7 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label class="form-check-label" :for="field.key">
+                                <label class="form-check-label fw-bold" :for="field.key">
                                     {{ field.label }}
                                 </label>
 
@@ -48,7 +48,7 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label class="form-check-label" :for="field.key">
+                                <label class="form-check-label fw-bold" :for="field.key">
                                     {{ field.label }}
                                 </label>
 
@@ -86,7 +86,7 @@
                                     :id="field.key"
                                     v-model="form[field.key].enabled"
                                 />
-                                <label class="form-check-label" :for="field.key">
+                                <label class="form-check-label fw-bold" :for="field.key">
                                     {{ field.label }}
                                 </label>
 
@@ -154,7 +154,7 @@ const kolom2 = [
 ];
 const kolom3 = [
     { key: "kecamatan", label: "Kecamatan", type: "select" },
-    { key: "alamat", label: "ALAMAT", type: "text" },
+    { key: "alamat", label: "Alamat", type: "text" },
 ];
 
 // Fungsi submit pencarian
