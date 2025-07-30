@@ -20,7 +20,8 @@ Route::prefix('admin')->group(function () {
 
 // Grup Filter
 Route::prefix('filter')->group(function () {
-    Route::get('/filter', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/modal', fn() => Inertia::render('Filter/Modal'))->name('filter.modal');
 });
 
 // Grup Loket
@@ -60,6 +61,76 @@ Route::prefix('laporan')->group(function () {
 });
 
 // Grup Mal Sehat
+Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
+    Route::inertia('/', 'MalSehat/Index')->name('index');
+
+    // Kesling
+    Route::prefix('kesling')->name('kesling.')->group(function () {
+        Route::inertia('/', 'MalSehat/Kesling/Index')->name('index');
+        Route::inertia('konseling-sanitasi', 'MalSehat/Kesling/KonselingSanitasi')->name('konseling');
+        Route::inertia('pengukuran-kebugaran-haji', 'MalSehat/Kesling/PengukuranKebugaranHaji')->name('haji');
+        Route::inertia('pengukuran-kebugaran-anak', 'MalSehat/Kesling/PengukuranKebugaranAnak')->name('anak');
+    });
+
+    // Kesga
+    Route::prefix('kesga')->name('kesga.')->group(function () {
+        Route::inertia('/', 'MalSehat/Kesga/Index')->name('index');
+        Route::inertia('konselingcatin', 'MalSehat/Kesga/KonselingCatin')->name('konselingcatin');
+        Route::inertia('konselinghaji', 'MalSehat/Kesga/KonselingHaji')->name('konselinghaji');
+        Route::inertia('konselingimunisasi', 'MalSehat/Kesga/KonselingImunisasi')->name('konselingimunisasi');
+        Route::inertia('konselinganak', 'MalSehat/Kesga/KonselingAnak')->name('konselinganak');
+        Route::inertia('konselingibu', 'MalSehat/Kesga/KonselingIbu')->name('konselingibu');
+        Route::inertia('konselingkb', 'MalSehat/Kesga/KonselingKB')->name('konselingkb');
+        Route::inertia('konsultasigizi', 'MalSehat/Kesga/KonsultasiGizi')->name('konsultasigizi');
+        Route::inertia('konsultasilansia', 'MalSehat/Kesga/KonsultasiLansia')->name('konsultasilansia');
+    });
+
+    // PTM
+    Route::prefix('ptm')->name('ptm.')->group(function () {
+        Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
+        Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
+        Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
+    });
+
+    // P3M
+    Route::prefix('p3m')->name('p3m.')->group(function () {
+        Route::inertia('/', 'MalSehat/P3M/Index')->name('index');
+        Route::inertia('konselinghivaids', 'MalSehat/P3M/KonselingHivAids')->name('konselinghivaids');
+        Route::inertia('konselinglroa', 'MalSehat/P3M/KonselingLROA')->name('konselinglroa');
+        Route::inertia('konselingtb', 'MalSehat/P3M/KonselingPenyakitTB')->name('konselingtb');
+    });
+
+    // Yankes Primer
+    Route::prefix('yankes-primer')->name('yankes-primer.')->group(function () {
+        Route::inertia('/', 'MalSehat/YankesPrimer/Index')->name('index');
+        Route::inertia('kunjungankonsultasitradisional', 'MalSehat/YankesPrimer/KunjunganKonsultasiTradisional')->name('kunjungankonsultasitradisional');
+        Route::inertia('kunjunganketerangansehat', 'MalSehat/YankesPrimer/KunjunganKeteranganSehat')->name('kunjunganketerangansehat');
+    });
+
+    // Farmasi
+    Route::prefix('farmasi')->name('farmasi.')->group(function () {
+        Route::inertia('/', 'MalSehat/Farmasi/Index')->name('index');
+        Route::inertia('permintaanobat', 'MalSehat/Farmasi/PermintaanObat')->name('permintaanobat');
+    });
+
+    // Biakes
+    Route::prefix('biakes')->name('biakes.')->group(function () {
+        Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
+        Route::inertia('pembiayaanjaminansehat', 'MalSehat/Biakes/PembiayaanJaminanSehat')->name('pembiayaanjaminansehat');
+    });
+
+    // Promkes
+    Route::prefix('promkes')->name('promkes.')->group(function () {
+        Route::inertia('/', 'MalSehat/Promkes/Index')->name('index');
+        Route::inertia('kesehatanpeduliremaja', 'MalSehat/Promkes/KesehatanPeduliRemaja')->name('kesehatanpeduliremaja');
+    });
+
+    // Lain-lain
+    Route::inertia('home-visit', 'MalSehat/HomeVisit/Index')->name('home-visit');
+    Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
+});
+
 // Halaman utama MAL SEHAT
 Route::get('/mal-sehat', fn () => Inertia::render('MalSehat/Index'))->name('mal-sehat');
 Route::get('/mal-sehat/kesling', fn () => Inertia::render('MalSehat/Kesling/Index'))->name('mal-sehat.kesling');
