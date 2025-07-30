@@ -30,7 +30,7 @@
             </Link>
           </li>
           <li class="nav-item">
-            <Link :href="route('mal-sehat')" class="nav-link d-flex align-items-center">
+            <Link :href="route('mal-sehat.index')" class="nav-link d-flex align-items-center">
             <i class="bi bi-people me-2"></i> Mal Sehat
             </Link>
           </li>
