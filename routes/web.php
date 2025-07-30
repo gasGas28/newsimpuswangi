@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,3 +111,7 @@ Route::get('/mal-sehat/home-visit', fn () => Inertia::render('MalSehat/HomeVisit
 Route::get('/mal-sehat/sehat', fn () => Inertia::render('MalSehat/Sehat/Index'))->name('mal-sehat.sehat');
 //Halaman Rapid test
 Route::get('/mal-sehat/rapid-test', fn () => Inertia::render('MalSehat/RapidTest/Index'))->name('mal-sehat.rapid-test');
+
+Route::get('/simpus/poli', [RuangLayananController::class, 'index']);
+Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli']);
+Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan']);

@@ -30,6 +30,11 @@
             </Link>
           </li>
           <li class="nav-item">
+            <Link href="/simpus/poli" class="nav-link d-flex align-items-center">
+            <i class="bi bi-ticket-perforated me-2"></i> RUang Layanan
+            </Link>
+          </li>
+          <li class="nav-item">
             <Link :href="route('mal-sehat')" class="nav-link d-flex align-items-center">
             <i class="bi bi-people me-2"></i> Mal Sehat
             </Link>
