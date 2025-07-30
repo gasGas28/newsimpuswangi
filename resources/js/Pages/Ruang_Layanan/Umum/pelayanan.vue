@@ -3,7 +3,7 @@
     <div class="card m-4">
       <div class="card-header d-flex justify-content-between">
         <h1 class="fs-5">BP Umum</h1>
-        <Link href="/simpus/umum" class="btn btn-primary">Kembali</Link>
+        <Link :href="route('ruang-layanan.umum')" class="btn btn-primary">Kembali</Link>
       </div>
 
       <div class="card-body">

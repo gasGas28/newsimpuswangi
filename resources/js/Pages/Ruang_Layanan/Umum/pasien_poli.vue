@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="card-header p-3 text-black d-flex justify-content-between align-items-center rounded">
         <h1 class="m-0 fs-4">Poli UMUM BP</h1>
-        <Link href="/simpus/poli" class="btn btn-warning btn-sm">Kembali</Link>
+        <Link :href="route('ruang-layanan.poli')" class="btn btn-warning btn-sm">Kembali</Link>
       </div>
 
         <!-- Filter Form -->
@@ -75,7 +75,7 @@
                 <td>1</td>
                 <td>1</td>
                 <td>1</td>
-                <td><Link href="/simpus/pelayanan">Belum Dilayani</Link></td>
+                <td><Link :href="route('ruang-layanan-umum.pelayanan')">Belum Dilayani</Link></td>
               </tr>
             </tbody>
           </table>

@@ -12,7 +12,7 @@
               </div>
               <!-- Konten kanan -->
               <div class="col">
-                <Link :href="layanan.link" class="text-decoration-none text-dark d-block p-3">
+                <Link :href="route('ruang-layanan.umum')" class="text-decoration-none text-dark d-block p-3">
                   <div class="fw-semibold text-uppercase small">{{ layanan.nama }}</div>
                   <div class="fs-5 fw-bold">{{ layanan.jumlah }}</div>
                 </Link>
@@ -29,7 +29,7 @@
 import { Link } from '@inertiajs/vue3';
 import AppLayouts from '../../Components/Layouts/AppLayouts.vue';
 const dataLayanan = [
-  { nama: 'Umum', jumlah: 1, link: '/simpus/umum' },
+  { nama: 'Umum', jumlah: 1, link: 'ruang-layanan.umum' },
   { nama: 'Gigi', jumlah: 0, link: '/simpus/gigi' },
   { nama: 'KIA', jumlah: 0, link: '/simpus/kia' },
   { nama: 'UGD', jumlah: 0, link: '/simpus/ugd' },
