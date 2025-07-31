@@ -25,7 +25,7 @@ Route::prefix('filter')->group(function () {
 // Grup Loket
 Route::prefix('loket')->group(function () {
     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/Pasien'))->name('loket.pasien');
+    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
     Route::get('/search', fn() => Inertia::render('Loket/Search'))->name('loket.search');
 });
 

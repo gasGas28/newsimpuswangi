@@ -1,277 +1,277 @@
 <template>
-    <AppLayout title="Loket">
-        <div class="container py-4">
-            <div>
-                <div class="mb-3 d-flex gap-2 justify-content-end">
-                    <Link
-                        :href="route('loket.search')"
-                        class="btn btn-outline-primary"
-                        >Cari Pasien</Link
-                    >
-                    <Link
-                        :href="route('loket.pasien')"
-                        class="btn btn-primary"
-                        >Tambah Pasien</Link
-                    >
-                </div>
-            </div>
-            <!-- Form Section -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">Form Loket</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">NO. MR</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="CER..I"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">NIK</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="CER..J"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">NO. BPJS</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="CER..J"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">NAMA</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="Ceri..."
-                                readonly
-                            />
-                        </div>
+  <AppLayout title="Loket">
+    <div class="container py-4">
+      <!-- Tombol Aksi -->
+      <div class="d-flex justify-content-end mb-3 gap-2">
+        <Link :href="route('loket.search')" class="btn btn-success text-white">
+          <i class="bi bi-search me-1"></i> CARI PASIEN
+        </Link>
+        <Link :href="route('loket.pasien')" class="btn btn-primary text-white">
+          <i class="bi bi-plus-lg me-1"></i> TAMBAH PASIEN
+        </Link>
+      </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">Tanggal Kunjungan</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="28-07-2025"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Kategori Unit</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="PUSKESMAS"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Unit</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="PUSKESMAS WONGSOREJO"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Status Kartu</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="CER..J"
-                                readonly
-                            />
-                        </div>
-
-                        <div class="col-md-12">
-                            <label class="form-label">Alamat *</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="-"
-                                readonly
-                            />
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Wilayah *</label>
-                            <select class="form-select">
-                                <option selected>Pillin -</option>
-                            </select>
-                            <small class="text-muted"
-                                >*) Pemilihan wilayah, sesuahkan dengan alamat
-                                pasien II</small
-                            >
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Jenis Pengunjung *</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="Pengunjung Lama"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Kategori *</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="NON BPJS"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Jenis Kunjungan</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="Kunjungan Sakit"
-                                readonly
-                            />
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Poli Tujuan</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="Umum"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Sub Kegiatan</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="RJTP (RAWAT JALAN)"
-                                readonly
-                            />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Kode TKP</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                value=""
-                                readonly
-                            />
-                        </div>
+      <!-- Form Loket -->
+      <div class="card border-success mb-4">
+        <div class="card-header bg-info text-white fw-bold">Form Loket</div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Kolom Kiri -->
+            <div class="col-md-6">
+              <div
+                class="mb-2"
+                v-for="(label, index) in ['NO. MR', 'NIK', 'NO. BPJS']"
+                :key="index"
+              >
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">{{ label }}</label>
+                  </div>
+                  <div class="col-8">
+                    <div class="input-group">
+                      <input type="text" class="form-control form-control-sm" />
+                      <button class="btn btn-info text-white btn-sm">CEK ..!</button>
                     </div>
+                  </div>
                 </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">NAMA</label>
+                  </div>
+                  <div class="col-8">
+                    <div class="input-group">
+                      <input type="text" class="form-control form-control-sm" disabled />
+                      <button class="btn btn-danger text-white btn-sm">Cari.....</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Tanggal Kunjungan</label>
+                  </div>
+                  <div class="col-8">
+                    <input type="date" class="form-control form-control-sm" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Kategori Unit</label>
+                  </div>
+                  <div class="col-8">
+                    <select class="form-select form-select-sm">
+                      <option selected disabled>- Pilih Kategori Unit -</option>
+                      <option>PUSKESMAS</option>
+                      <option>KLINIK</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Unit</label>
+                  </div>
+                  <div class="col-8">
+                    <select class="form-select form-select-sm">
+                      <option selected disabled>- Pilih Unit -</option>
+                      <option>PUSKESMAS WONGSOREJO</option>
+                      <option>PUSKESMAS PESANGGARAN</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Status Kartu</label>
+                  </div>
+                  <div class="col-8">
+                    <div class="input-group">
+                      <input type="text" class="form-control form-control-sm" disabled />
+                      <button class="btn btn-info text-white btn-sm">CEK ..!</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Provider Kartu</label>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" class="form-control form-control-sm" disabled />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Jenis Peserta</label>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" class="form-control form-control-sm" disabled />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">No HP</label>
+                  </div>
+                  <div class="col-8">
+                    <input type="text" class="form-control form-control-sm" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Data Table Section -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <div
-                        class="d-flex justify-content-between align-items-center"
-                    >
-                        <h5 class="card-title mb-0">Data: Loket</h5>
-                        <div class="d-flex align-items-center">
-                            <span class="me-3">Show</span>
-                            <select class="form-select form-select-sm w-auto">
-                                <option>10 entries</option>
-                            </select>
-                        </div>
-                    </div>
+            <!-- Kolom Kanan -->
+            <div class="col-md-6">
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Alamat *</label>
+                  </div>
+                  <div class="col-8">
+                    <textarea class="form-control form-control-sm" rows="2"></textarea>
+                  </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>TANGGAL NO. URUT (peare)</th>
-                                    <th>NO ANTRIAN POLI</th>
-                                    <th>NO. MR NAMA (UMUR) NIK</th>
-                                    <th>ALAMAT KECAMATAN-DESA</th>
-                                    <th>NO. BPJS STATUS</th>
-                                    <th>POLI</th>
-                                    <th>UNIT SUB UNIT</th>
-                                    <th>ACTION PCARE KATEGORI</th>
-                                    <th>ACTION</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>28-07-2025</td>
-                                    <td>Ceti Nomor Antrian Poli</td>
-                                    <td>
-                                        0189163 DENIS HIDAYAT (37)
-                                        3511010100286001
-                                    </td>
-                                    <td>
-                                        PERUM, GRYA PESONA KARANGREJO BLOK DE-15
-                                        RT 1 RW 4 Banyuwangi-Karangrejo No TLP :
-                                        -
-                                    </td>
-                                    <td>Umum</td>
-                                    <td>PUSKESMAS WONGSOREJO</td>
-                                    <td>Bukan BPJS</td>
-                                    <td>NON_BPJS</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary">
-                                            Action
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+              </div>
 
-                    <div
-                        class="d-flex justify-content-between align-items-center mt-3"
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Wilayah *</label>
+                  </div>
+                  <div class="col-8">
+                    <select class="form-select form-select-sm bg-warning">
+                      <option selected>- Pilih -</option>
+                    </select>
+                    <small class="text-muted"
+                      >*) Pemilihan wilayah, sesuaikan dengan alamat pasien !!</small
                     >
-                        <div>Showing 1 to 1 of 1 entries</div>
-                        <div>
-                            <button
-                                class="btn btn-sm btn-outline-secondary me-1"
-                                disabled
-                            >
-                                Previous
-                            </button>
-                            <button
-                                class="btn btn-sm btn-outline-secondary"
-                                disabled
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <div
+                class="mb-2"
+                v-for="item in [
+                  { label: 'Jenis Pengunjung *', value: 'Pengunjung Lama' },
+                  { label: 'Kategori *', value: 'NON BPJS' },
+                  { label: 'Jenis Kunjungan', value: 'Kunjungan Sakit' },
+                  { label: 'Poli Tujuan', value: 'Umum' },
+                  { label: 'Kode TKP', value: 'RJTP (RAWAT JALAN)' },
+                ]"
+                :key="item.label"
+              >
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">{{ item.label }}</label>
+                  </div>
+                  <div class="col-8">
+                    <select
+                      class="form-select form-select-sm"
+                      :class="item.label.includes('*') ? 'bg-warning' : ''"
+                    >
+                      <option selected>{{ item.value }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <div class="row">
+                  <div class="col-4">
+                    <label class="form-label form-label-sm fw-bold">Sub Kegiatan</label>
+                  </div>
+                  <div class="col-8">
+                    <select class="form-select form-select-sm" disabled>
+                      <option selected>RJTP (RAWAT JALAN)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- Tombol Bawah -->
+          <div class="d-flex justify-content-end mt-4 gap-2">
+            <button class="btn btn-success">RIWAYAT KUNJUNGAN</button>
+            <button class="btn btn-primary">SIMPAN</button>
+          </div>
         </div>
-    </AppLayout>
+      </div>
+
+      <!-- Daftar Loket -->
+      <div class="card border-success">
+        <div
+          class="card-header bg-info text-white d-flex justify-content-between align-items-center"
+        >
+          <span class="fw-bold">Daftar Loket</span>
+          <button class="btn btn-success btn-sm">Cek Pendaftaran Pcare</button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead class="text-center" style="background-color: #90ee90">
+                <tr>
+                  <th>TANGGAL<br />NO. URUT<br />(pcare)</th>
+                  <th>NO ANTRIAN<br />POLI</th>
+                  <th>NO. MR<br />NAMA (UMUR)<br />NIK</th>
+                  <th>ALAMAT<br />KECAMATAN-DESA</th>
+                  <th>NO. BPJS<br />STATUS</th>
+                  <th>POLI</th>
+                  <th>UNIT<br />SUB UNIT</th>
+                  <th>ACTION<br />PCARE<br />KATEGORI</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="9" class="text-center">No matching records found</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>Showing 0 to 0 of 0 entries</div>
+            <div>
+              <button class="btn btn-sm btn-outline-secondary me-1" disabled>Previous</button>
+              <button class="btn btn-sm btn-outline-secondary" disabled>Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script setup>
-import AppLayout from "@/Components/Layouts/AppLayouts.vue"
-import { Link } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
 </script>
 
 <style scoped>
-.card-header {
-    font-weight: bold;
-}
-.form-label {
+  .form-label {
     font-weight: 500;
-}
-.table th {
-    white-space: nowrap;
-    background-color: #f8f9fa;
-}
+  }
+  .table th,
+  .table td {
+    vertical-align: middle;
+  }
 </style>
