@@ -1,153 +1,363 @@
 <template>
     <AppLayout>
-        <div class="ms-4 me-4">
-            <div class="row mb-4">
-                <div class="col">
-                    <h3 class="fw-bold">Filter Laporan</h3>
-                    <p class="text-muted">Reusable components for your application</p>
+        <div class="container py-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-start">
+                    <h5 class="text-white fw-bold mt-2">FILTER LAPORAN</h5>
                 </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header bg-primary text-white fw-bold">Filter Laporan</div>
-
                 <div class="card-body">
-                    <div class="row g-3">
-                        <!-- Kolom 1 -->
-                        <div class="col-md-3">
-                            <div class="mb-2" v-for="field in kolom1" :key="field.key">
-                                <div class="form-check mb-1">
-                                    <input
-                                        class="form-check-input"
-                                        type="checkbox"
-                                        :id="field.key"
-                                        v-model="form[field.key].enabled"
-                                    />
-                                    <label class="form-check-label" :for="field.key">{{ field.label }}</label>
+                    <div class="container">
+                        <form>
+                            <div class="row">
+                                <!-- Kolom Pertama -->
+                                <div class="col-md-4">
+                                    <div class="row mb-2 align-items-center">
+                                        <div
+                                            class="col-sm-4 d-flex align-items-center"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input me-2 mt-2"
+                                                id="cekPuskesmas"
+                                                v-model="aktifPuskesmas"
+                                            />
+                                            <label
+                                                for="cekPuskesmas"
+                                                class="col-form-label fw-bold mb-0"
+                                                >Puskesmas</label
+                                            >
+                                        </div>
+                                        <div class="col-sm-8 d-flex">
+                                            <select
+                                                class="form-select"
+                                                id="selectPuskesmas"
+                                                :disabled="!aktifPuskesmas"
+                                            >
+                                                <option>Wongsorejo</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 align-items-center">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Tanggal Awal</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Tanggal Akhir</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <input
+                                                type="date"
+                                                class="form-control"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 align-items-center">
+                                        <div
+                                            class="col-sm-4 d-flex align-items-center"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input me-2"
+                                                id="tempatKunjungan"
+                                                v-model="aktifTempat"
+                                            />
+                                            <label
+                                                for="tempatKunjungan"
+                                                class="col-form-label mb-0 fw-bold"
+                                                >Tempat Kunjungan</label
+                                            >
+                                            <div class="col-sm-8">
+                                                <select
+                                                    class="form-select mb-2"
+                                                    id="selectTempat"
+                                                    :disabled="!aktifTempat"
+                                                >
+                                                    <option></option>
+                                                    <option>PUSKESMAS</option>
+                                                    <option>PUSTU</option>
+                                                    <option>POLINDES</option>
+                                                    <option>POSYANDU</option>
+                                                    <option>POSKESDES</option>
+                                                    <option>PUSLING</option>
+                                                    <option>POSKESTREN</option>
+                                                    <option>PONKESDES</option>
+                                                </select>
+                                                <select class="form-select">
+                                                    <option>--Pilih--</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 align-items-center">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Kunjungan Kasus</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select mb-2">
+                                                <option></option>
+                                                <option>Kasus Lama</option>
+                                                <option>Kasus Baru</option>
+                                                <option>
+                                                    Kunjungan Kasus Lama
+                                                </option>
+                                                <option>
+                                                    Kunjungan Kasus Baru
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-2 align-items-center">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Kunjungan</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select mb-2">
+                                                <option></option>
+                                                <option>Lama</option>
+                                                <option>Kasus Baru</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <template v-if="field.type === 'select'">
-                                    <select
-                                        class="form-select"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    >
-                                        <option v-for="option in field.options" :key="option" :value="option">
-                                            {{ option }}
-                                        </option>
-                                    </select>
-                                </template>
-
-                                <template v-else-if="field.type === 'date' || field.type === 'text'">
-                                    <input
-                                        :type="field.type"
-                                        class="form-control"
-                                        v-model="form[field.key].value"
-                                        :disabled="!form[field.key].enabled"
-                                    />
-                                </template>
+                                <!-- Kolom Kedua -->
+                                <div class="col-md-4">
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Nama</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2 align-items-center">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Umur</label
+                                        >
+                                        <div class="col-auto">
+                                            <input
+                                                type="text"
+                                                class="form-control text-center"
+                                                placeholder="0"
+                                                style="width: 60px"
+                                            />
+                                        </div>
+                                        <div class="col-auto fw-bold">s/d</div>
+                                        <div class="col-auto">
+                                            <input
+                                                type="text"
+                                                class="form-control text-center"
+                                                placeholder="0"
+                                                style="width: 60px"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Jenis Kelamin</label
+                                        >
+                                        <div class="col-sm-8 mt-2">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>Laki-Laki</option>
+                                                <option>Perempuan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Asal</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>Dalam Wilayah</option>
+                                                <option>Luar Wilayah</option>
+                                                <option>Luar Kabupaten</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Kecamatan</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>Kecamatan</option>
+                                                <option>Kecamatan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Desa</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>Desa</option>
+                                                <option>Desa</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Kepesertaan</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>BPJS</option>
+                                                <option>Non BPJS</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Kategori</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option></option>
+                                                <option>Non BPJS</option>
+                                                <option>JKN PBI</option>
+                                                <option>Non JKN PBI</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Kolom Ketiga -->
+                                <div class="col-md-4">
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Isi Diagnosa</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <select class="form-select">
+                                                <option>--Pilih--</option>
+                                                <option>Diagnosa Kosong</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Diagnosa</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                v-model="selectedTindakan"
+                                                @click="isModalOpen = true"
+                                                readonly
+                                            />
+                                            <Modal
+                                                :show="isModalOpen"
+                                                title="Pilih Tindakan"
+                                                :items="dataTindakan"
+                                                @close="isModalOpen = false"
+                                                @select="handleSelect"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <label
+                                            class="col-sm-4 col-form-label fw-bold"
+                                            >Tindakan</label
+                                        >
+                                        <div class="col-sm-8">
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                readonly
+                                                v-model="selectedTindakan"
+                                                @click="isModalOpen = true"
+                                            />
+                                            <Modal
+                                                :show="isModalOpen"
+                                                title="Pilih Tindakan"
+                                                :items="dataTindakan"
+                                                @close="isModalOpen = false"
+                                                @select="handleSelect"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Kolom 2 -->
-                        <div class="col-md-3" v-for="field in kolom2" :key="field.key">
-                            <div class="form-check mb-1">
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    :id="field.key"
-                                    v-model="form[field.key].enabled"
-                                />
-                                <label class="form-check-label" :for="field.key">{{ field.label }}</label>
+                            <div
+                                class="d-flex justify-content-start gap-2 mt-4"
+                            >
+                                <button class="btn btn-primary">
+                                    <i class="bi bi-eye"></i> Tampilkan Data
+                                </button>
+                                <button class="btn btn-dark text-white">
+                                    <i class="bi bi-filetype-html"></i>
+                                    Tampilkan Data HTML
+                                </button>
+                                <button class="btn btn-success">
+                                    <i class="bi bi-download"></i> Download
+                                    Excel
+                                </button>
                             </div>
-
-                            <template v-if="field.type === 'text'">
-                                <input
-                                    type="text"
-                                    class="form-control mb-2"
-                                    v-model="form[field.key].value"
-                                    :disabled="!form[field.key].enabled"
-                                />
-                            </template>
-
-                            <template v-else-if="field.type === 'select'">
-                                <select
-                                    class="form-select mb-2"
-                                    v-model="form[field.key].value"
-                                    :disabled="!form[field.key].enabled"
-                                >
-                                    <option v-for="option in field.options" :key="option" :value="option">
-                                        {{ option }}
-                                    </option>
-                                </select>
-                            </template>
-                        </div>
-
-                        <!-- Kolom 3 dan 4 dapat Anda lanjutkan dengan pola serupa -->
-                    </div>
-
-                    <!-- Tombol Aksi -->
-                    <div class="d-flex justify-content-start gap-2 mt-4">
-                        <button class="btn btn-primary">
-                            <i class="bi bi-eye"></i> Tampilkan Data
-                        </button>
-                        <button class="btn btn-info text-white">
-                            <i class="bi bi-filetype-html"></i> Tampilkan Data HTML
-                        </button>
-                        <button class="btn btn-success">
-                            <i class="bi bi-download"></i> Download Excel
-                        </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </AppLayout>
 </template>
-
 <script setup>
+import { ref } from "vue";
 import AppLayout from "@/Components/Layouts/AppLayouts.vue";
 import { reactive } from "vue";
-
-const form = reactive({
-    puskesmas: { enabled: false, value: "WONGSOREJO" },
-    tgl_awal: { enabled: false, value: "" },
-    tgl_akhir: { enabled: false, value: "" },
-    tempat_kunjungan: { enabled: false, value: "" },
-    asal: { enabled: false, value: "" },
-    rujuk_lanjut: { enabled: false, value: "" },
-    unit: { enabled: false, value: "" },
-    umur_awal: { enabled: false, value: "" },
-    umur_akhir: { enabled: false, value: "" },
-    diagnosa: { enabled: false, value: "" },
-    tindakan: { enabled: false, value: "" },
-    kepesertaan: { enabled: false, value: "" },
-    kategori: { enabled: false, value: "" },
-});
-
-const kolom1 = [
-    { key: "puskesmas", label: "Puskesmas", type: "select", options: ["WONGSOREJO"] },
-    { key: "tgl_awal", label: "Tgl Awal", type: "date" },
-    { key: "tgl_akhir", label: "Tgl Akhir", type: "date" },
+import Modal from "@/Components/Layouts/Modal.vue";
+const isModalOpen = ref(false);
+const selectedTindakan = ref("");
+const aktifPuskesmas = ref(false);
+const dataTindakan = ref([
     {
-        key: "tempat_kunjungan",
-        label: "Tempat Kunjungan",
-        type: "select",
-        options: [
-            "- Pilih -", "SEMUA UNIT", "PUSKESMAS", "PUSTU", "POSYANDU",
-            "POLINDES", "POSKESDES", "PUSLING", "POSKESTREN", "PONKESDES"
-        ],
+        kode: "00.01",
+        nama: "Therapeutic ultrasound of vessels of head and neck",
+        translate: "USG Terapi pembuluh kepala dan leher",
     },
-    { key: "asal", label: "Asal", type: "select", options: ["- Pilih -"] },
-    { key: "rujuk_lanjut", label: "Rujuk Lanjut", type: "select", options: ["- Pilih -"] },
-];
+    {
+        kode: "00.02",
+        nama: "Therapeutic ultrasound of heart",
+        translate: "USG Terapi hati",
+    },
+    // Tambahkan data lainnya sesuai kebutuhan
+]);
 
-const kolom2 = [
-    { key: "unit", label: "Unit", type: "select", options: ["- Pilih -"] },
-    { key: "umur_awal", label: "Umur Awal", type: "text" },
-    { key: "umur_akhir", label: "Umur Akhir", type: "text" },
-    { key: "diagnosa", label: "Diagnosa", type: "text" },
-    { key: "tindakan", label: "Tindakan", type: "select", options: ["- Pilih -"] },
-    { key: "kepesertaan", label: "Kepesertaan", type: "select", options: ["- Pilih -"] },
-    { key: "kategori", label: "Kategori", type: "select", options: ["- Pilih -"] },
-];
+const handleSelect = (item) => {
+    selectedTindakan.value = `${item.kode} - ${item.nama}`;
+    openModal.value = false;
+};
 </script>
