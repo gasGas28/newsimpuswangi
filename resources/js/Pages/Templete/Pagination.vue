@@ -126,5 +126,5 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layout/AppLayout.vue'
+import AppLayout from '@/Components/Layouts/AppLayouts.vue'
 </script>

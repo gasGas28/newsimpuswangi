@@ -36,6 +36,12 @@
           </li>
 
           <li class="nav-item">
+            <Link :href="route('farmasi.index')" class="nav-link d-flex align-items-center">
+            <i class="bi bi-people me-2"></i> Farmasi
+            </Link>
+          </li>
+
+          <li class="nav-item">
             <Link :href="route('filter')" class="nav-link d-flex align-items-center">
               <i class="bi bi-filter-square-fill me-2"></i> Filter
             </Link>
