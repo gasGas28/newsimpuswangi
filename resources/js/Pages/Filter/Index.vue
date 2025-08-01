@@ -21,7 +21,6 @@
                       </select>
                     </div>
                   </div>
-
                   <div class="row mb-2 align-items-center">
                     <label class="col-sm-4 col-form-label fw-bold">Tanggal Awal</label>
                     <div class="col-sm-8">
@@ -35,7 +34,6 @@
                     </div>
                   </div>
                   <div class="row mb-2 align-items-center">
-                    <!-- Kiri: Checkbox + Label -->
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
                         type="checkbox"
@@ -47,8 +45,6 @@
                         Tempat Kunjungan
                       </label>
                     </div>
-
-                    <!-- Kanan: Dropdown 1 dan 2 (atas-bawah) -->
                     <div class="col-sm-8">
                       <div class="mb-2">
                         <select class="form-select" id="selectTempat" :disabled="!aktifTempat">
@@ -241,10 +237,22 @@
                       </select>
                     </div>
                   </div>
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Kepesertaan</label>
-                    <div class="col-sm-8">
-                      <select class="form-select">
+                  <div class="row mb-2 align-items-center">
+                    <div class="col-sm-4 d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        id="cekKepesertaan"
+                        class="form-check-input me-2"
+                        v-model="aktifKepesertaan"
+                      />
+                      <label class="col-form-label fw-bold">Kepesertaan</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
+                      <select
+                        class="form-select"
+                        id="selectKepesertaan"
+                        :disabled="!aktifKepesertaan"
+                      >
                         <option></option>
                         <option>BPJS</option>
                         <option>Non BPJS</option>
@@ -252,9 +260,17 @@
                     </div>
                   </div>
                   <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Kategori</label>
-                    <div class="col-sm-8">
-                      <select class="form-select">
+                    <div class="col-sm-4 d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        id="cekKategori"
+                        class="form-check-input me-2"
+                        v-model="aktifKategori"
+                      />
+                      <label class="col-form-label fw-bold">Kategori</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
+                      <select class="form-select" id="selectKategori" :disabled="!aktifKategori">
                         <option></option>
                         <option>Non BPJS</option>
                         <option>JKN PBI</option>
@@ -265,10 +281,18 @@
                 </div>
                 <!-- Kolom Ketiga -->
                 <div class="col-md-4">
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Rujuk Lanjut</label>
-                    <div class="col-sm-8">
-                      <select class="form-select">
+                  <div class="row mb-2 align-items-center">
+                    <div class="col-sm-4 d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        id="cekRujuk"
+                        class="form-check-input me-2"
+                        v-model="aktifRujukLanjut"
+                      />
+                      <label class="col-form-label fw-bold">Rujuk Lanjut</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
+                      <select class="form-select" id="selectRujuk" :disabled="!aktifRujukLanjut">
                         <option></option>
                         <option>Non BPJS</option>
                         <option>JKN PBI</option>
@@ -276,41 +300,63 @@
                       </select>
                     </div>
                   </div>
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Isi Diagnosa</label>
-                    <div class="col-sm-8">
-                      <select class="form-select">
+                  <div class="row mb-2 align-items-center">
+                    <div class="col-sm-4 d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        id="cekIsiDiagnosa"
+                        class="form-check-input me-2"
+                        v-model="aktifIsiDiagnosa"
+                      />
+                      <label class="col-form-label fw-bold">Isi Diagnosa</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
+                      <select
+                        class="form-select"
+                        id="selectIsiDiagnosa"
+                        :disabled="!aktifIsiDiagnosa"
+                      >
                         <option>--Pilih--</option>
                         <option>Diagnosa Kosong</option>
                       </select>
                     </div>
                   </div>
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Diagnosa</label>
-                    <div class="col-sm-8">
+                  <div class="row mb-2 align-items-center">
+                    <div class="col-sm-4 d-flex align-items-center">
+                        <input type="checkbox" id="cekDiagnosa" class="form-check-input me-2" v-model="aktifDiagnosa">
+                        <label class="col-form-label fw-bold">Diagnosa</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
                       <input
                         type="text"
                         class="form-control"
+                        id="selectDiagnosa"
                         v-model="selectedTindakan"
                         @click="isModalOpen = true"
                         readonly
+                        :disabled="!aktifDiagnosa"
                       />
                       <Modal
                         :show="isModalOpen"
-                        title="Pilih Tindakan"
+                        title="Pilih Diagnosa"
                         :items="dataTindakan"
                         @close="isModalOpen = false"
                         @select="handleSelect"
                       />
                     </div>
                   </div>
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-bold">Tindakan</label>
-                    <div class="col-sm-8">
+                  <div class="row mb-2 align-items-center">
+                    <div class="col-sm-4 d-flex align-items-center">
+                        <input type="checkbox" id="cekTindakan" class="form-check-input me-2" v-model="aktifTindakan">
+                        <label class="col-form-label fw-bold">Tindakan</label>
+                    </div>
+                    <div class="col-sm-8 d-flex">
                       <input
                         type="text"
+                        id="selectDiagnosa"
                         class="form-control"
                         readonly
+                        :disabled="!aktifTindakan"
                         v-model="selectedTindakan"
                         @click="isModalOpen = true"
                       />
