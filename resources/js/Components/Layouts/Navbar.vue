@@ -4,29 +4,39 @@
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->
         <Link href="/" class="navbar-brand fw-bold d-flex align-items-center">
-          <span class="bg-primary bg-gradient p-2 rounded me-2">
-            <i class="bi bi-app-indicator text-white"></i>
-          </span>
-          <span class="text-gradient">SIMPUSWANGI</span>
+        <span class="bg-primary bg-gradient p-2 rounded me-2">
+          <i class="bi bi-app-indicator text-white"></i>
+        </span>
+        <span class="text-gradient">SIMPUSWANGI</span>
         </Link>
-        
+
         <!-- Toggle button di kanan -->
         <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
       </div>
-      
+
       <!-- Nav items di tengah -->
       <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
             <Link :href="route('home')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-house-door me-2"></i> Home
+            <i class="bi bi-house-door me-2"></i> Home
             </Link>
           </li>
           <li class="nav-item">
             <Link :href="route('loket.index')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-ticket-perforated me-2"></i> Loket
+            <i class="bi bi-ticket-perforated me-2"></i> Loket
+            </Link>
+          </li>
+          <li class="nav-item">
+            <Link :href="route('ruang-layanan.poli')" class="nav-link d-flex align-items-center">
+            <i class="bi bi-ticket-perforated me-2"></i> RUang Layanan
+            </Link>
+          </li>
+          <li class="nav-item">
+            <Link :href="route('mal-sehat.index')" class="nav-link d-flex align-items-center">
+            <i class="bi bi-people me-2"></i> Mal Sehat
             </Link>
           </li>
 
@@ -54,58 +64,55 @@
                 <li><Link :href="route('laporan.kunjungan-sehat')" class="dropdown-item">Kunjungan Sehat</Link></li>
               </ul>
             </li>
-
-
-          
         </ul>
       </div>
-      
+
       <!-- User dropdown di kanan -->
       <div class="d-none d-lg-flex ms-auto">
         <div class="dropdown">
-          <button class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center" 
-                  type="button" 
-                  id="userDropdown" 
-                  data-bs-toggle="dropdown">
+          <button class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center" type="button"
+            id="userDropdown" data-bs-toggle="dropdown">
             <i class="bi bi-person-circle me-2"></i>
             <span class="d-none d-sm-inline">User</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow">
             <li>
               <Link class="dropdown-item d-flex align-items-center" href="/profile">
-                <i class="bi bi-person me-2"></i> Profile
+              <i class="bi bi-person me-2"></i> Profile
               </Link>
             </li>
-            <li><hr class="dropdown-divider mx-3 my-1"></li>
+            <li>
+              <hr class="dropdown-divider mx-3 my-1">
+            </li>
             <li>
               <Link class="dropdown-item d-flex align-items-center text-danger" href="/logout">
-                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              <i class="bi bi-box-arrow-right me-2"></i> Logout
               </Link>
             </li>
           </ul>
         </div>
       </div>
-      
+
       <!-- User dropdown versi mobile -->
       <div class="d-lg-none">
         <div class="dropdown">
-          <button class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center" 
-                  type="button" 
-                  id="userDropdownMobile" 
-                  data-bs-toggle="dropdown">
+          <button class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center" type="button"
+            id="userDropdownMobile" data-bs-toggle="dropdown">
             <i class="bi bi-person-circle me-2"></i>
             <span class="d-none d-sm-inline">User</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow">
             <li>
               <Link class="dropdown-item d-flex align-items-center" href="/profile">
-                <i class="bi bi-person me-2"></i> Profile
+              <i class="bi bi-person me-2"></i> Profile
               </Link>
             </li>
-            <li><hr class="dropdown-divider mx-3 my-1"></li>
+            <li>
+              <hr class="dropdown-divider mx-3 my-1">
+            </li>
             <li>
               <Link class="dropdown-item d-flex align-items-center text-danger" href="/logout">
-                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              <i class="bi bi-box-arrow-right me-2"></i> Logout
               </Link>
             </li>
           </ul>
@@ -133,7 +140,7 @@ import { route } from 'ziggy-js';
   font-weight: 500;
 }
 
-.nav-link:hover, 
+.nav-link:hover,
 .nav-link.active {
   background-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
