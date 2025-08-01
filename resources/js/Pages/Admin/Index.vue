@@ -9,7 +9,9 @@
         <div class="az-header-menu">
           <ul class="nav">
             <li class="nav-item active show">
-              <a href="#" class="nav-link"><i class="typcn typcn-chart-area-outline"></i> Dashboard</a>
+              <a href="#" class="nav-link"
+                ><i class="typcn typcn-chart-area-outline"></i> Dashboard</a
+              >
             </li>
             <li class="nav-item">
               <a href="#" class="nav-link with-sub"><i class="typcn typcn-document"></i> Pages</a>
@@ -52,7 +54,9 @@
             <!-- Notification dropdown omitted for brevity -->
           </div>
           <div class="dropdown az-profile-menu">
-            <a href="#" class="az-img-user"><img src="https://www.bootstrapdash.com/demo/azia-free/img/faces/face1.jpg" alt=""></a>
+            <a href="#" class="az-img-user"
+              ><img src="https://www.bootstrapdash.com/demo/azia-free/img/faces/face1.jpg" alt=""
+            /></a>
             <!-- Profile dropdown omitted for brevity -->
           </div>
         </div>
@@ -113,7 +117,9 @@
                 <div class="card-header">
                   <div>
                     <h6 class="card-title">Website Audience Metrics</h6>
-                    <p class="card-text">Audience to which the users belonged while on the current date range.</p>
+                    <p class="card-text">
+                      Audience to which the users belonged while on the current date range.
+                    </p>
                   </div>
                   <div class="btn-group">
                     <button class="btn active">Day</button>
@@ -151,7 +157,10 @@
                 <div class="col-sm-6">
                   <div class="card card-dashboard-two">
                     <div class="card-header">
-                      <h6>33.50% <i class="icon ion-md-trending-up tx-success"></i> <small>18.02%</small></h6>
+                      <h6>
+                        33.50% <i class="icon ion-md-trending-up tx-success"></i>
+                        <small>18.02%</small>
+                      </h6>
                       <p>Bounce Rate</p>
                     </div>
                     <div class="card-body">
@@ -164,7 +173,9 @@
                 <div class="col-sm-6 mg-t-20 mg-sm-t-0">
                   <div class="card card-dashboard-two">
                     <div class="card-header">
-                      <h6>86k <i class="icon ion-md-trending-down tx-danger"></i> <small>0.86%</small></h6>
+                      <h6>
+                        86k <i class="icon ion-md-trending-down tx-danger"></i> <small>0.86%</small>
+                      </h6>
                       <p>Total Users</p>
                     </div>
                     <div class="card-body">
@@ -178,8 +189,14 @@
                   <div class="card card-dashboard-three">
                     <div class="card-header">
                       <p>All Sessions</p>
-                      <h6>16,869 <small class="tx-success"><i class="icon ion-md-arrow-up"></i> 2.87%</small></h6>
-                      <small>The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc.</small>
+                      <h6>
+                        16,869
+                        <small class="tx-success"><i class="icon ion-md-arrow-up"></i> 2.87%</small>
+                      </h6>
+                      <small
+                        >The total number of sessions within the date range. It is the period time a
+                        user is actively engaged with your website, page or app, etc.</small
+                      >
                     </div>
                     <div class="card-body">
                       <div class="chart"><canvas id="chartBar5"></canvas></div>
@@ -192,7 +209,6 @@
 
           <!-- More Cards & Table (dummy content) -->
           <!-- ...copy the rest of the HTML structure as needed... -->
-
         </div>
       </div>
     </div>
@@ -200,9 +216,15 @@
     <!-- Footer -->
     <div class="az-footer ht-40">
       <div class="container ht-100p pd-t-0-f">
-        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © bootstrapdash.com 2020</span>
+        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block"
+          >Copyright © bootstrapdash.com 2020</span
+        >
         <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
-          Free <a href="https://www.bootstrapdash.com/bootstrap-admin-template/" target="_blank">Bootstrap admin templates</a> from Bootstrapdash.com
+          Free
+          <a href="https://www.bootstrapdash.com/bootstrap-admin-template/" target="_blank"
+            >Bootstrap admin templates</a
+          >
+          from Bootstrapdash.com
         </span>
       </div>
     </div>
@@ -210,7 +232,7 @@
 </template>
 
 <script setup>
-// Jika ingin chart interaktif, tambahkan script JS chart di sini
+  // Jika ingin chart interaktif, tambahkan script JS chart di sini
 </script>
 
 <!-- Import CSS Azia dan Bootstrap di resources/js/app.js -->

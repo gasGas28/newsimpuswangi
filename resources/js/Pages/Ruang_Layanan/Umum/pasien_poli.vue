@@ -2,43 +2,48 @@
   <AppLayouts>
     <div class="card m-4 p-3 shadow-sm border-0">
       <!-- Header -->
-      <div class="card-header p-3 text-black d-flex justify-content-between align-items-center rounded">
+      <div
+        class="card-header p-3 text-black d-flex justify-content-between align-items-center rounded"
+      >
         <h1 class="m-0 fs-4">Poli UMUM BP</h1>
         <Link :href="route('ruang-layanan.poli')" class="btn btn-warning btn-sm">Kembali</Link>
       </div>
 
-        <!-- Filter Form -->
-        <div class="card mt-4 shadow-sm">
+      <!-- Filter Form -->
+      <div class="card mt-4 shadow-sm">
         <div class="card-header bg-light">
-            <h5 class="m-0">Filter Data</h5>
+          <h5 class="m-0">Filter Data</h5>
         </div>
         <div class="card-body">
-            <form>
+          <form>
             <div class="mb-3 row">
-                <label for="tanggal_kunjungan" class="col-md-3 col-form-label fw-semibold">Tanggal Kunjungan</label>
-                <div class="col-md-5">
+              <label for="tanggal_kunjungan" class="col-md-3 col-form-label fw-semibold"
+                >Tanggal Kunjungan</label
+              >
+              <div class="col-md-5">
                 <input class="form-control" type="date" id="tanggal_kunjungan" />
-                </div>
+              </div>
             </div>
 
             <div class="mb-3 row">
-                <label for="kategori_unit" class="col-md-3 col-form-label fw-semibold">Kategori Unit</label>
-                <div class="col-md-5">
+              <label for="kategori_unit" class="col-md-3 col-form-label fw-semibold"
+                >Kategori Unit</label
+              >
+              <div class="col-md-5">
                 <select class="form-select" id="kategori_unit">
-                    <option v-for="angka in 10" :key="angka">[ PUSKESMAS ] TEGALLDIMO</option>
+                  <option v-for="angka in 10" :key="angka">[ PUSKESMAS ] TEGALLDIMO</option>
                 </select>
-                </div>
+              </div>
             </div>
 
             <div class="row">
-                <div class="col-md-5 offset-md-3 d-flex justify-content-end">
+              <div class="col-md-5 offset-md-3 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">Tampilkan Data</button>
-                </div>
+              </div>
             </div>
-            </form>
+          </form>
         </div>
-        </div>
-
+      </div>
 
       <!-- Data Table -->
       <div class="card mt-4 shadow-sm">
@@ -85,6 +90,6 @@
   </AppLayouts>
 </template>
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
+  import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 </script>

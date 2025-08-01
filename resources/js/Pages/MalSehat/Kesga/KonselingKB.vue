@@ -1,21 +1,21 @@
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { ref } from 'vue';
+  import { router } from '@inertiajs/vue3';
 
-defineOptions({ layout: AppLayout })
+  defineOptions({ layout: AppLayout });
 
-const tanggal = ref(new Date().toISOString().split('T')[0])
-const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO')
+  const tanggal = ref(new Date().toISOString().split('T')[0]);
+  const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO');
 
-function tampilkanData() {
-  // Placeholder logika fetch data
-  console.log('Tampilkan data untuk', tanggal.value, kategoriUnit.value)
-}
+  function tampilkanData() {
+    // Placeholder logika fetch data
+    console.log('Tampilkan data untuk', tanggal.value, kategoriUnit.value);
+  }
 
-function kembali() {
-  router.get('/mal-sehat/kesga')
-}
+  function kembali() {
+    router.get('/mal-sehat/kesga');
+  }
 </script>
 
 <template>
