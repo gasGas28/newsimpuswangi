@@ -1,48 +1,44 @@
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { ref } from 'vue';
+  import { router } from '@inertiajs/vue3';
 
-defineOptions({ layout: AppLayout })
+  defineOptions({ layout: AppLayout });
 
-function kembali() {
-  router.get('/mal-sehat')
-}
-
-const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO')
-
-const entries = ref([
-  { nama: 'Kesehatan Peduli Remaja', jumlah: 0 },
-])
-
-function getIcon(nama) {
-  if (nama.includes('Remaja')) {
-    return 'https://img.icons8.com/ios-filled/50/girl.png'
+  function kembali() {
+    router.get('/mal-sehat');
   }
-  return 'https://img.icons8.com/ios-filled/50/info.png'
-}
 
-function goToLayanan(nama) {
-  if (nama.includes('Remaja')) {
-    router.get('/mal-sehat/promkes/kesehatanpeduliremaja')
+  const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO');
+
+  const entries = ref([{ nama: 'Kesehatan Peduli Remaja', jumlah: 0 }]);
+
+  function getIcon(nama) {
+    if (nama.includes('Remaja')) {
+      return 'https://img.icons8.com/ios-filled/50/girl.png';
+    }
+    return 'https://img.icons8.com/ios-filled/50/info.png';
   }
-}
+
+  function goToLayanan(nama) {
+    if (nama.includes('Remaja')) {
+      router.get('/mal-sehat/promkes/kesehatanpeduliremaja');
+    }
+  }
 </script>
 
 <template>
   <div class="card shadow-sm border-0">
-    <div class="card-header bg-white text-dark fw-bold fs-5 border-bottom d-flex justify-content-between align-items-center">
+    <div
+      class="card-header bg-white text-dark fw-bold fs-5 border-bottom d-flex justify-content-between align-items-center"
+    >
       <span>Promkes & PM - {{ kategoriUnit }}</span>
       <button class="btn btn-sm btn-outline-secondary" @click="kembali">← Kembali</button>
     </div>
 
     <div class="card-body bg-light-subtle p-3">
       <div class="row g-3">
-        <div
-          v-for="item in entries"
-          :key="item.nama"
-          class="col-12 col-sm-6 col-md-4"
-        >
+        <div v-for="item in entries" :key="item.nama" class="col-12 col-sm-6 col-md-4">
           <div
             class="card h-100 border-0 shadow-sm hover-shadow bg-white rounded-0 cursor-pointer"
             @click="goToLayanan(item.nama)"
@@ -56,7 +52,7 @@ function goToLayanan(nama) {
                 :src="getIcon(item.nama)"
                 alt="icon"
                 class="opacity-50"
-                style="width: 30px; height: 30px;"
+                style="width: 30px; height: 30px"
               />
             </div>
           </div>
@@ -67,7 +63,7 @@ function goToLayanan(nama) {
 </template>
 
 <style scoped>
-.hover-shadow:hover {
-  box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.04);
-}
+  .hover-shadow:hover {
+    box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.04);
+  }
 </style>

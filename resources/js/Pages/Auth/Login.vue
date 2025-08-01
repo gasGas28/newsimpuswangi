@@ -1,5 +1,7 @@
 <template>
-  <div class="login-page d-flex justify-content-center align-items-center position-relative overflow-hidden">
+  <div
+    class="login-page d-flex justify-content-center align-items-center position-relative overflow-hidden"
+  >
     <!-- Background images -->
     <div class="bg-logo bg-logo-left"></div>
     <div class="bg-logo bg-logo-right"></div>
@@ -22,7 +24,12 @@
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
           <div class="input-group">
-            <input type="password" class="form-control" id="password" placeholder="Enter your password" />
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Enter your password"
+            />
             <span class="input-group-text"><i class="bi bi-eye-slash"></i></span>
           </div>
           <div class="d-flex justify-content-between mt-2">
@@ -43,8 +50,15 @@
         </div>
 
         <div class="d-grid mb-3">
-          <button class="btn btn-light border rounded-pill d-flex align-items-center justify-content-center">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" width="20" class="me-2" />
+          <button
+            class="btn btn-light border rounded-pill d-flex align-items-center justify-content-center"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google"
+              width="20"
+              class="me-2"
+            />
             Sign in with Google
           </button>
         </div>
@@ -58,26 +72,25 @@
 </template>
 
 <style scoped>
-.login-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #4e73df, #8f94fb);
-  padding: 2rem;
-  position: relative;
-}
+  .login-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #4e73df, #8f94fb);
+    padding: 2rem;
+    position: relative;
+  }
 
-.login-box {
-  background: #fff;
-  border-radius: 1rem;
-  max-width: 400px;
-  width: 100%;
-  z-index: 10;
-}
+  .login-box {
+    background: #fff;
+    border-radius: 1rem;
+    max-width: 400px;
+    width: 100%;
+    z-index: 10;
+  }
 
-.text-gradient {
-  background: linear-gradient(90deg, #0d6efd, #00b4ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+  .text-gradient {
+    background: linear-gradient(90deg, #0d6efd, #00b4ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 </style>
-

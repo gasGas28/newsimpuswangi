@@ -1,7 +1,6 @@
 <template>
   <AppLayout title="Template Components">
     <div class="container px-2 py-2">
-
       <div class="card">
         <div class="card-body py-3 px-3">
           <h6 class="fw-bold mb-3">Data Pasien Rujukan</h6>
@@ -46,7 +45,7 @@
           <div class="row gx-2 gy-2 mb-2">
             <div class="col-md-6 d-flex align-items-center">
               <label class="me-1 small">Show</label>
-              <select class="form-select form-select-sm me-1" style="width: 60px;">
+              <select class="form-select form-select-sm me-1" style="width: 60px">
                 <option>10</option>
                 <option>25</option>
                 <option>50</option>
@@ -55,7 +54,11 @@
             </div>
             <div class="col-md-6 text-start text-md-end">
               <label class="me-1 small">Search:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" style="width: 180px;">
+              <input
+                type="text"
+                class="form-control form-control-sm d-inline-block"
+                style="width: 180px"
+              />
             </div>
           </div>
 
@@ -91,11 +94,10 @@
           </div>
         </div>
       </div>
-
     </div>
   </AppLayout>
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
 </script>
