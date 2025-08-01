@@ -120,10 +120,16 @@
                                             >Agama</label
                                         >
                                         <div class="col-sm-8">
-                                            <input
-                                                type="text"
-                                                class="form-control"
-                                            />
+                                            <select class="form-select">
+                                                <option value=""></option>
+                                                <option value="Islam">Islam</option>
+                                                <option value="Kristen">Kristen</option>
+                                                <option value="Katholik">Katholik</option>
+                                                <option value="Hindu">Hindu</option>
+                                                <option value="Buddha">Buddha</option>
+                                                <option value="Konghuchu">Konghuchu</option>
+                                                <option value="aliran">Aliran Kepercayaan Lain</option>
+                                            </select>
                                         </div>
                                     </div>
 
@@ -133,10 +139,20 @@
                                             >Hub. Keluarga</label
                                         >
                                         <div class="col-sm-8">
-                                            <input
-                                                type="text"
-                                                class="form-control"
-                                            />
+                                            <select class="form-select">
+                                                <option value=""></option>
+                                                <option value="">Kepala Keluarga</option>
+                                                <option value="">Pembantu</option>
+                                                <option value="">Lainnya</option>
+                                                <option value="">Suami</option>
+                                                <option value="">Istri</option>
+                                                <option value="">Anak</option>
+                                                <option value="">Menantu</option>
+                                                <option value="">Cucu</option>
+                                                <option value="">Orang Tua</option>
+                                                <option value="">Mertua</option>
+                                                <option value="">Family lain</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

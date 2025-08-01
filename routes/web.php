@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,8 @@ Route::prefix('admin')->group(function () {
 
 // Grup Filter
 Route::prefix('filter')->group(function () {
-    Route::get('/filter', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
+    Route::get('/modal', fn() => Inertia::render('Filter/Modal'))->name('filter.modal');
 });
 
 // Grup Loket
@@ -110,12 +112,3 @@ Route::get('/mal-sehat/home-visit', fn () => Inertia::render('MalSehat/HomeVisit
 Route::get('/mal-sehat/sehat', fn () => Inertia::render('MalSehat/Sehat/Index'))->name('mal-sehat.sehat');
 //Halaman Rapid test
 Route::get('/mal-sehat/rapid-test', fn () => Inertia::render('MalSehat/RapidTest/Index'))->name('mal-sehat.rapid-test');
-
-//Grup Farmasi
-Route::prefix('farmasi')->group(function () {
-    Route::get('/', fn() => Inertia::render('Farmasi/Index'))->name('farmasi.index');
-    Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'))->name('farmasi.master');
-    Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'))->name('farmasi.resep');
-    Route::get('/pelayanan-resep', fn() => Inertia::render('Farmasi/PelayananResepPoli'))->name('farmasi.pelayanan');
-    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'))->name('farmasi.laporan');
-});
