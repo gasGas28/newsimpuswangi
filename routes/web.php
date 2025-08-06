@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Filter\FilterController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -28,9 +29,9 @@ Route::prefix('farmasi')->group(function () {
 });
 
 // Grup Filter
-Route::prefix('filter')->group(function () {
-    Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
-    Route::get('/modal', fn() => Inertia::render('Filter/Modal'))->name('filter.modal');
+Route::prefix('filter')->controller(FilterController::class)->group(function () {
+    Route::get('/', 'index')->name('filter');
+    Route::get('/modal', 'modal')->name('filter.modal');
 });
 
 // Grup Loket
