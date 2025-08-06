@@ -3,12 +3,12 @@
     <div class="container py-4">
      <div class="mb-3">
         <Link href="/dashboard" class="btn btn-secondary">
-          <i class="bi bi-arrow-left-circle"></i> Kembali ke Dashboard
+          <i class=""></i> Kembali 
         </Link>
       </div>
       <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
-          <h4 class="mb-0"><i class="bi bi-capsule me-2"></i> Menu Farmasi</h4>
+          <h4 class="mb-0"><i class=""></i> Menu Farmasi</h4>
         </div>
         <div class="card-body">
             <div class="row g-4">
