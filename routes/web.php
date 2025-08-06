@@ -18,6 +18,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/', fn() => Inertia::render('Admin/Index'))->name('admin.index');
 });
 
+//Grup Farmasi
+Route::prefix('farmasi')->group(function () {
+    Route::get('/', fn() => Inertia::render('Farmasi/Index'));
+});
+
 // Grup Filter
 Route::prefix('filter')->group(function () {
     Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
