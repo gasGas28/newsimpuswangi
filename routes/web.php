@@ -21,6 +21,10 @@ Route::prefix('admin')->group(function () {
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
     Route::get('/', fn() => Inertia::render('Farmasi/Index'));
+    Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
+    Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
+    Route::get('/pelayanan-resep', fn() => Inertia::render('Farmasi/PelayananResep'));
+    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'));
 });
 
 // Grup Filter
