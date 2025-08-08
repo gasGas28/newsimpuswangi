@@ -1,12 +1,9 @@
 <template>
   <AppLayout title="Template Components">
     <div class="container py-4">
-
       <!-- Tambahan form filter sesuai gambar -->
       <div class="card mb-4">
-        <div class="card-header fw-bold">
-          Filter Data Laporan Ranap
-        </div>
+        <div class="card-header fw-bold">Filter Data Laporan Ranap</div>
         <div class="card-body">
           <form>
             <div class="row mb-2">
@@ -74,14 +71,11 @@
           </form>
         </div>
       </div>
-
-
-
     </div>
   </AppLayout>
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
 </script>

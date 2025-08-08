@@ -1,9 +1,8 @@
-
 <script setup>
-import { usePage } from '@inertiajs/vue3'
+  import { usePage } from '@inertiajs/vue3';
 
-const page = usePage()
-const welcomeText = page.props.welcomeText
+  const page = usePage();
+  const welcomeText = page.props.welcomeText;
 </script>
 
 <template>

@@ -72,40 +72,44 @@ const layanan = [
     link: "/mal-sehat/rapid-test",
   },
 ]
+
+function getCardColor(nama) {
+  if (['Home Visit', 'Sehat', 'Rapid Test'].includes(nama)) {
+    return '#f0f8ff' // biru sangat soft
+  }
+  return '#B0E0E6' // biru soft
+}
 </script>
 
 <template>
-  <div class="card shadow-sm border-0">
-    <div class="card-header bg-white text-dark fw-bold fs-5 border-bottom">
+  <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-header bg-white text-dark fw-bold fs-5 border-bottom py-3 px-4">
       MAL SEHAT
     </div>
-    <div class="card-body bg-light-subtle p-3">
-      <div class="row g-3">
+    <div class="card-body py-4 px-4" style="background-color: #f8fbfd;">
+      <div class="row g-4">
         <div
           class="col-12 col-sm-6 col-lg-4"
           v-for="item in layanan"
           :key="item.nama"
         >
           <div
-            class="card h-100 cursor-pointer border-0 shadow-sm hover-shadow"
+            class="card h-100 border-0 shadow-sm rounded-4 cursor-pointer"
+            :style="{ backgroundColor: getCardColor(item.nama), transition: 'transform 0.2s ease' }"
             @click="router.get(item.link)"
-            :class="[
-              ['Home Visit', 'Sehat', 'Rapid Test'].includes(item.nama)
-                ? 'bg-info-subtle'
-                : 'bg-white',
-              'rounded-0'
-            ]"
+            @mouseover="$event.currentTarget.style.transform = 'scale(1.01)'"
+            @mouseleave="$event.currentTarget.style.transform = 'scale(1)'"
           >
-            <div class="card-body d-flex justify-content-between align-items-center p-2">
-              <div class="text-dark">
-                <h6 class="mb-1">{{ item.nama }}</h6>
-                <small>Hari ini {{ item.jumlah }} pasien</small>
+            <div class="card-body d-flex justify-content-between align-items-center px-3 py-3">
+              <div>
+                <div class="fw-semibold fs-6 mb-1 text-dark">{{ item.nama }}</div>
+                <small class="text-muted">Hari ini {{ item.jumlah }} pasien</small>
               </div>
               <img
                 :src="item.icon"
                 alt="icon"
                 class="opacity-50"
-                style="width: 30px; height: 30px;"
+                style="width: 32px; height: 32px;"
               />
             </div>
           </div>

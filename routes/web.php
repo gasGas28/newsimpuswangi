@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Filter\FilterController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -18,16 +19,25 @@ Route::prefix('admin')->group(function () {
     Route::get('/', fn() => Inertia::render('Admin/Index'))->name('admin.index');
 });
 
+//Grup Farmasi
+Route::prefix('farmasi')->group(function () {
+    Route::get('/', fn() => Inertia::render('Farmasi/Index'));
+    Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
+    Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
+    Route::get('/pelayanan-resep', fn() => Inertia::render('Farmasi/PelayananResep'));
+    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'));
+});
+
 // Grup Filter
-Route::prefix('filter')->group(function () {
-    Route::get('/', fn() => Inertia::render('Filter/Index'))->name('filter');
-    Route::get('/modal', fn() => Inertia::render('Filter/Modal'))->name('filter.modal');
+Route::prefix('filter')->controller(FilterController::class)->group(function () {
+    Route::get('/', 'index')->name('filter');
+    Route::get('/modal', 'modal')->name('filter.modal');
 });
 
 // Grup Loket
 Route::prefix('loket')->group(function () {
     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/Pasien'))->name('loket.pasien');
+    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
     Route::get('/search', fn() => Inertia::render('Loket/Search'))->name('loket.search');
 });
 

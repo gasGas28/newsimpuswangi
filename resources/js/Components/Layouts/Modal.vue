@@ -1,5 +1,10 @@
 <template>
-  <div v-if="show" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+  <div
+    v-if="show"
+    class="modal fade show d-block"
+    tabindex="-1"
+    style="background-color: rgba(0, 0, 0, 0.5)"
+  >
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
@@ -8,7 +13,12 @@
         </div>
 
         <div class="modal-body">
-          <input type="text" class="form-control mb-3" placeholder="Search..." v-model="searchTerm" />
+          <input
+            type="text"
+            class="form-control mb-3"
+            placeholder="Search..."
+            v-model="searchTerm"
+          />
 
           <table class="table table-bordered table-striped">
             <thead>
@@ -25,16 +35,16 @@
                 <td>{{ item.nama }}</td>
                 <td>{{ item.translate }}</td>
                 <td>
-                  <button class="btn btn-sm btn-info text-white" @click="selectItem(item)">Pilih</button>
+                  <button class="btn btn-sm btn-info text-white" @click="selectItem(item)">
+                    Pilih
+                  </button>
                 </td>
               </tr>
             </tbody>
           </table>
 
           <div>
-            <small>
-              Menampilkan {{ filteredItems.length }} dari {{ items.length }} data
-            </small>
+            <small> Menampilkan {{ filteredItems.length }} dari {{ items.length }} data </small>
           </div>
         </div>
 
@@ -47,28 +57,28 @@
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, ref } from 'vue'
+  import { computed, defineProps, defineEmits, ref } from 'vue';
 
-const props = defineProps({
-  show: Boolean,
-  title: String,
-  items: Array,
-})
+  const props = defineProps({
+    show: Boolean,
+    title: String,
+    items: Array,
+  });
 
-const emits = defineEmits(['close', 'select'])
+  const emits = defineEmits(['close', 'select']);
 
-const searchTerm = ref('')
+  const searchTerm = ref('');
 
-const filteredItems = computed(() => {
-  if (!searchTerm.value) return props.items
-  return props.items.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val).toLowerCase().includes(searchTerm.value.toLowerCase())
-    )
-  )
-})
+  const filteredItems = computed(() => {
+    if (!searchTerm.value) return props.items;
+    return props.items.filter((item) =>
+      Object.values(item).some((val) =>
+        String(val).toLowerCase().includes(searchTerm.value.toLowerCase())
+      )
+    );
+  });
 
-const selectItem = (item) => {
-  emits('select', item)
-}
+  const selectItem = (item) => {
+    emits('select', item);
+  };
 </script>

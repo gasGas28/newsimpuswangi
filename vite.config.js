@@ -5,17 +5,17 @@ import path from 'path';
 import ziggy from 'vite-plugin-ziggy';
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true,
-        }),
-        vue(),
-        ziggy(),
-    ],
-    resolve: {
+  plugins: [
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.js'],
+      refresh: true,
+    }),
+    vue(),
+    ziggy(),
+  ],
+  resolve: {
     alias: {
-      '@': path.resolve(__dirname, './resources/js'), 
+      '@': path.resolve(__dirname, './resources/js'),
     },
   },
 });

@@ -1,8 +1,6 @@
 <template>
   <AppLayout title="Template Components">
     <div class="container px-2 py-2">
-
-
       <div class="card">
         <div class="card-body py-3 px-3">
           <h6 class="fw-bold mb-3">Filter Data Laporan Loket</h6>
@@ -75,13 +73,11 @@
           </form>
         </div>
       </div>
-
-
     </div>
   </AppLayout>
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
 </script>
