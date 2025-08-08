@@ -2,9 +2,9 @@
   <AppLayouts>
     <div class="card m-4 p-3 shadow-sm border-0">
       <!-- Header -->
-      <div class="card-header p-3 text-black d-flex justify-content-between align-items-center rounded">
+      <div class="card-header bg-primary p-3 text-white d-flex justify-content-between align-items-center rounded">
         <h1 class="m-0 fs-4">Poli UMUM BP</h1>
-        <Link :href="route('ruang-layanan.poli')" class="btn btn-warning btn-sm">Kembali</Link>
+        <Link :href="route('ruang-layanan.umum')" class="btn text-white btn-warning btn-sm">Kembali</Link>
       </div>
 
         <!-- Filter Form -->
@@ -75,7 +75,7 @@
                 <td>1</td>
                 <td>1</td>
                 <td>1</td>
-                <td><Link :href="route('ruang-layanan-umum.pelayanan')">Belum Dilayani</Link></td>
+                <td class="text-center"><Link class="text-decoration-none btn btn-sm btn-danger" :href="route('ruang-layanan-umum.pelayanan')">Belum Dilayani</Link></td>
               </tr>
             </tbody>
           </table>

@@ -92,7 +92,7 @@
         </div>
 
         <hr />
-        <div class="card mt-4" v-if="isMelayani">
+        <div class="card mt-4" v-if="isMelayani"> 
         <div class="card-header p-4 d-flex gap-4 align-items-center bg-info-subtle" >
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'subjective' }" @click.prevent="currentTab = 'subjective'">Subjective</a>
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'objective' }" @click.prevent="currentTab = 'objective'">Objective</a>
@@ -788,7 +788,7 @@
           </tbody>
         </table>
       </div>
-</div>
+      </div>
 
 
 
