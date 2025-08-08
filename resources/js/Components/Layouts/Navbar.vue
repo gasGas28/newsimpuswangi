@@ -40,11 +40,7 @@
             </Link>
           </li>          <li class="nav-item">
             <Link :href="route('ruang-layanan.poli')" class="nav-link d-flex align-items-center">
-<<<<<<< HEAD
             <i class="bi bi-ticket-perforated me-2"></i> Ruang Layanan
-=======
-              <i class="bi bi-ticket-perforated me-2"></i> RUang Layanan
->>>>>>> ad20b08f2870c6287da050a75961eb0e5d2433c0
             </Link>
           </li>
           <li class="nav-item">
