@@ -31,6 +31,7 @@ Route::prefix('farmasi')->group(function () {
 // Grup Filter
 Route::prefix('filter')->controller(FilterController::class)->group(function () {
     Route::get('/', 'index')->name('filter');
+    Route::get('/dev', 'dev')->name('filter.dev');
     Route::get('/modal', 'modal')->name('filter.modal');
 });
 

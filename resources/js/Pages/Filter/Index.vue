@@ -1,15 +1,19 @@
 <template>
   <AppLayout>
     <div class="container py-4">
+      <div class="d-flex justify-content-end mb-3 gap-2">
+        <Link :href="route('filter.dev')" class="btn btn-outline-primary"> Dev This Page </Link>
+      </div>
       <div class="card shadow-sm">
         <div class="card-header text-start">
-          <h5 class="text-dark fw-semibold mt-2">Filter Laporan</h5>
+          <h5 class="text-white fw-semibold mt-2">Filter Laporan</h5>
         </div>
         <div class="card-body">
           <div class="container">
             <form>
               <div class="row">
                 <!-- Kolom Pertama -->
+                <!--Form Puskesmas-->
                 <div class="col-md-4">
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
@@ -22,6 +26,7 @@
                     </div>
                   </div>
 
+                  <!--Form Tanggal Awal & Akhir-->
                   <div class="row mb-2 align-items-center">
                     <label class="col-sm-4 col-form-label fw-semibold">Tanggal Awal</label>
                     <div class="col-sm-8">
@@ -35,16 +40,28 @@
                     </div>
                   </div>
 
+                  <!--Form Tempat Kunjungan-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
+                      <input
+                        type="checkbox"
+                        class="form-check-input me-2 mt-2"
+                        id="cekKasus"
+                        v-model="aktif.tmptKunjungan"
+                      />
                       <label for="tempatKunjungan" class="col-form-label fw-semibold mb-0">
                         Tempat Kunjungan
                       </label>
                     </div>
                     <div class="col-sm-8">
                       <div class="mb-2">
-                        <select class="form-select" id="selectTempat" v-model="selectedKategori">
-                          <option disabled value="">-- Pilih Tempat --</option>
+                        <select
+                          class="form-select"
+                          id="selectTempat"
+                          v-model="selectedKategori"
+                          :disabled="!aktif.tmptKunjungan"
+                        >
+                          <option>-- Pilih Tempat --</option>
                           <option
                             v-for="kategori in tempat_kunjungan"
                             :key="kategori.id_kategori"
@@ -75,6 +92,7 @@
                     </div>
                   </div>
 
+                  <!--Form Kunjungan Kasus-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -90,11 +108,18 @@
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectKasus" :disabled="!aktif.kasus">
                         <option></option>
-                        <option v-for="kunjungan in kunj_kasus" :key="kunjungan.id" :value="kunjungan.id">{{ kunjungan.kasus }}</option>
+                        <option
+                          v-for="kunjungan in kunj_kasus"
+                          :key="kunjungan.id"
+                          :value="kunjungan.id"
+                        >
+                          {{ kunjungan.kasus }}
+                        </option>
                       </select>
                     </div>
                   </div>
 
+                  <!--Form Kunjungan-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -120,6 +145,7 @@
                 </div>
 
                 <!-- Kolom Kedua -->
+                <!--Form Nama-->
                 <div class="col-md-4">
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
@@ -140,7 +166,8 @@
                       />
                     </div>
                   </div>
-                  
+
+                  <!--Form Umur-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -171,6 +198,8 @@
                       />
                     </div>
                   </div>
+
+                  <!--Form Jenis Kelamin-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -191,6 +220,8 @@
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Asal Wilayah-->
                   <div class="row mb-2">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -204,10 +235,14 @@
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectAsal" :disabled="!aktif.asal">
                         <option></option>
-                        <option v-for="asl in asal" :key="asl.id_wilayah" :value="asl.id_wilayah">{{ asl.wilayah }}</option>
+                        <option v-for="asl in asal" :key="asl.id_wilayah" :value="asl.id_wilayah">
+                          {{ asl.wilayah }}
+                        </option>
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Kecamatan-->
                   <div class="row mb-2">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -219,13 +254,21 @@
                       <label class="col-form-label fw-semibold">Kecamatan</label>
                     </div>
                     <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectKecamatan" :disabled="!aktif.kecamatan">
+                      <select
+                        class="form-select"
+                        id="selectKecamatan"
+                        v-model="selectedKecamatan"
+                        :disabled="!aktif.kecamatan"
+                      >
                         <option></option>
-                        <option>Kecamatan</option>
-                        <option>Kecamatan</option>
+                        <option v-for="kec in kecamatan" :key="kec.NO_KEC" :value="kec.NO_KEC">
+                          {{ kec.NAMA_KEC }}
+                        </option>
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Desa-->
                   <div class="row mb-2">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -237,13 +280,25 @@
                       <label class="col-form-label fw-semibold">Desa</label>
                     </div>
                     <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectDesa" :disabled="!aktif.desa">
-                        <option></option>
-                        <option>Desa</option>
-                        <option>Desa</option>
+                      <select
+                        class="form-select"
+                        id="selectDesa"
+                        v-model="selectedDesa"
+                        :disabled="!aktif.desa"
+                      >
+                        <option>--Pilih Desa--</option>
+                        <option
+                          v-for="desa in filteredDesa"
+                          :key="desa.NO_KEL"
+                          :value="desa.NO_KEL"
+                        >
+                          {{ desa.NAMA_KEL }}
+                        </option>
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Kepesertaan-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -266,6 +321,8 @@
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Kategori-->
                   <div class="row mb-2">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -287,6 +344,7 @@
                   </div>
                 </div>
                 <!-- Kolom Ketiga -->
+                <!--Form Unit-->
                 <div class="col-md-4">
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
@@ -311,6 +369,8 @@
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Rujuk Lanjut-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -334,6 +394,8 @@
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Isi Diagnosa-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -355,6 +417,8 @@
                       </select>
                     </div>
                   </div>
+
+                  <!--Form Diagnosa-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -384,6 +448,8 @@
                       />
                     </div>
                   </div>
+
+                  <!--Form Tindakan-->
                   <div class="row mb-2 align-items-center">
                     <div class="col-sm-4 d-flex align-items-center">
                       <input
@@ -435,15 +501,17 @@
   </AppLayout>
 </template>
 <script setup>
-  import { ref, computed, watch } from 'vue';
+  import { ref, computed, watch, reactive } from 'vue';
+  import { Link } from '@inertiajs/vue3';
   import AppLayout from '@/Components/Layouts/AppLayouts.vue';
-  import { reactive } from 'vue';
   import Modal from '@/Components/Layouts/Modal.vue';
 
+  // Variabel Reactive Untuk CheckBox
   const aktif = reactive({
     tempat: false,
     kasus: false,
     kunjungan: false,
+    tmptKunjungan: false,
     nama: false,
     umur: false,
     jk: false,
@@ -459,6 +527,7 @@
     unit: false,
   });
 
+  // Setup Modal untuk Diagnosa dan Tindakan
   const isModalOpen = ref(false);
   const selectedTindakan = ref('');
   const dataTindakan = ref([
@@ -472,24 +541,26 @@
       nama: 'Therapeutic ultrasound of heart',
       translate: 'USG Terapi hati',
     },
-    // Tambahkan data lainnya sesuai kebutuhan
   ]);
-
   const handleSelect = (item) => {
     selectedTindakan.value = `${item.kode} - ${item.nama}`;
     openModal.value = false;
   };
+
+  // Array Untuk Mengambil Data Pada Database
   const props = defineProps({
     providers: Array,
     tempat_kunjungan: Array,
     detail_tempat_kunjungan: Array,
     kunj_kasus: Array,
     asal: Array,
+    kecamatan: Array,
+    desa: Array,
   });
 
+  // Fungsi Untuk Filter Tempat Kunjungan
   const selectedKategori = ref('');
   const selectedUnit = ref('');
-
   const filteredUnits = computed(() => {
     if (!selectedKategori.value) return [];
 
@@ -500,6 +571,19 @@
 
   watch(selectedKategori, () => {
     selectedUnit.value = '';
+  });
+
+  // Fungsi Untuk Filter Desa & Kecamatan
+  const selectedKecamatan = ref('');
+  const selectedDesa = ref('');
+  const filteredDesa = computed(() => {
+    if (!selectedKecamatan.value) return [];
+
+    return props.desa.filter((desa) => desa.NO_KEC == selectedKecamatan.value);
+  });
+
+  watch(selectedKecamatan, () => {
+    selectedDesa.value = '';
   });
   // Opsi 2: Jika menggunakan detail_tempat_kunjungan sebagai array terpisah
   // return props.detail_tempat_kunjungan.filter(
