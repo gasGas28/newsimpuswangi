@@ -1,65 +1,89 @@
 <template>
   <AppLayout title="Template Components">
-    <div class="container py-4">
+    <div class="container py-4" style="font-family: 'Segoe UI', sans-serif;">
 
+      <div class="card mb-4 shadow-sm">
+        <!-- Header Gradient -->
+        <div class="card-header fw-bold text-white"
+             style="background: linear-gradient(135deg, #0d6efd, #20c997); transition: 0.3s;">
+          Filter Data Laporan UGD
+        </div>
 
-<div class="card mb-4">
-  <div class="card-body">
-    <div class="mb-3 fw-bold">Filter Data Laporan UGD</div>
-    <form>
-      <div class="row mb-2">
-        <div class="col-sm-2 fw-bold">Puskesmas</div>
-        <div class="col-sm-4">
-          <select class="form-select">
-            <option selected>WONGSOREJO</option>
-          </select>
+        <div class="card-body">
+          <form>
+            <!-- Puskesmas -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Puskesmas</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option selected>WONGSOREJO</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Laporan -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Laporan</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option>- Pilih -</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tgl Awal -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Tgl Awal</label>
+              <div class="col-md-6">
+                <input type="date" class="form-control" />
+              </div>
+            </div>
+
+            <!-- Tgl Akhir -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Tgl Akhir</label>
+              <div class="col-md-6">
+                <input type="date" class="form-control" />
+              </div>
+            </div>
+
+            <!-- Unit -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Unit</label>
+              <div class="col-md-3">
+                <select class="form-select">
+                  <option>- Pilih -</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sub Unit -->
+            <div class="row mb-4">
+              <label class="col-md-2 col-form-label fw-semibold">Sub Unit</label>
+              <div class="col-md-3">
+                <select class="form-select">
+                  <option>- Pilih -</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tombol -->
+  <!-- Tombol -->
+          <div class="row">
+            <div class="col-md-8 offset-md-2 d-flex flex-wrap gap-3">
+              <button type="button" class="btn btn-gradient text-white border-0 px-4 py-2 fw-semibold rounded">
+                <i class="bi bi-printer me-1"></i> Tampilkan Data
+              </button>
+
+              <button type="button" class="btn btn-gradient text-white border-0 px-4 py-2 fw-semibold rounded">
+                <i class="bi bi-download me-1"></i> Download Excel
+              </button>
+            </div>
+          </div>
+
+          </form>
         </div>
       </div>
-      <div class="row mb-2">
-        <div class="col-sm-2 fw-bold">Laporan</div>
-        <div class="col-sm-4">
-          <select class="form-select">
-            <option>- Pilih -</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-sm-2 fw-bold">Tgl Awal</div>
-        <div class="col-sm-4">
-          <input type="text" class="form-control"/>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-sm-2 fw-bold">Tgl Akhir</div>
-        <div class="col-sm-4">
-          <input type="text" class="form-control"/>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-sm-2 fw-bold">Unit</div>
-        <div class="col-sm-4">
-          <select class="form-select mb-2">
-            <option>- Pilih -</option>
-          </select>
-        </div>
-        <div class="col-sm-2 fw-bold">Sub Unit</div>
-        <div class="col-sm-4">
-          <select class="form-select">
-            <option>- Pilih -</option>
-          </select>
-        </div>
-      </div>
-      <div class="mt-3">
-        <button type="button" class="btn btn-primary me-2">
-          <i class="bi bi-printer"></i> Tampilkan Data
-        </button>
-        <button type="button" class="btn btn-info text-white">
-          <i class="bi bi-download"></i> Download Excel
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 
     </div>
   </AppLayout>
@@ -67,5 +91,6 @@
 
 <script setup>
 import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+import '@/../css/laporan-css/form-styles.css' // path sesuaikan dengan struktur proyek
+
 </script>
