@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Filter\FilterController;
+use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -7,56 +9,36 @@ use App\Models\User;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TemplateController;
 use Inertia\Inertia;
-use App\Http\Controllers\Laporan\LaporanLoketController;
-use App\Http\Controllers\Laporan\Rujukan\RujukanController;
-use App\Http\Controllers\Laporan\Kb\KbController;
-use App\Http\Controllers\Auth\LoginController;
-
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
 })->name('home');
-
-
-// Login
-Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-
-// Protected
-Route::middleware('auth')->group(function () {
-
-    // Semua role boleh dashboard
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
-
-    // OWNER ONLY
-    Route::middleware('role:owner')->group(function () {
-        Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
-    });
-
-    // (Opsional) nanti isi menu khusus role lain di sini:
-    // Route::middleware('role:pelayanan,owner,kapus')->group(function () { ... });
-    // Route::middleware('role:loket,owner,kapus')->group(function () { ... });
-});
-
-
-
-
-
 
 // Grup Admin
 Route::prefix('admin')->group(function () {
     Route::get('/', fn() => Inertia::render('Admin/Index'))->name('admin.index');
 });
 
+//Grup Farmasi
+Route::prefix('farmasi')->group(function () {
+    Route::get('/', fn() => Inertia::render('Farmasi/Index'));
+    Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
+    Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
+    Route::get('/pelayanan-resep', fn() => Inertia::render('Farmasi/PelayananResep'));
+    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'));
+});
+
 // Grup Filter
-Route::prefix('filter')->group(function () {
-    Route::get('/filter', fn() => Inertia::render('Filter/Index'))->name('filter');
+Route::prefix('filter')->controller(FilterController::class)->group(function () {
+    Route::get('/', 'index')->name('filter');
+    Route::get('/dev', 'dev')->name('filter.dev');
+    Route::get('/modal', 'modal')->name('filter.modal');
 });
 
 // Grup Loket
 Route::prefix('loket')->group(function () {
     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/Pasien'))->name('loket.pasien');
+    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
     Route::get('/search', fn() => Inertia::render('Loket/Search'))->name('loket.search');
 });
 
@@ -76,13 +58,8 @@ Route::prefix('loket')->group(function () {
 
 // Grup Laporan
 Route::prefix('laporan')->group(function () {
-    Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
-    Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
-
-    // Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
-Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
-
-
+    Route::inertia('loket', 'Laporan/Loket/Loket')->name('laporan.loket');
+    Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
     Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
     Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
     Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
@@ -99,3 +76,121 @@ Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->nam
 });
 
 
+
+
+
+
+// Grup Mal Sehat
+Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
+    Route::inertia('/', 'MalSehat/Index')->name('index');
+
+    // Kesling
+    Route::prefix('kesling')->name('kesling.')->group(function () {
+        Route::inertia('/', 'MalSehat/Kesling/Index')->name('index');
+        Route::inertia('konseling-sanitasi', 'MalSehat/Kesling/KonselingSanitasi')->name('konseling');
+        Route::inertia('pengukuran-kebugaran-haji', 'MalSehat/Kesling/PengukuranKebugaranHaji')->name('haji');
+        Route::inertia('pengukuran-kebugaran-anak', 'MalSehat/Kesling/PengukuranKebugaranAnak')->name('anak');
+    });
+
+    // Kesga
+    Route::prefix('kesga')->name('kesga.')->group(function () {
+        Route::inertia('/', 'MalSehat/Kesga/Index')->name('index');
+        Route::inertia('konselingcatin', 'MalSehat/Kesga/KonselingCatin')->name('konselingcatin');
+        Route::inertia('konselinghaji', 'MalSehat/Kesga/KonselingHaji')->name('konselinghaji');
+        Route::inertia('konselingimunisasi', 'MalSehat/Kesga/KonselingImunisasi')->name('konselingimunisasi');
+        Route::inertia('konselinganak', 'MalSehat/Kesga/KonselingAnak')->name('konselinganak');
+        Route::inertia('konselingibu', 'MalSehat/Kesga/KonselingIbu')->name('konselingibu');
+        Route::inertia('konselingkb', 'MalSehat/Kesga/KonselingKB')->name('konselingkb');
+        Route::inertia('konsultasigizi', 'MalSehat/Kesga/KonsultasiGizi')->name('konsultasigizi');
+        Route::inertia('konsultasilansia', 'MalSehat/Kesga/KonsultasiLansia')->name('konsultasilansia');
+    });
+
+    // PTM
+    Route::prefix('ptm')->name('ptm.')->group(function () {
+        Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
+        Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
+        Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
+    });
+
+    // P3M
+    Route::prefix('p3m')->name('p3m.')->group(function () {
+        Route::inertia('/', 'MalSehat/P3M/Index')->name('index');
+        Route::inertia('konselinghivaids', 'MalSehat/P3M/KonselingHivAids')->name('konselinghivaids');
+        Route::inertia('konselinglroa', 'MalSehat/P3M/KonselingLROA')->name('konselinglroa');
+        Route::inertia('konselingtb', 'MalSehat/P3M/KonselingPenyakitTB')->name('konselingtb');
+    });
+
+    // Yankes Primer
+    Route::prefix('yankes-primer')->name('yankes-primer.')->group(function () {
+        Route::inertia('/', 'MalSehat/YankesPrimer/Index')->name('index');
+        Route::inertia('kunjungankonsultasitradisional', 'MalSehat/YankesPrimer/KunjunganKonsultasiTradisional')->name('kunjungankonsultasitradisional');
+        Route::inertia('kunjunganketerangansehat', 'MalSehat/YankesPrimer/KunjunganKeteranganSehat')->name('kunjunganketerangansehat');
+    });
+
+    // Farmasi
+    Route::prefix('farmasi')->name('farmasi.')->group(function () {
+        Route::inertia('/', 'MalSehat/Farmasi/Index')->name('index');
+        Route::inertia('permintaanobat', 'MalSehat/Farmasi/PermintaanObat')->name('permintaanobat');
+    });
+
+    // Biakes
+    Route::prefix('biakes')->name('biakes.')->group(function () {
+        Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
+        Route::inertia('pembiayaanjaminansehat', 'MalSehat/Biakes/PembiayaanJaminanSehat')->name('pembiayaanjaminansehat');
+    });
+
+    // Promkes
+    Route::prefix('promkes')->name('promkes.')->group(function () {
+        Route::inertia('/', 'MalSehat/Promkes/Index')->name('index');
+        Route::inertia('kesehatanpeduliremaja', 'MalSehat/Promkes/KesehatanPeduliRemaja')->name('kesehatanpeduliremaja');
+    });
+
+    // Lain-lain
+    Route::inertia('home-visit', 'MalSehat/HomeVisit/Index')->name('home-visit');
+    Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
+});
+
+Route::prefix('ruang_layanan')->group(function () {
+    // Menampilkan halaman poli
+    Route::get('/simpus/poli', [RuangLayananController::class, 'index'])->name('ruang-layanan.poli');
+
+    // Umum
+    Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli'])->name('ruang-layanan.umum');
+    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])->name('ruang-layanan-umum.pelayanan');
+    Route::inertia('/simpus/umum/surat-keterangan', 'Ruang_Layanan/Umum/surat_keterangan')->name('ruang-layanan-umum.surat-keterangan');
+    Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
+
+    //Gigi
+    Route::inertia('/simpus/gigi', 'Ruang_Layanan/Gigi/pasien_poli')->name('ruang-layanan.gigi');
+    Route::inertia('/simpus/gigi/pelayanan', 'Ruang_Layanan/Gigi/pelayanan')->name('ruang-layanan-gigi.pelayanan');
+
+    //UGD
+    Route::inertia('/simpus/ugd', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ugd');
+    Route::inertia('/simpus/ugd/pelayanan', 'Ruang_Layanan/UGD/pelayanan')->name('ruang-layanan-ugd.pelayanan');
+
+    //KB
+    Route::inertia('/simpus/kb', 'Ruang_Layanan/KB/pasien_poli')->name('ruang-layanan.kb');
+    Route::inertia('/simpus/kb/pelayanan', 'Ruang_Layanan/KB/pelayanan')->name('ruang-layanan-kb.pelayanan');
+
+    //Kunjungan Online
+    Route::inertia('/simpus/kunjungan-online', 'Ruang_Layanan/KunjunganOnline/pasien_poli')->name('ruang-layanan.kunjungan-online');
+    Route::inertia('/simpus/kunjungan-online/pelayanan', 'Ruang_Layanan/KunjunganOnline/pelayanan')->name('ruang-layanan.kunjungan-online.pelayanan');
+
+    //Sanitasi
+    Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
+    Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
+
+    //Gizi
+    Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
+    Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
+
+    //Laborat
+    Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
+     
+    //Rawat Inap
+    Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
+    Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
+    Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
+    Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+});
