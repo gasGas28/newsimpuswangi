@@ -1,97 +1,69 @@
 <template>
-<AppLayout>
-  <div class="row">
-    <!-- Dropdown Kategori -->
-    <div class="col-md-6">
-      <div class="mb-3">
-        <label for="selectKategori" class="form-label">Pilih Kategori</label>
-        <select 
-          id="selectKategori"
-          class="form-select" 
-          v-model="selectedKategori"
-        >
-          <option value="">-- Pilih Kategori --</option>
-          <option
-            v-for="kategori in tempat_kunjungan"
-            :key="kategori.id_kategori"
-            :value="kategori.id_kategori"
-          >
-            {{ kategori.kategori }}
-          </option>
-        </select>
-      </div>
+  <div class="col-md-4">
+    <!-- Form Puskesmas -->
+    <div class="mb-2">
+      <label class="form-label fw-semibold">Puskesmas</label>
+      <select class="form-select" v-model="formData.puskesmas">
+        <option disabled value="">-- Pilih Puskesmas --</option>
+        <option>Wongsorejo</option>
+        <option>Blimbingsari</option>
+        <option>Kalipuro</option>
+      </select>
     </div>
-    
-    <!-- Dropdown Unit -->
-    <div class="col-md-6">
-      <div class="mb-3">
-        <label for="selectUnit" class="form-label">Pilih Unit</label>
-        <select
-          id="selectUnit"
-          class="form-select"
-          v-model="selectedUnit"
-          :disabled="!selectedKategori"
-        >
-          <option value="">-- Pilih Unit --</option>
-          <option
-            v-for="unit in filteredUnits"
-            :key="unit.id_detail"
-            :value="unit.id_detail"
-          >
-            {{ unit.nama_unit }}
-          </option>
-        </select>
+
+    <!-- Form Kecamatan -->
+    <div class="mb-2">
+      <label class="form-label fw-semibold">Kecamatan</label>
+      <input type="text" class="form-control" v-model="formData.kecamatan" />
+    </div>
+
+    <!-- Form Nama Dokter -->
+    <div class="mb-2">
+      <label class="form-label fw-semibold">Nama Dokter</label>
+      <input type="text" class="form-control" v-model="formData.dokter" />
+    </div>
+
+    <!-- Tombol -->
+    <button class="btn btn-primary w-100" @click="tampilkanCard">Tampilkan</button>
+  </div>
+
+  <!-- Container Card -->
+  <div class="mt-3">
+    <div v-for="(item, index) in cards" :key="index" class="card mb-2">
+      <div class="card-body">
+        <h5 class="card-title">{{ item.puskesmas }}</h5>
+        <p class="card-text">
+          Kecamatan: {{ item.kecamatan }} <br />
+          Dokter: {{ item.dokter }}
+        </p>
+        <button class="btn btn-sm btn-danger" @click="hapusCard(index)">Hapus</button>
       </div>
     </div>
   </div>
-  </AppLayout>
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
-import AppLayout from '@/Components/Layouts/AppLayouts.vue';
-
-export default {
-  props: {
-    tempat_kunjungan: Array,
-    detail_tempat_kunjungan: Array,
-  },
-
-  setup(props) {
-    const selectedKategori = ref('')
-    const selectedUnit = ref('')
-
-    // Filter unit berdasarkan kategori yang dipilih
-    const filteredUnits = computed(() => {
-      if (!selectedKategori.value) return []
-      
-      return props.detail_tempat_kunjungan.filter(
-        unit => unit.id_kategori == selectedKategori.value
-      )
-    })
-
-    // Reset selectedUnit ketika kategori berubah
-    watch(selectedKategori, () => {
-      selectedUnit.value = ''
-    })
-
-    return {
-      selectedKategori,
-      selectedUnit,
-      filteredUnits
-    }
-  }
-}
+  export default {
+    data() {
+      return {
+        formData: {
+          puskesmas: '',
+          kecamatan: '',
+          dokter: '',
+        },
+        cards: [],
+      };
+    },
+    methods: {
+      tampilkanCard() {
+        if (this.formData.puskesmas && this.formData.kecamatan && this.formData.dokter) {
+          this.cards.push({ ...this.formData }); // copy object
+          this.formData = { puskesmas: '', kecamatan: '', dokter: '' }; // reset form
+        }
+      },
+      hapusCard(index) {
+        this.cards.splice(index, 1);
+      },
+    },
+  };
 </script>
-
-<style scoped>
-.form-select:disabled {
-  background-color: #f8f9fa;
-  opacity: 0.65;
-}
-
-.form-label {
-  font-weight: 600;
-  color: #495057;
-}
-</style>
