@@ -9,10 +9,36 @@ use App\Models\User;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TemplateController;
 use Inertia\Inertia;
+use App\Http\Controllers\Laporan\LaporanLoketController;
+use App\Http\Controllers\Laporan\Rujukan\RujukanController;
+use App\Http\Controllers\Laporan\Kb\KbController;
+use App\Http\Controllers\Auth\LoginController;
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
 })->name('home');
+
+
+
+// Login
+Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
+Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+
+// Protected
+Route::middleware('auth')->group(function () {
+
+    // Semua role boleh dashboard
+    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+
+    // OWNER ONLY
+    Route::middleware('role:owner')->group(function () {
+        Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
+    });
+
+    // (Opsional) nanti isi menu khusus role lain di sini:
+    // Route::middleware('role:pelayanan,owner,kapus')->group(function () { ... });
+    // Route::middleware('role:loket,owner,kapus')->group(function () { ... });
+});
 
 // Grup Admin
 Route::prefix('admin')->group(function () {
@@ -56,10 +82,16 @@ Route::prefix('loket')->group(function () {
     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
 });
 
+
 // Grup Laporan
 Route::prefix('laporan')->group(function () {
-    Route::inertia('loket', 'Laporan/Loket/Loket')->name('laporan.loket');
-    Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
+    Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
+    Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
+
+    // Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
+Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
+
+
     Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
     Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
     Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
@@ -74,10 +106,6 @@ Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->nam
     Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
     Route::inertia('kunjungan-sehat', 'Laporan/Kunjungan-sehat/Kunjungan-sehat')->name('laporan.kunjungan-sehat');
 });
-
-
-
-
 
 
 // Grup Mal Sehat
