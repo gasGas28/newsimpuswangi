@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Ini yang benar untuk Laravel 11
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
+        'role' => \App\Http\Middleware\Auth\CheckRole::class,
             'verify.recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class, // Tambahin ini
 
         ]);
