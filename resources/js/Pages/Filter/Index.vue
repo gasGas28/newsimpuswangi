@@ -5,10 +5,11 @@
         <Link :href="route('filter.dev')" class="btn btn-outline-primary"> Dev This Page </Link>
       </div>
       <div class="card shadow-sm">
-        <div class="card-header text-start">
-          <h5 class="text-white fw-semibold mt-2">Filter Laporan</h5>
-        </div>
         <div class="card-body">
+          <div class="text-header">
+            <h5 class="text-primary fw-semibold fs-3 mt-2 mb-3 ms-2 gap-4"><i class="bi bi-funnel-fill"></i> Filter Laporan</h5>
+          </div>
+          <hr>
           <div class="container">
             <form>
               <div class="row">
@@ -77,7 +78,7 @@
                           id="selectUnit"
                           class="form-select"
                           v-model="selectedUnit"
-                          :disabled="!selectedKategori"
+                          :disabled="!selectedKategori || !aktif.tmptKunjungan"
                         >
                           <option value="">-- Pilih Unit --</option>
                           <option
@@ -107,7 +108,7 @@
                     </div>
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectKasus" :disabled="!aktif.kasus">
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option
                           v-for="kunjungan in kunj_kasus"
                           :key="kunjungan.id"
@@ -136,12 +137,13 @@
                         id="selectKunjungan"
                         :disabled="!aktif.kunjungan"
                       >
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option>Lama</option>
                         <option>Kasus Baru</option>
                       </select>
                     </div>
                   </div>
+                  <hr>
                 </div>
 
                 <!-- Kolom Kedua -->
@@ -214,7 +216,7 @@
                     </div>
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectJK" :disabled="!aktif.JK">
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option>Laki-Laki</option>
                         <option>Perempuan</option>
                       </select>
@@ -234,7 +236,7 @@
                     </div>
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectAsal" :disabled="!aktif.asal">
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option v-for="asl in asal" :key="asl.id_wilayah" :value="asl.id_wilayah">
                           {{ asl.wilayah }}
                         </option>
@@ -260,7 +262,7 @@
                         v-model="selectedKecamatan"
                         :disabled="!aktif.kecamatan"
                       >
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option v-for="kec in kecamatan" :key="kec.NO_KEC" :value="kec.NO_KEC">
                           {{ kec.NAMA_KEC }}
                         </option>
@@ -286,7 +288,7 @@
                         v-model="selectedDesa"
                         :disabled="!aktif.desa"
                       >
-                        <option>--Pilih Desa--</option>
+                        <option>--Pilih--</option>
                         <option
                           v-for="desa in filteredDesa"
                           :key="desa.NO_KEL"
@@ -315,7 +317,7 @@
                         id="selectKepesertaan"
                         :disabled="!aktif.kepesertaan"
                       >
-                        <option></option>
+                        <option>--Pilih--</option>
                         <option>BPJS</option>
                         <option>Non BPJS</option>
                       </select>
@@ -342,6 +344,7 @@
                       </select>
                     </div>
                   </div>
+                  <hr>
                 </div>
                 <!-- Kolom Ketiga -->
                 <!--Form Unit-->
@@ -359,12 +362,8 @@
                     <div class="col-sm-8 d-flex">
                       <select class="form-select" id="selectRujuk" :disabled="!aktif.unit">
                         <option></option>
-                        <option
-                          v-for="provider in providers"
-                          :key="provider.kdProvider"
-                          :value="provider.kdProvider"
-                        >
-                          {{ provider.nmProvider }}
+                        <option v-for="unt in unit" :key="unt.kdPoli" :value="unt.kdPoli">
+                          {{ unt.nmPoli }}
                         </option>
                       </select>
                     </div>
@@ -479,21 +478,70 @@
                       />
                     </div>
                   </div>
+                  <hr>
                 </div>
+                <hr>
               </div>
-              <div class="d-flex justify-content-start gap-2 mt-4">
-                <button class="btn btn-data fw-semibold">
-                  <i class="bi bi-eye"></i> Tampilkan Data
+              <div class="d-flex justify-content-start gap-2 mt-2">
+                <button type="button" class="btn btn-data fw-semibold" @click="aktif.showData = !aktif.showData">
+                  <i class="bi bi-eye"></i> {{ aktif.showData ? 'Sembunyikan Data' : 'Tampilkan Data' }}
                 </button>
-                <button class="btn btn-html fw-semibold">
+                <button type="button" class="btn btn-html fw-semibold">
                   <i class="bi bi-filetype-html"></i>
                   Tampilkan Data HTML
                 </button>
-                <button class="btn btn-excel fw-semibold">
+                <button type="button" class="btn btn-excel fw-semibold">
                   <i class="bi bi-download"></i> Download Excel
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      </div>
+
+      <div v-show="aktif.showData" class="card shadow-sm mt-4" @click.stop>
+        <div class="card-body">
+          <div class="container">
+            <!-- Tambahkan table-responsive -->
+            <div class="table-responsive">
+              <table class="table table-primary table-bordered table-striped">
+                <thead class="text-center fw-semibold">
+                  <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">Tgl Kunjungan</th>
+                    <th scope="col">NIK</th>
+                    <th scope="col">NO RM</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">Kecamatan</th>
+                    <th scope="col">Desa</th>
+                    <th scope="col">Sex</th>
+                    <th scope="col">Tgl Lahir</th>
+                    <th scope="col">Umur</th>
+                    <th scope="col">Kelompok Umur</th>
+                    <th scope="col">Anamnesa</th>
+                    <th scope="col">Diagnosa</th>
+                    <th scope="col">Obat</th>
+                    <th scope="col">Tindakan/LAB</th>
+                    <th scope="col">BPJS</th>
+                    <th scope="col">Nama Faskes</th>
+                    <th scope="col">Kategori</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Tujuan</th>
+                    <th scope="col">Rujuk Internal</th>
+                    <th scope="col">Rujuk Lanjut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(filter, index) in kunjungan" :key="filter.id">
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ filter.tglKunjungan }}</td>
+                    <td>{{ filter.NIK }}</td>
+                  </tr>
+                  <!-- data di sini -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -525,6 +573,7 @@
     tindakan: false,
     rujukLanjut: false,
     unit: false,
+    showData: false
   });
 
   // Setup Modal untuk Diagnosa dan Tindakan
@@ -556,6 +605,9 @@
     asal: Array,
     kecamatan: Array,
     desa: Array,
+    unit: Array,
+    kunjungan: Array,
+    Filter: Array,
   });
 
   // Fungsi Untuk Filter Tempat Kunjungan
@@ -588,18 +640,23 @@
   // Opsi 2: Jika menggunakan detail_tempat_kunjungan sebagai array terpisah
   // return props.detail_tempat_kunjungan.filter(
   //   (item) => item.id_kategori === selectedKategori.value
+
+  // Data Untuk Form
 </script>
 <style scoped>
   .card-header {
-    background-color: #b0e0e6;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
   }
   .btn-data {
-    background-color: #e6b0ce;
+    background-color: #9faae9;
   }
   .btn-html {
     background-color: #eebd95;
   }
   .btn-excel {
     background-color: #98ec82;
+  }
+  th {
+    white-space: nowrap;
   }
 </style>
