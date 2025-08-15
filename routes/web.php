@@ -13,6 +13,8 @@ use App\Http\Controllers\Laporan\LaporanLoketController;
 use App\Http\Controllers\Laporan\Rujukan\RujukanController;
 use App\Http\Controllers\Laporan\Kb\KbController;
 use App\Http\Controllers\Auth\LoginController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
@@ -208,6 +210,15 @@ Route::prefix('ruang_layanan')->group(function () {
     //Sanitasi
     Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
     Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
+
+    // Menampilkan pelayanan
+    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])
+        ->name('ruang-layanan-umum.pelayanan');
+});
+
+Route::get('/cek-db', function () {
+    $tables = DB::select('SHOW TABLES');
+    return response()->json($tables);
 
     //Gizi
     Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');

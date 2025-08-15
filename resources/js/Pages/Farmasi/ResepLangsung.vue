@@ -16,7 +16,7 @@
       <div class="card-body">
         <form @submit.prevent="filterData">
           <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Unit</label>
               <select v-model="form.unit" class="form-select" required>
                 <option value="">-- Pilih Unit --</option>
@@ -30,22 +30,20 @@
               </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Sub Unit</label>
               <select v-model="form.subUnit" class="form-select">
                 <option value="">-- Pilih Sub Unit --</option>
                 <option>PUSKESMAS WONGSOREJO</option>
-                <option></option>
-                <option></option>
               </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Periode</label>
               <input type="date" v-model="filter.periode" class="form-control" />
             </div>
 
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6">
               <label class="form-label">Keperluan</label>
               <select v-model="form.keperluan" class="form-select">
                 <option value="">-- Pilih Keperluan --</option>
@@ -61,6 +59,16 @@
               </select>
             </div>
           </div>
+
+          <!-- Tombol -->
+          <div class="d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-arrow-repeat me-1"></i> Tampilkan Data
+            </button>
+            <button type="button" class="btn btn-info text-white">
+              <i class="bi bi-save me-1"></i> Simpan Data
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -68,7 +76,7 @@
     <!-- Tabel Resep -->
     <vue-good-table
       :columns="columns"
-      :rows=[]
+      :rows="rows"
       :search-options="{ enabled: true }"
       :pagination-options="{ enabled: true, perPage: 10 }"
     />
@@ -76,7 +84,7 @@
     <!-- Tombol Kembali -->
     <div class="mt-4 text-start">
       <a href="/farmasi" class="btn btn-secondary">
-        <i class=""></i> Kembali
+        Kembali
       </a>
     </div>
   </div>
@@ -96,6 +104,8 @@ const columns = [
   { label: 'Action', field: 'aksi' }
 ]
 
+const rows = ref([]) // ✅ Perbaikan dari :rows=[]
+
 const form = ref({
   unit: '',
   subUnit: '',
@@ -107,7 +117,6 @@ const filter = ref({
 })
 
 function filterData() {
-  // logika filter bisa ditambahkan nanti
   console.log('Data difilter:', form.value, filter.value)
 }
 </script>
