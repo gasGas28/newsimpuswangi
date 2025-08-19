@@ -2,47 +2,43 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Auth\Group;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    public $timestamps = false; // tabelmu tidak punya created_at/updated_at
+
+    // sesuaikan kalau perlu
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'username','email','password','first_name','last_name',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // kolom sensitif/non-pakai
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password','remember_code','salt','activation_code','forgotten_password_code',
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Relasi ke groups via pivot users_groups
      */
-    protected function casts(): array
+    public function groups()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(Group::class, 'users_groups', 'user_id', 'group_id')
+                    ->withPivot('nama_group');
+    }
+
+    /**
+     * Helper: ambil nama role dalam lowercase (['owner','admin',...])
+     */
+    public function roleNames(): array
+    {
+        return $this->groups()->pluck('name')->map(fn($n) => strtolower($n))->toArray();
     }
 }

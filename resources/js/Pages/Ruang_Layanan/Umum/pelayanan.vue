@@ -90,45 +90,15 @@
         </div>
 
         <hr />
-        <div class="card mt-4" v-if="isMelayani">
-          <div class="card-header p-4 d-flex gap-4 align-items-center bg-info-subtle">
-            <a
-              href="#"
-              class="text-decoration-none"
-              :class="{ 'fw-bold text-primary': currentTab === 'subjective' }"
-              @click.prevent="currentTab = 'subjective'"
-              >Subjective</a
-            >
-            <a
-              href="#"
-              class="text-decoration-none"
-              :class="{ 'fw-bold text-primary': currentTab === 'objective' }"
-              @click.prevent="currentTab = 'objective'"
-              >Objective</a
-            >
-            <a
-              href="#"
-              class="text-decoration-none"
-              :class="{ 'fw-bold text-primary': currentTab === 'assesment' }"
-              @click.prevent="currentTab = 'assesment'"
-              >Assessment</a
-            >
-            <a
-              href="#"
-              class="text-decoration-none"
-              :class="{ 'fw-bold text-primary': currentTab === 'planning' }"
-              @click.prevent="currentTab = 'planning'"
-              >Planning</a
-            >
-            <a
-              href="#"
-              class="text-decoration-none"
-              :class="{ 'fw-bold text-primary': currentTab === 'status_pasien' }"
-              @click.prevent="currentTab = 'status_pasien'"
-              >Status Pasien</a
-            >
-            <Link href="#" class="btn btn-success">Kirim RME v.1 ke SATU SEHAT</Link>
-          </div>
+        <div class="card mt-4" v-if="isMelayani"> 
+        <div class="card-header p-4 d-flex gap-4 align-items-center bg-info-subtle" >
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'subjective' }" @click.prevent="currentTab = 'subjective'">Subjective</a>
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'objective' }" @click.prevent="currentTab = 'objective'">Objective</a>
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'assesment' }" @click.prevent="currentTab = 'assesment'">Assessment</a>
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'planning' }" @click.prevent="currentTab = 'planning'">Planning</a>
+          <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'status_pasien' }" @click.prevent="currentTab = 'status_pasien'">Status Pasien</a>
+          <Link href="#" class="btn btn-success">Kirim RME v.1 ke SATU SEHAT</Link>
+        </div>
 
           <div class="m-4 row gx-5">
             <div class="container" v-if="currentTab === 'subjective'">
@@ -826,47 +796,51 @@
                   </div>
                 </div>
 
-                <div class="row mb-3">
-                  <div class="col-sm-4">
-                    <button type="submit" class="btn btn-success">Simpan</button>
-                  </div>
-                </div>
-              </form>
-              <hr />
-              <!-- TABLE -->
-              <div class="table-responsive mt-4">
-                <table class="table table-bordered table-sm align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th>No</th>
-                      <th>Asal Poli</th>
-                      <th>Keterangan</th>
-                      <th>Poli Tujuan</th>
-                      <th>Tenaga Medis</th>
-                      <th>Created By</th>
-                      <th>Mulai melayani</th>
-                      <th>Selesai melayani</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td><span class="badge bg-success">Umum</span></td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>user1</td>
-                      <td>2025-07-29 08:17:36</td>
-                      <td>-</td>
-                      <td><button class="btn btn-outline-secondary btn-sm">Poli awal</button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="row mb-3">
+          <div class=" col-sm-4">
+            <button type="submit" class="btn btn-success">Simpan</button>
           </div>
         </div>
+      </form>
+      <hr>
+      <!-- TABLE -->
+      <div class="table-responsive mt-4">
+        <table class="table table-bordered table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>No</th>
+              <th>Asal Poli</th>
+              <th>Keterangan</th>
+              <th>Poli Tujuan</th>
+              <th>Tenaga Medis</th>
+              <th>Created By</th>
+              <th>Mulai melayani</th>
+              <th>Selesai melayani</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><span class="badge bg-success">Umum</span></td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>user1</td>
+              <td>2025-07-29 08:17:36</td>
+              <td>-</td>
+              <td><button class="btn btn-outline-secondary btn-sm">Poli awal</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      </div>
+
+
+
+  </div>
+</div>
+
       </div>
     </div>
   </AppLayouts>
