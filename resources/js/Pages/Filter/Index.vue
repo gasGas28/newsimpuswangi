@@ -2,7 +2,7 @@
   <AppLayout>
     <div class="container py-4">
       <div class="d-flex justify-content-end mb-3 gap-2">
-        <Link :href="route('filter.dev')" class="btn btn-outline-primary"> Dev This Page </Link>
+        <Link :href="route('filter.dev')" class="btn text-white"> Dev This Page </Link>
       </div>
       <div class="card shadow-sm">
         <div class="card-body">
@@ -483,14 +483,14 @@
                 <hr>
               </div>
               <div class="d-flex justify-content-start gap-2 mt-2">
-                <button type="button" class="btn btn-data fw-semibold" @click="aktif.showData = !aktif.showData">
+                <button type="button" class="btn btn-data fw-semibold text-white" @click="aktif.showData = !aktif.showData">
                   <i class="bi bi-eye"></i> {{ aktif.showData ? 'Sembunyikan Data' : 'Tampilkan Data' }}
                 </button>
-                <button type="button" class="btn btn-html fw-semibold">
+                <button type="button" class="btn btn-html fw-semibold text-white">
                   <i class="bi bi-filetype-html"></i>
                   Tampilkan Data HTML
                 </button>
-                <button type="button" class="btn btn-excel fw-semibold">
+                <button type="button" class="btn btn-excel fw-semibold text-white">
                   <i class="bi bi-download"></i> Download Excel
                 </button>
               </div>
@@ -647,14 +647,8 @@
   .card-header {
     background: linear-gradient(135deg, #3b82f6, #10b981);
   }
-  .btn-data {
-    background-color: #9faae9;
-  }
-  .btn-html {
-    background-color: #eebd95;
-  }
-  .btn-excel {
-    background-color: #98ec82;
+  .btn {
+    background: linear-gradient(135deg, #3b82f6, #10b981); 
   }
   th {
     white-space: nowrap;
