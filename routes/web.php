@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\Filter\FilterController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
@@ -120,6 +119,8 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
         Route::inertia('konseling-sanitasi', 'MalSehat/Kesling/KonselingSanitasi')->name('konseling');
         Route::inertia('pengukuran-kebugaran-haji', 'MalSehat/Kesling/PengukuranKebugaranHaji')->name('haji');
         Route::inertia('pengukuran-kebugaran-anak', 'MalSehat/Kesling/PengukuranKebugaranAnak')->name('anak');
+        // Halaman detail "Belum Dilayani"
+        Route::inertia('detail/{noUrut}', 'MalSehat/Kesling/DetailKonselingSanitasi')->name('detail');
     });
 
     // Kesga
@@ -178,7 +179,10 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Lain-lain
     Route::inertia('home-visit', 'MalSehat/HomeVisit/Index')->name('home-visit');
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
+
 });
 
 Route::prefix('ruang_layanan')->group(function () {
