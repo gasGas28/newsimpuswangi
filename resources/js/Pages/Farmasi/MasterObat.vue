@@ -61,32 +61,52 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted  } from 'vue'
 import { VueGoodTable } from 'vue-good-table-next'
 import 'vue-good-table-next/dist/vue-good-table-next.css'
+import axios from 'axios'
 
 const showModal = ref(false)
 
 const columns = [
   { label: 'KODE', field: 'kode' },
   { label: 'NAMA', field: 'nama' },
-  { label: 'SATUAN', field: 'satuan' }
+  { label: 'SATUAN', field: 'satuan' },
+  { label: 'STOK', filed: 'stok' }
 ]
 
-const obatList = ref([
-  { kode: '11120101000200089', nama: 'Reagen KHB HIV -', satuan: 'test' },
-  { kode: '11120101000200090', nama: 'Reagen HIV Combo -', satuan: 'TES' }
-])
+const obatList = ref([])
 
 const form = ref({
   kode: '',
   nama: '',
-  satuan: ''
+  satuan: '',
+  stok: 0
 })
 
-function tambahObat() {
-  obatList.value.push({ ...form.value })
-  form.value = { kode: '', nama: '', satuan: '' }
-  showModal.value = false
+async function getObat() {
+  try {
+    let res = await axios.get('/api/master-obat')
+    obatList.value = res.data
+  } catch (err) {
+    console.error(err)
+  }
 }
+
+async function tambahObat() {
+  try {
+    let res = await axios.post('/api/master-obat', form.value)
+    obatList.value.push(res.data)
+    form.value = { kode: '', nama: '', satuan: '', stok: 0 }
+    showModal.value = false
+  } catch (err) {
+    console.error(err.response?.data || err.message)
+    alert('Gagal menambahkan obat!')
+  }
+}
+
+onMounted(() => {
+  getObat()
+})
+
 </script>
