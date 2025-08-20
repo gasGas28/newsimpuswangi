@@ -1,27 +1,33 @@
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { ref } from 'vue';
+  import { router } from '@inertiajs/vue3';
 
-defineOptions({ layout: AppLayout })
+  defineOptions({ layout: AppLayout });
 
-const tanggal = ref(new Date().toISOString().split('T')[0])
-const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO')
+  const tanggal = ref(new Date().toISOString().split('T')[0]);
+  // const kategoriUnit = ref('[ PUSKESMAS ] WONGSOREJO')
 
-function tampilkanData() {
-  console.log('Tampilkan data untuk', tanggal.value, kategoriUnit.value)
-}
+  const props = defineProps({
+    puskesmas: Array,
+  });
 
-function kembali() {
-  router.get('/mal-sehat/ptm')
-}
+  function tampilkanData() {
+    console.log('Tampilkan data untuk', tanggal.value, kategoriUnit.value);
+  }
+
+  function kembali() {
+    router.get('/mal-sehat/ptm');
+  }
 </script>
 
 <template>
   <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
     <!-- HEADER -->
-    <div class="card-header d-flex justify-content-between align-items-center text-white fw-semibold fs-5 px-4 py-3"
-      style="background-color: #87CEEB;">
+    <div
+      class="card-header d-flex justify-content-between align-items-center text-white fw-semibold fs-5 px-4 py-3"
+      style="background-color: #87ceeb"
+    >
       <span>Konseling Upaya Berhenti Merokok (UBM)</span>
       <button class="btn btn-sm btn-light" @click="kembali">Kembali</button>
     </div>
@@ -38,15 +44,19 @@ function kembali() {
       <div class="row mb-1 align-items-center">
         <label class="col-sm-2 col-form-label fw-semibold">Kategori Unit</label>
         <div class="col-sm-4">
-          <select class="form-select" v-model="kategoriUnit">
-            <option>[ PUSKESMAS ] WONGSOREJO</option>
+          <select class="form-select">
+            <option v-for="pusk in puskesmas" :key="pusk.id_detail" :value="pusk.id_detail"> {{ pusk.nama_unit }}</option>
             <!-- Tambahkan opsi lain jika perlu -->
           </select>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-2 offset-sm-2">
-          <button class="btn btn-sm text-white w-100" style="background-color:#87CEEB;" @click="tampilkanData">
+          <button
+            class="btn btn-sm text-white w-100"
+            style="background-color: #87ceeb"
+            @click="tampilkanData"
+          >
             Tampilkan Data
           </button>
         </div>
@@ -97,9 +107,7 @@ function kembali() {
       </table>
 
       <div class="d-flex justify-content-between align-items-center">
-        <div>
-          Showing 0 to 0 of 0 entries (filtered from NaN total entries)
-        </div>
+        <div>Showing 0 to 0 of 0 entries (filtered from NaN total entries)</div>
         <div>
           <nav>
             <ul class="pagination pagination-sm mb-0">
