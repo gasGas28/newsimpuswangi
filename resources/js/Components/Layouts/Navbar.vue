@@ -30,6 +30,11 @@
             </Link>
           </li>
           <li class="nav-item">
+            <Link :href="route('home.home')" class="nav-link d-flex align-items-center">
+              <i class="bi bi-ticket-perforated me-2"></i> Dashboard
+            </Link>
+          </li>
+          <li class="nav-item">
             <Link :href="route('loket.index')" class="nav-link d-flex align-items-center">
               <i class="bi bi-ticket-perforated me-2"></i> Loket
             </Link>

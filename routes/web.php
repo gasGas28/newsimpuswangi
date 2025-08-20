@@ -14,8 +14,11 @@ use App\Http\Controllers\Laporan\LaporanLoketController;
 use App\Http\Controllers\Laporan\Rujukan\RujukanController;
 use App\Http\Controllers\Laporan\Kb\KbController;
 use App\Http\Controllers\Auth\LoginController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
+use App\Http\Controllers\Laporan\Ugd\UgdController;
+use App\Http\Controllers\Home\HomeController;
+
+
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
@@ -86,12 +89,18 @@ Route::prefix('loket')->group(function () {
 });
 
 
+
+
+Route::prefix('home')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])
+        ->name('home.home');
+});
+
 // Grup Laporan
 Route::prefix('laporan')->group(function () {
     Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
     Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
 
-    // Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
 Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
 
 
@@ -104,10 +113,22 @@ Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.ruju
 Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->name('laporan.kb');    // Route::inertia('kb', 'Laporan/Kb/Kb')->name('laporan.kb');
 
 
-    Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+    // Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+    Route::get('/ugd', [UgdController::class, 'index'])->name('laporan.ugd');
+
+
+
     Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
-    Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
-    Route::inertia('kunjungan-sehat', 'Laporan/Kunjungan-sehat/Kunjungan-sehat')->name('laporan.kunjungan-sehat');
+    // Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
+Route::inertia('kunjungan-sehat', 'Laporan/KunjunganSehat/Index')  ->name('laporan.kunjungan-sehat');
+    Route::get('/sanitasi', [SanitasiController::class, 'index'])->name('laporan.sanitasi');
+    Route::get('/sanitasi/register', [SanitasiController::class, 'registerSanitasi'])->name('laporan.sanitasi.register');
+    Route::get('/sanitasi/sanitasi', [SanitasiController::class, 'laporanSanitasi'])->name('laporan.sanitasi.laporan');
+    Route::get('/sanitasi/kasus', [SanitasiController::class, 'laporanKasus'])->name('laporan.sanitasi.kasus');
+
+
+
+
 });
 
 
