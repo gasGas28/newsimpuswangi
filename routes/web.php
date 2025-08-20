@@ -1,6 +1,7 @@
 <?php
-
 use App\Http\Controllers\Filter\FilterController;
+use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
+use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -141,6 +142,8 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
         Route::inertia('konseling-sanitasi', 'MalSehat/Kesling/KonselingSanitasi')->name('konseling');
         Route::inertia('pengukuran-kebugaran-haji', 'MalSehat/Kesling/PengukuranKebugaranHaji')->name('haji');
         Route::inertia('pengukuran-kebugaran-anak', 'MalSehat/Kesling/PengukuranKebugaranAnak')->name('anak');
+        // Halaman detail "Belum Dilayani"
+        Route::inertia('detail/{noUrut}', 'MalSehat/Kesling/DetailKonselingSanitasi')->name('detail');
     });
 
     // Kesga
@@ -199,7 +202,10 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Lain-lain
     Route::inertia('home-visit', 'MalSehat/HomeVisit/Index')->name('home-visit');
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
+    Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
+
 });
 
 Route::prefix('ruang_layanan')->group(function () {
@@ -207,14 +213,18 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::get('/simpus/poli', [RuangLayananController::class, 'index'])->name('ruang-layanan.poli');
 
     // Umum
-    Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli'])->name('ruang-layanan.umum');
-    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])->name('ruang-layanan-umum.pelayanan');
+    Route::get('/simpus/umum', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.umum');
+    Route::get('/simpus/umum/pelayanan/{id}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan-umum.pelayanan');
     Route::inertia('/simpus/umum/surat-keterangan', 'Ruang_Layanan/Umum/surat_keterangan')->name('ruang-layanan-umum.surat-keterangan');
     Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
+    Route::post('simpus/umum/pelayanan/anamnesa', [PoliBpUmumController::class, 'setAnamnesa'])->name('ruang-layanan-umum.setAnamnesa');
+    Route::post('simpus/umum/pelayanan/anamnesa/objective', [PoliBpUmumController::class, 'setAnamnesaObjective'])->name('ruang-layanan-umum.setAnamnesaObjective');
+    Route::post('simpus/umum/pelayanan/mulaiPelayanan', [PoliBpUmumController::class, 'mulaiPemeriksaanPasien'])->name('ruang-layanan-umum.mulai-pemeriksaan-pasien');
+    Route::post('simpus/umum/pelayanan/diagnosa-medis', [PoliBpUmumController::class, 'setDiagnosaMedis'])->name('ruang-layanan-umum.diagnosa-medis');
 
     //Gigi
-    Route::inertia('/simpus/gigi', 'Ruang_Layanan/Gigi/pasien_poli')->name('ruang-layanan.gigi');
-    Route::inertia('/simpus/gigi/pelayanan', 'Ruang_Layanan/Gigi/pelayanan')->name('ruang-layanan-gigi.pelayanan');
+    Route::get('/simpus/gigi', [PoliGigiController::class, 'index'])->name('ruang-layanan.gigi');
+    Route::get('/simpus/gigi/pelayanan/{id}', [PoliGigiController::class, 'pelayanan'])->name('ruang-layanan-gigi.pelayanan');
 
     //UGD
     Route::inertia('/simpus/ugd', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ugd');
@@ -232,6 +242,15 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
     Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
 
+    // Menampilkan pelayanan
+    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])
+        ->name('ruang-layanan-umum.pelayanan');
+});
+
+Route::get('/cek-db', function () {
+    $tables = DB::select('SHOW TABLES');
+    return response()->json($tables);
+
     //Gizi
     Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
     Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
@@ -244,4 +263,6 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
     Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+
+    Route::inertia('/nyoba', 'Ruang_Layanan/Umum/parent')->name('nyoba');
 });

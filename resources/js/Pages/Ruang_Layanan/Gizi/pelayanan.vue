@@ -6,7 +6,8 @@
         <Link class="btn btn-primary">Kembali</Link>
       </div>
     <div class="card-body">
-    <DataPasien :isMelayani="isMelayani" @ubah-melayani="handleMelayani">
+    <DataPasien  @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien"
+          :dataAnamnesa="DataAnamnesa">
       <div class="card">
       <div class="card-header p-4 d-flex gap-4 align-items-center bg-info-subtle" >
           <a href="#" class="text-decoration-none" :class="{ 'fw-bold text-primary': currentTab === 'subjective' }" @click.prevent="currentTab = 'subjective'">Subjective</a>

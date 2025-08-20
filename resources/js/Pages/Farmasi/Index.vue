@@ -2,7 +2,7 @@
   <AppLayout title="Farmasi">
     <div class="container py-4">
      <div class="mb-3">
-        <Link href="/dashboard" class="btn btn-secondary">
+        <Link href="/" class="btn btn-secondary">
           <i class=""></i> Kembali 
         </Link>
       </div>

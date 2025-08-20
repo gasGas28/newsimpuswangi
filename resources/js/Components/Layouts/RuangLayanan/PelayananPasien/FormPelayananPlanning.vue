@@ -1,16 +1,16 @@
 <template>
      <div class="container">
        <div class="card">
-        <div class="card-header d-flex gap-4 p-3">
-            <a href="" class="text-decoration-none text-danger" :class="{ 'text-danger fw-bold': currrentSubTabPlanning === 'tindakan' }" @click.prevent="currrentSubTabPlanning = 'tindakan'">Tindakan ></a>
-            <a href="" class="text-decoration-none text-danger" :class="{ 'text-danger fw-bold': currrentSubTabPlanning === 'pengobatan' }" @click.prevent="currrentSubTabPlanning = 'pengobatan'">Pengobatan ></a>
+        <div class="border rounded rounded-bottom-0 shadow-sm d-flex gap-4 p-3">
+            <a href="" class="text-decoration-none text-primary" :class="{ 'text-primary fw-bold': currrentSubTabPlanning === 'tindakan' }" @click.prevent="currrentSubTabPlanning = 'tindakan'">Tindakan ></a>
+            <a href="" class="text-decoration-none text-primary" :class="{ 'text-primary fw-bold': currrentSubTabPlanning === 'pengobatan' }" @click.prevent="currrentSubTabPlanning = 'pengobatan'">Pengobatan ></a>
         </div>
       <div class="card-body" v-if="currrentSubTabPlanning === 'tindakan'">
         <form action="">
         <slot></slot>
         <!-- Kode Tindakan + Tombol -->
         <div class="mb-3 row align-items-center">
-          <label class="col-sm-2 col-form-label text-end fw-bold">Kode Tindakan</label>
+          <label class="col-sm-2 col-form-label fw-bold">Kode Tindakan</label>
           <div class="col-sm-4">
             <div class="input-group">
               <input type="text" class="form-control bg-light" disabled />
@@ -22,7 +22,7 @@
 
         <!-- Nama Tindakan -->
         <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label text-end fw-bold">Nama Tindakan</label>
+          <label class="col-sm-2 col-form-label fw-bold">Nama Tindakan</label>
           <div class="col-sm-4">
             <input type="text" class="form-control bg-light" disabled />
           </div>
@@ -30,7 +30,7 @@
 
         <!-- Nama Tindakan (Ind) -->
         <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label text-end fw-bold">Nama Tindakan (Ind)</label>
+          <label class="col-sm-2 col-form-label fw-bold">Nama Tindakan (Ind)</label>
           <div class="col-sm-4">
             <input type="text" class="form-control bg-light" disabled />
           </div>
@@ -38,7 +38,7 @@
 
         <!-- Keterangan -->
         <div class="mb-3 row">
-          <label class="col-sm-2 col-form-label text-end fw-bold">Keterangan</label>
+          <label class="col-sm-2 col-form-label fw-bold">Keterangan</label>
           <div class="col-sm-4">
             <textarea class="form-control" rows="2"></textarea>
           </div>
@@ -54,7 +54,7 @@
       <hr>
       <div class="table-responsive mt-4">
         <table class="table table-bordered table-sm text-center">
-          <thead class="table-light">
+          <thead class="table-primary">
             <tr>
               <th>No</th>
               <th>Kode</th>
@@ -80,7 +80,7 @@
          <div class="my-4">
         <!-- Baris: Pilihan Puyer -->
         <div class="row mb-3 align-items-center">
-          <div class="col-sm-2 text-end fw-bold">Puyer/Bukan puyer</div>
+          <div class="col-sm-2 fw-bold w-auto">Puyer/Bukan puyer</div>
           <div class="col-sm-4">
             <select class="form-select">
               <option selected>BUKAN PUYER</option>
@@ -93,10 +93,9 @@
         </div>
         </div>
        </form>
-       <hr></hr>
        <div class="table-responsive mt-4">
           <table class="table table-bordered table-sm text-center">
-            <thead class="table-light">
+            <thead class="table-primary">
               <tr>
                 <th>Poli</th>
                 <th>Jenis/Nama Puyer</th>
@@ -111,7 +110,6 @@
             </tbody>
           </table>
         </div>
-
       </div>
       </div>
      </div>

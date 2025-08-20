@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top" >
     <div class="container-fluid">
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->

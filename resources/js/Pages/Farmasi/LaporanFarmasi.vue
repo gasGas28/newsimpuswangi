@@ -15,8 +15,9 @@
       </div>
       <div class="card-body">
         <form @submit.prevent="filterLaporan">
+          <!-- Baris 1 -->
           <div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Jenis Laporan</label>
               <select v-model="form.laporan" class="form-select" required>
                 <option value="">-- Pilih Jenis Laporan --</option>
@@ -25,18 +26,19 @@
                 <option>Laporan jumlah pemakaian harian</option>
               </select>
             </div>
-
             <div class="col-md-6">
               <label class="form-label">Tanggal Awal</label>
               <input type="date" v-model="form.tanggalAwal" class="form-control" required />
             </div>
+          </div>
 
+          <!-- Baris 2 -->
+          <div class="row mb-3">
             <div class="col-md-6">
               <label class="form-label">Tanggal Akhir</label>
               <input type="date" v-model="form.tanggalAkhir" class="form-control" required />
             </div>
-
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Unit</label>
               <select v-model="form.unit" class="form-select" required>
                 <option value="">-- Pilih Unit --</option>
@@ -51,16 +53,22 @@
                 <option>PONKESDES</option>
               </select>
             </div>
+          </div>
 
-            <div class="col-md-4">
+          <!-- Baris 3 -->
+          <div class="row mb-3">
+            <div class="col-md-6">
               <label class="form-label">Sub Unit</label>
               <select v-model="form.subUnit" class="form-select">
                 <option value="">-- Pilih Sub Unit --</option>
               </select>
             </div>
-
+            <div class="col-md-6">
+              <!-- Kosong sesuai permintaan -->
+            </div>
           </div>
 
+          <!-- Tombol -->
           <div class="d-flex justify-content-end gap-2">
             <button type="submit" class="btn btn-success">
               <i class="bi bi-bar-chart-line me-1"></i> Tampilkan Data
@@ -73,18 +81,10 @@
       </div>
     </div>
 
-    <!-- Tabel Laporan -->
-    <vue-good-table
-      :columns=[]
-      :rows=[]
-      :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true, perPage: 10 }"
-    />
-
     <!-- Tombol Kembali -->
     <div class="mt-4 text-start">
       <a href="/farmasi" class="btn btn-secondary">
-        <i class=""></i> Kembali
+        Kembali
       </a>
     </div>
   </div>
@@ -92,7 +92,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { VueGoodTable } from 'vue-good-table-next'
 import 'vue-good-table-next/dist/vue-good-table-next.css'
 
 const form = ref({
@@ -103,4 +102,7 @@ const form = ref({
   subUnit: ''
 })
 
+const filterLaporan = () => {
+  console.log('Filter data', form.value)
+}
 </script>

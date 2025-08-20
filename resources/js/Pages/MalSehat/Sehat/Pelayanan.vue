@@ -1,7 +1,7 @@
 <template>
     <AppLayouts>
     <div class="card m-4  rounded-4 rounded-bottom-0">
-    <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"  style="background: linear-gradient(135deg, #3b82f6, #10b981);" >
+    <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"   style="background: linear-gradient(135deg, #3b82f6, #10b981);">
         <h1 class="fs-5 text-white">BP GIGI</h1>
         <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
         <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
@@ -9,10 +9,61 @@
       </div>
     <div class="card-body">
     <PelayananPasien :isMelayani="isMelayani" @ubah-melayani="handleMelayani">
-      <div class="shadow-sm rounded-5">
-    <NavigasiFormPemeriksaan :currentTab="currentTab"  @change-currentTab="currentTab = $event" >
-    </NavigasiFormPemeriksaan>
-    <div class="m-4 pb-4 row gx-5">
+      <div class="card">
+   <div class="card-header p-4 bg-white border-bottom">
+  <div class="d-flex align-items-center flex-wrap gap-3">
+    <!-- Tab Navigation -->
+    <div class="d-flex position-relative align-items-center">
+      <div class="d-flex position-relative gap-2">
+        <a href="#" 
+           class="text-decoration-none btn tab-item px-3 py-2" 
+           :class="currentTab === 'subjective' ? 'active text-primary' : 'text-muted'" 
+           @click.prevent="currentTab = 'subjective'">
+          Subjective
+        </a>
+        
+        <a href="#" 
+           class="text-decoration-none btn tab-item px-3 py-2" 
+           :class="currentTab === 'objective' ? 'active text-primary' : 'text-muted'" 
+           @click.prevent="currentTab = 'objective'">
+          Objective
+        </a>
+        
+        <a href="#" 
+           class="text-decoration-none btn tab-item px-3 py-2" 
+           :class="currentTab === 'assesment' ? 'active text-primary' : 'text-muted'" 
+           @click.prevent="currentTab = 'assesment'">
+          Assesment
+        </a>
+        
+        <a href="#" 
+           class="text-decoration-none btn tab-item px-3 py-2" 
+           :class="currentTab === 'planning' ? 'active text-primary' : 'text-muted'" 
+           @click.prevent="currentTab = 'planning'">
+          Planning
+        </a>
+        <a href="#" 
+           class="text-decoration-none btn tab-item px-3 py-2" 
+           :class="currentTab === 'planning' ? 'active text-primary' : 'text-muted'" 
+           @click.prevent="currentTab = 'status_pasien'">
+          Status Pasien
+        </a>
+        
+        <!-- Active Indicator Line -->
+        <div class="tab-indicator" :style="indicatorStyle"></div>
+      </div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="ms-auto">
+      <Link href="#" class="btn btn-success btn-sm">
+        <i class="fas fa-paper-plane me-2"></i> Kirim RME v.1 ke SATU SEHAT
+      </Link>
+    </div>
+  </div>
+</div>
+
+    <div class="m-4 row gx-5">
     <FormPelayananSubjective v-if="currentTab === 'subjective'">
     </FormPelayananSubjective>
     <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="gigi">
@@ -49,7 +100,7 @@
             </div>
           </div>
           <div class="mb-3 row align-items-center" >
-            <label class="col-sm-2 col-form-label fw-bold">Keterangan Gigi</label>
+            <label class="col-sm-2 col-form-label text-end fw-bold">Keterangan Gigi</label>
             <div class="col-sm-4">
               <input type="text" class="form-control bg-light" :value="keterangangigi" disabled />
             </div>
@@ -72,16 +123,14 @@ import FormPelayananObjective from '../../../Components/Layouts/RuangLayanan/Pel
 import FormPelayananAssesment from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananAssesment.vue';
 import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananPlanning.vue';
 import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananStatusPasien.vue';
-import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/PelayananPasien/NavigasiFormPemeriksaan.vue';
-import { ref , computed, watch} from 'vue';
+import { ref , computed} from 'vue';
+import { watch } from 'vue'
 
-const isMelayani = ref(false);
-const keterangangigi = ref('');
-const currentTab = ref('subjective');
-
+const isMelayani = ref(false)
 function handleMelayani(val) {
   isMelayani.value = val
 }
+const currentTab = ref('subjective')
 const layoutKursi = ref([
   // Baris 1
   [
@@ -147,20 +196,44 @@ const layoutKursi = ref([
     { nomor: 37, terpilih: false },
     { nomor: 38, terpilih: false },
   ],
-]);
+])
+console.log('ini kursi', layoutKursi.value.flat());
+
+const keterangangigi = ref('');
 
 const gigiTerpilih = computed(() => {
   return layoutKursi.value
-    .flat() 
-    .filter(item => item.terpilih) 
-    .map(item => item.nomor) 
-    .join(', ') 
+    .flat() // gabungkan semua baris menjadi satu array
+    .filter(item => item.terpilih) // hanya yang terpilih
+    .map(item => item.nomor) // ambil nomornya
+    .join(', ') // gabungkan jadi string
 })
 watch(gigiTerpilih, (baru) => {
   keterangangigi.value = baru,
   console.log('dipilih', baru)
 });
-
+const indicatorStyle = computed(() => {
+  const tabs = {
+    subjective: 0,
+    objective: 1,
+    assesment: 2,
+    planning: 3,
+    status_pasien : 4
+  };
+  
+  const activeIndex = tabs[currentTab.value];
+  const tabElements = document.querySelectorAll('.tab-item');
+  
+  if (tabElements.length > 0 && activeIndex >= 0) {
+    const activeTab = tabElements[activeIndex];
+    return {
+      width: `${activeTab.offsetWidth}px`,
+      transform: `translateX(${activeTab.offsetLeft}px)`
+    };
+  }
+  
+  return { display: 'none' };
+});
 </script>
 
 <style>
@@ -185,7 +258,7 @@ watch(gigiTerpilih, (baru) => {
 
 .tab-indicator {
   position: absolute;
-  bottom: -16px;
+  bottom: -16px; /* Adjust based on your padding */
   left: 0;
   height: 3px;
   background-color: #0d6efd;
