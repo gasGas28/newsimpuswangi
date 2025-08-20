@@ -11,6 +11,7 @@ use App\Models\Filter\SetupDesa;
 use App\Models\Filter\SetupKecamatan;
 use App\Models\Filter\SimpusKunjungan;
 use App\Models\Filter\Loket;
+use App\Models\Filter\SimpusLoket;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Filter\SimpusProvider;
@@ -33,7 +34,15 @@ class FilterController extends Controller
             ->get();
         $unit = UnitFilter::where('pelayanan', 'TRUE')->get();
         $kunjungan = SimpusKunjungan::all();
-        $filter = Loket::with(['pasien', 'anamnesa'])->get();
+        $data = SimpusLoket::with([
+            'pasien',
+            'anamnesa',
+            'obat',
+            'kunjungan'
+        ])->get();
+        // $loket = \App\Models\Filter\SimpusLoket::with('anamnesa')->first();
+        // dd($loket->idLoket, $loket->anamnesa);
+        // dd(SimpusLoket::with('anamnesa')->first()->toArray());
 
         return Inertia::render('Filter/Index', [
             'providers' => $providers,
@@ -45,7 +54,7 @@ class FilterController extends Controller
             'desa' => $desa,
             'unit' => $unit,
             'kunjungan' => $kunjungan,
-            'filter' => $filter,
+            'rekamMedis' => $data
         ]);
     }
     //
@@ -68,7 +77,6 @@ class FilterController extends Controller
             ->get();
         $unit = UnitFilter::where('pelayanan', 'TRUE')->get();
         $kunjungan = SimpusKunjungan::all();
-        $filter = Loket::with(['pasien', 'anamnesa'])->get();
 
         return Inertia::render('Filter/card', [
             'providers' => $providers,
@@ -80,7 +88,6 @@ class FilterController extends Controller
             'desa' => $desa,
             'unit' => $unit,
             'kunjungan' => $kunjungan,
-            'filter' => $filter,
         ]);
     }
     //

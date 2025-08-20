@@ -11,12 +11,15 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TemplateController;
 use Inertia\Inertia;
 use App\Http\Controllers\Laporan\LaporanLoketController;
+use App\Http\Controllers\Pasien\PasienController;
 use App\Http\Controllers\Laporan\Rujukan\RujukanController;
+use App\Http\Controllers\MalSehat\PTMController;
 use App\Http\Controllers\Laporan\Kb\KbController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
+use DB;
 
 
 
@@ -68,10 +71,10 @@ Route::prefix('filter')->controller(FilterController::class)->group(function () 
 });
 
 // Grup Loket
-Route::prefix('loket')->group(function () {
-    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+Route::prefix('loket')->controller(PasienController::class)->group(function () {
+    // Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
     Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
-    Route::get('/search', fn() => Inertia::render('Loket/Search'))->name('loket.search');
+    Route::get('/search', 'index')->name('loket.search');
 });
 
 // Grup Templete
@@ -160,7 +163,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     });
 
     // PTM
-    Route::prefix('ptm')->name('ptm.')->group(function () {
+     Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
