@@ -8,23 +8,20 @@
 <script setup>
 import { ref } from 'vue'
 import { route } from 'ziggy-js';
+import { usePage } from '@inertiajs/vue3';
 import FormAnamnesa from '../../../Components/Layouts/RuangLayanan/DataPasien.vue';
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 
-const unitList = [
-  '[ PUSKESMAS ] TEGALLDIMO', 
-  '[ PUSKESMAS ] KALITENGAH',
-  '[ PUSKESMAS ] KARANGBINANGUN'
-]
+const {props} = usePage();
+const DataUnit = props.DataUnit;
+const DataPasien = props.DataPasien;
+const backRoute = 'ruang-layanan-gigi.pelayanan';
 
-const rows = ref([
-  {
-    tanggal: '2025-07-30',
-    nomor_mr: 'MR001',
-    alamat: 'Kec. A - Desa B',
-    nomor_bpjs: 'BPJS12345',
-    poli: 'Umum',
-    linkTo: route('ruang-layanan-gigi.pelayanan')
-  }
-])
+console.log('data pasien gigi',DataPasien);
+const unitList = DataUnit.map(item => {
+  const kategori = item.data_master_unit.kategori
+  const nama = item.nama_unit
+  return `[ ${kategori} ] ${nama}`
+})
+const rows = DataPasien;
 </script>

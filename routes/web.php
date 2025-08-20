@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\Filter\FilterController;
+use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
+use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -14,8 +16,12 @@ use App\Http\Controllers\Laporan\Rujukan\RujukanController;
 use App\Http\Controllers\MalSehat\PTMController;
 use App\Http\Controllers\Laporan\Kb\KbController;
 use App\Http\Controllers\Auth\LoginController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
+use App\Http\Controllers\Laporan\Ugd\UgdController;
+use App\Http\Controllers\Home\HomeController;
+use DB;
+
+
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
@@ -86,12 +92,18 @@ Route::prefix('loket')->group(function () {
 });
 
 
+
+
+Route::prefix('home')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])
+        ->name('home.home');
+});
+
 // Grup Laporan
 Route::prefix('laporan')->group(function () {
     Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
     Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
 
-    // Route::inertia('rujukan', 'Laporan/Rujukan/Rujukan')->name('laporan.rujukan');
 Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
 
 
@@ -104,10 +116,22 @@ Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.ruju
 Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->name('laporan.kb');    // Route::inertia('kb', 'Laporan/Kb/Kb')->name('laporan.kb');
 
 
-    Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+    // Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+    Route::get('/ugd', [UgdController::class, 'index'])->name('laporan.ugd');
+
+
+
     Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
-    Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
-    Route::inertia('kunjungan-sehat', 'Laporan/Kunjungan-sehat/Kunjungan-sehat')->name('laporan.kunjungan-sehat');
+    // Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
+Route::inertia('kunjungan-sehat', 'Laporan/KunjunganSehat/Index')  ->name('laporan.kunjungan-sehat');
+    Route::get('/sanitasi', [SanitasiController::class, 'index'])->name('laporan.sanitasi');
+    Route::get('/sanitasi/register', [SanitasiController::class, 'registerSanitasi'])->name('laporan.sanitasi.register');
+    Route::get('/sanitasi/sanitasi', [SanitasiController::class, 'laporanSanitasi'])->name('laporan.sanitasi.laporan');
+    Route::get('/sanitasi/kasus', [SanitasiController::class, 'laporanKasus'])->name('laporan.sanitasi.kasus');
+
+
+
+
 });
 
 
@@ -192,14 +216,18 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::get('/simpus/poli', [RuangLayananController::class, 'index'])->name('ruang-layanan.poli');
 
     // Umum
-    Route::get('/simpus/umum', [RuangLayananController::class, 'dataPasienPoli'])->name('ruang-layanan.umum');
-    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])->name('ruang-layanan-umum.pelayanan');
+    Route::get('/simpus/umum', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.umum');
+    Route::get('/simpus/umum/pelayanan/{id}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan-umum.pelayanan');
     Route::inertia('/simpus/umum/surat-keterangan', 'Ruang_Layanan/Umum/surat_keterangan')->name('ruang-layanan-umum.surat-keterangan');
     Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
+    Route::post('simpus/umum/pelayanan/anamnesa', [PoliBpUmumController::class, 'setAnamnesa'])->name('ruang-layanan-umum.setAnamnesa');
+    Route::post('simpus/umum/pelayanan/anamnesa/objective', [PoliBpUmumController::class, 'setAnamnesaObjective'])->name('ruang-layanan-umum.setAnamnesaObjective');
+    Route::post('simpus/umum/pelayanan/mulaiPelayanan', [PoliBpUmumController::class, 'mulaiPemeriksaanPasien'])->name('ruang-layanan-umum.mulai-pemeriksaan-pasien');
+    Route::post('simpus/umum/pelayanan/diagnosa-medis', [PoliBpUmumController::class, 'setDiagnosaMedis'])->name('ruang-layanan-umum.diagnosa-medis');
 
     //Gigi
-    Route::inertia('/simpus/gigi', 'Ruang_Layanan/Gigi/pasien_poli')->name('ruang-layanan.gigi');
-    Route::inertia('/simpus/gigi/pelayanan', 'Ruang_Layanan/Gigi/pelayanan')->name('ruang-layanan-gigi.pelayanan');
+    Route::get('/simpus/gigi', [PoliGigiController::class, 'index'])->name('ruang-layanan.gigi');
+    Route::get('/simpus/gigi/pelayanan/{id}', [PoliGigiController::class, 'pelayanan'])->name('ruang-layanan-gigi.pelayanan');
 
     //UGD
     Route::inertia('/simpus/ugd', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ugd');
@@ -238,4 +266,6 @@ Route::get('/cek-db', function () {
     Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
     Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+
+    Route::inertia('/nyoba', 'Ruang_Layanan/Umum/parent')->name('nyoba');
 });

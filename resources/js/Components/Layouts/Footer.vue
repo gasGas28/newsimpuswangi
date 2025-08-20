@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-dark text-white py-4 mt-auto">
+  <footer class="bg-dark text-white py-4 mt-auto" >
     <div class="container">
       <div class="text-center">
         <small>&copy; {{ new Date().getFullYear() }} Simpuswangi. All rights reserved.</small>

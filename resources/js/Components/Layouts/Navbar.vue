@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top" >
     <div class="container-fluid">
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->
@@ -27,6 +27,11 @@
           <li class="nav-item">
             <Link :href="route('home')" class="nav-link d-flex align-items-center">
               <i class="bi bi-house-door me-2"></i> Home
+            </Link>
+          </li>
+          <li class="nav-item">
+            <Link :href="route('home.home')" class="nav-link d-flex align-items-center">
+              <i class="bi bi-ticket-perforated me-2"></i> Dashboard
             </Link>
           </li>
           <li class="nav-item">
