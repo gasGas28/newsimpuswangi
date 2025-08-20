@@ -1,9 +1,9 @@
 <template>
-    <AppLayouts>
+  <AppLayouts>
     <DataPasien title="UGD" :rows>
 
     </DataPasien>
-    </AppLayouts>
+  </AppLayouts>
 
 </template>
 
