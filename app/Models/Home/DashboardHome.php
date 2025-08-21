@@ -3,55 +3,77 @@
 namespace App\Models\Home;
 
 use Illuminate\Support\Facades\DB;
+use Carbon\CarbonPeriod;
+use Carbon\Carbon;
 
 class DashboardHome
 {
-    public static function perDayAll(string $startDate, string $endDate)
+    /**
+     * Per-hari L/P pada rentang [startDate, endDate], zero-fill tanggal yang tidak ada data.
+     */
+    public static function perDayAll(string $startDate, string $endDate): array
     {
+        // Ambil agregasi yang ada datanya
         $rows = DB::table('simpus_loket as l')
             ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
             ->selectRaw("
-                DATE(l.tglKunjungan) AS date,
-                SUM(p.JENIS_KLMIN = 1) AS male,
-                SUM(p.JENIS_KLMIN = 2) AS female
+                DATE(l.tglKunjungan) AS `date`,
+                SUM(CASE WHEN p.JENIS_KLMIN = 1 THEN 1 ELSE 0 END) AS male,
+                SUM(CASE WHEN p.JENIS_KLMIN = 2 THEN 1 ELSE 0 END) AS female
             ")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->groupBy('date')
             ->orderBy('date')
-            ->get();
+            ->get()
+            ->keyBy('date'); // untuk lookup cepat
 
-        return $rows->map(fn($r) => [
-            'date'   => $r->date,
-            'male'   => (int)($r->male ?? 0),
-            'female' => (int)($r->female ?? 0),
-        ])->toArray();
+        // Zero-fill seluruh tanggal dalam rentang
+        $period = CarbonPeriod::create($startDate, $endDate);
+        $result = [];
+        foreach ($period as $d) {
+            $key = $d->format('Y-m-d');
+            $r   = $rows->get($key);
+            $result[] = [
+                'date'   => $key,
+                'male'   => (int)($r->male   ?? 0),
+                'female' => (int)($r->female ?? 0),
+            ];
+        }
+        return $result;
     }
 
-    public static function genderTotals(string $startDate, string $endDate)
+    /**
+     * Total L/P pada rentang.
+     */
+    public static function genderTotals(string $startDate, string $endDate): array
     {
         $row = DB::table('simpus_loket as l')
             ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
             ->selectRaw("
-                SUM(p.JENIS_KLMIN = 1) AS male,
-                SUM(p.JENIS_KLMIN = 2) AS female
+                SUM(CASE WHEN p.JENIS_KLMIN = 1 THEN 1 ELSE 0 END) AS male,
+                SUM(CASE WHEN p.JENIS_KLMIN = 2 THEN 1 ELSE 0 END) AS female
             ")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->first();
 
         return [
             'male'   => (int)($row->male ?? 0),
             'female' => (int)($row->female ?? 0),
         ];
-    }
+        }
 
-    public static function paymentTotals(string $startDate, string $endDate)
+    /**
+     * Total pembiayaan BPJS vs Non-BPJS pada rentang.
+     * Sesuaikan kolom 'jknPbi' sesuai skema kamu.
+     */
+    public static function paymentTotals(string $startDate, string $endDate): array
     {
         $row = DB::table('simpus_loket as l')
             ->selectRaw("
-                SUM(UPPER(TRIM(l.jknPbi)) IN ('BPJS','JKN','PBI')) AS bpjs,
-                SUM(UPPER(TRIM(l.jknPbi)) NOT IN ('BPJS','JKN','PBI')) AS non_bpjs
+                SUM(CASE WHEN UPPER(TRIM(l.jknPbi)) IN ('BPJS','JKN','PBI') THEN 1 ELSE 0 END) AS bpjs,
+                SUM(CASE WHEN UPPER(TRIM(l.jknPbi)) IN ('BPJS','JKN','PBI') THEN 0 ELSE 1 END) AS non_bpjs
             ")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->first();
 
         return [
@@ -60,14 +82,18 @@ class DashboardHome
         ];
     }
 
-    public static function visitTotals(string $startDate, string $endDate)
+    /**
+     * Total kunjungan baru vs lama pada rentang.
+     * Sesuaikan kolom 'kunjBaru' (YA = baru).
+     */
+    public static function visitTotals(string $startDate, string $endDate): array
     {
         $row = DB::table('simpus_loket as l')
             ->selectRaw("
-                SUM(UPPER(TRIM(l.kunjBaru)) = 'YA') AS baru,
-                SUM(UPPER(TRIM(l.kunjBaru)) <> 'YA') AS lama
+                SUM(CASE WHEN UPPER(TRIM(l.kunjBaru)) = 'YA' THEN 1 ELSE 0 END) AS baru,
+                SUM(CASE WHEN UPPER(TRIM(l.kunjBaru)) = 'YA' THEN 0 ELSE 1 END) AS lama
             ")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->first();
 
         return [
@@ -76,25 +102,35 @@ class DashboardHome
         ];
     }
 
-    public static function referralTotals(string $startDate, string $endDate)
+    /**
+     * Total rujukan (dummy contoh).
+     * Kalau punya kolom status rujukan asli, ganti CASE WHEN sesuai.
+     */
+    public static function referralTotals(string $startDate, string $endDate): array
     {
-        // sementara: semua internal
         $row = DB::table('simpus_loket as l')
-            ->selectRaw("COUNT(*) AS internal, 0 AS rujukan")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->selectRaw("
+                SUM(1) AS internal, 
+                SUM(0) AS rujukan
+            ")
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->first();
 
         return [
             'internal' => (int)($row->internal ?? 0),
-            'rujukan'  => (int)($row->rujukan ?? 0),
+            'rujukan'  => (int)($row->rujukan  ?? 0),
         ];
     }
 
-    public static function topDiseases(string $startDate, string $endDate, int $limit = 10)
+    /**
+     * Top penyakit dari kolom keluhan (placeholder kode Kxx).
+     * Sesuaikan kolom 'keluhan' atau mapping ICD jika ada.
+     */
+    public static function topDiseases(string $startDate, string $endDate, int $limit = 10): array
     {
         $rows = DB::table('simpus_loket as l')
             ->selectRaw("TRIM(COALESCE(l.keluhan, 'Tidak diketahui')) AS nama, COUNT(*) AS total")
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate])
+            ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->groupBy('nama')
             ->orderByDesc('total')
             ->limit($limit)

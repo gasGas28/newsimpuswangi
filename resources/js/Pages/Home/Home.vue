@@ -2,66 +2,64 @@
   <AppLayout title="Home">
     <div class="container-fluid py-4" style="font-family: 'Segoe UI', sans-serif;">
 
-      <!-- FILTER -->
+      <!-- FILTER (rentang tanggal) -->
       <div class="card mb-4 shadow-sm">
         <div
           class="card-header fw-bold text-white d-flex align-items-center justify-content-between"
-          style="background: linear-gradient(135deg, #0d6efd, #20c997); transition: 0.3s;"
+          style="background: linear-gradient(135deg, #0d6efd, #20c997);"
         >
           <span>Filter Home</span>
-          <small class="opacity-75">Default: Per Hari</small>
+          <small class="opacity-75">Rentang Tanggal</small>
         </div>
         <div class="card-body">
           <form @submit.prevent>
-            <!-- Mode -->
-            <div class="row mb-3">
-              <label class="col-md-2 col-form-label fw-semibold">Mode</label>
-              <div class="col-md-6 d-flex gap-4 align-items-center">
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" id="modeHarian" value="harian" v-model="filters.mode">
-                  <label class="form-check-label" for="modeHarian">Per Hari</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" id="modeRentang" value="rentang" v-model="filters.mode">
-                  <label class="form-check-label" for="modeRentang">Rentang</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Per Hari -->
-            <div class="row mb-3" v-if="filters.mode==='harian'">
+            <div class="row mb-3 align-items-center">
               <label class="col-md-2 col-form-label fw-semibold">Tanggal</label>
-              <div class="col-md-6">
-                <input type="date" class="form-control" v-model="filters.date" />
-              </div>
-            </div>
-
-            <!-- Rentang -->
-            <div class="row mb-3" v-else>
-              <label class="col-md-2 col-form-label fw-semibold">Rentang</label>
-              <div class="col-md-3 mb-2 mb-md-0">
-                <input type="date" class="form-control" v-model="filters.start" />
-              </div>
               <div class="col-md-3">
-                <input type="date" class="form-control" v-model="filters.end" />
+                <input type="date" class="form-control" v-model="filters.start_date" />
+              </div>
+              <div class="col-md-1 text-center">s/d</div>
+              <div class="col-md-3">
+                <input type="date" class="form-control" v-model="filters.end_date" />
               </div>
             </div>
 
             <div class="row">
               <div class="col-md-8 offset-md-2 d-flex flex-wrap gap-3">
-                <button type="button" class="btn btn-gradient text-white border-0 px-4 py-2 fw-semibold rounded" @click="applyFilter">
-                  <i class="bi bi-funnel me-1"></i> Terapkan
+                <button
+                  type="button"
+                  class="btn btn-primary px-4 py-2 fw-semibold rounded"
+                  :disabled="!isRangeValid"
+                  @click="applyFilter"
+                  title="Tampilkan data sesuai rentang"
+                >
+                  <i class="bi bi-eye me-1"></i> Tampilkan
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary px-4 py-2 fw-semibold rounded"
+                  @click="resetFilter"
+                >
+                  Reset
                 </button>
               </div>
+            </div>
+
+            <div v-if="validationMsg" class="alert alert-warning mt-3 py-2 mb-0">
+              {{ validationMsg }}
             </div>
           </form>
         </div>
       </div>
 
-      <!-- ROW 1: BAR FULL WIDTH -->
+      <!-- ROW 1: BAR (rentang) -->
       <div class="card h-100 shadow-sm mb-4">
         <div class="card-header fw-bold d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <span>Kunjungan Per Hari (L/P)</span>
+          <span>
+            Kunjungan Per Hari ({{ filters.start_date }} → {{ filters.end_date }}) •
+            <small class="text-muted">{{ perDay.length }} hari</small>
+          </span>
           <div class="d-flex align-items-center gap-2">
             <span class="badge rounded-pill text-bg-primary-subtle border text-primary">Laki-laki: {{ totalMaleRange }}</span>
             <span class="badge rounded-pill text-bg-danger-subtle border text-danger">Perempuan: {{ totalFemaleRange }}</span>
@@ -74,7 +72,7 @@
         </div>
       </div>
 
-      <!-- ROW 2: DONUTS (2 kolom sejajar) -->
+      <!-- ROW 2: DONUTS -->
       <div class="row g-3 mb-4">
         <div class="col-md-6">
           <div class="card shadow-sm h-100">
@@ -145,7 +143,7 @@
         </div>
       </div>
 
-      <!-- ROW 3: TOP 10 PENYAKIT FULL -->
+      <!-- ROW 3: TOP 10 -->
       <div class="card mt-4 shadow-sm">
         <div class="card-header fw-bold">10 Penyakit Terbesar</div>
         <div class="card-body">
@@ -181,20 +179,28 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import AppLayout from '@/Components/Layouts/AppLayouts.vue'
 
-// ====== PROPS dari Inertia ======
 const page = usePage()
 const initial = page.props
 
-// Filters (ambil dari server, biar konsisten dengan normalisasi di backend)
+// ====== FILTER: Rentang tanggal ======
+const today = (initial.serverNow ?? new Date().toISOString().slice(0,10))
+const defaultStart = initial.filters?.start_date ?? today
+const defaultEnd   = initial.filters?.end_date   ?? today
+
 const filters = ref({
-  mode: initial.filters?.mode ?? 'harian',
-  date: initial.filters?.date ?? (initial.serverNow ?? new Date().toISOString().slice(0,10)),
-  start: initial.filters?.start ?? initial.serverNow,
-  end: initial.filters?.end ?? initial.serverNow,
-  pusk_id: initial.filters?.pusk_id ?? null,
+  start_date: defaultStart,
+  end_date: defaultEnd,
 })
 
-// Data dari server
+const validationMsg = ref('')
+
+const isRangeValid = computed(() => {
+  const s = filters.value.start_date
+  const e = filters.value.end_date
+  return !!s && !!e && s <= e
+})
+
+// ====== DATA dari server (struktur dipertahankan) ======
 const perDayAll    = ref(initial.perDayAll ?? [])
 const gender       = ref(initial.gender ?? { male: 0, female: 0 })
 const payment      = ref(initial.payment ?? { bpjs: 0, non_bpjs: 0 })
@@ -202,34 +208,25 @@ const visit        = ref(initial.visit ?? { baru: 0, lama: 0 })
 const referral     = ref(initial.referral ?? { internal: 0, rujukan: 0 })
 const topDiseases  = ref(initial.topDiseases ?? [])
 
-// Terapkan filter → reload via Inertia (Ziggy route('home.home'))
-function applyFilter() {
-  const params = {
-    mode: filters.value.mode,
-    date: filters.value.date,
-    start: filters.value.start,
-    end: filters.value.end,
+// ====== Aksi: Tampilkan ======
+function applyFilter () {
+  validationMsg.value = ''
+  if (!isRangeValid.value) {
+    validationMsg.value = 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.'
+    return
   }
-  if (filters.value.pusk_id) params.pusk_id = filters.value.pusk_id
+  const s = filters.value.start_date
+  const e = filters.value.end_date
 
-  router.get(route('home.home'), params, {
+  router.get(route('home.home'), { start_date: s, end_date: e }, {
     preserveScroll: true,
     preserveState: true,
     replace: true,
     onSuccess: () => {
-      // ambil data terbaru dari props
       const p = usePage().props
 
-      // *** penting: sinkronkan filter dari server (yang sudah dinormalisasi) ***
-      if (p.filters) {
-        filters.value = {
-          mode: p.filters.mode,
-          date: p.filters.date,
-          start: p.filters.start,
-          end: p.filters.end,
-          pusk_id: p.filters.pusk_id ?? null,
-        }
-      }
+      if (p.filters?.start_date) filters.value.start_date = p.filters.start_date
+      if (p.filters?.end_date)   filters.value.end_date   = p.filters.end_date
 
       perDayAll.value   = p.perDayAll ?? []
       gender.value      = p.gender ?? { male: 0, female: 0 }
@@ -238,23 +235,22 @@ function applyFilter() {
       referral.value    = p.referral ?? { internal: 0, rujukan: 0 }
       topDiseases.value = p.topDiseases ?? []
 
-      // refresh donut
+      refreshBar()
       updateDonuts()
     }
   })
 }
 
-// ====== Data by filter (client-side subset untuk bar chart)
-const perDay = computed(() => {
-  if (filters.value.mode === 'harian') {
-    return perDayAll.value.filter(d => d.date === filters.value.date)
-  }
-  const start = filters.value.start
-  const end   = filters.value.end
-  return perDayAll.value.filter(d => d.date >= start && d.date <= end)
-})
+function resetFilter () {
+  filters.value.start_date = defaultStart
+  filters.value.end_date   = defaultEnd
+  applyFilter()
+}
 
-// ====== Totals (untuk badge header bar) ======
+// Data utk bar (berdasarkan rentang)
+const perDay = computed(() => perDayAll.value)
+
+// Totals (badge)
 const totalMaleRange   = computed(() => perDay.value.reduce((s, d) => s + (d.male || 0), 0))
 const totalFemaleRange = computed(() => perDay.value.reduce((s, d) => s + (d.female || 0), 0))
 
@@ -264,11 +260,16 @@ const donutGenderRef = ref(null)
 const donutPaymentRef = ref(null)
 const donutVisitRef = ref(null)
 const donutReferralRef = ref(null)
-const chartMode = ref('stacked') // 'stacked' | 'grouped' | 'percent'
 let ChartLib = null
 let barChart = null
 
-function setMode(mode) { chartMode.value = mode }
+// Auto skala batang saat banyak hari
+function dynamicBarSizing(count) {
+  const barPct = Math.max(0.15, Math.min(0.85, 12 / Math.max(1, count)))
+  const catPct = Math.max(0.4,  Math.min(0.9,  18 / Math.max(1, count)))
+  const maxTicks = Math.min(14, Math.max(6, Math.floor(120 / Math.log2(Math.max(4, count)))))
+  return { barPct, catPct, maxTicks }
+}
 
 const centerTextPlugin = {
   id: 'centerText',
@@ -295,7 +296,6 @@ const centerTextPlugin = {
   }
 }
 
-// simpan instance donut utk bisa di-update
 let donutGenderChart = null
 let donutPaymentChart = null
 let donutVisitChart = null
@@ -319,75 +319,97 @@ function updateDonuts() {
     donutReferralChart.update()
   }
 }
-
 function buildBarConfig() {
   const blue = 'rgba(77, 171, 247, 0.9)'
-  const pink = 'rgba(247, 131, 172, 0.9)'
+  const yellow = '#FFD700' // kuning
   const grid = '#e9ecef'
   const border = '#dee2e6'
 
-  let labels = perDay.value.map(d => d.date)
-  let datasets = []
-  let stacked = false
-  let yMax, yTicks
-
-  if (chartMode.value === 'stacked') {
-    stacked = true
-    datasets = [
-      { label: 'Laki-laki', data: perDay.value.map(d => d.male), backgroundColor: blue, borderWidth: 0, barPercentage: 0.85, categoryPercentage: 0.7, stack: 'v' },
-      { label: 'Perempuan', data: perDay.value.map(d => d.female), backgroundColor: pink, borderWidth: 0, barPercentage: 0.85, categoryPercentage: 0.7, stack: 'v', borderRadius: { topLeft: 8, topRight: 8 } },
-    ]
-  } else if (chartMode.value === 'grouped') {
-    stacked = false
-    datasets = [
-      { label: 'Laki-laki', data: perDay.value.map(d => d.male), backgroundColor: blue, borderWidth: 0, barPercentage: 0.9, categoryPercentage: 0.7 },
-      { label: 'Perempuan', data: perDay.value.map(d => d.female), backgroundColor: pink, borderWidth: 0, barPercentage: 0.9, categoryPercentage: 0.7 },
-    ]
-  } else {
-    stacked = true
-    yMax = 100
-    yTicks = { callback: v => v + '%' }
-    const toPct = (key) => perDay.value.map(d => {
-      const t = (d.male || 0) + (d.female || 0)
-      return t ? Math.round(((d[key] || 0) / t) * 100) : 0
-    })
-    datasets = [
-      { label: 'Laki-laki', data: toPct('male'), backgroundColor: blue, borderWidth: 0, barPercentage: 0.85, categoryPercentage: 0.7, stack: 'v' },
-      { label: 'Perempuan', data: toPct('female'), backgroundColor: pink, borderWidth: 0, barPercentage: 0.85, categoryPercentage: 0.7, stack: 'v', borderRadius: { topLeft: 8, topRight: 8 } },
-    ]
-  }
+  const n = perDay.value.length
+  const { barPct, catPct, maxTicks } = dynamicBarSizing(n)
 
   return {
     type: 'bar',
-    data: { labels, datasets },
+    data: {
+      labels: perDay.value.map(d => d.date),
+      datasets: [
+        {
+          label: 'Laki-laki',
+          data: perDay.value.map(d => d.male),
+          backgroundColor: blue,
+          borderWidth: 0,
+          barPercentage: barPct,
+          categoryPercentage: catPct,
+          stack: 'v'
+        },
+        {
+          label: 'Perempuan',
+          data: perDay.value.map(d => d.female),
+          backgroundColor: yellow, // <-- ganti ke kuning
+          borderWidth: 0,
+          barPercentage: barPct,
+          categoryPercentage: catPct,
+          stack: 'v',
+          borderRadius: { topLeft: 8, topRight: 8 }
+        },
+      ],
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: { left: 0, right: 0, top: 8, bottom: 8 } },
       interaction: { mode: 'index', intersect: false },
       scales: {
-        x: { stacked, offset: true, grid: { color: grid, drawBorder: true, borderColor: border }, ticks: { autoSkip: true, maxRotation: 0, minRotation: 0 } },
-        y: { stacked, beginAtZero: true, grace: '10%', suggestedMax: yMax, grid: { color: grid, drawBorder: true, borderColor: border }, ticks: yTicks || { precision: 0 } },
+        x: {
+          stacked: true,
+          offset: true,
+          grid: { color: grid, drawBorder: true, borderColor: border },
+          ticks: {
+            autoSkip: true,
+            maxTicksLimit: maxTicks,
+            maxRotation: 0,
+            minRotation: 0,
+            // pakai function biasa, jangan arrow
+            callback: function (value, index) {
+              const step = Math.max(1, Math.ceil(n / maxTicks))
+              return (index % step === 0) ? (perDay.value[index]?.date ?? '') : ''
+            }
+          }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          grace: '10%',
+          grid: { color: grid, drawBorder: true, borderColor: border },
+          ticks: { precision: 0 }
+        },
       },
       plugins: {
         legend: { position: 'top', labels: { boxWidth: 14, boxHeight: 14 } },
-        tooltip: chartMode.value === 'percent'
-          ? { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}%`, footer: () => 'Total: 100%' } }
-          : { callbacks: { footer: (items) => 'Total: ' + items.reduce((s, i) => s + i.parsed.y, 0) } },
+        tooltip: { callbacks: { footer: (items) => 'Total: ' + items.reduce((s, i) => s + i.parsed.y, 0) } },
       },
-      animation: { duration: 300 },
+      animation: { duration: 250 },
     }
   }
+}
+
+
+function refreshBar() {
+  if (!ChartLib || !barRef.value) return
+  if (barChart) {
+    barChart.destroy()
+    barChart = null
+  }
+  barChart = new ChartLib(barRef.value, buildBarConfig())
 }
 
 onMounted(async () => {
   ChartLib = (await import('chart.js/auto')).default
   ChartLib.register(centerTextPlugin)
 
-  // Bar awal
-  barChart = new ChartLib(barRef.value, buildBarConfig())
+  // render pertama
+  refreshBar()
 
-  // Donut common options
   const commonOpts = (formatter) => ({
     responsive: true,
     maintainAspectRatio: false,
@@ -395,7 +417,6 @@ onMounted(async () => {
     plugins: { legend: { position: 'bottom' }, centerText: { formatter } }
   })
 
-  // simpan instance donut biar bisa di-update
   donutGenderChart = new ChartLib(donutGenderRef.value, {
     type: 'doughnut',
     data: { labels: ['Laki-laki', 'Perempuan'], datasets: [{ data: [gender.value.male, gender.value.female] }] },
@@ -418,21 +439,15 @@ onMounted(async () => {
   })
 })
 
-// Re-render bar kalau data/mode berubah
-watch([perDay, chartMode, perDayAll], () => {
-  if (!barChart || !ChartLib) return
-  barChart.destroy()
-  barChart = new ChartLib(barRef.value, buildBarConfig())
-})
+// Re-render bar kalau array berubah referensi
+watch(perDay, () => { refreshBar() })
 </script>
 
 <style scoped>
-/* ...style lain tetap... */
 .chart-wrap {
   position: relative;
   width: 100%;
-  /* Naikkan tinggi canvas (dulu 420px) */
-  height: 520px; /* atau 600px kalau mau lebih tinggi */
+  height: 520px;
 }
 .chart-wrap canvas,
 .chart-donut canvas {
