@@ -2,14 +2,16 @@
   <AppLayout>
     <div class="container py-4">
       <div class="d-flex justify-content-end mb-3 gap-2">
-        <Link :href="route('filter.dev')" class="btn btn-outline-primary"> Dev This Page </Link>
+        <Link :href="route('filter.dev')" class="btn text-white"> Dev This Page </Link>
       </div>
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="text-header">
-            <h5 class="text-primary fw-semibold fs-3 mt-2 mb-3 ms-2 gap-4"><i class="bi bi-funnel-fill"></i> Filter Laporan</h5>
+            <h5 class="text-primary fw-semibold fs-3 mt-2 mb-3 ms-2 gap-4">
+              <i class="bi bi-funnel-fill"></i> Filter Laporan
+            </h5>
           </div>
-          <hr>
+          <hr />
           <div class="container">
             <form>
               <div class="row">
@@ -143,7 +145,7 @@
                       </select>
                     </div>
                   </div>
-                  <hr>
+                  <hr />
                 </div>
 
                 <!-- Kolom Kedua -->
@@ -344,7 +346,7 @@
                       </select>
                     </div>
                   </div>
-                  <hr>
+                  <hr />
                 </div>
                 <!-- Kolom Ketiga -->
                 <!--Form Unit-->
@@ -478,19 +480,24 @@
                       />
                     </div>
                   </div>
-                  <hr>
+                  <hr />
                 </div>
-                <hr>
+                <hr />
               </div>
               <div class="d-flex justify-content-start gap-2 mt-2">
-                <button type="button" class="btn btn-data fw-semibold" @click="aktif.showData = !aktif.showData">
-                  <i class="bi bi-eye"></i> {{ aktif.showData ? 'Sembunyikan Data' : 'Tampilkan Data' }}
+                <button
+                  type="button"
+                  class="btn btn-data fw-semibold text-white"
+                  @click="aktif.showData = !aktif.showData"
+                >
+                  <i class="bi bi-eye"></i>
+                  {{ aktif.showData ? 'Sembunyikan Data' : 'Tampilkan Data' }}
                 </button>
-                <button type="button" class="btn btn-html fw-semibold">
+                <button type="button" class="btn btn-html fw-semibold text-white">
                   <i class="bi bi-filetype-html"></i>
                   Tampilkan Data HTML
                 </button>
-                <button type="button" class="btn btn-excel fw-semibold">
+                <button type="button" class="btn btn-excel fw-semibold text-white">
                   <i class="bi bi-download"></i> Download Excel
                 </button>
               </div>
@@ -504,7 +511,7 @@
           <div class="container">
             <!-- Tambahkan table-responsive -->
             <div class="table-responsive">
-              <table class="table table-primary table-bordered table-striped">
+              <table class="table table-bordered table-striped">
                 <thead class="text-center fw-semibold">
                   <tr>
                     <th scope="col">No.</th>
@@ -533,10 +540,58 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(filter, index) in kunjungan" :key="filter.id">
+                  <tr v-for="(filter, index) in rekamMedis" :key="filter.idLoket">
                     <td>{{ index + 1 }}</td>
                     <td>{{ filter.tglKunjungan }}</td>
-                    <td>{{ filter.NIK }}</td>
+                    <td>{{ filter.pasien?.NIK }}</td>
+                    <td>{{ filter.pasien?.NO_MR }}</td>
+                    <td>{{ filter.pasien?.NAMA_LGKP }}</td>
+                    <td>{{ filter.pasien?.ALAMAT }}</td>
+                    <td>{{ filter.pasien?.NO_KEC }}</td>
+                    <td>{{ filter.pasien?.NO_KEL }}</td>
+                    <td>{{ filter.pasien?.JENIS_KLMIN }}</td>
+                    <td>{{ filter.pasien?.TGL_LHR }}</td>
+                    <td>{{ filter.umur }}</td>
+                    <td>{{ filter.kelUmur }}</td>
+                    <td>
+                      <div class="table-text" v-if="filter.anamnesa">
+                        <p>sistole: {{ filter.anamnesa.sistole }}</p>
+                        <p>diastole: {{ filter.anamnesa.diastole }}</p>
+                        <p>Suhu: {{ filter.anamnesa.suhu }} °C</p>
+                        <p>BB: {{ filter.anamnesa.beratBadan }} kg</p>
+                        <p>TB: {{ filter.anamnesa.tinggiBadan }} cm</p>
+                        <p>Lingkar Perut: {{ filter.anamnesa.lingkarPerut }} cm</p>
+                        <p>IMT: {{ filter.anamnesa.imtKet }}</p>
+                        <p>RespRate: {{ filter.anamnesa.respRate }} HeartRate: {{ filter.anamnesa.heartRate }} </p>
+                        <p>Catatan: {{ filter.anamnesa.catatan }}</p>
+                      </div>
+                      <em v-else>Belum ada anamnesa</em>
+                    </td>
+                    <td>
+                      <div class="fw-semibold table-text" v-if="filter.kunjungan">
+                        <p>{{ filter.kunjungan.nmdiagnosa1 }}</p>
+                        <p>{{ filter.kunjungan.nmdiagnosa2 }}</p>
+                        <p>{{ filter.kunjungan.nmdiagnosa3 }}</p>
+                      </div>
+                      <em v-else>Belum Ada Diagnosa</em>
+                    </td>
+                    <td>
+                      <div class="fw-semibold" v-if="filter.obat">
+                        <p>{{ filter.obat.nama_obat }}</p>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold table-text" v-if="filter.kunjungan">
+                        <p>{{ filter.kunjungan.nmtindakan1 }}</p>
+                        <p>{{ filter.kunjungan.nmtindakan2 }}</p>
+                        <p>{{ filter.kunjungan.nmtindakan3 }}</p>
+                        <p>{{ filter.kunjungan.nmtindakan4 }}</p>
+                        <p>{{ filter.kunjungan.nmtindakan5 }}</p>
+                      </div>
+                      <em v-else>
+                        Belum ada tindakan
+                      </em>
+                    </td>
                   </tr>
                   <!-- data di sini -->
                 </tbody>
@@ -573,7 +628,7 @@
     tindakan: false,
     rujukLanjut: false,
     unit: false,
-    showData: false
+    showData: false,
   });
 
   // Setup Modal untuk Diagnosa dan Tindakan
@@ -608,6 +663,7 @@
     unit: Array,
     kunjungan: Array,
     Filter: Array,
+    rekamMedis: Array,
   });
 
   // Fungsi Untuk Filter Tempat Kunjungan
@@ -647,16 +703,18 @@
   .card-header {
     background: linear-gradient(135deg, #3b82f6, #10b981);
   }
-  .btn-data {
-    background-color: #9faae9;
-  }
-  .btn-html {
-    background-color: #eebd95;
-  }
-  .btn-excel {
-    background-color: #98ec82;
+  .btn {
+    background: linear-gradient(135deg, #3b82f6, #10b981);
   }
   th {
+    width: inherit;
+  }
+  td {
     white-space: nowrap;
   }
+  .table-text p {
+  margin: 4px 2;       /* jarak antar baris lebih rapat */
+  line-height: 1;    /* tinggi baris rapat */
+  font-size: 0.9rem;   /* optional, biar lebih compact */
+}
 </style>

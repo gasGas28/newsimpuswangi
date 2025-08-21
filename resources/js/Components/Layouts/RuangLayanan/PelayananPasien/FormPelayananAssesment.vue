@@ -13,7 +13,8 @@
             <div class="col-9">
               <div class="input-group">
                 <input type="text" class="form-control bg-light" disabled v-model="form.nama_diagnosa" />
-                <button type="button" class="btn btn-info ">Cari</button>
+                <button type="button" class="btn btn-info" @click="showModal = true">Cari</button>
+
                 <button type="button" class="btn btn-danger ">Del</button>
               </div>
             </div>
@@ -132,14 +133,43 @@
       </div>
     </div>
   </div>
+  <div v-if="showModal" class="modal fade show d-block" style="background: rgba(0,0,0,.5);">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Pilih Diagnosa</h5>
+          <button type="button" class="btn-close" @click="showModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th>KODE</th>
+                <th>NAMA</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in diagnosaMedis" :key="index">
+                <td>{{ item.kode }}</td>
+                <td>{{ item.nama }}</td>
+                <td><button class="btn btn-info btn-sm" @click="pilihDiagnosa(item)">Pilih</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 const props = defineProps({
   diagnosaKasus: Array,
-  dataPasien: Object
-
+  dataPasien: Object,
+  diagnosaMedis: Array
 })
 const form = useForm({
   kode_diagnosa: '',
@@ -151,6 +181,11 @@ const form = useForm({
   loketId: 1,
   kdPoli: props.dataPasien?.kdPoli ?? ''
 });
+function pilihDiagnosa(item) {
+  form.kode_diagnosa = item.kode
+  form.nama_diagnosa = item.nama
+  showModal.value = false // tutup modal
+}
 
 function submitForm() {
   // form.post(route('ruang-layanan-umum.diagnosa-medis'))
