@@ -18,7 +18,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-4">
           <div class="card h-100 shadow-sm">
             <div class="card-body">
@@ -28,7 +28,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-4">
           <div class="card h-100 shadow-sm">
             <div class="card-body">
@@ -38,7 +38,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-4">
           <div class="card h-100 shadow-sm">
             <div class="card-body">
@@ -48,13 +48,15 @@
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-4">
           <div class="card h-100 shadow-sm">
             <div class="card-body">
               <h5 class="card-title fw-bold">Pagination</h5>
               <p class="card-text text-muted">Pagination components and examples.</p>
-              <Link :href="route('templete.pagination')" class="btn btn-outline-primary">View Pagination</Link>
+              <Link :href="route('templete.pagination')" class="btn btn-outline-primary"
+                >View Pagination</Link
+              >
             </div>
           </div>
         </div>
@@ -64,6 +66,6 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
 </script>

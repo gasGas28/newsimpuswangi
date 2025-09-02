@@ -3,10 +3,7 @@
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\LoketController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -26,9 +23,23 @@ Route::prefix('filter')->group(function () {
 
 // Grup Loket
 Route::prefix('loket')->group(function () {
-    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
-    Route::get('/search', fn() => Inertia::render('Loket/Search'))->name('loket.search');
+    Route::get('/', [LoketController::class, 'index'])->name('loket.index');
+    Route::get('/pasien', [LoketController::class, 'create'])->name('loket.pasien');
+    Route::post('/pasien', [LoketController::class, 'store'])->name('loket.pasien.store');
+    Route::get('/search', [LoketController::class, 'search'])->name('loket.search');
+    Route::post('/register', [LoketController::class, 'register'])->name('loket.register');
+
+    Route::get('/api/provinsi', [LoketController::class, 'getProvinsiList'])->name('loket.api.provinsi');
+    Route::get('/api/kabupaten', [LoketController::class, 'getKabupatenByProvinsi'])->name('loket.api.kabupaten');
+    Route::get('/api/kecamatan', [LoketController::class, 'getKecamatanList'])->name('loket.api.kecamatan');
+    Route::get('/api/kelurahan', [LoketController::class, 'getKelurahanByKecamatan'])->name('loket.api.kelurahan');
+    Route::get('/api/poli-by-jenis', [LoketController::class, 'getPoliByJenisKunjungan'])->name('loket.api.poli-by-jenis');
+
+    Route::get('/api/pasien/search', [LoketController::class, 'apiSearch'])->name('api.pasien.search');
+
+    Route::get('/api/pasien/{id}', function ($id) {
+        return \App\Models\Pasien::findOrFail($id);
+    });
 });
 
 // Grup Templete
@@ -41,9 +52,9 @@ Route::prefix('templete')->group(function () {
 });
 
 // Grup Loket
-Route::prefix('loket')->group(function () {
-    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-});
+// Route::prefix('loket')->group(function () {
+//     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+// });
 
 // Grup Laporan
 Route::prefix('laporan')->group(function () {
@@ -143,4 +154,4 @@ Route::prefix('ruang_layanan')->group(function () {
     // Menampilkan pelayanan
     Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])
         ->name('ruang-layanan-umum.pelayanan');
-    });
+});
