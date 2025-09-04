@@ -20,7 +20,7 @@
     <div class="m-4 row gx-5">
     <FormPelayananSubjective v-if="currentTab === 'subjective'">
     </FormPelayananSubjective>
-    <FormPelayananObjective v-if="currentTab === 'objective'">
+    <FormPelayananObjective v-if="currentTab === 'objective'"  :currrentSub=true halaman="gigi">
     </FormPelayananObjective>
     <FormPelayananAssesment v-if="currentTab === 'assesment'">
     </FormPelayananAssesment>
@@ -32,8 +32,6 @@
     </div>
 
     </DataPasien>
-   
-
     </div>
 
    </div>
