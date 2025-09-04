@@ -30,15 +30,22 @@ class LoginController extends Controller
             ]);
         }
 
-            if (auth()->attempt(['username' => $data['username'], 'password' => $data['password']])) {
-                $request->session()->regenerate();
+if (auth()->attempt(['username' => $data['username'], 'password' => $data['password']])) {
+    $request->session()->regenerate();
+    $roles = auth()->user()->roleNames();
 
-                // Langsung ke /laporan/loket
-                return response()->json([
-                    'ok' => true,
-                    'redirect' => route('laporan.loket'),
-                ]);
-            }
+    $to = match (true) {
+        in_array('owner', $roles)      => route('dashboard'),
+        in_array('admin', $roles)      => route('laporan.loket'),        // admin bebas, pilih default laporan
+        in_array('loket', $roles)      => route('loket.index'),
+        in_array('pelayanan', $roles)  => route('ruang-layanan.poli'),
+        in_array('kapus', $roles)      => route('dashboard'),
+        default                        => route('login'),
+    };
+
+    return response()->json(['ok' => true, 'redirect' => $to]);
+}
+
 
 
         throw ValidationException::withMessages([

@@ -1,7 +1,13 @@
 <?php
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+
+// ⬇️ import middleware yang kamu punya
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\Auth\CheckRole;
+use App\Http\Middleware\VerifyRecaptcha;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -10,11 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Ini yang benar untuk Laravel 11
-        $middleware->alias([
-        'role' => \App\Http\Middleware\Auth\CheckRole::class,
-            'verify.recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class, // Tambahin ini
 
+        // ⬇️ PENTING: tempelkan Inertia middleware ke group "web"
+        $middleware->web(append: [
+            HandleInertiaRequests::class,
+        ]);
+
+        // ⬇️ alias custom middleware
+        $middleware->alias([
+            'role' => CheckRole::class,
+            'verify.recaptcha' => VerifyRecaptcha::class, // kalau dipakai
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

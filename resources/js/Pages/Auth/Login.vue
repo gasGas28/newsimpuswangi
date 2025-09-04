@@ -145,7 +145,7 @@ const submit = async () => {
           class="img-fluid px-5 px-md-4"
           style="max-height: 260px"
         />
-        <p class="small mt-3 text-muted mb-4 mb-md-0">&copy; 2025 Puskesmas App<br />Powered by NOC</p>
+        <p class="small mt-3 text-muted mb-4 mb-md-0">&copy; 2025 Puskesmas App<br />Powered by FAIZ</p>
       </div>
 
       <!-- Panel Kanan -->
@@ -176,15 +176,8 @@ const submit = async () => {
             </button>
           </div>
 
-          <div class="text-center small">
-            <span class="text-white-50">Don't have an account?</span>
-            <a href="#" class="text-info text-decoration-none">Register Now</a>
-          </div>
 
-          <div class="text-center mt-3 small">
-            <a href="#" class="text-white-50 text-decoration-underline">Terms and Services</a><br />
-            <span class="text-white-50">Need help? <a href="mailto:support@email.com" class="text-info">Contact us</a></span>
-          </div>
+
         </form>
       </div>
     </div>

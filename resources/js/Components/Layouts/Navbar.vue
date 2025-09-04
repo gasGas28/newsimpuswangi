@@ -104,7 +104,7 @@
             data-bs-toggle="dropdown"
           >
             <i class="bi bi-person-circle me-2"></i>
-            <span class="d-none d-sm-inline">User</span>
+            <span class="d-none d-sm-inline">{{ roleLabel }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow">
             <li>
@@ -115,11 +115,16 @@
             <li>
               <hr class="dropdown-divider mx-3 my-1" />
             </li>
-            <li>
-              <Link class="dropdown-item d-flex align-items-center text-danger" href="/logout">
-                <i class="bi bi-box-arrow-right me-2"></i> Logout
-              </Link>
-            </li>
+                  <li>
+                    <Link
+                      :href="route('logout')" 
+                      method="post"
+                      as="button"
+                      class="dropdown-item d-flex align-items-center text-danger w-100 text-start"
+                    >
+                      <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </Link>
+                  </li>
           </ul>
         </div>
       </div>
@@ -145,11 +150,16 @@
             <li>
               <hr class="dropdown-divider mx-3 my-1" />
             </li>
-            <li>
-              <Link class="dropdown-item d-flex align-items-center text-danger" href="/logout">
-                <i class="bi bi-box-arrow-right me-2"></i> Logout
-              </Link>
-            </li>
+                  <li>
+                    <Link
+                      :href="route('logout')" 
+                      method="post"
+                      as="button"
+                      class="dropdown-item d-flex align-items-center text-danger w-100 text-start"
+                    >
+                      <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </Link>
+                  </li>
           </ul>
         </div>
       </div>
@@ -158,8 +168,17 @@
 </template>
 
 <script setup>
-  import { Link } from '@inertiajs/vue3';
-  import { route } from 'ziggy-js';
+import { Link, usePage } from '@inertiajs/vue3'   // ⬅️ tambahkan usePage
+import { route } from 'ziggy-js'
+import { computed } from 'vue'// ⬅️ tambahkan usePage
+const page = usePage()
+
+// roles dari Inertia share; fallback []
+const roles = computed(() => page.props.auth?.roles ?? [])
+
+// gabung semua role → "owner, loket" (atau ganti jadi roles.value[0] kalau mau ambil satu)
+const roleLabel = computed(() => roles.value.length ? roles.value.join(', ') : 'User')
+
 </script>
 
 <style scoped>

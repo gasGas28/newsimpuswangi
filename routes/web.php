@@ -19,7 +19,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
-use DB;
+use App\Http\Controllers\RuangLayanan\KunjOnline\KunjOnlineController;
+
 
 
 
@@ -43,11 +44,13 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:owner')->group(function () {
         Route::get('/reports', fn () => Inertia::render('Reports/Index'))->name('reports.index');
     });
-
-    // (Opsional) nanti isi menu khusus role lain di sini:
-    // Route::middleware('role:pelayanan,owner,kapus')->group(function () { ... });
-    // Route::middleware('role:loket,owner,kapus')->group(function () { ... });
 });
+
+// LOGOUTT
+Route::post('/logout', function (Request $request) {Auth::logout();$request->session()->invalidate();$request->session()->regenerateToken();return redirect()->route('login');})->name('logout');
+
+
+
 
 // Grup Admin
 Route::prefix('admin')->group(function () {
@@ -100,39 +103,68 @@ Route::prefix('home')->group(function () {
 });
 
 // Grup Laporan
-Route::prefix('laporan')->group(function () {
-    Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
-    Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
 
-Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
+Route::prefix('laporan')
+    ->middleware(['auth','role:owner,admin,loket'])
+    ->group(function () {
+        Route::get('loket', [\App\Http\Controllers\Laporan\LaporanLoketController::class, 'index'])->name('laporan.loket');
+        Route::get('loket/tampilkan', [\App\Http\Controllers\Laporan\LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
+
+        Route::get('/rujukan', [\App\Http\Controllers\Laporan\Rujukan\RujukanController::class, 'index'])->name('laporan.rujukan');
+        Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
+        Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
+        Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
+        Route::inertia('lab', 'Laporan/Lab/Lab')->name('laporan.lab');
+        Route::match(['get','post'], '/laporan/kb', [\App\Http\Controllers\Laporan\Kb\KbController::class, 'index'])->name('laporan.kb');
+        Route::get('/ugd', [\App\Http\Controllers\Laporan\Ugd\UgdController::class, 'index'])->name('laporan.ugd');
+        Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
+        Route::inertia('kunjungan-sehat', 'Laporan/KunjunganSehat/Index')->name('laporan.kunjungan-sehat');
+        Route::get('/sanitasi', [\App\Http\Controllers\Laporan\Sanitasi\SanitasiController::class, 'index'])->name('laporan.sanitasi');
+        Route::get('/sanitasi/register', [\App\Http\Controllers\Laporan\Sanitasi\SanitasiController::class, 'registerSanitasi'])->name('laporan.sanitasi.register');
+        Route::get('/sanitasi/sanitasi', [\App\Http\Controllers\Laporan\Sanitasi\SanitasiController::class, 'laporanSanitasi'])->name('laporan.sanitasi.laporan');
+        Route::get('/sanitasi/kasus', [\App\Http\Controllers\Laporan\Sanitasi\SanitasiController::class, 'laporanKasus'])->name('laporan.sanitasi.kasus');
+    });
+
+    Route::post('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('login');
+})->name('logout');
+
+// Route::prefix('laporan')->group(function () {
+//     Route::get('loket', [LaporanLoketController::class, 'index'])->name('laporan.loket');
+//     Route::get('loket/tampilkan', [LaporanLoketController::class, 'tampil'])->name('laporan.loket.tampilkan-laporan-loket');
+
+// Route::get('/rujukan', [RujukanController::class, 'index']) ->name('laporan.rujukan'); // (atau .index) — samain sama yang dipakai di Navbar
 
 
-    Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
-    Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
-    Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
-    Route::inertia('lab', 'Laporan/Lab/Lab')->name('laporan.lab');
+//     Route::inertia('umum', 'Laporan/Umum/Umum')->name('laporan.umum');
+//     Route::inertia('gigi', 'Laporan/Gigi/Gigi')->name('laporan.gigi');
+//     Route::inertia('kia', 'Laporan/Kia/Kia')->name('laporan.kia');
+//     Route::inertia('lab', 'Laporan/Lab/Lab')->name('laporan.lab');
 
 
-Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->name('laporan.kb');    // Route::inertia('kb', 'Laporan/Kb/Kb')->name('laporan.kb');
+// Route::match(['get','post'], '/laporan/kb', [KbController::class, 'index'])->name('laporan.kb');    // Route::inertia('kb', 'Laporan/Kb/Kb')->name('laporan.kb');
 
 
-    // Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
-    Route::get('/ugd', [UgdController::class, 'index'])->name('laporan.ugd');
-
-
-
-    Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
-    // Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
-Route::inertia('kunjungan-sehat', 'Laporan/KunjunganSehat/Index')  ->name('laporan.kunjungan-sehat');
-    Route::get('/sanitasi', [SanitasiController::class, 'index'])->name('laporan.sanitasi');
-    Route::get('/sanitasi/register', [SanitasiController::class, 'registerSanitasi'])->name('laporan.sanitasi.register');
-    Route::get('/sanitasi/sanitasi', [SanitasiController::class, 'laporanSanitasi'])->name('laporan.sanitasi.laporan');
-    Route::get('/sanitasi/kasus', [SanitasiController::class, 'laporanKasus'])->name('laporan.sanitasi.kasus');
+//     // Route::inertia('ugd', 'Laporan/Ugd/Ugd')->name('laporan.ugd');
+//     Route::get('/ugd', [UgdController::class, 'index'])->name('laporan.ugd');
 
 
 
+//     Route::inertia('rawat-inap', 'Laporan/Rawat-inap/Rawat-inap')->name('laporan.rawat-inap');
+//     // Route::inertia('sanitasi', 'Laporan/Sanitasi/Sanitasi')->name('laporan.sanitasi');
+// Route::inertia('kunjungan-sehat', 'Laporan/KunjunganSehat/Index')  ->name('laporan.kunjungan-sehat');
+//     Route::get('/sanitasi', [SanitasiController::class, 'index'])->name('laporan.sanitasi');
+//     Route::get('/sanitasi/register', [SanitasiController::class, 'registerSanitasi'])->name('laporan.sanitasi.register');
+//     Route::get('/sanitasi/sanitasi', [SanitasiController::class, 'laporanSanitasi'])->name('laporan.sanitasi.laporan');
+//     Route::get('/sanitasi/kasus', [SanitasiController::class, 'laporanKasus'])->name('laporan.sanitasi.kasus');
 
-});
+
+
+
+// });
 
 
 // Grup Mal Sehat
@@ -237,24 +269,56 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::inertia('/simpus/kb', 'Ruang_Layanan/KB/pasien_poli')->name('ruang-layanan.kb');
     Route::inertia('/simpus/kb/pelayanan', 'Ruang_Layanan/KB/pelayanan')->name('ruang-layanan-kb.pelayanan');
 
-    //Kunjungan Online
-    Route::inertia('/simpus/kunjungan-online', 'Ruang_Layanan/KunjunganOnline/pasien_poli')->name('ruang-layanan.kunjungan-online');
-    Route::inertia('/simpus/kunjungan-online/pelayanan', 'Ruang_Layanan/KunjunganOnline/pelayanan')->name('ruang-layanan.kunjungan-online.pelayanan');
+
+    // 🔹 Kunjungan Online
+// 🔹 Kunjungan Online
+Route::get('simpus/kunjungan-online', [KunjOnlineController::class, 'index'])
+    ->name('ruang-layanan.kunjungan-online');
+
+Route::get('simpus/kunjungan-online/pelayanan/{id}', [KunjOnlineController::class, 'pelayanan'])
+    ->name('ruang-layanan.kunjungan-online.pelayanan');
+
+Route::post('simpus/kunjungan-online/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])
+    ->name('ruang-layanan-kunjungan-online.setAnamnesa');
+
+Route::post('simpus/kunjungan-online/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])
+    ->name('ruang-layanan-kunjungan-online.setAnamnesaObjective');
+
+Route::post('simpus/kunjungan-online/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])
+    ->name('ruang-layanan-kunjungan-online.mulai-pemeriksaan-pasien');
+
+Route::post('simpus/kunjungan-online/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])
+    ->name('ruang-layanan-kunjungan-online.diagnosa-medis');
+
+// Halaman daftar surat rujukan (opsional)
+Route::get('simpus/kunjungan-online/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])
+    ->name('ruang-layanan.kunjungan-online.surat-rujukan');
+
+// Tampilkan form Surat Rujukan
+Route::get('simpus/kunjungan-online/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])
+    ->name('ruang-layanan.kunjungan-online.surat-rujukan.create');
+
+// Simpan Surat Rujukan
+Route::post('simpus/kunjungan-online/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])
+    ->name('ruang-layanan.kunjungan-online.surat-rujukan.store');
+
+    // Riwayat Kesehatan (Medical Record) Pasien
+Route::get('simpus/kunjungan-online/{id}/riwayat-kesehatan', 
+    [KunjOnlineController::class, 'riwayatKesehatan']
+)->name('ruang-layanan.kunjungan-online.riwayat-kesehatan');
+
+
+// CPPT (Catatan Perkembangan Pasien Terintegrasi)
+Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class,'cppt'])
+    ->name('ruang-layanan.kunjungan-online.cppt');
+
+
+
 
     //Sanitasi
     Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
     Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
-
-    // Menampilkan pelayanan
-    Route::get('/simpus/pelayanan', [RuangLayananController::class, 'layanan'])
-        ->name('ruang-layanan-umum.pelayanan');
-});
-
-Route::get('/cek-db', function () {
-    $tables = DB::select('SHOW TABLES');
-    return response()->json($tables);
-
-    //Gizi
+ //Gizi
     Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
     Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
 
@@ -268,4 +332,11 @@ Route::get('/cek-db', function () {
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
 
     Route::inertia('/nyoba', 'Ruang_Layanan/Umum/parent')->name('nyoba');
+});
+
+Route::get('/cek-db', function () {
+    $tables = DB::select('SHOW TABLES');
+    return response()->json($tables);
+
+   
 });
