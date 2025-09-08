@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Farmasi;
 
 use App\Http\Controllers\Controller;
-use App\Models\MasterObat;
+use App\Models\Farmasi\MasterObat;
 use Illuminate\Http\Request;
 
 class MasterObatController extends Controller
@@ -11,22 +11,35 @@ class MasterObatController extends Controller
     // 📌 Ambil semua data obat
     public function index()
     {
-        return response()->json(MasterObat::all(), 200);
+        $obat = MasterObat::all();
+        return response()->json($obat);
     }
 
     // 📌 Tambah data obat baru
     public function store(Request $request)
     {
         $request->validate([
-            'kode_obat' => 'required|unique:master_obat',
-            'nama_obat' => 'required|string|max:255',
-            'satuan_obat' => 'required|string|max:50',
-            'stok' => 'required|integer|min:0'
+            'obat_id' => 'required|integer|max:20',
+            'kode_obat' => 'required|string|max:50',
+            'nama' => 'required|string|max:255',
+            'satuan' => 'nullable|string|max:100',
+            'jenis' => 'nullable|string|max:100',
+            'golongan' => 'nullable|string|max:100',
+            'sumber' => 'nullable|string|max:100',
+            'tahun' => 'nullable|integer',
+            'harga' => 'nullable|numeric',
+            'isi' => 'nullable|string|max:50',
+            'rek' => 'nullable|string|max:50',
+            'aktif' => 'nullable|boolean',
+            'created_date' => 'nullable|date',
         ]);
 
         $obat = MasterObat::create($request->all());
 
-        return response()->json($obat, 201);
+        return response()->json([
+            'message' => 'Obat berhasil ditambahkan',
+            'data' => $obat
+        ], 201);
     }
 
     // 📌 Tampilkan detail obat berdasarkan id
@@ -42,14 +55,26 @@ class MasterObatController extends Controller
         $obat = MasterObat::findOrFail($id);
 
         $request->validate([
-            'nama_obat' => 'string|max:255',
-            'satuan_obat' => 'string|max:50',
-            'stok' => 'integer|min:0'
+            'kode_obat' => 'sometimes|required|string|max:50',
+            'nama' => 'sometimes|required|string|max:255',
+            'satuan' => 'nullable|string|max:100',
+            'jenis' => 'nullable|string|max:100',
+            'golongan' => 'nullable|string|max:100',
+            'sumber' => 'nullable|string|max:100',
+            'tahun' => 'nullable|integer',
+            'harga' => 'nullable|numeric',
+            'isi' => 'nullable|string|max:50',
+            'rek' => 'nullable|string|max:50',
+            'aktif' => 'nullable|boolean',
+            'created_date' => 'nullable|date',
         ]);
 
         $obat->update($request->all());
 
-        return response()->json($obat, 200);
+        return response()->json([
+            'message' => 'Obat berhasil diperbarui',
+            'data' => $obat
+        ]);
     }
 
     // 📌 Hapus obat

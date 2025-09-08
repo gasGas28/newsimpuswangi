@@ -20,7 +20,9 @@ Route::get('/', function () {
     return Inertia::render('Templete/Index');
 })->name('home');
 
-
+Route::get('/tes', function () {
+    return 'Laravel jalan normal';
+});
 
 // Login
 Route::get('/login', fn () => Inertia::render('Auth/Login'))->name('login');
