@@ -20,7 +20,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -200,7 +200,13 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Promkes
     Route::prefix('promkes')->name('promkes.')->group(function () {
         Route::inertia('/', 'MalSehat/Promkes/Index')->name('index');
-        Route::inertia('kesehatanpeduliremaja', 'MalSehat/Promkes/KesehatanPeduliRemaja')->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja', [\App\Http\Controllers\MalSehat\PromkesController::class, 'kesehatanPeduliRemaja'])
+            ->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
+            ->name('kesehatanpeduliremaja.pelayanan')
+            ->middleware('web');
     });
 
     // Lain-lain
