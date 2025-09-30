@@ -12,7 +12,7 @@
           <a href="" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'status_generalis' }"
             @click.prevent="currrentSubTabObjective = 'status_generalis'">Status Generalis ></a>
-          <a v-if="halaman === 'gigi' && currrentSub === true" href="" class="text-decoration-none text-primary"
+          <a v-if="props.halaman === 'gigi'" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'pemeriksaan_intra_oral_gigi' }"
             @click.prevent="currrentSubTabObjective = 'pemeriksaan_intra_oral_gigi'">Pemeriksaan Intra Oral Gigi ></a>
           <a href="" class="text-decoration-none text-primary"
@@ -23,14 +23,14 @@
           <div class="col-6">
             <div class="mb-3">
               <label for="tanggal-anamnesa" class="form-label fw-bold">Tanggal Anamnesa</label>
-              <input type="datetime-local" id="tanggal-anamnesa" class="form-control"  v-model="form.tanggal_anamnesa">
+              <input type="datetime-local" id="tanggal-anamnesa" class="form-control" v-model="form.tanggal_anamnesa">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Keadaan Umum</label>
               <div class="d-flex gap-4">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" value="Baik"  v-model="form.keadaan_umum">
+                  <input class="form-check-input" type="radio" value="Baik" v-model="form.keadaan_umum">
                   <label class="form-check-label">Baik</label>
                 </div>
                 <div class="form-check">
@@ -121,14 +121,16 @@
               <div class="row mb-3">
                 <div class="col-4">
                   <label class="form-label">Jantung</label>
-                  <select class="form-select" id="jantung" v-model="form.jantung"  @change="changeInputKet('jantung', 'ket_jantung')">
+                  <select class="form-select" id="jantung" v-model="form.jantung"
+                    @change="changeInputKet('jantung', 'ket_jantung')">
                     <option value="NORMAL">NORMAL</option>
                     <option value="ABNORMAL">ABNORMAL</option>
                   </select>
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control" :class="{'bg-light': form.jantung !== 'ABNORMAL'}" :readonly="form.jantung !== 'ABNORMAL'" v-model="form.ket_jantung" >
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.jantung !== 'ABNORMAL' }"
+                    :readonly="form.jantung !== 'ABNORMAL'" v-model="form.ket_jantung">
                 </div>
               </div>
 
@@ -142,7 +144,8 @@
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.pulmo !== 'ABNORMAL'}" :readonly="form.pulmo !== 'ABNORMAL'" readonly v-model="form.ket_pulmo">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.pulmo !== 'ABNORMAL' }"
+                    :readonly="form.pulmo !== 'ABNORMAL'" readonly v-model="form.ket_pulmo">
                 </div>
               </div>
 
@@ -151,28 +154,32 @@
               <div class="row mb-3">
                 <div class="col-4">
                   <label class="form-label">Atas</label>
-                  <select class="form-select" v-model="form.abdomen_atas" @change="changeInputKet('abdomen_atas', 'ket_abdomen_atas')">
+                  <select class="form-select" v-model="form.abdomen_atas"
+                    @change="changeInputKet('abdomen_atas', 'ket_abdomen_atas')">
                     <option value="NORMAL">NORMAL</option>
                     <option value="ABNORMAL">ABNORMAL</option>
                   </select>
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.abdomen_atas !== 'ABNORMAL'}" :readonly="form.abdomen_atas !== 'ABNORMAL'" readonly v-model="form.ket_abdomen_atas">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.abdomen_atas !== 'ABNORMAL' }"
+                    :readonly="form.abdomen_atas !== 'ABNORMAL'" readonly v-model="form.ket_abdomen_atas">
                 </div>
               </div>
 
               <div class="row mb-3">
                 <div class="col-4">
                   <label class="form-label">Bawah</label>
-                  <select class="form-select" v-model="form.abdomen_bawah" @change="changeInputKet('abdomen_bawah', 'ket_abdomen_bawah')">
+                  <select class="form-select" v-model="form.abdomen_bawah"
+                    @change="changeInputKet('abdomen_bawah', 'ket_abdomen_bawah')">
                     <option value="NORMAL">NORMAL</option>
                     <option value="ABNORMAL">ABNORMAL</option>
                   </select>
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.abdomen_bawah !== 'ABNORMAL'}" :readonly="form.abdomen_bawah !== 'ABNORMAL'" readonly v-model="form.ket_abdomen_bawah">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.abdomen_bawah !== 'ABNORMAL' }"
+                    :readonly="form.abdomen_bawah !== 'ABNORMAL'" readonly v-model="form.ket_abdomen_bawah">
                 </div>
               </div>
 
@@ -181,28 +188,33 @@
               <div class="row mb-3">
                 <div class="col-4">
                   <label class="form-label">Atas</label>
-                  <select class="form-select" v-model="form.extrimitas_atas" @change="changeInputKet('extrimitas_atas', 'ket_extrimitas_atas')">
+                  <select class="form-select" v-model="form.extrimitas_atas"
+                    @change="changeInputKet('extrimitas_atas', 'ket_extrimitas_atas')">
                     <option value="NORMAL">NORMAL</option>
                     <option value="ABNORMAL">ABNORMAL</option>
                   </select>
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control bg-light"  :class="{'bg-light': form.extrimitas_atas !== 'ABNORMAL'}" :readonly="form.extrimitas_atas !== 'ABNORMAL'" readonly v-model="form.ket_extrimitas_atas">
+                  <input type="text" class="form-control bg-light"
+                    :class="{ 'bg-light': form.extrimitas_atas !== 'ABNORMAL' }"
+                    :readonly="form.extrimitas_atas !== 'ABNORMAL'" readonly v-model="form.ket_extrimitas_atas">
                 </div>
               </div>
 
               <div class="row mb-3">
                 <div class="col-4">
                   <label class="form-label">Bawah</label>
-                  <select class="form-select" v-model="form.extrimitas_bawah" @change="changeInputKet('extrimitas_bawah', 'ket_extrimitas_bawah')">
+                  <select class="form-select" v-model="form.extrimitas_bawah"
+                    @change="changeInputKet('extrimitas_bawah', 'ket_extrimitas_bawah')">
                     <option value="NORMAL">NORMAL</option>
                     <option value="ABNORMAL">ABNORMAL</option>
                   </select>
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.extrimitas_bawah !== 'ABNORMAL'}" :readonly="form.extrimitas_bawah !== 'ABNORMAL'" readonly v-model="form.ket_extrimitas_bawah">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.extrimitas_bawah !== 'ABNORMAL' }"
+                    :readonly="form.extrimitas_bawah !== 'ABNORMAL'" readonly v-model="form.ket_extrimitas_bawah">
                 </div>
               </div>
             </div>
@@ -221,7 +233,8 @@
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.kepala !== 'ABNORMAL'}" :readonly="form.kepala !== 'ABNORMAL'" readonly v-model="form.ket_kepala">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.kepala !== 'ABNORMAL' }"
+                    :readonly="form.kepala !== 'ABNORMAL'" readonly v-model="form.ket_kepala">
                 </div>
               </div>
 
@@ -235,7 +248,8 @@
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.mata !== 'ABNORMAL'}" :readonly="form.mata !== 'ABNORMAL'" readonly v-model="form.ket_mata">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.mata !== 'ABNORMAL' }"
+                    :readonly="form.mata !== 'ABNORMAL'" readonly v-model="form.ket_mata">
                 </div>
               </div>
 
@@ -249,7 +263,8 @@
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.telinga !== 'ABNORMAL'}" :readonly="form.telinga !== 'ABNORMAL'"readonly v-model="form.ket_telinga">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.telinga !== 'ABNORMAL' }"
+                    :readonly="form.telinga !== 'ABNORMAL'" readonly v-model="form.ket_telinga">
                 </div>
               </div>
 
@@ -263,21 +278,21 @@
                 </div>
                 <div class="col-8">
                   <label class="form-label">Keterangan</label>
-                  <input type="text" class="form-control"  :class="{'bg-light': form.leher !== 'ABNORMAL'}" :readonly="form.leher !== 'ABNORMAL'"readonly v-model="form.ket_leher">
+                  <input type="text" class="form-control" :class="{ 'bg-light': form.leher !== 'ABNORMAL' }"
+                    :readonly="form.leher !== 'ABNORMAL'" readonly v-model="form.ket_leher">
                 </div>
               </div>
             </div>
           </div>
         </div>
-
         <div name="form-intra-oral-gigi" v-if="currrentSubTabObjective === 'pemeriksaan_intra_oral_gigi'">
-          <FormPemeriksaanIntraOralGigi></FormPemeriksaanIntraOralGigi>
+          <FormPemeriksaanIntraOralGigi :form="form"></FormPemeriksaanIntraOralGigi>
         </div>
         <div class="card-body" v-if="currrentSubTabObjective === 'tenaga_medis'">
           <div class="row">
-            <slot name="keterangan-gigi">
-            </slot>
             <div class="col-6">
+              <slot name="status_pasien">
+              </slot>
               <label for="" class="fw-bold">Tenaga Media Askep</label>
               <select class="form-control my-3" name="" id="tenaga_medis_askep" v-model="form.tenaga_medis_askep">
                 <option value="pract1">Practioner 1</option>
@@ -296,20 +311,21 @@ import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 const currrentSubTabObjective = ref('pemeriksaan_fisik');
 import FormPemeriksaanIntraOralGigi from './FormPemeriksaanIntraOralGigi.vue';
-function pesan() {
-  alert('tes')
-}
+const emit = defineEmits(['dataAnamnesa-update']);
+import { watch } from 'vue';
+
 const props = defineProps({
   currrentSub: String,
   halaman: String,
   dataKesadaran: Object,
-  dataAnamnesa:Object,
+  dataAnamnesa: Object,
+  routeName: String,
+  statusPasien: String,
 });
-
-console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
+console.log(props.halaman, 'data anamnesa dari tab objective');
 
 const form = useForm({
-  idAnamnesa:props.dataAnamnesa.idAnamnesa,
+  idAnamnesa: props.dataAnamnesa.idAnamnesa,
   tanggal_anamnesa: props.dataAnamnesa.tglAnamnesa,
   keadaan_umum: props.dataAnamnesa.keadaanUmum,
   kesadaran: props.dataAnamnesa.kdSadar,
@@ -326,41 +342,52 @@ const form = useForm({
   suhu: props.dataAnamnesa.suhu,
 
   jantung: props.dataAnamnesa.thoraxJantung ?? 'NORMAL',
-  ket_jantung:  props.dataAnamnesa.thoraxJantungKet,
+  ket_jantung: props.dataAnamnesa.thoraxJantungKet,
   pulmo: props.dataAnamnesa.thoraxPulmo ?? 'NORMAL',
-  ket_pulmo:  props.dataAnamnesa.thoraxPulmoKet,
-  abdomen_atas: props.dataAnamnesa.abdomanAtas ??'NORMAL',
-  ket_abdomen_atas:  props.dataAnamnesa.abdomanAtasKet,
-  abdomen_bawah: props.dataAnamnesa.abdomanBawah ??'NORMAL',
-  ket_abdomen_bawah:  props.dataAnamnesa.abdomanBawahket,
-  extrimitas_atas:props.dataAnamnesa.extrimitasAtas ?? 'NORMAL',
-  ket_extrimitas_atas:  props.dataAnamnesa.extrimitasAtasKet,
-  extrimitas_bawah:props.dataAnamnesa.extrimitasBawah ?? 'NORMAL',
-  ket_extrimitas_bawah:  props.dataAnamnesa.extrimitasBawahKet,
-  kepala: props.dataAnamnesa.kepala ??'NORMAL',
-  ket_kepala:  props.dataAnamnesa.kepalaKet,
-  mata: props.dataAnamnesa.mata ??'NORMAL',
-  ket_mata:  props.dataAnamnesa.mataKet,
-  telinga: props.dataAnamnesa.telinga ??'NORMAL',
-  ket_telinga:  props.dataAnamnesa.telingatKet,
-  leher:props.dataAnamnesa.leher ??'NORMAL',
+  ket_pulmo: props.dataAnamnesa.thoraxPulmoKet,
+  abdomen_atas: props.dataAnamnesa.abdomanAtas ?? 'NORMAL',
+  ket_abdomen_atas: props.dataAnamnesa.abdomanAtasKet,
+  abdomen_bawah: props.dataAnamnesa.abdomanBawah ?? 'NORMAL',
+  ket_abdomen_bawah: props.dataAnamnesa.abdomanBawahket,
+  extrimitas_atas: props.dataAnamnesa.extrimitasAtas ?? 'NORMAL',
+  ket_extrimitas_atas: props.dataAnamnesa.extrimitasAtasKet,
+  extrimitas_bawah: props.dataAnamnesa.extrimitasBawah ?? 'NORMAL',
+  ket_extrimitas_bawah: props.dataAnamnesa.extrimitasBawahKet,
+  kepala: props.dataAnamnesa.kepala ?? 'NORMAL',
+  ket_kepala: props.dataAnamnesa.kepalaKet,
+  mata: props.dataAnamnesa.mata ?? 'NORMAL',
+  ket_mata: props.dataAnamnesa.mataKet,
+  telinga: props.dataAnamnesa.telinga ?? 'NORMAL',
+  ket_telinga: props.dataAnamnesa.telingatKet,
+  leher: props.dataAnamnesa.leher ?? 'NORMAL',
   ket_leher: props.dataAnamnesa.leherKet,
-  tenaga_medis_askep: props.dataAnamnesa.tenagaMedisAskep
+  tenaga_medis_askep: props.dataAnamnesa.tenagaMedisAskep,
+
+  perkusi: props.dataAnamnesa.perkusi ?? '',
+  druk: props.dataAnamnesa.druk ?? '',
+  palpasi: props.dataAnamnesa.palpasi ?? '',
+  luxasi: props.dataAnamnesa.luxasi ?? '',
+  vitalitas: props.dataAnamnesa.vitalitas ?? '',
+  statusPasien: props.statusPasien ?? ''
 });
 
-function changeInputKet(field, ketfield){
-  if(form[field] !== 'ABNORMAL')  {
-    form[ketfield]= '';
+function changeInputKet(field, ketfield) {
+  if (form[field] !== 'ABNORMAL') {
+    form[ketfield] = '';
   }
 }
 
 function submitForm() {
-  form.post(route('ruang-layanan-umum.setAnamnesaObjective'), {
-      preserveScroll: true,
-      onSuccess: () => {
-        alert("Anamnesa Objective tersimpan");
-      },
-    })
+  form.post(route(props.routeName), {
+    preserveScroll: true,
+    onSuccess: () => {
+      alert("Anamnesa Objective tersimpan");
+      emit('dataAnamnesa-update');
+    },
+  })
 }
+watch(() => props.statusPasien, (newVal) => {
+  form.statusPasien = newVal;
+});
 
 </script>
