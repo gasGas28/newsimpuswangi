@@ -20,8 +20,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
-use DB;
-
+use Illuminate\Support\Facades\DB;
 
 
 Route::get('/', function () {
@@ -72,10 +71,12 @@ Route::prefix('filter')->controller(FilterController::class)->group(function () 
 });
 
 // Grup Loket
-Route::prefix('loket')->controller(PasienController::class)->group(function () {
+Route::prefix('pasien')->controller(PasienController::class)->group(function () {
     // Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
+    Route::get('/', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
     Route::get('/search', 'index')->name('loket.search');
+    Route::get('/{id}/edit', 'edit')->name('loket.edit');
+    Route::post('/{id}', 'update')->name('pasien.update');
 });
 
 // Grup Templete
@@ -269,4 +270,13 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
     Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+
+    Route::inertia('/nyoba', 'Ruang_Layanan/Umum/parent')->name('nyoba');
 });
+
+Route::get('/cek-db', function () {
+    $tables = DB::select('SHOW TABLES');
+    return response()->json($tables);
+    
+});
+
