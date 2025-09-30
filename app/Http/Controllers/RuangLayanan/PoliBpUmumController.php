@@ -5,10 +5,11 @@ namespace App\Http\Controllers\RuangLayanan;
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\DataMasterUnitDetail;
 use App\Models\RuangLayanan\SimpusLoket;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Str;
+use Illuminate\Support\Str;
+
 
 class PoliBpUmumController extends Controller
 {

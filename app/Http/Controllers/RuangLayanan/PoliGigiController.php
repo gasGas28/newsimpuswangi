@@ -4,7 +4,7 @@ namespace App\Http\Controllers\RuangLayanan;
 
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\DataMasterUnitDetail;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
