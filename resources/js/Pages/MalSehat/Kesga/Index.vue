@@ -1,19 +1,20 @@
 <script setup>
 import AppLayout from '@/Components/Layouts/AppLayouts.vue'
+import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 defineOptions({ layout: AppLayout })
 
-const layananKesga = [
-  { nama: 'Konseling Catin', file: 'KonselingCatin' },
-  { nama: 'Konseling & Pelayanan Calon Jamaah Haji', file: 'KonselingHaji' },
-  { nama: 'Konseling & Pelayanan Imunisasi', file: 'KonselingImunisasi' },
-  { nama: 'Konseling Kesehatan Bayi & Anak', file: 'KonselingAnak' },
-  { nama: 'Konseling Kesehatan Ibu', file: 'KonselingIbu' },
-  { nama: 'Konseling Kesehatan KB', file: 'KonselingKB' },
-  { nama: 'Konsultasi Gizi & Pencegahan Stunting', file: 'KonsultasiGizi' },
-  { nama: 'Konsultasi Kesehatan Lansia', file: 'KonsultasiLansia' },
-]
+const layananKesga = ref([
+  { nama: 'Konseling Catin', file: 'KonselingCatin', jumlah: 0 },
+  { nama: 'KonsPel Calon Jamaah Haji', file: 'KonselingHaji', jumlah: 0 },
+  { nama: 'KonsPel Imunisasi', file: 'KonselingImunisasi', jumlah: 0 },
+  { nama: 'Konseling Kesehatan Bayi dan Anak', file: 'KonselingAnak', jumlah: 0 },
+  { nama: 'Konseling Kesehatan Ibu', file: 'KonselingIbu', jumlah: 0 },
+  { nama: 'Konseling Kesehatan KB', file: 'KonselingKB', jumlah: 0 },
+  { nama: 'KonGiz Stunting', file: 'KonsultasiGizi', jumlah: 0 },
+  { nama: 'Konsultasi Kesehatan Lansia', file: 'KonsultasiLansia', jumlah: 0 },
+])
 
 function navigateToLayanan(file) {
   router.get(`/mal-sehat/kesga/${file.toLowerCase()}`)
@@ -23,67 +24,78 @@ function kembali() {
   router.get('/mal-sehat')
 }
 
-function getIcon(nama) {
+function getIconClass(nama) {
   if (nama.includes('Catin')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/love.png'
+    return { icon: 'bi bi-heart-fill', bg: '#ec4899' }
   } else if (nama.includes('Haji')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/kaaba.png'
+    return { icon: 'bi bi-moon-stars', bg: '#f59e0b' }
   } else if (nama.includes('Imunisasi')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/syringe.png'
+    return { icon: 'bi bi-syringe', bg: '#3b82f6' }
   } else if (nama.includes('Bayi') || nama.includes('Anak')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/baby.png'
+    return { icon: 'bi bi-emoji-smile', bg: '#fbbf24' }
   } else if (nama.includes('Ibu')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/pregnant.png'
+    return { icon: 'bi bi-person-heart', bg: '#f472b6' }
   } else if (nama.includes('KB')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/family.png'
+    return { icon: 'bi bi-people', bg: '#10b981' }
   } else if (nama.includes('Gizi')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/salad.png'
+    return { icon: 'bi bi-basket-fill', bg: '#84cc16' }
   } else if (nama.includes('Lansia')) {
-    return 'https://img.icons8.com/ios-filled/50/000000/elderly-person.png'
+    return { icon: 'bi bi-person', bg: '#6b7280' }
   }
-  return 'https://img.icons8.com/ios-filled/50/000000/info.png'
+  return { icon: 'bi bi-info-circle', bg: '#6b7280' }
 }
+
+const currentDate = new Date().toLocaleDateString('id-ID', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+})
 </script>
 
 <template>
-  <div class="card shadow-sm border-0">
-    <div class="card-header bg-white text-dark fw-bold fs-5 border-bottom d-flex justify-content-between align-items-center">
-      <span>KESGA - Layanan Kesehatan Keluarga</span>
-      <button class="btn btn-sm btn-outline-secondary" @click="kembali">← Kembali</button>
-    </div>
+    <div class="container my-2">
+      <!-- Header -->
+      <div
+        class="p-4 rounded mb-4 text-white d-flex justify-content-between align-items-center"
+        style="background: linear-gradient(135deg, #f59e0b, #ec4899);"
+      >
+        <div>
+          <h1 class="h4 mb-2">Layanan - Kesehatan Keluarga</h1>
+          <div class="bg-white bg-opacity-25 d-inline-block px-3 py-2 rounded-pill mt-2">
+            <i class="fas fa-calendar-alt me-2"></i>
+            {{ currentDate }}
+          </div>
+        </div>
+        <button class="btn btn-light btn-sm" @click="kembali">← Kembali</button>
+      </div>
 
-    <div class="card-body bg-light-subtle p-3">
-      <div class="row g-3">
+      <!-- Cards -->
+      <div class="row g-4">
         <div
+          class="col-6 col-md-4 col-lg-3"
           v-for="item in layananKesga"
           :key="item.file"
-          class="col-12 col-sm-6 col-lg-4"
         >
           <div
-            class="card h-100 border-0 shadow-sm hover-shadow bg-white rounded-0 cursor-pointer"
+            class="card shadow cursor-pointer"
             @click="navigateToLayanan(item.file)"
           >
-            <div class="card-body d-flex justify-content-between align-items-center p-2">
-              <div class="text-dark">
-                <h6 class="mb-1">{{ item.nama }}</h6>
-                <small>Belum ada data</small>
+            <div class="card-body text-center">
+              <div
+                class="mb-3 rounded-4 d-flex justify-content-center align-items-center mx-auto"
+                :style="{ width: '60px', height: '60px', backgroundColor: getIconClass(item.nama).bg }"
+              >
+                <i :class="getIconClass(item.nama).icon" class="text-white fs-2"></i>
               </div>
-              <img
-                :src="getIcon(item.nama)"
-                alt="icon"
-                class="opacity-50"
-                style="width: 30px; height: 30px;"
-              />
+              <h6 class="card-title mb-2">{{ item.nama }}</h6>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">Total Pasien</small>
+                <strong class="fs-4">{{ item.jumlah }}</strong>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
-
-<style scoped>
-.hover-shadow:hover {
-  box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.04);
-}
-</style>

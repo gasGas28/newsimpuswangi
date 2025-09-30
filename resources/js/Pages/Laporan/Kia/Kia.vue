@@ -1,78 +1,96 @@
 <template>
   <AppLayout title="Template Components">
-    <div class="container py-4">
+    <div class="container py-4" style="font-family: 'Segoe UI', sans-serif;">
 
+      <div class="card mb-4 shadow-sm">
+        <!-- Header gradient -->
+        <div class="card-header fw-bold text-white"
+             style="background: linear-gradient(135deg, #0d6efd, #20c997); transition: 0.3s;">
+          Filter Data Laporan KIA
+        </div>
 
-      <div class="card mb-4">
-  <div class="card-body">
-<h5 class="mb-3 fw-bold">
-  <span class="d-inline-block w-100 px-2 py-1 text-white" style="background-color: #198754;">
-    Filter Data Laporan Kia
-  </span>
-</h5>
-    <form>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Puskesmas</div>
-        <div class="col-md-5">
-          <select class="form-select">
-            <option>WONGSOREJO</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Laporan</div>
-        <div class="col-md-5">
-          <select class="form-select">
-            <option>1. LAPORAN REGISTER KIA</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Tgl Awal</div>
-        <div class="col-md-5">
-          <input type="text" class="form-control" value="02-07-2025" />
-        </div>
-      </div>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Tgl Akhir</div>
-        <div class="col-md-5">
-          <input type="text" class="form-control" value="01-07-2025" />
-        </div>
-      </div>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Unit</div>
-        <div class="col-md-5">
-          <select class="form-select">
-            <option>PUSKESMAS</option>
-          </select>
-        </div>
-      </div>
-      <div class="row mb-2 align-items-center">
-        <div class="col-md-2 fw-bold">Sub Unit</div>
-        <div class="col-md-5">
-          <select class="form-select">
-            <option>PUSKESMAS WONGSOREJO</option>
-          </select>
-        </div>
-      </div>
-      <div class="mt-3">
-        <button type="button" class="btn btn-primary me-2">
-          <i class="bi bi-printer me-1"></i> Tampilkan Data
-        </button>
-        <button type="button" class="btn btn-info text-white">
-          <i class="bi bi-download me-1"></i> Download Excel
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+        <div class="card-body">
+          <form>
+            <!-- Puskesmas -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Puskesmas</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option>WONGSOREJO</option>
+                </select>
+              </div>
+            </div>
 
+            <!-- Laporan -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Laporan</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option>1. LAPORAN REGISTER KIA</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tgl Awal -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Tgl Awal</label>
+              <div class="col-md-6">
+                <input type="text" class="form-control" value="02-07-2025" />
+              </div>
+            </div>
+
+            <!-- Tgl Akhir -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Tgl Akhir</label>
+              <div class="col-md-6">
+                <input type="text" class="form-control" value="01-07-2025" />
+              </div>
+            </div>
+
+            <!-- Unit -->
+            <div class="row mb-3">
+              <label class="col-md-2 col-form-label fw-semibold">Unit</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option>PUSKESMAS</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sub Unit -->
+            <div class="row mb-4">
+              <label class="col-md-2 col-form-label fw-semibold">Sub Unit</label>
+              <div class="col-md-6">
+                <select class="form-select">
+                  <option>PUSKESMAS WONGSOREJO</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tombol -->
+            <div class="row">
+              <div class="col-md-8 offset-md-2 d-flex flex-wrap gap-3">
+                <button type="button" class="btn btn-gradient text-white border-0 px-4 py-2 fw-semibold rounded">
+                  <i class="bi bi-printer me-1"></i> Tampilkan Data
+                </button>
+
+                <button type="button" class="btn btn-gradient text-white border-0 px-4 py-2 fw-semibold rounded">
+                  <i class="bi bi-download me-1"></i> Download Excel
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
 
     </div>
   </AppLayout>
 </template>
 
+
 <script setup>
 import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+import '@/../css/laporan-css/form-styles.css'; // sesuaikan path-nya
+
 </script>

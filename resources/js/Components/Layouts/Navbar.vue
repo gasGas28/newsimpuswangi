@@ -30,13 +30,23 @@
             </Link>
           </li>
           <li class="nav-item">
+            <Link :href="route('home.home')" class="nav-link d-flex align-items-center">
+              <i class="bi bi-ticket-perforated me-2"></i> Dashboard
+            </Link>
+          </li>
+          <li class="nav-item">
             <Link :href="route('loket.index')" class="nav-link d-flex align-items-center">
               <i class="bi bi-ticket-perforated me-2"></i> Loket
             </Link>
           </li>
           <li class="nav-item">
+            <Link class="nav-link" href="/farmasi">
+              <i class="bi bi-capsule me-1"></i> Farmasi
+            </Link>
+          </li>
+          <li class="nav-item">
             <Link :href="route('ruang-layanan.poli')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-ticket-perforated me-2"></i> RUang Layanan
+              <i class="bi bi-ticket-perforated me-2"></i> Ruang Layanan
             </Link>
           </li>
           <li class="nav-item">

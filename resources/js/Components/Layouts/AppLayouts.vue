@@ -9,12 +9,12 @@
 </template>
 
 <script setup>
-import Navbar from '@/Components/Layouts/Navbar.vue';
-import Footer from '@/Components/Layouts/Footer.vue';
+  import Navbar from '@/Components/Layouts/Navbar.vue';
+  import Footer from '@/Components/Layouts/Footer.vue';
 </script>
 
 <style scoped>
-main {
-  background-color: #f8f9fa;
-}
+  main {
+    background-color: #f8f9fa;
+  }
 </style>

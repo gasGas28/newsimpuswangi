@@ -58,7 +58,11 @@
             <button class="btn btn-primary">Normal</button>
             <button class="btn btn-primary" disabled>Disabled</button>
             <button class="btn btn-primary">
-              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
               Loading...
             </button>
           </div>
@@ -69,6 +73,6 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Components/Layouts/AppLayouts.vue'
-import { Link } from '@inertiajs/vue3'
+  import AppLayout from '@/Components/Layouts/AppLayouts.vue';
+  import { Link } from '@inertiajs/vue3';
 </script>
