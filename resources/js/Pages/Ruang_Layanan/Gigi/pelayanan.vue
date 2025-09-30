@@ -1,68 +1,75 @@
 <template>
-    <AppLayouts>
+  <AppLayouts>
     <div class="card m-4  rounded-4 rounded-bottom-0">
-    <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"  style="background: linear-gradient(135deg, #3b82f6, #10b981);" >
+      <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"
+        style="background: linear-gradient(135deg, #3b82f6, #10b981);">
         <h1 class="fs-5 text-white">BP GIGI</h1>
         <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
         <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
-      </Link>
+        </Link>
       </div>
-    <div class="card-body">
-    <PelayananPasien :isMelayani="isMelayani" @ubah-melayani="handleMelayani">
-      <div class="shadow-sm rounded-5">
-    <NavigasiFormPemeriksaan :currentTab="currentTab"  @change-currentTab="currentTab = $event" >
-    </NavigasiFormPemeriksaan>
-    <div class="m-4 pb-4 row gx-5">
-    <FormPelayananSubjective v-if="currentTab === 'subjective'">
-    </FormPelayananSubjective>
-    <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="gigi">
-    </FormPelayananObjective>
-    <FormPelayananAssesment v-if="currentTab === 'assesment'">
-    </FormPelayananAssesment>
-    <FormPelayananPlanning v-if="currentTab === 'planning'">
-          <div class="mb-3 row">
-            <div class="col-sm-6">
-              <div class="border p-3">
-                <div
-                  v-for="(baris, index) in layoutKursi"
-                  :key="index"
-                  class="border border-dark d-flex justify-content-center mb-2 flex-wrap"
-                >
-                  <div
-                    v-for="(kursi, i) in baris"
-                    :key="i"
-                    class="d-flex flex-column align-items-center my-1 fw-bold"
-                    style="width: 40px"
-                  >
-                    <input
-                      type="checkbox"
-                      class="form-check-input mb-1"
-                      :id="'kursi-' + kursi.nomor"
-                      v-model="kursi.terpilih"
-                    />
-                    <label :for="'kursi-' + kursi.nomor" style="font-size: 12px">{{
-                      kursi.nomor
-                    }}</label>
+      <div class="card-body">
+        <PelayananPasien @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien" :dataAnamnesa="DataAnamnesa">
+          <div class="shadow-sm rounded-5">
+            <NavigasiFormPemeriksaan :currentTab="currentTab" @change-currentTab="currentTab = $event">
+            </NavigasiFormPemeriksaan>
+            <div class="m-4 pb-4 row gx-5">
+              <FormPelayananSubjective v-if="currentTab === 'subjective'" :idLoket="DataPasien.idLoket"
+                :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi" :routeName="routeNameFormSubjective" :idPasien="DataPasien.ID" :AlergiPasien="AlergiPasien" @dataAnamnesa-update="refreshDataAnamnesa">
+              </FormPelayananSubjective>
+              <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="gigi"
+                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" :routeName="routeNameFormObjective" :statusPasien="statusPasien">
+                <template #status_pasien>
+                  <div>
+                    <label for="" class="fw-bold">Status</label>
+                    <select class="form-control my-3" v-model="statusPasien">
+                      <option value="anak sekolah">ANAK SEKOLAH</option>
+                      <option value="apras">APRAS</option>
+                      <option value="bumil">BUMIL</option>
+                      <option value="umum">UMUM</option>
+                    </select>
+                  </div>
+                </template>
+              </FormPelayananObjective>
+              <FormPelayananAssesment v-if="currentTab === 'assesment'" :diagnosaKasus="DiagnosaKasus"
+                :dataPasien="DataPasien" routeDiagnosaMedis="ruang-layanan-gigi.diagnosa-medis" :AlergiPasien="AlergiPasien"
+                :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis" @dataAnamnesa-update="refreshDataAnamnesa">
+              </FormPelayananAssesment>
+              <FormPelayananPlanning v-if="currentTab === 'planning'" :dataTindakan="DataTindakan"
+                :dataPasien="DataPasien" :simpusTindakan="SimpusTindakan" :keterangangigi="keterangangigi"
+                routePlanningTindakan="ruang-layanan-gigi.set-PlanningTindakan" :simpusResepObat="SimpusResepObat" :MasterObat="MasterObat">
+                <div class="mb-3 row">
+                  <div class="col-sm-6">
+                    <div class="border p-3">
+                      <div v-for="(baris, index) in layoutKursi" :key="index"
+                        class="border border-dark d-flex justify-content-center mb-2 flex-wrap">
+                        <div v-for="(kursi, i) in baris" :key="i"
+                          class="d-flex flex-column align-items-center my-1 fw-bold" style="width: 40px">
+                          <input type="checkbox" class="form-check-input mb-1" :id="'kursi-' + kursi.nomor"
+                            v-model="kursi.terpilih" />
+                          <label :for="'kursi-' + kursi.nomor" style="font-size: 12px">{{
+                            kursi.nomor
+                          }}</label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+                <div class="mb-3 row align-items-center">
+                  <label class="col-sm-2 col-form-label fw-bold">Keterangan Gigi</label>
+                  <div class="col-sm-4">
+                    <input type="text" class="form-control bg-light" :value="keterangangigi" disabled />
+                  </div>
+                </div>
+              </FormPelayananPlanning>
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'" :statusPulang = "statusPulang" >
+              </FormPelayananStatusPasien>
             </div>
           </div>
-          <div class="mb-3 row align-items-center" >
-            <label class="col-sm-2 col-form-label fw-bold">Keterangan Gigi</label>
-            <div class="col-sm-4">
-              <input type="text" class="form-control bg-light" :value="keterangangigi" disabled />
-            </div>
-          </div>
-    </FormPelayananPlanning>
-    <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'">
-    </FormPelayananStatusPasien>
+        </PelayananPasien>
+      </div>
     </div>
-    </div>
-    </PelayananPasien>
-    </div>
-   </div>
-    </AppLayouts>
+  </AppLayouts>
 </template>
 <script setup>
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
@@ -73,15 +80,31 @@ import FormPelayananAssesment from '../../../Components/Layouts/RuangLayanan/Pel
 import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananPlanning.vue';
 import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananStatusPasien.vue';
 import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/PelayananPasien/NavigasiFormPemeriksaan.vue';
-import { ref , computed, watch} from 'vue';
+import { ref, computed, watch } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 
 const isMelayani = ref(false);
 const keterangangigi = ref('');
 const currentTab = ref('subjective');
+const routeNameFormSubjective = 'ruang-layanan-gigi.setAnamnesaSubjective';
+const routeNameFormObjective = 'ruang-layanan-gigi.setAnamnesaObjective';
 
-function handleMelayani(val) {
-  isMelayani.value = val
-}
+const page = usePage();
+const DataAnamnesa = computed(() => page.props.DataAnamnesa);
+const DataPasien = computed(() => page.props.DataPasien[0]);
+const DataKesadaran = computed(() => page.props.DataKesadaran);
+const DiagnosaKasus = computed(() => page.props.DiagnosaKasus);
+const MasterAlergi = computed(() => page.props.MasterAlergi);
+const DataTindakan = computed(() => page.props.DataTindakan);
+const SimpusDataDiagnosaMedis = computed(() => page.props.SimpusDataDiagnosa);
+const SimpusTindakan = computed(() => page.props.SimpusTindakan);
+const AlergiPasien = computed(() => page.props.AlergiPasien);
+const statusPulang = computed(() => page.props.StatusPulang);
+const SimpusResepObat =computed(() => page.props.SimpusResepObat);
+const MasterObat = computed(() => page.props.MasterObat);
+console.log('master obat', MasterObat.value);
+
+console.log(' SimpusResepObat', SimpusResepObat.value);
 const layoutKursi = ref([
   // Baris 1
   [
@@ -151,15 +174,22 @@ const layoutKursi = ref([
 
 const gigiTerpilih = computed(() => {
   return layoutKursi.value
-    .flat() 
-    .filter(item => item.terpilih) 
-    .map(item => item.nomor) 
-    .join(', ') 
+    .flat()
+    .filter(item => item.terpilih)
+    .map(item => item.nomor)
+    .join(', ')
 })
 watch(gigiTerpilih, (baru) => {
   keterangangigi.value = baru,
-  console.log('dipilih', baru)
+    console.log('dipilih', baru)
 });
+const refreshDataAnamnesa = () => {
+  router.reload({
+    only: ['DataAnamnesa', 'SimpusDataDiagnosaMedis', 'SimpusTindakan', 'AlergiPasien'],
+    preserveState: true,
+    preserveScroll: true
+  })
+}
 
 </script>
 
