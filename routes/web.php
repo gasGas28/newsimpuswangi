@@ -20,13 +20,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
-use Illuminate\Support\Facades\DB;
-
 
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
 })->name('home');
-
 
 
 // Login
@@ -195,13 +192,33 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Biakes
     Route::prefix('biakes')->name('biakes.')->group(function () {
         Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
-        Route::inertia('pembiayaanjaminansehat', 'MalSehat/Biakes/PembiayaanJaminanSehat')->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pembiayaanJaminanSehat'])
+            ->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pelayanan'])
+            ->name('pembiayaanjaminansehat.pelayanan')
+            ->middleware('web');
     });
 
     // Promkes
     Route::prefix('promkes')->name('promkes.')->group(function () {
         Route::inertia('/', 'MalSehat/Promkes/Index')->name('index');
-        Route::inertia('kesehatanpeduliremaja', 'MalSehat/Promkes/KesehatanPeduliRemaja')->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja', [\App\Http\Controllers\MalSehat\PromkesController::class, 'kesehatanPeduliRemaja'])
+            ->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
+            ->name('kesehatanpeduliremaja.pelayanan')
+            ->middleware('web');
+            
+        // ✅ route untuk diagnosa
+        Route::get('diagnosa/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getDiagnosa'])
+            ->name('diagnosa.list');
+        
+        // ✅ route untuk tindakan
+        Route::get('tindakan/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getTindakan'])
+            ->name('tindakan.list');
     });
 
     // Lain-lain
