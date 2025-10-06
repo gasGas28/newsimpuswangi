@@ -44,7 +44,7 @@ function getIconClass(nama) {
     <!-- Header -->
     <div
       class="card-header d-flex justify-content-between align-items-center p-4 rounded-4 rounded-bottom-0"
-      style="background: linear-gradient(135deg, #4682B4, #ADD8E6);"
+      style="background: linear-gradient(135deg, #4682B4, #8EB6C3);"
     >
       <div>
         <h1 class="fs-4 m-0 text-white">Layanan - Promosi Kesehatan & PMK</h1>

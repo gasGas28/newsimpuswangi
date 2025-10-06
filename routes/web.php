@@ -20,6 +20,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
+use App\Http\Controllers\MalSehat\BiakesController;
+use App\Http\Controllers\MalSehat\PromkesController;
 use Illuminate\Support\Facades\DB;
 
 
@@ -194,7 +196,13 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Biakes
     Route::prefix('biakes')->name('biakes.')->group(function () {
         Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
-        Route::inertia('pembiayaanjaminansehat', 'MalSehat/Biakes/PembiayaanJaminanSehat')->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pembiayaanJaminanSehat'])
+            ->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pelayanan'])
+            ->name('pembiayaanjaminansehat.pelayanan')
+            ->middleware('web');
     });
 
     // Promkes
@@ -207,6 +215,14 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
         Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
             ->name('kesehatanpeduliremaja.pelayanan')
             ->middleware('web');
+            
+        // ✅ route untuk diagnosa
+        Route::get('diagnosa/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getDiagnosa'])
+            ->name('diagnosa.list');
+        
+        // ✅ route untuk tindakan
+        Route::get('tindakan/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getTindakan'])
+            ->name('tindakan.list');
     });
 
     // Lain-lain

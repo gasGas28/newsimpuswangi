@@ -2,7 +2,7 @@
   <div class="card m-2 shadow-sm border-0 rounded-4">
     <!-- Header -->
     <div class="card-header p-4 d-flex justify-content-between align-items-center rounded-4 rounded-bottom-0"
-      style="background: linear-gradient(135deg, #4682B4, #ADD8E6);">
+      style="background: linear-gradient(135deg, #4682B4, #8EB6C3);">
       <div>
         <h5 class="m-0 fs-4 text-white">Pelayanan Kesehatan Peduli Remaja</h5>
         <div class="bg-white bg-opacity-25 d-inline-block px-3 py-2 rounded-pill mt-2 text-white fw-semibold">
@@ -38,7 +38,7 @@
         <div class="row">
           <div class="col-sm-2 offset-sm-2">
             <button class="btn w-100 text-white fw-semibold rounded-3 shadow-sm"
-              style="background: linear-gradient(135deg, #4682B4, #5A9BD5);" @click="tampilkanData">
+              style="background: linear-gradient(135deg, #4682B4, #8EB6C3);" @click="tampilkanData">
               Tampilkan Data
             </button>
           </div>
@@ -72,8 +72,8 @@
                 <td>{{ p.poli }}</td>
                 <td>
                   <button class="btn btn-sm rounded-pill shadow-sm text-white"
-                    style="background: linear-gradient(135deg, #4682B4, #5A9BD5);" @click="bukaKunjungan(p)">
-                    {{ p.status }}
+                    style="background: linear-gradient(135deg, #4682B4, #8EB6C3);" @click="bukaKunjungan(p)">
+                    {{ p.status ? p.status : 'Belum Dilayani' }}
                   </button>
                 </td>
               </tr>

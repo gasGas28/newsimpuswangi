@@ -1,5 +1,12 @@
 <template>
   <div class="container">
+    <!-- Header -->
+    <div class="card-header d-flex justify-content-between align-items-center p-3"
+      style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
+      <h5 class="text-white fw-bold m-0">
+        <i class="fas fa-stethoscope me-2"></i>
+      </h5>
+    </div>
     <div class="row">
       <!-- Diagnosa Medis -->
       <div class="col-6">
@@ -11,12 +18,62 @@
           </div>
           <div class="card-body">
             <!-- Input Diagnosa -->
-            <div class="row mb-3">
-              <div class="col-3">
-                <input type="text" class="form-control bg-light" placeholder="" disabled>
-              </div>
-              <div class="col-9">
-                <input type="text" class="form-control bg-light" placeholder="" disabled>
+            <div class="mb-3 row align-items-center">
+              <div class="row g-2"> <!-- kolom pertama: KODE -->
+                <div class="col-sm-3"> <input type="text" class="form-control bg-light" placeholder=""
+                    v-model="selectedKode" disabled> </div> <!-- kolom kedua: NAMA + tombol -->
+                <div class="col-sm-5">
+                  <div class="input-group"> <input type="text" class="form-control bg-light" placeholder=""
+                      v-model="selectedNama" disabled> <button type="button" class="btn btn-primary"
+                      @click="overlay = true"> Cari </button> <button type="button" class="btn btn-outline-danger"
+                      @click="hapusPilihan"> Del </button> </div>
+                </div>
+              </div> <!-- Overlay -->
+              <div v-if="overlay" class="overlay">
+                <div class="overlay-content">
+                  <h4 class="mb-3">Pilih Data</h4> <!-- Search + Table -->
+                  <div class="d-flex justify-content-between mb-2">
+                    <div> Show <select v-model="showEntries" class="form-select d-inline w-auto mx-1">
+                        <option v-for="n in [10, 25, 50]" :key="n" :value="n">{{ n }}</option>
+                      </select> entries </div>
+                    <div> Search: <input v-model="search" type="text" class="form-control d-inline w-auto ms-1"> </div>
+                  </div>
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>KODE</th>
+                        <th>NAMA</th>
+                        <th>KETERANGAN</th>
+                        <th>ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, i) in paginatedData" :key="i">
+                        <td>{{ item.kode }}</td>
+                        <td>{{ item.nama }}</td>
+                        <td>{{ item.keterangan }}</td>
+                        <td>
+                          <button class="btn btn-sm btn-primary" @click="pilihItem(item)">Pilih</button>
+                        </td>
+                      </tr>
+                      <tr v-if="filteredData.length === 0">
+                        <td colspan="4" class="text-center">Tidak ada data</td>
+                      </tr>
+                    </tbody>
+                  </table> <button class="btn btn-secondary mt-3" @click="overlay = false">Tutup</button>
+
+                  <!-- Pagination -->
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                    <button class="btn btn-sm btn-outline-secondary" :disabled="currentPage === 1" @click="prevPage">
+                      Previous
+                    </button>
+                    <span>Halaman {{ currentPage }} / {{ totalPages }}</span>
+                    <button class="btn btn-sm btn-outline-secondary" :disabled="currentPage === totalPages"
+                      @click="nextPage">
+                      Next
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -258,9 +315,103 @@
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  dokter: Array,
-  kasus: Array
-})
+<script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      overlay: false,
+      search: "",
+      showEntries: 10,      // jumlah per halaman
+      currentPage: 1,       // halaman aktif
+      dataDiagnosa: [],
+      selectedKode: "",
+      selectedNama: "",
+    };
+  },
+  computed: {
+    filteredData() {
+      if (!this.search) return this.dataDiagnosa;
+      return this.dataDiagnosa.filter(
+        (item) =>
+          item.nama.toLowerCase().includes(this.search.toLowerCase()) ||
+          item.kode.toLowerCase().includes(this.search.toLowerCase())
+      );
+    },
+    paginatedData() {
+      const start = (this.currentPage - 1) * this.showEntries;
+      const end = start + this.showEntries;
+      return this.filteredData.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredData.length / this.showEntries);
+    },
+  },
+  methods: {
+    async fetchDiagnosa() {
+      try {
+        const res = await axios.get("/mal-sehat/promkes/diagnosa/list", {
+          params: { q: this.search },
+        });
+        this.dataDiagnosa = res.data;
+      } catch (e) {
+        console.error("Gagal ambil data diagnosa", e);
+      }
+    },
+    pilihItem(item) {
+      this.selectedKode = item.kode;
+      this.selectedNama = item.nama;
+      this.overlay = false; // otomatis tutup popup
+    },
+    hapusPilihan() {
+      this.selectedKode = "";
+      this.selectedNama = "";
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    },
+    prevPage() {
+      if (this.currentPage > 1) this.currentPage--;
+    },
+  },
+  watch: {
+    overlay(val) {
+      if (val) {
+        this.fetchDiagnosa();
+      }
+    },
+    search() {
+      this.currentPage = 1; // reset ke page 1 setiap cari
+      this.fetchDiagnosa();
+    },
+  },
+};
 </script>
+
+
+<style scoped>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.overlay-content {
+  background: #fff;
+  padding: 1rem;
+  border-radius: .5rem;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+</style>

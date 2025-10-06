@@ -1,15 +1,9 @@
 <template>
   <div class="container">
-    <!-- Info -->
-    <div class="alert bg-primary bg-opacity-25 fw-bold rounded-3 shadow-sm px-3 py-2 mb-4">
-      <i class="fas fa-info-circle me-2"></i> Tombol <strong>"Simpan"</strong> ada di tab <strong>"Tenaga
-        Medis"</strong>
-    </div>
-
-    <form @submit.prevent="pesan">
-      <div class="card rounded-4 shadow-sm overflow-hidden">
+   <form @submit.prevent="pesan">
+      <div class="card m-2 rounded-4 shadow-sm overflow-hidden">
         <!-- Header Tabs -->
-        <div class="card-header d-flex flex-wrap gap-3 p-3"
+        <div class="card-header d-flex align-items-center gap-3 p-3"
           style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
           <a href="" class="text-white text-decoration-none fw-semibold"
             :class="{ 'fw-bold border-bottom border-2 pb-1': currrentSubTabObjective === 'pemeriksaan_fisik' }"
@@ -250,6 +244,12 @@
         </div>
       </div>
     </form>
+    
+    <!-- Info -->
+    <div class="alert bg-primary bg-opacity-25 fw-bold rounded-3 shadow-sm px-3 py-2 mb-4">
+      <i class="fas fa-info-circle me-2"></i> Tombol <strong>"Simpan"</strong> ada di tab <strong>"Tenaga
+        Medis"</strong>
+    </div>
   </div>
 </template>
 

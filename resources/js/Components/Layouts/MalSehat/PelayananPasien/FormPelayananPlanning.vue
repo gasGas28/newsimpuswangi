@@ -2,16 +2,18 @@
   <div class="container">
     <div class="card shadow-sm rounded-4 border-0">
       <!-- Header Tab -->
-      <div class="card-header d-flex gap-4 p-3 bg-primary bg-opacity-10 border-0 rounded-top-4">
+      <div class="card-header d-flex gap-4 p-3 border-0 rounded-top-4"
+        style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
         <a href="" class="text-decoration-none" :class="{
-          'text-primary fw-bold': currrentSubTabPlanning === 'tindakan',
-          'text-secondary': currrentSubTabPlanning !== 'tindakan'
+          'text-white fw-bold': currrentSubTabPlanning === 'tindakan',
+          'text-light': currrentSubTabPlanning !== 'tindakan'
         }" @click.prevent="currrentSubTabPlanning = 'tindakan'">
           Tindakan >
         </a>
+
         <a href="" class="text-decoration-none" :class="{
-          'text-primary fw-bold': currrentSubTabPlanning === 'pengobatan',
-          'text-secondary': currrentSubTabPlanning !== 'pengobatan'
+          'text-white fw-bold': currrentSubTabPlanning === 'pengobatan',
+          'text-light': currrentSubTabPlanning !== 'pengobatan'
         }" @click.prevent="currrentSubTabPlanning = 'pengobatan'">
           Pengobatan >
         </a>
@@ -20,16 +22,14 @@
       <!-- Tab: Tindakan -->
       <div class="card-body" v-if="currrentSubTabPlanning === 'tindakan'">
         <form>
-          <slot></slot>
-
-          <!-- Kode Tindakan -->
+          <!-- Input Group -->
           <div class="mb-3 row align-items-center">
             <label class="col-sm-2 col-form-label text-end fw-bold">Kode Tindakan</label>
             <div class="col-sm-4">
               <div class="input-group">
-                <input type="text" class="form-control bg-light" disabled />
-                <button type="button" class="btn btn-primary">Cari</button>
-                <button type="button" class="btn btn-outline-danger">Del</button>
+                <input type="text" class="form-control bg-light" :value="selected.kode" disabled />
+                <button type="button" class="btn btn-primary" @click="showModal = true">Cari</button>
+                <button type="button" class="btn btn-outline-danger" @click="hapusKode">Del</button>
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@
           <div class="mb-3 row">
             <label class="col-sm-2 col-form-label text-end fw-bold">Nama Tindakan</label>
             <div class="col-sm-4">
-              <input type="text" class="form-control bg-light" disabled />
+              <input type="text" class="form-control bg-light" :value="selected.nama" disabled />
             </div>
           </div>
 
@@ -46,7 +46,7 @@
           <div class="mb-3 row">
             <label class="col-sm-2 col-form-label text-end fw-bold">Nama Tindakan (Ind)</label>
             <div class="col-sm-4">
-              <input type="text" class="form-control bg-light" disabled />
+              <input type="text" class="form-control bg-light" :value="selected.ind" disabled />
             </div>
           </div>
 
@@ -66,31 +66,40 @@
           </div>
         </form>
 
-        <hr />
-
-        <!-- Table Tindakan -->
-        <div class="table-responsive mt-4">
-          <table class="table table-bordered table-sm text-center">
-            <thead class="table-primary">
-              <tr>
-                <th>No</th>
-                <th>Kode</th>
-                <th>Nama Tindakan</th>
-                <th>Peraturan</th>
-                <th>Harga</th>
-                <th>Bayar</th>
-                <th>Poli</th>
-                <th>Keterangan</th>
-                <th>Ket gigi</th>
-                <th>Created by</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Data rows here -->
-            </tbody>
-          </table>
+        <!-- Modal -->
+        <div class="modal fade" tabindex="-1" :class="{ show: showModal }" style="display: block;" v-if="showModal">
+          <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Pilih Tindakan</h5>
+                <button type="button" class="btn-close" @click="showModal = false"></button>
+              </div>
+              <div class="modal-body">
+                <table class="table table-bordered table-striped">
+                  <thead class="table-light">
+                    <tr>
+                      <th>KODE</th>
+                      <th>NAMA TINDAKAN</th>
+                      <th>IND (TRANSLATE)</th>
+                      <th>ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in tindakan" :key="item.kode">
+                      <td>{{ item.kode }}</td>
+                      <td>{{ item.nama }}</td>
+                      <td>{{ item.ind }}</td>
+                      <td>
+                        <button class="btn btn-sm btn-info" @click="pilihKode(item)">Pilih</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="modal-backdrop fade show" v-if="showModal"></div>
       </div>
 
       <!-- Tab: Pengobatan -->
@@ -204,6 +213,52 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+
 const currrentSubTabPlanning = ref("tindakan");
+const showModal = ref(false);
+
+// state data tindakan
+const tindakan = ref([]);
+
+// nilai yang dipilih
+const selected = ref({
+  kode: "",
+  nama: "",
+  ind: ""
+});
+
+// fetch data dari API
+const loadTindakan = async () => {
+  try {
+    const res = await axios.get("/mal-sehat/promkes/tindakan/list");
+    tindakan.value = res.data.map(item => ({
+      kode: item.kode,
+      nama: item.nama_tindakan,
+      ind: item.nama_tindakan_indonesia,
+      harga: item.harga,
+      kategori: item.kategori,
+      deskripsi: item.deskripsi
+    }));
+  } catch (error) {
+    console.error("Gagal load data tindakan:", error);
+  }
+};
+
+// pilih kode dari modal
+const pilihKode = (item) => {
+  selected.value = { ...item };
+  showModal.value = false;
+};
+
+// hapus pilihan
+const hapusKode = () => {
+  selected.value = { kode: "", nama: "", ind: "" };
+};
+
+// load saat komponen mount
+onMounted(() => {
+  loadTindakan();
+});
 </script>

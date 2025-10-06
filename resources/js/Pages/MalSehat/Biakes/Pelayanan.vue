@@ -30,7 +30,7 @@ function mulaiPemeriksaan() {
 }
 
 function goBack() {
-    router.get(route('mal-sehat.promkes.kesehatanpeduliremaja'))
+    router.get(route('mal-sehat.biakes.pembiayaanjaminansehat'))
 }
 </script>
 
@@ -38,7 +38,7 @@ function goBack() {
     <div class="card m-2 rounded-4 rounded-bottom-0 shadow-sm overflow-hidden">
         <!-- Header -->
         <div class="card-header d-flex justify-content-between align-items-center p-3"
-            style="background: linear-gradient(135deg, #4682B4, #8EB6C3);">
+            style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
             <h1 class="fs-5 text-white fw-bold m-0">Pelayanan Kesehatan Peduli Remaja</h1>
             <button @click="goBack"
                 class="btn bg-white bg-opacity-25 text-white fw-semibold btn-sm d-flex align-items-center gap-2 px-3 rounded-pill shadow-sm border-0">
@@ -50,7 +50,7 @@ function goBack() {
         <div class="card m-4 shadow-lg border-0 rounded-4 overflow-hidden">
             <!-- Info Pasien Header -->
             <div class="card-header p-4 d-flex align-items-center justify-content-between rounded-4 rounded-bottom-0"
-                style="background: linear-gradient(135deg, #4682B4, #8EB6C3);">
+                style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
                 <h5 class="text-white m-0 d-flex align-items-center">
                     <i class="fas fa-user-circle me-2 text-warning"></i> Informasi Pasien
                 </h5>
@@ -113,7 +113,7 @@ function goBack() {
                 </button>
                 <button v-if="!mulaiMelayani"
                     class="btn btn-success btn-sm d-flex align-items-center gap-2 px-4 fw-semibold text-white shadow-sm rounded-pill"
-                    style="background: linear-gradient(135deg, #4682B4, #8EB6C3); border: none;"
+                    style="background: linear-gradient(135deg, #4682B4, #5A9BD5); border: none;"
                     @click="mulaiPemeriksaan">
                     <i class="fas fa-stethoscope"></i> Mulai Pemeriksaan
                 </button>
