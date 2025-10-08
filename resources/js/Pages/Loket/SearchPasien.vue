@@ -80,7 +80,7 @@
                     <small class="text-muted">{{ item.NIK }}</small>
                   </td>
                   <td>
-                    {{ item.ALAMAT }}<br /><small class="fw-semibold">{{ item.nama_kecamatan }} - {{ item.nama_kelurahan }}</small>
+                    {{ item.ALAMAT }}<br /><small class="fw-semibold">{{ item.nama_kecamatan }} - {{ item.nama_kecamatan }}</small>
                   </td>
                   <td>
                     {{ item.noKartu }}<br /><small class="text-muted">{{ item.kdProvider }}</small>
