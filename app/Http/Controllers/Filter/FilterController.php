@@ -64,30 +64,31 @@ class FilterController extends Controller
     }
     public function dev()
     {
-        $providers = SimpusProvider::all();
-        $data_master_unit = DataMasterUnit::with(['detail'])->get();
-        $data_master_unit_detail = DataMasterUnitDetail::all();
-        $kunj_kasus = DiagnosaKasus::all();
-        $asal = MasterWilayah::all();
-        $kecamatan = SetupKecamatan::where('no_kab', 10)
-            ->where('no_prop', 35)
-            ->get();
-        $desa = SetupDesa::where('no_kab', 10)
-            ->where('no_prop', 35)
-            ->get();
-        $unit = UnitFilter::where('pelayanan', 'TRUE')->get();
-        $kunjungan = SimpusKunjungan::all();
+        // $providers = SimpusProvider::all();
+        // $data_master_unit = DataMasterUnit::with(['detail'])->get();
+        // $data_master_unit_detail = DataMasterUnitDetail::all();
+        // $kunj_kasus = DiagnosaKasus::all();
+        // $asal = MasterWilayah::all();
+        // $kecamatan = SetupKecamatan::where('no_kab', 10)
+        //     ->where('no_prop', 35)
+        //     ->get();
+        // $desa = SetupDesa::where('no_kab', 10)
+        //     ->where('no_prop', 35)
+        //     ->get();
+        // $unit = UnitFilter::where('pelayanan', 'TRUE')->get();
+        // $kunjungan = SimpusKunjungan::all();
+        $data = SimpusLoket::with([
+            'pasien',
+            'anamnesa',
+            'obat',
+            'kunjungan'
+        ])->get();
+
+        // dd($data);
+        // dd($data->first()->toArray());
 
         return Inertia::render('Filter/card', [
-            'providers' => $providers,
-            'tempat_kunjungan' => $data_master_unit,
-            'detail_tempat_kunjungan' => $data_master_unit_detail,
-            'kunj_kasus' => $kunj_kasus,
-            'asal' => $asal,
-            'kecamatan' => $kecamatan,
-            'desa' => $desa,
-            'unit' => $unit,
-            'kunjungan' => $kunjungan,
+            'rekamMedis' => $data,
         ]);
     }
     //

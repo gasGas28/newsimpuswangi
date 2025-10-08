@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top" >
+  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" >
     <div class="container-fluid">
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->
@@ -55,7 +55,7 @@
           </li>
 
           <li class="nav-item">
-            <Link :href="route('filter')" class="nav-link d-flex align-items-center">
+            <Link :href="route('filter.dev')" class="nav-link d-flex align-items-center">
               <i class="bi bi-filter-square-fill me-2"></i> Filter
             </Link>
           </li>
@@ -165,7 +165,7 @@
 <style scoped>
   .navbar {
     padding: 0.5rem 1rem;
-    background-color: #1a1a1a !important;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
   }
 
   .nav-link {

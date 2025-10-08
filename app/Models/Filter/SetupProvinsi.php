@@ -4,15 +4,15 @@ namespace App\Models\Filter;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SetupDesa extends Model
+class SetupProvinsi extends Model
 {
-    protected $table = 'setup_kel';
-    protected $primaryKey = 'NO_KEL';
+    protected $table = 'setup_prop';
+    protected $primaryKey = 'NO_PROP';
     public $incrementing = false;
     protected $keyType = 'string';
 
     public function pasien() {
-        return $this->belongsTo(SimpusPasien::class, 'NO_KEL', 'NO_KEL');
+        return $this->belongsTo(SimpusPasien::class, 'NO_PROP', 'NO_PROP');
     }
     //
 }
