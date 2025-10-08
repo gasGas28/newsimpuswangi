@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pasien;
 
 use App\Http\Controllers\Controller;
+use App\Models\Filter\SetupKabupaten;
 use App\Models\Filter\SetupProvinsi;
 use App\Models\Filter\SimpusPasien;
 use App\Models\Pasien\Agama;
@@ -71,6 +72,9 @@ class PasienController extends Controller
             'nik' => 'required|string|max:16',
             'alamat' => 'required|string|max:160',
             'tanggal_lahir' => 'required|date',
+            'kabupaten' => 'required',
+            'kecamatan' => 'required',
+            'kelurahan' => 'required',
         ]);
 
         $pasien = Pasien::findOrFail($id);
@@ -79,6 +83,9 @@ class PasienController extends Controller
             'NIK' => $request->nik,
             'ALAMAT' => $request->alamat,
             'TGL_LHR' => $request->tanggal_lahir,
+            'NO_KAB' => $request->kabupaten,
+            'NO_KEC' => $request->kecamatan,
+            'NO_KEL' => $request->kecamatan,
         ]);
 
         return Inertia::location(route('loket.search'));

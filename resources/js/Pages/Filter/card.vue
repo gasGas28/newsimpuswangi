@@ -3,7 +3,7 @@
     <div class="row g-4">
       <!-- Card atas: Filter -->
       <div class="col-12">
-        <div class="card border-0 shadow-lg rounded-4">
+        <div class="card border-1 border-dark shadow-lg rounded-4">
           <div class="card-body p-4">
             <h4 class="text-primary fw-bold mb-3 d-flex align-items-center">
               <i class="bi bi-funnel-fill me-2"></i> Filter Laporan
@@ -51,7 +51,7 @@
 
       <!-- Card bawah: Tabel -->
       <div class="col-12">
-        <div class="card border-0 shadow-lg rounded-4">
+        <div class="card border-1 border-dark shadow-lg rounded-4">
           <div class="card-body p-4">
             <!-- Header + Info -->
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-3">
@@ -139,8 +139,8 @@
 <script setup>
   import { ref, computed } from 'vue';
   import AppLayout from '@/Components/Layouts/AppLayouts.vue';
-  import { Link } from '@inertiajs/vue3';
   defineOptions({ layout: AppLayout });
+  import { Link } from '@inertiajs/vue3';
   import ExcelJS from 'exceljs';
   import { saveAs } from 'file-saver';
 
@@ -266,7 +266,7 @@
 
   // fungsi tampilkan HTML
   function showHtml() {
-    const htmlContent = `
+  const htmlContent = `
     <html>
       <head>
         <title>Data Laporan Pasien</title>
@@ -274,7 +274,7 @@
           body { font-family: Arial, sans-serif; padding: 20px; }
           h3 { text-align: center; margin-bottom: 16px; }
           table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid; padding: 8px; text-align: left; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
           th { background: #3b82f6; color: white; }
           tr:nth-child(even) { background: #f9f9f9; }
         </style>
@@ -309,10 +309,11 @@
     </html>
   `;
 
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(htmlContent);
-    newWindow.document.close();
-  }
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(htmlContent);
+  newWindow.document.close();
+}
+
 </script>
 
 <style scoped>

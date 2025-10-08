@@ -256,13 +256,6 @@
     ihs_pasien: props.pasien.IHS_NUMBER ?? '',
   });
 
-  // const submit = () => {
-  //   // form.put(route('pasien.update', props.pasien.ID), form.data());
-  //   console.log(route().current()); // cek route aktif
-  //   console.log(route('pasien.update', props.pasien.ID)); // cek url hasil generate
-  //   console.log('Update route =>', route('pasien.update', props.pasien.ID));
-  //   form.post(route('pasien.update', props.pasien.ID));
-  // }
 
   const submit = () => {
     form.post(route('pasien.update', props.pasien.ID), {
