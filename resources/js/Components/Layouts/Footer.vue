@@ -18,6 +18,6 @@
     transition: color 0.3s ease;
   }
   .footer-bg {
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background-color: rgba(0, 0, 0);
   }
 </style>

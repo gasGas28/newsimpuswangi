@@ -40,6 +40,8 @@ class PasienController extends Controller
             )
             ->get();
 
+            // dd($pasien);
+
         return Inertia::render('Loket/SearchPasien', [
             'pasien' => $pasien,
         ]);
@@ -83,9 +85,9 @@ class PasienController extends Controller
             'NIK' => $request->nik,
             'ALAMAT' => $request->alamat,
             'TGL_LHR' => $request->tanggal_lahir,
-            'NO_KAB' => $request->kabupaten,
+            'NO_KAB' => $request->kabupaten,  
             'NO_KEC' => $request->kecamatan,
-            'NO_KEL' => $request->kecamatan,
+            'NO_KEL' => $request->kelurahan,
         ]);
 
         return Inertia::location(route('loket.search'));
