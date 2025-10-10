@@ -1,0 +1,105 @@
+<template>
+  <AppLayouts>
+    <div class="card m-4  rounded-4 rounded-bottom-0">
+      <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"
+        style="background: linear-gradient(135deg, #3b82f6, #10b981);">
+        <h1 class="fs-5 text-white">BP UMUM</h1>
+        <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+        <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
+        </Link>
+      </div>
+      <div class="card-body">
+        <PelayananPasien @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien" :dataAnamnesa="DataAnamnesa">
+          <div class="shadow-sm rounded-5">
+            <NavigasiFormPemeriksaan :currentTab="currentTab" @change-currentTab="currentTab = $event">
+            </NavigasiFormPemeriksaan>
+            <div class="m-4 pb-4 row gx-5">
+              <FormPelayananSubjective v-if="currentTab === 'subjective'" :idLoket="DataPasien.idLoket"
+                :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi" @dataAnamnesa-update="refreshDataAnamnesa" :routeName="routeNameFormSubjective">
+              </FormPelayananSubjective>
+              <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="umum"
+                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" @dataAnamnesa-update="refreshDataAnamnesa" :routeName="routeNameFormObjective">
+              </FormPelayananObjective>
+              <FormPelayananAssesment v-if="currentTab === 'assesment'" :diagnosaKasus="DiagnosaKasus"
+                :dataPasien="DataPasien" :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis" routeDiagnosaMedis ="ruang-layanan-umum.diagnosa-medis"
+                @dataAnamnesa-update="refreshDataAnamnesa">
+              </FormPelayananAssesment>
+              <FormPelayananPlanning v-if="currentTab === 'planning'" :dataTindakan="DataTindakan" :dataPasien="DataPasien" :simpusTindakan="SimpusTindakan"   routePlanningTindakan="'ruang-layanan-umum.set PlanningTindakan'">
+              </FormPelayananPlanning>
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'">
+              </FormPelayananStatusPasien>
+            </div>
+          </div>
+        </PelayananPasien>
+      </div>
+    </div>
+  </AppLayouts>
+</template>
+<script setup>
+import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
+import PelayananPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/PelayananPasien.vue';
+import FormPelayananSubjective from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananSubjective.vue';
+import FormPelayananObjective from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananObjective.vue';
+import FormPelayananAssesment from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananAssesment.vue';
+import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananPlanning.vue';
+import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananStatusPasien.vue';
+import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/PelayananPasien/NavigasiFormPemeriksaan.vue';
+import { ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const isMelayani = ref(false);
+const currentTab = ref('subjective');
+const page = usePage();
+const routeNameFormSubjective = 'ruang-layanan-umum.setAnamnesa';
+const routeNameFormObjective='ruang-layanan-umum.setAnamnesaObjective';
+
+const DataAnamnesa = computed(() => page.props.DataAnamnesa);
+const DataPasien = computed(() => page.props.DataPasien[0]);
+const DataKesadaran = computed(() => page.props.DataKesadaran);
+const DiagnosaKasus = computed(() => page.props.DiagnosaKasus);
+const MasterAlergi = computed(() => page.props.MasterAlergi);
+const DataTindakan = computed(() => page.props.DataTindakan);
+const SimpusDataDiagnosaMedis = computed(() => page.props.SimpusDataDiagnosa);
+const SimpusTindakan = computed(() => page.props.SimpusTindakan);
+
+const refreshDataAnamnesa = () => {
+  router.reload({
+    only: ['DataAnamnesa', 'SimpusDataDiagnosaMedis', 'SimpusTindakan'],
+    preserveState: true,
+    preserveScroll: true
+  })
+}
+</script>
+
+<style> 
+.tab-item {
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  border-radius: 0;
+  position: relative;
+  transition: all 0.3s ease;
+  color: #6c757d;
+}
+
+.tab-item:hover {
+  color: #495057 !important;
+}
+
+.tab-item.active {
+  color: #0d6efd !important;
+  font-weight: 600;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  height: 3px;
+  background-color: #0d6efd;
+  transition: all 0.3s ease;
+  z-index: 1;
+  border-radius: 3px 3px 0 0;
+}
+</style>
