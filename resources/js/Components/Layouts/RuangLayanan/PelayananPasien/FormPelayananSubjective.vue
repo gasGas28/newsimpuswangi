@@ -118,18 +118,24 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import { Inertia } from '@inertiajs/inertia';
+import { watch } from 'vue';
 const props = defineProps({
   dataAnamnesa: Object,
   idLoket: String,
-  masterAlergi: Array
+  masterAlergi: Array,
+  routeName : String,
+  idPasien:String,
+  AlergiPasien: Object
 });
+const emit = defineEmits(['dataAnamnesa-update'])
 const alergiMakanan =
   props.masterAlergi.filter(item => item.category == 1)
+  console.log('alergi dari subjective')
 
 
 const alergiObat =
   props.masterAlergi.filter(item => item.category == 2)
-
 
 console.log('data anamnesa ny dari formsubjetivea', props.dataAnamnesa)
 const form = useForm({
@@ -140,21 +146,22 @@ const form = useForm({
   riwayat_penyakit_sekarang: props.dataAnamnesa?.riwayatPenyakitSekarang ?? '',
   riwayat_penyakit_dahulu: props.dataAnamnesa?.riwayatPenyakitDahulu ?? '',
   riwayat_penyakit_keluarga: props.dataAnamnesa?.riwayatPenyakitKeluarga ?? '',
-  alergi_makanan: '',
-  alergi_obat: '',
-  keterangan_alergi: '',
+  alergi_makanan: props.AlergiPasien[0]?.alergi_makanan.kodeSatuSehat ?? '',
+  alergi_obat: props.AlergiPasien[0]?.alergi_obat.kodeSatuSehat ?? '',
+  keterangan_alergi: props.AlergiPasien[0]?.keterangan,
   tindakan: props.dataAnamnesa?.terapiYangPernahDijalani ?? '',
   obat_digunakan: props.dataAnamnesa?.obatSeringDigunakan ?? '',
-  obat_dikonsumsi: props.dataAnamnesa?.obatSeringDikonsumsi ?? ''
+  obat_dikonsumsi: props.dataAnamnesa?.obatSeringDikonsumsi ?? '',
+  idPasien:props.idPasien
 });
 
-
 function submitForm() {
-  form.post(route('ruang-layanan-umum.setAnamnesa'),
+  form.post(route(props.routeName),
     {
       preserveScroll: true,
       onSuccess: () => {
         alert("Anamnesa tersimpan");
+        emit('dataAnamnesa-update');
       },
     });
 }
