@@ -1,8 +1,10 @@
 <?php
+
 use App\Http\Controllers\Filter\FilterController;
 use App\Http\Controllers\RuangLayanan\indexController;
 use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
 use App\Http\Controllers\RuangLayanan\PoliGigiController;
+use App\Http\Controllers\RuangLayanan\PoliKIAController;
 use App\Http\Controllers\RuangLayananController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -82,8 +84,8 @@ Route::prefix('farmasi')->group(function () {
 // Grup Filter
 Route::prefix('filter')->controller(FilterController::class)->group(function () {
     Route::get('/', 'index')->name('filter');
-    Route::get('/dev', 'dev')->name('filter.dev');
-    Route::get('/modal', 'modal')->name('filter.modal');
+    // Route::get('/dev', 'dev')->name('filter.dev');
+    // Route::get('/modal', 'modal')->name('filter.modal');
 });
 
 // Grup Loket
@@ -210,7 +212,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     });
 
     // PTM
-     Route::prefix('ptm')->name('ptm.')->group(function () {
+    Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
@@ -275,7 +277,6 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
-
 });
 
 Route::prefix('ruang_layanan')->group(function () {
@@ -412,6 +413,13 @@ Route::post(
     '/simpus/laborat/tindakan/hapus',
     [LaboratoriumController::class, 'hapusTindakan']
 )->name('ruang-layanan.laborat.hapusTindakan');
+
+    // Kia
+    // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+    Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+    Route::get('/simpus/kia/pelayanan/{id}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+
+
 
     //Rawat Inap
     Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');

@@ -219,7 +219,7 @@ const show = (menuKey) => {
 <style scoped>
   .navbar {
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background-color: rgba(0, 0, 0);
   }
 
   .nav-link {
@@ -231,7 +231,7 @@ const show = (menuKey) => {
 
   .nav-link:hover,
   .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
   }
 
