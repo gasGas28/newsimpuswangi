@@ -12,10 +12,10 @@
       </div>
 
       <div class="card-body">
-        <!-- persis seperti halaman Umum: kirim OBJEK (bukan array) -->
+        <!-- sesuai reusable: dataPasien = Array, dataAnamnesa = Array -->
         <PelayananPasien
-          :dataPasien="DataPasien"
-          :dataAnamnesa="DataAnamnesa"
+          :dataPasien="DataPasienArr"
+          :dataAnamnesa="DataAnamnesaArr"
           @ubah-melayani="isMelayani = $event"
         >
           <div class="shadow-sm rounded-5">
@@ -23,27 +23,42 @@
               :currentTab="currentTab"
               @change-currentTab="currentTab = $event"
             />
+
             <div class="m-4 pb-4 row gx-5">
+              <!-- SUBJECTIVE -->
               <FormPelayananSubjective
                 v-if="currentTab === 'subjective'"
-                :idLoket="DataPasien?.idLoket"
+                :idLoket="DataPasienArr[0]?.idLoket || ''"
                 :dataAnamnesa="DataAnamnesa"
-                :masterAlergi="MasterAlergi"
+                :masterAlergi="MasterAlergiArr"
+                :idPasien="DataPasienArr[0]?.pasienId || ''"
+                routeName="ruang-layanan-kunjungan-online.setAnamnesa"
+                @dataAnamnesa-update="reloadAnamnesa"
               />
+
+              <!-- OBJECTIVE -->
               <FormPelayananObjective
-                v-if="currentTab === 'objective'"
-                :currrentSub="true"
+                v-else-if="currentTab === 'objective'"
+                :currentSub="true"
                 halaman="umum"
-                :dataKesadaran="DataKesadaran"
-                :dataAnamnesa="DataAnamnesa"
+                :dataKesadaran="DataKesadaranArr"
+                :dataAnamnesa="DataAnamnesaArr"
+                routeName="ruang-layanan-kunjungan-online.setAnamnesaObjective"
+                @dataAnamnesa-update="reloadAnamnesa"
               />
+
+              <!-- ASSESMENT -->
               <FormPelayananAssesment
-                v-if="currentTab === 'assesment'"
-                :diagnosaKasus="DiagnosaKasus"
-                :dataPasien="DataPasien"
+                v-else-if="currentTab === 'assesment'"
+                :diagnosaKasus="DiagnosaKasusArr"
+                :dataPasien="DataPasienObj"
               />
-              <FormPelayananPlanning v-if="currentTab === 'planning'" />
-              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'" />
+
+              <!-- PLANNING -->
+              <FormPelayananPlanning v-else-if="currentTab === 'planning'" />
+
+              <!-- STATUS PASIEN -->
+              <FormPelayananStatusPasien v-else-if="currentTab === 'status_pasien'" />
             </div>
           </div>
         </PelayananPasien>
@@ -54,31 +69,119 @@
 
 <script setup>
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue'
-import PelayananPasien from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien.vue'
-import FormPelayananSubjective from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananSubjective.vue'
-import FormPelayananObjective from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananObjective.vue'
-import FormPelayananAssesment from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananAssesment.vue'
-import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananPlanning.vue'
-import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananStatusPasien.vue'
-import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/PelayananPasien/NavigasiFormPemeriksaan.vue'
+import PelayananPasien from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/PelayananPasien.vue'
+import FormPelayananSubjective from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/FormPelayananSubjective.vue'
+import FormPelayananObjective from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/FormPelayananObjective.vue'
+import FormPelayananAssesment from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/FormPelayananAssesment.vue'
+import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/FormPelayananPlanning.vue'
+import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/FormPelayananStatusPasien.vue'
+import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/KunjOnline/PelayananPasien/NavigasiFormPemeriksaan.vue'
 
-import { ref } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { Link, usePage, router, useRemember } from '@inertiajs/vue3' // <- pakai useRemember
 import { route } from 'ziggy-js'
 
-const isMelayani = ref(false)
-const currentTab = ref('subjective')
+// ===== State yang dipersist (tetap ada setelah F5) =====
+const isMelayani = useRemember(false, 'kunjonline.isMelayani')
+const currentTab = useRemember('subjective', 'kunjonline.currentTab')
 
-// ambil PASCAL CASE dari controller (samain dengan halaman Umum)
-const { props } = usePage()
-const DataPasien      = props.DataPasien?.[0] ?? null   // object tunggal
-const DataAnamnesa    = props.DataAnamnesa ?? null
-const DataKesadaran   = props.DataKesadaran ?? []
-const DiagnosaKasus   = props.DiagnosaKasus ?? []
-const MasterAlergi    = props.MasterAlergi ?? []
-const DiagnosaMedis   = props.DiagnosaMedis ?? [] // kalau dibutuhkan form lain, sudah siap
+// Ambil props dari Inertia
+const { props } = usePage();
+console.log('datakjabsas',props.DataAnamnesa)
+const DataAnamnesa = computed(() => props.DataAnamnesa);
 
-// tombol kembali
+// --- DataPasien: sediakan Object & Array (reusable minta Array)
+const RawPasien = computed(() => {
+  if (Array.isArray(props.DataPasien)) return props.DataPasien[0] ?? null
+  return props.DataPasien ?? null
+})
+
+// --- DataPasien: pastikan key yang dipakai header tersedia (UPPERCASE)
+const DataPasienArr = computed(() => {
+  const src = Array.isArray(props.DataPasien) ? props.DataPasien : []
+  const r = src[0] || null
+
+  if (!r) {
+    return [{
+      idLoket: '',
+      NO_MR: '-', no_mr: '-', no_rm: '-',
+      NAMA_LGKP: '-', nama_lgkp: '-', nama: '-',
+      NIK: '-', nik: '-',
+      ALAMAT: '', alamat: '',
+      NO_RT: '', no_rt: '', rt: '',
+      NO_RW: '', no_rw: '', rw: '',
+      JENIS_KLMIN: null, jenis_klmin: null, jk: '-',
+      umur: 0, umur_tahun: 0, umur_bulan: 0, umur_hari: 0,
+      NAMA_KEL: '', nama_kel: '', kelurahan: '',
+      NAMA_KEC: '', nama_kec: '', kecamatan: '',
+      NAMA_KAB: '', nama_kab: '', kabupaten: '',
+      NAMA_PROP: '', nama_prop: '', provinsi: '',
+      nmPoli: 'Kunjungan Online',
+      tglKunjungan: '', tgl_kunjungan: '',
+      noKartu: null, no_bpjs: null, kdProvider: null, provider: null,
+      pasienId: null,
+    }]
+  }
+
+  return [{
+    idLoket: r.idLoket,
+    NO_MR: r.NO_MR, no_mr: r.no_mr ?? r.NO_MR, no_rm: r.no_rm ?? r.NO_MR,
+    NAMA_LGKP: r.NAMA_LGKP, nama_lgkp: r.nama_lgkp ?? r.NAMA_LGKP, nama: r.nama ?? r.NAMA_LGKP,
+    NIK: r.NIK, nik: r.nik ?? r.NIK,
+    ALAMAT: r.ALAMAT, alamat: r.alamat ?? r.ALAMAT,
+    NO_RT: r.NO_RT, no_rt: r.no_rt ?? r.NO_RT, rt: r.rt ?? r.NO_RT,
+    NO_RW: r.NO_RW, no_rw: r.no_rw ?? r.NO_RW, rw: r.rw ?? r.NO_RW,
+    JENIS_KLMIN: r.JENIS_KLMIN, jenis_klmin: r.jenis_klmin ?? r.JENIS_KLMIN, jk: r.jk ?? '-',
+    umur: r.umur ?? 0, umur_tahun: r.umur_tahun ?? r.umur ?? 0,
+    umur_bulan: r.umur_bulan ?? 0, umur_hari: r.umur_hari ?? 0,
+    NAMA_KEL: r.NAMA_KEL, nama_kel: r.nama_kel ?? r.NAMA_KEL, kelurahan: r.kelurahan ?? r.NAMA_KEL,
+    NAMA_KEC: r.NAMA_KEC, nama_kec: r.nama_kec ?? r.NAMA_KEC, kecamatan: r.kecamatan ?? r.NAMA_KEC,
+    NAMA_KAB: r.NAMA_KAB, nama_kab: r.nama_kab ?? r.NAMA_KAB, kabupaten: r.kabupaten ?? r.NAMA_KAB,
+    NAMA_PROP: r.NAMA_PROP, nama_prop: r.nama_prop ?? r.NAMA_PROP, provinsi: r.provinsi ?? r.NAMA_PROP,
+    nmPoli: r.nmPoli ?? 'Kunjungan Online',
+    tglKunjungan: r.tglKunjungan ?? '', tgl_kunjungan: r.tgl_kunjungan ?? r.tglKunjungan ?? '',
+    noKartu: r.noKartu ?? null, no_bpjs: r.no_bpjs ?? r.noKartu ?? null,
+    kdProvider: r.kdProvider ?? null, provider: r.provider ?? r.kdProvider ?? null,
+    pasienId: r.pasienId ?? null, // <- dipakai Form Subjective
+  }]
+})
+
+const DataPasienObj = computed(() => RawPasien.value ?? { idLoket: '', NO_MR: '-', NAMA_LGKP: '-' })
+
+// --- DataAnamnesa: SELALU Array & punya struktur subjective.alergi
+const DataAnamnesaArr = computed(() => {
+  const src = props.DataAnamnesa
+  if (Array.isArray(src) && src.length) return src
+  return [{
+    subjective: { alergi: [] },
+    keluhan_utama: '',
+    riwayat_penyakit: ''
+  }]
+})
+
+// --- MasterAlergi
+const MasterAlergiArr = computed(() => {
+  const src = props.MasterAlergi
+  if (Array.isArray(src) && src.length) return src
+  return [{ kode: '', nama: '' }]
+})
+
+// --- Lain-lain
+const DataKesadaranArr = computed(() => Array.isArray(props.DataKesadaran) ? props.DataKesadaran : [])
+const DiagnosaKasusArr = computed(() => Array.isArray(props.DiagnosaKasus) ? props.DiagnosaKasus : [])
+const DiagnosaMedisArr = computed(() => Array.isArray(props.DiagnosaMedis) ? props.DiagnosaMedis : [])
+
+// ===== Refresh helper agar state & scroll tetap =====
+function reloadAnamnesa() {
+  router.reload({
+    only: ['DataAnamnesa'],
+    preserveState: true,
+    preserveScroll: true,
+  })
+}
+
+
+// Tombol kembali
 const backRoute = route('ruang-layanan.kunjungan-online')
 </script>
 

@@ -6,11 +6,75 @@ use Illuminate\Database\Eloquent\Model;
 
 class SimpusLoket extends Model
 {
-    
+
     protected $table = 'simpus_loket';
     protected $primaryKey = 'idLoket';
+    public $incrementing = false;
+    protected $keyType = 'string'; 
 
-     public function SimpusPasien(){
+    protected $fillable = [
+        'idLoket',
+        'pasienId',
+        'noUrut',
+        'noKartu',
+        'kdProvider',
+        'statusKartu',
+        'providerKartu',
+        'jnsPeserta',
+        'kdTkp',
+        'noKunjungan',
+        'tglKunjungan',
+        'kunjSakit',
+        'kdPoli',
+        'kdKegiatan',
+        'keluhan',
+        'puskId',
+        'unitId',
+        'ukkId',
+        'wilayah',
+        'kunjBaru',
+        'kelUmur',
+        'umur',
+        'umur_bulan',
+        'umur_hari',
+        'jknPbi',
+        'statusPasien',
+        'createdDate',
+        'createdBy',
+        'modifiedDate',
+        'modifiedBy',
+        'kategoriUnitId',
+        'PROP',
+        'KAB',
+        'statusResponSatuData',
+        'idResponSatuData',
+        'timeRespon',
+        'no_antrian',
+        'resep_diambil',
+        'sample_resep',
+        'statusLayananLab',
+        'startTImeLab',
+        'endTimeLab',
+        'startTimeResep',
+        'endTimeResep',
+        'tenagaMedisApotek',
+        'PHONE',
+        'kdDokter',
+        'resp_add',
+        'resp_panggil',
+        'idResponRekamMedik',
+    ];
+
+    public function SimpusPasien()
+    {
         return $this->belongsTo(SimpusPasien::class, 'pasienId', 'ID');
     }
+
+    public function SimpusPoli(){
+        return $this->belongsTo(SimpusPoliFKTP::class, 'kdPoli', 'kdPoli');
+    }
+    public function anamnesa()
+{
+    return $this->hasMany(SimpusAnamnesa::class, 'loketId', 'idLoket');
+}
 }

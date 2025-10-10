@@ -1,7 +1,7 @@
 <template>
   <AppLayouts>
     <FormAnamnesa
-      title="Kunjungan Online"
+      title="Kunjungan Online33"
       :backRoute="backRoute"
       :unitList="unitList"
       :rows="rows"

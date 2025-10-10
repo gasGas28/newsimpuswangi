@@ -1,0 +1,955 @@
+<template>
+  <AppLayouts>
+    <!-- ===================== APP NORMAL (disembunyikan saat print) ===================== -->
+    <div class="app-shell">
+      <div class="card m-4 rounded-4 rounded-bottom-0 shadow-sm">
+        <!-- Header -->
+        <div
+          class="card-header d-flex justify-content-between align-items-center p-3 rounded-4 rounded-bottom-0"
+          style="background: linear-gradient(135deg, #3b82f6, #10b981);"
+        >
+          <h1 class="m-0 fs-5 text-white">Laboratorium — Pemeriksaan Pasien</h1>
+          <Link :href="route('ruang-layanan.laborat')" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+            <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
+          </Link>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-4">
+            <!-- ============ KIRI: IDENTITAS + AKSI ============ -->
+            <div class="col-lg-4">
+              <div class="border rounded-4 h-100">
+                <div class="p-3 border-bottom" style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="m-0">Identitas Pasien</h6>
+
+                    <!-- AKSI kecil ala CI -->
+                    <div class="btn-group">
+                      <button class="btn btn-sm btn-outline-primary" @click="openPermohonanModal" title="Tambah Permohonan">
+                        <i class="bi bi-file-plus"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-success" @click="openMasterModal" :disabled="!order" title="Tambah Pemeriksaan">
+                        <i class="bi bi-clipboard2-plus"></i>
+                      </button>
+                      <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" :disabled="!order" title="Tambah Paket Cepat">
+                          Paket
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket Darah Lengkap</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a></li>
+                        </ul>
+                      </div>
+                      <button class="btn btn-sm btn-outline-dark" @click="printHasil" :disabled="!order" title="Cetak / Print">
+                        <i class="bi bi-printer"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-3 small">
+                  <div class="fw-semibold">{{ pasien.NAMA_LGKP || '-' }}</div>
+                  <div class="text-muted">NO. MR: {{ pasien.NO_MR || '-' }}</div>
+                  <hr />
+                  <div><span class="text-muted">Tgl Kunjungan:</span> {{ pasien.tglKunjungan || '-' }}</div>
+                  <div><span class="text-muted">NIK:</span> {{ pasien.NIK || '-' }}</div>
+                  <div><span class="text-muted">Jenis Kelamin:</span> {{ pasien.jenis_klmin || '-' }}</div>
+                  <div class="mt-2">
+                    <span class="text-muted">Alamat:</span>
+                    <div>{{ alamatLengkap }}</div>
+                  </div>
+                </div>
+
+                <!-- Objective -->
+                <div class="p-3 border-top">
+                  <h6 class="mb-2 text-danger">Hasil Pemeriksaan Objective</h6>
+                  <pre class="small text-muted mb-2">loketId: {{ pasien.idLoket || '-' }}</pre>
+
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Keadaan umum</span>
+                    <span>{{ (objective && objective.keadaanUmum) || '-' }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Tinggi Badan</span>
+                    <span>{{ (objective && objective.tinggiBadan) || '-' }} cm</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Berat Badan</span>
+                    <span>{{ (objective && objective.beratBadan) || '-' }} kg</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Tekanan darah</span>
+                    <span>{{ (objective && objective.sistole) || '-' }}/{{ (objective && objective.diastole) || '-' }} mmHg</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Resp. rate</span>
+                    <span>{{ (objective && objective.respRate) || '-' }} bpm</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Heart rate</span>
+                    <span>{{ (objective && objective.heartRate) || '-' }} bpm</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Suhu</span>
+                    <span>{{ (objective && objective.suhu) || '-' }} °C</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============ KANAN: PERMOHONAN + TABEL ============ -->
+            <div class="col-lg-8">
+              <!-- Data Permohonan -->
+              <div class="border rounded-4 mb-4">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center"
+                     style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
+                  <h6 class="m-0">
+                    Data Permohonan
+                    <span v-if="permId" class="text-muted small">(#{{ permId }})</span>
+                  </h6>
+                  <span class="badge" :class="order && order.status === 'Selesai' ? 'bg-success' : 'bg-warning text-dark'">
+                    {{ (order && order.status) || 'Belum dilayani' }}
+                  </span>
+                </div>
+                <div class="p-3 table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width:48px;">No.</th>
+                        <th>Tgl. dibuat</th>
+                        <th>Tenaga Medis Perujuk</th>
+                        <th>Tenaga Medis Pemeriksa</th>
+                        <th>Poli</th>
+                        <th>Alasan</th>
+                        <th>Hasil lab luar faskes</th>
+                        <th style="width:110px;" class="text-end">
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="order">
+                        <td>1</td>
+                        <td>{{ order.tgl_dibuat || '-' }}</td>
+                        <td>{{ order.tenaga_medis_perujuk || '-' }}</td>
+                        <td>{{ order.tenaga_medis_pemeriksa || '-' }}</td>
+                        <td>{{ order.poli || pasien.nmPoli || '-' }}</td>
+                        <td>{{ order.alasan || '-' }}</td>
+                        <td>{{ order.hasil_lab_luar_faskes ? 'ya' : 'tidak' }}</td>
+                        <td class="text-end">
+                        <td class="text-end">
+                          <div class="btn-group btn-group-sm" role="group" style="white-space:nowrap;">
+                            <button class="btn btn-outline-success" @click="openMasterModal">
+                              <i class="bi bi-plus-square me-1"></i>Tambah
+                            </button>
+                            <button class="btn-success"
+                              @click="printHasil"
+                              :disabled="!order"
+                              title="Cetak / Print lembar hasil">
+                              <i class="bi bi-printer"></i>
+                            </button>
+                          </div>
+                        </td>
+
+                        </td>
+                      </tr>
+                      <tr v-else>
+                        <td colspan="8" class="text-center text-muted">Tidak ada permohonan.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Jenis Pemeriksaan -->
+              <div class="border rounded-4">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                  <h6 class="m-0">Jenis Pemeriksaan Laborat</h6>
+                  <div class="d-flex align-items-center gap-2">
+                    <!-- ICON PRINT -->
+
+
+                    <button class="btn btn-sm btn-outline-secondary" @click="reloadPage">
+                      <i class="bi bi-arrow-clockwise me-1"></i> Reload
+                    </button>
+
+                  </div>
+                </div>
+
+                <div class="p-3">
+                  <div class="row g-3 mb-3">
+ 
+                  </div>
+
+                  <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                      <thead class="table-light text-center">
+                        <tr>
+                          <th style="width:56px;">No</th>
+                          <th style="width:120px;">Kode</th>
+                          <th>Nama pemeriksaan</th>
+                          <th style="width:220px;">Nilai Normal/kritis</th>
+                          <th style="width:240px;">Nilai Lab (satuan)</th>
+                          <th style="width:100px;">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(row, i) in rows" :key="row.detail_id">
+                          <td class="text-center">{{ i + 1 }}</td>
+                          <td class="text-center">{{ row.kode }}</td>
+                          <td>{{ row.nama_pemeriksaan }}</td>
+                          <td class="small">
+                          <div class="text-muted white-pre-line">{{ row.nilai_normal_kritis || '-' }}</div>
+                          </td>
+                          <td>
+                            <div class="input-group">
+                              <input
+                                type="text"
+                                class="form-control"
+                                v-model="hasil[row.detail_id]"
+                                :placeholder="row.satuan ? `(${row.satuan})` : ''"
+                              />
+                              <span class="input-group-text">{{ row.satuan || '-' }}</span>
+                            </div>
+                          </td>
+                          <td class="text-center">
+
+                                <button class="btn btn-outline-danger"
+                                        @click="hapusRow(row)"
+                                        :disabled="!order"
+                                        title="Hapus item ini">
+                                        <i class="bi bi-trash"></i>
+                                </button>
+                          </td>
+                        </tr>
+                        <tr v-if="rows.length === 0">
+                          <td colspan="6" class="text-center text-muted py-4">Belum ada item pemeriksaan.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                  </div>
+                                     <div class="col-md-4">
+                      <label class="form-label small">Sample diambil jam</label>
+                      <input type="datetime-local" class="form-control" v-model="formWaktu.sample_diambil_at" />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label small">Sample selesai jam</label>
+                      <input type="datetime-local" class="form-control" v-model="formWaktu.sample_selesai_at" />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label small">Tenaga Medis Pemeriksa</label>
+                      <select class="form-select" v-model="formWaktu.tenaga_medis_pemeriksa">
+                        <option value="" disabled>Pilih...</option>
+                        <option v-for="tm in tenagaMedis" :key="tm.id" :value="tm.nama">
+                          {{ tm.nama }} <span v-if="tm.profesi">— {{ tm.profesi }}</span>
+                        </option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <button class="btn btn-primary gradient-btn" @click="submitWaktu" :disabled="!order">
+                        Simpan Waktu & Pemeriksa
+                      </button>
+                    </div>
+                  <br/>
+                  <div class="text-end">
+                    <button class="btn btn-sm btn-success"
+                            @click="submitNilai"
+                            :disabled="!order">
+                      <i class="bi bi-check2-square me-1"></i> UPDATE NILAI LAB
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODAL: TAMBAH PERMOHONAN ===== -->
+      <div v-if="showPermohonan" class="modal-mask" @click.self="showPermohonan=false">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h6 class="m-0">Tambah Permohonan Laborat</h6>
+            <button class="btn-close" @click="showPermohonan=false"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning py-2" v-if="!permForm.idPasien">
+              <i class="bi bi-info-circle me-1"></i> idPasien belum terdeteksi otomatis. Silakan isi manual.
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small">ID Loket</label>
+                <input class="form-control" :value="permForm.idLoket" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">ID Pasien</label>
+                <input class="form-control" v-model="permForm.idPasien" placeholder="cth: 1 / 2 / 3" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Tanggal dibuat</label>
+                <input type="datetime-local" class="form-control" v-model="permForm.tglDibuat" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Hasil lab luar faskes?</label>
+                <select class="form-select" v-model="permForm.hasilLabLuarFaskes">
+                  <option value="">Tidak</option>
+                  <option value="1">Ya</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Kode Poli (opsional)</label>
+                <input class="form-control" v-model="permForm.kdPoli" placeholder="cth: 004" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Tenaga Medis Pengirim (kode)</label>
+                <input class="form-control" v-model="permForm.tenagaMedisPengirim" placeholder="cth: DR001" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small">Alasan Dirujuk</label>
+                <textarea class="form-control" rows="2" v-model="permForm.alasanDirujuk"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-light" @click="showPermohonan=false">Batal</button>
+            <button class="btn btn-primary" @click="submitPermohonan">Simpan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MODAL: MASTER PEMERIKSAAN (ala CI) ===== -->
+      <div v-if="showMaster" class="modal-mask" @click.self="showMaster=false">
+        <div class="modal-card modal-xl">
+          <div class="modal-header">
+            <h6 class="m-0">Daftar Jenis Pemeriksaan</h6>
+          <button class="btn-close" @click="showMaster=false"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row g-3 align-items-end mb-3">
+              <div class="col-lg-6">
+                <label class="form-label small text-danger">Input nama jenis pemeriksaan</label>
+                <div class="input-group">
+                  <input class="form-control" v-model="master.search" placeholder="input nama jenis pemeriksaan" @keyup.enter="loadMaster(1)" />
+                  <button class="btn btn-primary" @click="loadMaster(1)">
+                    <i class="bi bi-search me-1"></i> CARI / TAMPILKAN SEMUA
+                  </button>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <label class="form-label small text-danger">Input Paket Pemeriksaan</label>
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketCatin')" :disabled="!order">PAKET CATIN</button>
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketAnck1')" :disabled="!order">PAKET ANC K1</button>
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketAnck3')" :disabled="!order">PAKET ANC K3</button>
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketPtm')" :disabled="!order">PAKET PTM</button>
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketDarahLengkap')" :disabled="!order">PAKET DARAH LENGKAP</button>
+                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketWidal')" :disabled="!order">PAKET WIDAL</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive border rounded">
+              <table class="table table-striped align-middle mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th style="width:120px;">Kode</th>
+                    <th>Jenis Pemeriksaan</th>
+                    <th style="width:120px;">Satuan</th>
+                    <th style="width:260px;">Nilai normal / kritis</th>
+                    <th style="width:180px;">Hasil Lab</th>
+                    <th style="width:60px;" class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="master.loading">
+                    <td colspan="6" class="text-center py-4">Memuat...</td>
+                  </tr>
+                  <tr v-for="(it, idx) in master.items" :key="`m-${it.idPemeriksaan || it.id || idx}`">
+                    <td class="text-muted">{{ it.kode || '-' }}</td>
+                    <td>
+                      <div class="fw-semibold">{{ it.nama || it.nmPemeriksaan || '-' }}</div>
+                      <div class="text-muted fst-italic small" v-if="it.nmPemeriksaanInd">{{ it.nmPemeriksaanInd }}</div>
+                    </td>
+                    <td>{{ it.satuan || '-' }}</td>
+                    <td class="small">
+                      <div class="text-muted">{{ it.nilaiNormalKritis || it.nilai_normal_kritis || '-' }}</div>
+                    </td>
+                    <td>
+                      <input class="form-control form-control-sm"
+                             v-model="valueMap[it.idPemeriksaan || it.id]" placeholder="isian opsional" />
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                             v-model="selectedMap[it.idPemeriksaan || it.id]" />
+                    </td>
+                  </tr>
+                  <tr v-if="!master.loading && master.items.length === 0">
+                    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- pagination simple -->
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <div class="small text-muted">
+                Total: {{ master.meta.total || 0 }}
+              </div>
+              <div class="btn-group">
+                <button
+                  v-for="(ln, i) in master.links"
+                  :key="i"
+                  class="btn btn-sm"
+                  :class="['btn-outline-secondary', ln.active ? 'active' : '']"
+                  :disabled="!ln.url"
+                  @click="gotoLink(ln.url)"
+                >
+                  {{ ln.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light" @click="showMaster=false">Close</button>
+            <button class="btn btn-success" :disabled="!order" @click="submitSelected">
+              <i class="bi bi-check2-square me-1"></i> SIMPAN
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ===================== /APP NORMAL ===================== -->
+
+    <!-- ===================== PRINT SHEET (hanya muncul saat print) ===================== -->
+    <div class="print-sheet" v-if="order">
+      <!-- Header -->
+      <div class="ps-head">
+        <img src="../../../../../public/images/logo.png" alt="logo" class="ps-logo" />
+        <div class="ps-title">
+          <div>PEMERINTAH KABUPATEN BANYUWANGI</div>
+          <div>DINAS KESEHATAN</div>
+          <div>PUSKESMAS WONGSOREJO</div>
+          <div class="ps-sub">JL. Raya Situbondo No.04, Dsn. Kebunrejo RT 01 / RW 01</div>
+        </div>
+      </div>
+
+      <h3 class="ps-report-title">LEMBAR HASIL LABORATORIUM</h3>
+
+      <!-- Identitas -->
+      <table class="ps-info">
+        <tr>
+          <td>Nama</td><td>: {{ pasien.NAMA_LGKP || '-' }}</td>
+          <td>No reg lab</td><td>: {{ order.no_reg_lab || order.order_id || '-' }}</td>
+        </tr>
+        <tr>
+          <td>Tgl Lahir</td><td>: {{ pasien.TGL_LHR || '-' }}</td>
+          <td>Tgl periksa</td><td>: {{ order.tgl_dibuat || '-' }}</td>
+        </tr>
+        <tr>
+<td>Jenis kelamin</td><td>: {{ jenisKelaminLabel }}</td>
+          <td>Spec diambil jam</td><td>: {{ order.sample_diambil_at || '-' }}</td>
+        </tr>
+        <tr>
+          <td>Alamat</td><td>: {{ alamatLengkap }}</td>
+          <td>Spec selesai jam</td><td>: {{ order.sample_selesai_at || '-' }}</td>
+        </tr>
+        <tr>
+          <td>No RM</td><td>: {{ pasien.NO_MR || '-' }}</td>
+          <td>Unit pengirim</td><td>: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
+        </tr>
+        <!-- Tambahan: Tenaga Medis Pemeriksa -->
+        <tr>
+          <td>Pemeriksa</td>
+          <td colspan="3">: {{ order.tenaga_medis_pemeriksa || '-' }}</td>
+        </tr>
+      </table>
+
+      <!-- Section contoh -->
+      <div class="ps-section">HEMATOLOGI</div>
+      <table class="ps-table">
+        <thead>
+          <tr>
+            <th class="w-1">No.</th>
+            <th class="w-2">Kode</th>
+            <th>Nama pemeriksaan</th>
+            <th>Nilai Normal/kritis</th>
+            <th>Nilai Lab (satuan)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(r,i) in rows" :key="r.detail_id">
+            <td class="t-center">{{ i+1 }}</td>
+            <td class="t-center">{{ r.kode }}</td>
+            <td>{{ r.nama_pemeriksaan }}</td>
+            <td class="t-small">{{ r.nilai_normal_kritis }}</td>
+            <td>{{ (hasil && hasil[r.detail_id]) || r.nilai_lab || '' }} <span class="muted">{{ r.satuan }}</span></td>
+          </tr>
+          <tr v-if="rows.length===0">
+            <td colspan="5" class="t-center">Belum ada data</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Tanda tangan -->
+      <div class="ps-sign">
+        <div class="col">Dokter<br><br><br>
+          <u>{{ order.tenaga_medis_perujuk || '___________________' }}</u>
+        </div>
+        <div class="col">Pemeriksa<br><br><br>
+          <u>{{ order.tenaga_medis_pemeriksa || '___________________' }}</u>
+        </div>
+      </div>
+
+      <div class="ps-footnote">
+        <div class="small muted">* Hasil pemeriksaan mohon dibawa saat konsultasi. Lembar ini dicetak otomatis dari sistem.</div>
+      </div>
+    </div>
+    <!-- ===================== /PRINT SHEET ===================== -->
+  </AppLayouts>
+</template>
+
+<script setup>
+import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { computed, reactive, ref, watch, isRef, onMounted } from 'vue';
+
+const page = usePage();
+const pageProps = computed(() => (isRef(page?.props) ? (page.props.value || {}) : (page?.props || {})));
+
+// Props dari Inertia
+const pasien      = computed(() => pageProps.value.DataPasien || {});
+const order       = computed(() => pageProps.value.DataPermohonan || null);
+const rows        = computed(() => pageProps.value.DataPemeriksaan || []);
+const objective   = computed(() => pageProps.value.DataObjective || null);
+const tenagaMedis = computed(() => pageProps.value.TenagaMedis || []);
+
+// ===== Helpers umum =====
+function toInt(x) {
+  if (x === null || x === undefined) return null;
+  const n = typeof x === 'string' ? parseInt(x.trim(), 10) : Number(x);
+  return Number.isFinite(n) && Number.isInteger(n) ? n : null;
+}
+function toStr(x) {
+  if (x === null || x === undefined) return null;
+  const s = String(x).trim();
+  return s.length ? s : null;
+}
+
+// Ambil ID permohonan sebagai **STRING** (PMH001, dsb.)
+const permId = computed(() => {
+  const o = order.value || {};
+  const cands = [
+    o?.order_id,
+    o?.orderId,
+    o?.idPermohonan,
+    o?.id,
+    pageProps.value?.DataPermohonan?.order_id,
+    pageProps.value?.DataPermohonan?.idPermohonan,
+  ];
+  for (const c of cands) {
+    const s = toStr(c);
+    if (s) return s;
+  }
+  console.warn('[Laborat] Tidak menemukan permohonan ID.', o, cands);
+  return null;
+});
+
+function showErrors(errs) {
+  try {
+    const list = Object.values(errs || {}).flat().map(String);
+    if (list.length) alert(list.join('\n'));
+  } catch {
+    alert('Terjadi kesalahan. Coba lagi.');
+  }
+}
+
+function hapusRow(row) {
+  if (!order.value) return;
+  if (!row || !row.detail_id) return;
+
+  const ok = confirm(`Hapus item "${row.nama_pemeriksaan}"?`);
+  if (!ok) return;
+
+  const payload = {
+    order_id: permId.value,
+    detail_id: row.detail_id
+  };
+
+  router.post(route('ruang-layanan.laborat.hapusTindakan'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => {
+      // refresh daftar & nilai lokal
+      reloadPage();
+      // popup sederhana
+      try { alert('Item pemeriksaan dihapus.'); } catch {}
+    }
+  });
+}
+
+
+// Alamat rapi
+const alamatLengkap = computed(() => {
+  const p = pasien.value || {};
+  const parts = [
+    p.alamat, `RT ${p.no_rt || '-'}`, `RW ${p.no_rw || '-'}`,
+    p.nama_kel, p.nama_kec, p.nama_kab, p.nama_prop
+  ].filter(Boolean);
+  return parts.join(', ');
+});
+
+// ===== Waktu sample & pemeriksa =====
+const formWaktu = reactive({
+  order_id: null,
+  sample_diambil_at: '',
+  sample_selesai_at: '',
+  tenaga_medis_pemeriksa: '',
+});
+watch(order, (o) => {
+  if (!o) return;
+  formWaktu.order_id = toStr(o.order_id ?? o.orderId ?? o.idPermohonan ?? o.id ?? null);
+  formWaktu.sample_diambil_at = toInputDateTime(o.sample_diambil_at || o.sampleDiambil || '');
+  formWaktu.sample_selesai_at = toInputDateTime(o.sample_selesai_at || o.sampleSelesai || '');
+  formWaktu.tenaga_medis_pemeriksa = o.tenaga_medis_pemeriksa || o.tenagaMedisPemeriksa || '';
+}, { immediate: true });
+
+const hasil = ref({});
+watch(rows, (list) => {
+  const map = {};
+  (list || []).forEach(r => {
+    map[r.detail_id] = (r.nilai_lab !== undefined && r.nilai_lab !== null) ? r.nilai_lab : '';
+  });
+  hasil.value = map;
+}, { immediate: true });
+
+function toInputDateTime(val) {
+  if (!val) return '';
+  return String(val).replace(' ', 'T').slice(0, 16);
+}
+function copyNormal(row) {
+  if (!row || !row.nilai_normal_kritis) return;
+  hasil.value[row.detail_id] = row.nilai_normal ?? row.nilai_normal_kritis ?? '';
+}
+function submitWaktu() {
+  if (permId.value === null) {
+    alert('Permohonan ID tidak valid.\nSilakan muat ulang halaman.');
+    return;
+  }
+  const payload = { ...formWaktu, order_id: permId.value };
+  router.post(route('ruang-layanan.laborat.setWaktuSample'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => {
+      alert('✅ Waktu & Tenaga Medis Pemeriksa berhasil disimpan');
+      reloadPage();
+    }
+  });
+}
+
+function submitNilai() {
+  if (permId.value === null) {
+    alert('Permohonan ID tidak valid.\nSilakan muat ulang halaman.');
+    return;
+  }
+  const payload = {
+    order_id: permId.value,
+    hasil: Object.entries(hasil.value).map(([detail_id, nilai]) => ({
+      detail_id: toInt(detail_id),
+      nilai
+    })).filter(x => x.detail_id !== null)
+  };
+  router.post(route('ruang-layanan.laborat.updateNilaiLab'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => {
+      alert('✅ Nilai lab berhasil disimpan');
+      reloadPage();
+    }
+  });
+}
+
+function reloadPage() {
+  router.reload({
+    only: ['DataPermohonan', 'DataPemeriksaan', 'DataObjective'],
+    preserveState: true,
+    preserveScroll: true,
+  });
+}
+function printHasil() {
+  // print hanya konten print-sheet
+  requestAnimationFrame(() => window.print());
+}
+
+// ===== Permohonan =====
+const showPermohonan = ref(false);
+const permForm = reactive({
+  idLoket: '',
+  idPasien: '',
+  idPelayanan: '',
+  hasilLabLuarFaskes: '',
+  kdPoli: '',
+  tenagaMedisPengirim: '',
+  alasanDirujuk: '',
+  tglDibuat: defaultNow(),
+});
+
+// Prefill otomatis
+watch(pasien, (p) => {
+  permForm.idLoket = p?.idLoket || '';
+}, { immediate: true });
+watch(order, (o) => {
+  permForm.idPasien = o?.pasien_id ?? '';
+}, { immediate: true });
+
+function defaultNow() {
+  const d = new Date();
+  const pad = (n)=> String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function openPermohonanModal() {
+  permForm.idLoket = pasien.value?.idLoket || '';
+  permForm.idPasien = order.value?.pasien_id ? String(order.value.pasien_id) : '';
+  permForm.tglDibuat = defaultNow();
+  showPermohonan.value = true;
+}
+function submitPermohonan() {
+  const payload = {
+    idLoket: permForm.idLoket,
+    idPasien: permForm.idPasien,
+    idPelayanan: permForm.idPelayanan || '',
+    hasilLabLuarFaskes: permForm.hasilLabLuarFaskes || '',
+    kdPoli: permForm.kdPoli || '',
+    tenagaMedisPengirim: permForm.tenagaMedisPengirim || '',
+    alasanDirujuk: permForm.alasanDirujuk || '',
+    tglDibuat: permForm.tglDibuat ? permForm.tglDibuat.replace('T',' ') + ':00' : '',
+  };
+  if (!payload.idLoket || !payload.idPasien) {
+    alert('ID Loket dan ID Pasien wajib diisi.');
+    return;
+  }
+  router.post(route('ruang-layanan.laborat.simpanPermohonan'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => { showPermohonan.value = false; reloadPage(); }
+  });
+}
+
+// ===== MASTER PEMERIKSAAN (modal) =====
+const showMaster = ref(false);
+const master = reactive({
+  search: '',
+  items: [],
+  meta: { total: 0 },
+  links: [],
+  loading: false,
+});
+const selectedMap = reactive({});
+const valueMap = reactive({});
+
+function openMasterModal() {
+  if (!order.value) return;
+  showMaster.value = true;
+  if (master.items.length === 0) loadMaster(1);
+}
+async function loadMaster(page = 1) {
+  master.loading = true;
+  try {
+    const url = new URL(route('ruang-layanan.laborat.paginasiMasterPemeriksaan'), window.location.origin);
+    if (master.search) url.searchParams.set('search', master.search);
+    url.searchParams.set('page', String(page));
+    const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' }});
+    const data = await res.json();
+    master.items = (data?.data || []).map((x) => ({
+      id: x.id || x.idPemeriksaan || x.id_pemeriksaan || x.pemeriksaanId,
+      idPemeriksaan: x.idPemeriksaan ?? x.id ?? x.id_pemeriksaan ?? x.pemeriksaanId,
+      kode: x.kode,
+      nama: x.nama || x.nmPemeriksaan,
+      nmPemeriksaanInd: x.nmPemeriksaanInd,
+      satuan: x.satuan,
+      nilaiNormalKritis: x.nilai_normal_kritis || x.nilaiNormalKritis,
+    }));
+    master.meta  = data?.meta || {};
+    master.links = data?.links || [];
+  } catch (e) {
+    console.error(e);
+    master.items = [];
+    master.meta = { total: 0 };
+    master.links = [];
+  } finally {
+    master.loading = false;
+  }
+}
+function gotoLink(url) {
+  if (!url) return;
+  const u = new URL(url, window.location.origin);
+  const p = u.searchParams.get('page') || '1';
+  loadMaster(Number(p));
+}
+
+const jenisKelaminLabel = computed(() => {
+  const jk = pasien.value?.jenis_klmin;
+  if (jk == '1' || jk?.toString().toLowerCase() === 'l') return 'Laki-laki';
+  if (jk == '2' || jk?.toString().toLowerCase() === 'p') return 'Perempuan';
+  return '-';
+});
+
+function addPaket(paketKey) {
+  if (permId.value === null) {
+    alert('Permohonan ID tidak valid.\nSilakan muat ulang halaman.');
+    return;
+  }
+  const payload = {
+    loketId: pasien.value?.idLoket || '',
+    permohonanId: permId.value,
+    pelayananId: order.value?.idPelayanan || '',
+  };
+  router.post(route('ruang-layanan.laborat.paketPemeriksaanSimpan', { paket: paketKey }), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => { reloadPage(); }
+  });
+}
+function submitSelected() {
+  if (permId.value === null) {
+    alert('Permohonan ID tidak valid.\nSilakan muat ulang halaman.');
+    return;
+  }
+  const pilih = Object.entries(selectedMap)
+    .filter(([, v]) => !!v)
+    .map(([k]) => toInt(k))
+    .filter((n) => n !== null);
+
+  if (pilih.length === 0) {
+    alert('Pilih minimal satu pemeriksaan.');
+    return;
+  }
+
+
+  const payload = {
+    loketId: pasien.value?.idLoket || '',
+    permohonanId: permId.value,
+    pelayananId: order.value?.idPelayanan || '',
+    pilih,
+    nilaiLab: valueMap
+  };
+  router.post(route('ruang-layanan.laborat.pemeriksaanSimpan'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => { showMaster.value = false; reloadPage(); }
+  });
+}
+
+// debug helper (opsional)
+onMounted(() => {
+  window.__order = order;
+  window.__permId = permId;
+});
+</script>
+
+<!-- ========== GLOBAL PRINT CSS (JANGAN scoped) ========== -->
+<style>
+@page { size: A4; margin: 14mm 12mm; }
+/* HANYA untuk mode print — tampilkan cuma .print-sheet */
+@media print {
+  /* Sembunyikan SEMUA konten halaman */
+  body * { visibility: hidden !important; }
+
+  /* Tampilkan hanya lembar cetak + isinya */
+  .print-sheet, .print-sheet * {
+    visibility: visible !important;
+  }
+
+  /* Posisikan lembar cetak memenuhi halaman */
+  .print-sheet {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+    margin: 0;
+    z-index: 9999;
+  }
+
+  /* Jaga-jaga: matikan layout/header/footers app kalau ada */
+  .app-shell, header, .navbar, .sidebar, .card-header, footer {
+    display: none !important;
+  }
+}
+
+/* Default: sembunyikan print-sheet saat layar biasa */
+@media screen {
+  .print-sheet { display: none; }
+}
+
+/* ====== Gaya print-sheet ====== */
+.print-sheet {
+  font-family: "Times New Roman", serif;
+  color:#000;
+  width: 190mm;
+  margin: 0 auto;
+  font-size: 12pt;
+}
+.ps-head { display:flex; align-items:center; gap:14px; border-bottom:2px solid #000; padding-bottom:8px; }
+.ps-logo { width:58px; height:58px; object-fit:contain; }
+.ps-title { flex:1; text-align:center; font-weight:bold; font-size:14pt; line-height:1.25; }
+.ps-sub { font-size:10pt; font-weight:normal; }
+.ps-report-title { text-align:center; margin:12px 0 8px; text-decoration: underline; }
+
+.ps-info { width:100%; border-collapse: collapse; margin-top: 6px; }
+.ps-info td { padding: 2px 4px; vertical-align: top; }
+
+.ps-section { margin-top:12px; font-weight:bold; background:#f3f4f6; border:1px solid #000; border-bottom:0; padding:4px 6px; }
+.ps-table { width:100%; border-collapse: collapse; }
+.ps-table th, .ps-table td { border:1px solid #000; padding:6px; }
+.ps-table th { text-align:center; font-weight:bold; }
+.t-center { text-align:center; }
+.t-small { font-size: 10pt; }
+.muted { color:#555; }
+
+.ps-sign { display:flex; justify-content:space-between; margin-top:30px; }
+.ps-sign .col { width:48%; text-align:center; }
+
+.ps-footnote { margin-top:14px; font-size:10pt; color:#444; }
+.w-1 { width:36px; }
+.w-2 { width:90px; }
+</style>
+
+<!-- ========== STYLE BIASA (scoped) ========== -->
+<style scoped>
+.gradient-btn {
+  background: linear-gradient(135deg, #3b82f6, #10b981) !important;
+  border: none !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.gradient-btn:hover { transform: translateY(-1px); box-shadow: 0 .5rem 1rem rgba(16,185,129,.15); }
+.table th, .table td { vertical-align: middle; }
+
+/* --- Simple Modal --- */
+.modal-mask {
+  position: fixed; z-index: 1050; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: grid; place-items: center;
+  padding: 1rem;
+}
+.modal-card {
+  width: 100%; max-width: 720px;
+  background: #fff; border-radius: 1rem;
+  box-shadow: 0 1rem 2rem rgba(0,0,0,.2);
+  overflow: hidden;
+}
+.modal-card.modal-xl { max-width: 1100px; } /* yang daftar master */
+.modal-header, .modal-footer {
+  padding: .75rem 1rem;
+  background: #f8fafc;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-body { padding: 1rem; }
+.btn-close { border: 0; background: transparent; }
+</style>

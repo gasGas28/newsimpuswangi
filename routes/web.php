@@ -17,11 +17,15 @@ use App\Http\Controllers\Laporan\Rujukan\RujukanController;
 use App\Http\Controllers\MalSehat\PTMController;
 use App\Http\Controllers\Laporan\Kb\KbController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
+use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; 
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\RuangLayanan\KunjOnline\KunjOnlineController;
-
+use App\Http\Controllers\RuangLayanan\LaboratoriumController;
+use App\Http\Controllers\Owner\OwnerController;
+use App\Http\Controllers\Owner\PanelController;
+use App\Http\Controllers\Auth\PasswordForceController;
+use App\Http\Controllers\Owner\OwnerLogController;
 
 
 
@@ -34,6 +38,15 @@ Route::get('/', function () {
 // Login
 Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':owner,kapus'])->get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':loket,owner,admin'])->get('/loket', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+Route::middleware(['auth', CheckRole::class.':pelayanan,owner,admin'])
+    ->get('/ruang-layanan/poli', fn() => Inertia::render('RuangLayanan/Poli'))
+    ->name('ruang-layanan.poli.alt');  // nama beda, tidak bentrok
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':owner,admin,loket,pelayanan'])->group(function () {
+  // semua rute laporan
+});
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':laborat,pelayanan'])->get('/laborat', fn() => Inertia::render('Laborat/Index'))->name('laborat.index');
 
 // Protected
 Route::middleware('auth')->group(function () {
@@ -335,7 +348,49 @@ Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class,'cp
     Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
 
     //Laborat
-    Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
+    // Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
+Route::get('/simpus/laborat', [LaboratoriumController::class, 'index'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat');
+
+
+Route::get('/simpus/laborat/pemeriksaan/{loketId}', [LaboratoriumController::class, 'pemeriksaan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.pemeriksaan');
+
+Route::post('/simpus/laborat/set-waktu-sample', [LaboratoriumController::class, 'setWaktuSample'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.setWaktuSample');
+
+Route::post('/simpus/laborat/update-nilai', [LaboratoriumController::class, 'updateNilaiLab'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.updateNilaiLab');
+
+// === endpoint untuk modal master/paket & cetak ===
+Route::get('/simpus/laborat/paginasi-master-pemeriksaan', [LaboratoriumController::class, 'paginasiMasterPemeriksaan'])
+        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+        ->name('ruang-layanan.laborat.paginasiMasterPemeriksaan');
+
+Route::post('/simpus/laborat/permohonan/simpan', [LaboratoriumController::class, 'simpanPermohonan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.simpanPermohonan');
+
+Route::post('/simpus/laborat/pemeriksaan/simpan', [LaboratoriumController::class, 'pemeriksaanSimpan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+->name('ruang-layanan.laborat.pemeriksaanSimpan');
+
+Route::post('/simpus/laborat/pemeriksaan/paket/{paket}', [LaboratoriumController::class, 'paketPemeriksaanSimpan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+->name('ruang-layanan.laborat.paketPemeriksaanSimpan');
+
+Route::get('/simpus/laborat/detail/{idPermohonan}', [LaboratoriumController::class, 'detail']
+    )->name('ruang-layanan.laborat.detail');
+
+
+Route::post(
+    '/simpus/laborat/tindakan/hapus',
+    [LaboratoriumController::class, 'hapusTindakan']
+)->name('ruang-layanan.laborat.hapusTindakan');
 
     //Rawat Inap
     Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
@@ -343,6 +398,61 @@ Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class,'cp
     Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
 });
+
+
+// =================== HALAMAN OWNER (Inertia) ===================
+Route::get('/owner', [PanelController::class, 'index'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
+    ->name('owner.panel');
+
+// =================== API OWNER (session-based) =================
+Route::prefix('api/owner')
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
+    ->group(function () {
+        Route::get('/roles',                    [OwnerController::class, 'roles']);
+        Route::get('/puskesmas',                [OwnerController::class, 'puskesmas']);
+        Route::get('/users',                    [OwnerController::class, 'users']);
+        Route::post('/users',                   [OwnerController::class, 'storeUser']); // tambah user
+        Route::patch('/users/{id}/roles',       [OwnerController::class, 'updateRoles']);
+        Route::post('/users/{id}/force-logout', [OwnerController::class, 'forceLogout']);
+        Route::get('/online-users',             [OwnerController::class, 'onlineUsers']); // opsional
+    });
+Route::post('/auth/password/force-update', [PasswordForceController::class, 'update'])
+    ->middleware(['auth'])
+    ->name('auth.password.force-update');
+// =================== API OWNER (session-based) =================
+Route::prefix('api/owner')
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
+    ->group(function () {
+        Route::get('/roles',                    [OwnerController::class, 'roles']);
+        Route::get('/puskesmas',                [OwnerController::class, 'puskesmas']);
+        Route::get('/users',                    [OwnerController::class, 'users']);
+        Route::post('/users',                   [OwnerController::class, 'storeUser']); // tambah user
+        Route::patch('/users/{id}/roles',       [OwnerController::class, 'updateRoles']);
+        Route::post('/users/{id}/force-logout', [OwnerController::class, 'forceLogout']);
+        Route::get('/online-users',             [OwnerController::class, 'onlineUsers']); // opsional
+    });
+Route::post('/auth/password/force-update', [PasswordForceController::class, 'update'])
+    ->middleware(['auth'])
+    ->name('auth.password.force-update');
+// =================== JSON + PAGE: Log Hapus Pasien (Loket) ===================
+Route::middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
+    ->group(function () {
+        // JSON endpoint (dipakai halaman khusus log)
+        Route::get('/owner/loket-delete-logs', [OwnerLogController::class, 'loketDeletes'])
+            ->middleware('throttle:60,1')
+            ->name('owner.loket-delete-logs');
+
+        // Halaman khusus log (Inertia)
+        Route::get('/owner/logs/loket-delete', function () { return Inertia::render('Owner/LoketDeleteLogs');})->name('owner.logs.loket');
+
+        // ⬇️ ini yang baru
+        Route::patch('/users/{id}/password-changed', [OwnerController::class, 'updatePasswordChanged'])
+            ->name('owner.users.password_changed');
+    });
+        Route::delete('/users/{id}', [OwnerController::class, 'destroyUser'])
+            ->name('owner.users.destroy'); // ⬅️ beri nama
+
 
 Route::get('/cek-db', function () {
     $tables = DB::select('SHOW TABLES');

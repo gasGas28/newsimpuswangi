@@ -29,83 +29,94 @@
               <i class="bi bi-house-door me-2"></i> Home
             </Link>
           </li>
-          <li class="nav-item">
+          <!-- Dashboard -->
+          <li class="nav-item" v-if="show('dashboard')">
             <Link :href="route('home.home')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-ticket-perforated me-2"></i> Dashboard
+              <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </Link>
           </li>
-          <li class="nav-item">
+
+          <!-- Loket -->
+          <li class="nav-item" v-if="show('loket')">
             <Link :href="route('loket.index')" class="nav-link d-flex align-items-center">
               <i class="bi bi-ticket-perforated me-2"></i> Loket
             </Link>
           </li>
           <li class="nav-item">
-            <Link class="nav-link" href="/farmasi">
-              <i class="bi bi-capsule me-1"></i> Farmasi
-            </Link>
-          </li>          <li class="nav-item">
-            <Link :href="route('ruang-layanan.poli')" class="nav-link d-flex align-items-center">
-            <i class="bi bi-ticket-perforated me-2"></i> Ruang Layanan
-            </Link>
-          </li>
-          <li class="nav-item">
-            <Link :href="route('mal-sehat.index')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-people me-2"></i> Mal Sehat
-            </Link>
-          </li>
+    <Link class="nav-link" href="/farmasi">
+      <i class="bi bi-capsule me-1"></i> Farmasi
+    </Link>
+       
+       
+          </li>          
+  <!-- Ruang Layanan -->
+  <li class="nav-item" v-if="show('ruangLayanan')">
+    <Link :href="route('ruang-layanan.poli')" class="nav-link d-flex align-items-center">
+      <i class="bi bi-hospital me-2"></i> Ruang Layanan
+    </Link>
+  </li>
+  <li class="nav-item" v-if="show('malSehat')">
+    <Link :href="route('mal-sehat.index')" class="nav-link d-flex align-items-center">
+      <i class="bi bi-people me-2"></i> Mal Sehat
+    </Link>
+  </li>
 
-          <li class="nav-item">
-            <Link :href="route('filter')" class="nav-link d-flex align-items-center">
-              <i class="bi bi-filter-square-fill me-2"></i> Filter
-            </Link>
-          </li>
+  <li class="nav-item" v-if="show('filter')">
+    <Link :href="route('filter')" class="nav-link d-flex align-items-center">
+      <i class="bi bi-filter-square-fill me-2"></i> Filter
+    </Link>
+  </li>
 
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle d-flex align-items-center"
-              href="#"
-              id="laporanDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="laporanDropdown">
-              <li><Link :href="route('laporan.loket')" class="dropdown-item">Loket</Link></li>
-              <li><Link :href="route('laporan.rujukan')" class="dropdown-item">Rujukan</Link></li>
-              <li><Link :href="route('laporan.umum')" class="dropdown-item">Umum</Link></li>
-              <li><Link :href="route('laporan.gigi')" class="dropdown-item">Gigi</Link></li>
-              <li><Link :href="route('laporan.kia')" class="dropdown-item">KIA</Link></li>
-              <li><Link :href="route('laporan.lab')" class="dropdown-item">Lab</Link></li>
-              <li><Link :href="route('laporan.kb')" class="dropdown-item">KB</Link></li>
-              <li><Link :href="route('laporan.ugd')" class="dropdown-item">UGD</Link></li>
-              <li>
-                <Link :href="route('laporan.rawat-inap')" class="dropdown-item">Rawat Inap</Link>
-              </li>
-              <li><Link :href="route('laporan.sanitasi')" class="dropdown-item">Sanitasi</Link></li>
-              <li>
-                <Link :href="route('laporan.kunjungan-sehat')" class="dropdown-item"
-                  >Kunjungan Sehat</Link
-                >
-              </li>
-            </ul>
-          </li>
+  <!-- Dropdown Laporan -->
+  <li class="nav-item dropdown" v-if="show('laporan')">
+    <a
+      class="nav-link dropdown-toggle d-flex align-items-center"
+      href="#"
+      id="laporanDropdown"
+      role="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="laporanDropdown">
+      <!-- Bebaskan sub-itemnya (semua di bawah blok laporan) -->
+      <li><Link :href="route('laporan.loket')" class="dropdown-item">Loket</Link></li>
+      <li><Link :href="route('laporan.rujukan')" class="dropdown-item">Rujukan</Link></li>
+      <li><Link :href="route('laporan.umum')" class="dropdown-item">Umum</Link></li>
+      <li><Link :href="route('laporan.gigi')" class="dropdown-item">Gigi</Link></li>
+      <li><Link :href="route('laporan.kia')" class="dropdown-item">KIA</Link></li>
+      <li><Link :href="route('laporan.lab')" class="dropdown-item">Lab</Link></li>
+      <li><Link :href="route('laporan.kb')" class="dropdown-item">KB</Link></li>
+      <li><Link :href="route('laporan.ugd')" class="dropdown-item">UGD</Link></li>
+      <li><Link :href="route('laporan.rawat-inap')" class="dropdown-item">Rawat Inap</Link></li>
+      <li><Link :href="route('laporan.sanitasi')" class="dropdown-item">Sanitasi</Link></li>
+      <li><Link :href="route('laporan.kunjungan-sehat')" class="dropdown-item">Kunjungan Sehat</Link></li>
+    </ul>
+  </li>
+
         </ul>
       </div>
 
       <!-- User dropdown di kanan -->
       <div class="d-none d-lg-flex ms-auto">
         <div class="dropdown">
-          <button
-            class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center"
-            type="button"
-            id="userDropdown"
-            data-bs-toggle="dropdown"
-          >
-            <i class="bi bi-person-circle me-2"></i>
-            <span class="d-none d-sm-inline">{{ roleLabel }}</span>
-          </button>
+    <button
+      class="btn btn-outline-light rounded-pill dropdown-toggle d-flex align-items-center gap-2"
+      type="button"
+      id="userDropdown"
+      data-bs-toggle="dropdown"
+    >
+      <i class="bi bi-hospital me-1"></i>
+      <span class="badge bg-light text-dark rounded-pill px-2">
+        {{ puskesmasNama }}
+      </span>
+
+      <span class="vr mx-2 opacity-50"></span>
+
+      <i class="bi bi-person-circle"></i>
+      <span class="d-none d-sm-inline">{{ roleLabel }}</span>
+    </button>
           <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow">
             <li>
               <Link class="dropdown-item d-flex align-items-center" href="/profile">
@@ -172,12 +183,36 @@ import { Link, usePage } from '@inertiajs/vue3'   // ⬅️ tambahkan usePage
 import { route } from 'ziggy-js'
 import { computed } from 'vue'// ⬅️ tambahkan usePage
 const page = usePage()
+// roles: array dari server (Inertia share). Normalisasi ke lowercase.
+const roles = computed(() =>
+  (page.props.auth?.user?.roles || []).map(r => String(r).toLowerCase())
+)
 
 // roles dari Inertia share; fallback []
-const roles = computed(() => page.props.auth?.roles ?? [])
+const roleLabel = computed(() => (page.props.auth?.user?.roles?.[0] || 'User'))
+const puskesmasNama = computed(() => page.props.auth?.user?.puskesmas?.nama || '-')
 
-// gabung semua role → "owner, loket" (atau ganti jadi roles.value[0] kalau mau ambil satu)
-const roleLabel = computed(() => roles.value.length ? roles.value.join(', ') : 'User')
+const ALLOW = {
+  // single items
+  dashboard: ['owner','kapus'],
+  loket: ['owner','loket','admin'],
+  pasien: ['loket'],                // kalau nanti kamu punya menu Pasien
+  ruangLayanan: ['owner','pelayanan','admin'],
+  malSehat: ['owner','admin'],
+  laborat: ['pelayanan','laborat'],
+  // dropdown Laporan (sebagai satu blok)
+  laporan: ['owner','loket','pelayanan','admin'],
+   farmasi: ['owner','admin'],
+  filter: ['owner','admin'],
+  // yang tidak disebut di requirement kamu, kita sembunyikan (farmasi, filter)
+}
+
+// helper cek izin
+const show = (menuKey) => {
+  const allowed = ALLOW[menuKey]
+  if (!allowed) return false
+  return roles.value.some(r => allowed.includes(r))
+}
 
 </script>
 
