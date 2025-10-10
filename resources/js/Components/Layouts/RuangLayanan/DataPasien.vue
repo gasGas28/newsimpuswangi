@@ -105,15 +105,15 @@
                   </td>
 
                   <td class="text-center">
-                    <Link :href="route(backRoute, item.idLoket)" class="btn px-3 d-flex gap-3 align-items-center">
-                    <span class="btn btn-sm btn-danger">
-                      <i class="fas fa-times-circle me-1"></i> Belum Dilayani
+                    <Link :href="route(backRoute, [item.idLoket,item.kdPoli, item.idpelayanan])" class="btn">
+                    <span class="btn btn-sm btn-danger" v-if="item.sudahDilayani == 0">
+                      <i class="fas fa-times-circle "></i> Belum Dilayani
                     </span>
-                    <span class="btn btn-sm btn-warning">
-                      <i class="fas fa-spinner fa-spin me-1"></i> Proses Dilayani
+                    <span class="btn btn-sm btn-warning"  v-if="item.sudahDilayani == 2">
+                      <i class="fas fa-spinner fa-spin "></i> Proses Dilayani
                     </span>
-                    <span class="btn btn-sm btn-success">
-                      <i class="fas fa-check-circle me-1"></i> Selesai Dilayani
+                    <span class="btn btn-sm btn-success"  v-if="item.sudahDilayani == 1">
+                      <i class="fas fa-check-circle "></i> Selesai Dilayani
                     </span>
                     </Link>
                   </td>
@@ -140,9 +140,10 @@ const props = defineProps({
   unitList: Array,
   rows: Array
 });
+console.log('data pasien/unit list', props.rows);
 
 
-const emit = defineEmits(['filter'])
+const emit = defineEmits(['filter', 'update-dataPelayanan'])
 
 const tanggal_kunjungan = ref('')
 const selectedUnit = ref('')
@@ -150,7 +151,8 @@ const selectedUnit = ref('')
 onMounted(() => {
   const today = new Date().toISOString().split('T')[0]
   tanggal_kunjungan.value = today
-})
+});
+
 
 </script>
 <style></style>

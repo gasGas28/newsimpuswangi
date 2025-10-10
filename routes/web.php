@@ -20,7 +20,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Laporan\Sanitasi\SanitasiController; // ✅ baru
 use App\Http\Controllers\Laporan\Ugd\UgdController;
 use App\Http\Controllers\Home\HomeController;
-use DB;
+// use DB;
 
 
 
@@ -164,7 +164,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     });
 
     // PTM
-     Route::prefix('ptm')->name('ptm.')->group(function () {
+    Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
@@ -215,19 +215,43 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
 Route::prefix('ruang_layanan')->group(function () {
     // Menampilkan halaman poli
     Route::get('/simpus/poli', [RuangLayananController::class, 'index'])->name('ruang-layanan.poli');
-
     // Umum
     Route::get('/simpus/umum', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.umum');
-    Route::get('/simpus/umum/pelayanan/{id}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan-umum.pelayanan');
-    Route::inertia('/simpus/umum/surat-keterangan', 'Ruang_Layanan/Umum/surat_keterangan')->name('ruang-layanan-umum.surat-keterangan');
+    Route::get('/simpus/umum/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan-umum.pelayanan');
+    Route::get('/simpus/umum/surat-keterangan/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suketList'])->name('ruang-layanan-umum.surat-keterangan');
+    Route::get('/simpus/surat-rujuk/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukList'])->name('ruang-layanan.surat-rujuk');
+    Route::get('/simpus/surat-rujuk-form/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form');
+    Route::post('/simpus/simpan-rujukan/{idPoli}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.simpan-rujukan');
+    Route::get('simpus/cetak-rujukan/{idSurat}', [PoliBpUmumController::class, 'cetakRujukan'])->name('ruang-layanan.cetak-rujukan');
+    Route::get('simpus/surat-rujukan-form-edit/{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form-edit');
+    Route::post('simpus/update/surat-rujukan/{idPoli}/{idSurat}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.update-rujukan');
+    Route::post('simpus/hapus-surat-rujukan/{idSurat}', [PoliBpUmumController::class, 'hapusSuratRujukan'])->name('ruang-layanan.hapus-surat-rujukan');
     Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
     Route::post('simpus/umum/pelayanan/anamnesa', [PoliBpUmumController::class, 'setAnamnesa'])->name('ruang-layanan-umum.setAnamnesa');
     Route::post('simpus/umum/pelayanan/anamnesa/objective', [PoliBpUmumController::class, 'setAnamnesaObjective'])->name('ruang-layanan-umum.setAnamnesaObjective');
     Route::post('simpus/umum/pelayanan/planning-tindakan', [PoliBpUmumController::class, 'setPlanningTindakan'])->name('ruang-layanan-umum.set-PlanningTindakan');
     Route::post('simpus/umum/pelayanan/mulaiPelayanan', [PoliBpUmumController::class, 'mulaiPemeriksaanPasien'])->name('ruang-layanan-umum.mulai-pemeriksaan-pasien');
     Route::post('simpus/umum/pelayanan/diagnosa-medis', [PoliBpUmumController::class, 'setDiagnosaMedis'])->name('ruang-layanan-umum.diagnosa-medis');
+    Route::post('simpus/diagnosa/diagnosa-keperawatan-simpan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setDiagnosaKeperawatan'])->name(name: 'ruang-layanan.diagnosa-keperawatan');
     Route::get('/api/diagnosa-medis', [PoliBpUmumController::class, 'paginasi'])->name('api.diagnosa-medis');
     Route::get('/master-tindakan', [indexController::class, 'paginasiSimpusTindakan'])->name('ruang-layanan.master-tindakan');
+    //Resep obat (Pengobatan Pasien)
+    Route::post('simpus/pelayanan/resep-obat/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setResepObat'])->name('ruang-layanan.set-resep-obat');
+    Route::post('simpus/pelayanan/detail-resep-obat/{idResep}/{idObat}', [PoliBpUmumController::class, 'setDetailResepObat'])->name('ruang-layanan.set-detail-resep');
+    Route::delete('simpus/hapus-resep-obat/{idResepObat}', [PoliBpUmumController::class, 'hapusResepObat'])->name('ruang-layanan.hapus-resep-obat');
+    Route::post('simpus/hapus-detail-resep-obat/{idDetailResepObat}', [PoliBpUmumController::class, 'hapusDetailResepObat'])->name('ruang-layanan.hapus-detail-resep-obat');
+    Route::post('simpus/umum/pelayanan/simpan-rujuk', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan-umum.simpanRujukan');
+    Route::get('simpus/umum/create-surat-keterangan/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'createSuratKeterangan'])->name('ruang-layanan-umum.create-surat-keterangan');
+    Route::post('simpus/umum/pelayanan/simpan-surat-keterangan/{idPoli}', [PoliBpUmumController::class, 'simpanSuket'])->name('ruang-layanan-umum.simpanSuket');
+    Route::get('simpus/umum/cetak-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'cetakSuket'])->name('ruang-layanan-umum.cetak-suket');
+    Route::post('simpus/umum/hapus-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'hapusSuket'])->name('ruang-layanan-umum.hapus-suket');
+    Route::get('simpus/umum/edit-surat-keterangan//{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'editSuket'])->name('ruang-layanan-umum.edit-suket');
+    Route::post('simpus/umum/update-surat-keterangan', [PoliBpUmumController::class, 'updateSuket'])->name('ruang-layanan-umum.update-suket');
+    Route::get('simpus/umum/laborat/{idPoli}/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'formLaborat'])->name('ruang-layanan.form-laborat');
+    Route::post('simpus/umum/laborat/simpan-permohonan-lab/{idLoket}', [PoliBpUmumController::class, 'simpanPermohonanLab'])->name('ruang-layanan.simpan-permohonan-lab');
+    Route::get('simpus/laborat/list-permohonan/{idLoket}', [indexController::class, 'getPermohonanLaborat'])->name('ruang-layanan.getPermonanLab');
+    //riwayat pasien
+    Route::get('simpus/riwayat-pasien/{idPoli}/{idPasien}', [PoliBpUmumController::class, 'riwayatPasien'])->name('ruang-layanan.riwayat-pasien');
     //Gigi
     Route::get('/simpus/gigi', [PoliGigiController::class, 'index'])->name('ruang-layanan.gigi');
     Route::get('/simpus/gigi/pelayanan/{id}', [PoliGigiController::class, 'pelayanan'])->name('ruang-layanan-gigi.pelayanan');

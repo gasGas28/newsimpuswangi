@@ -9,24 +9,31 @@
         </Link>
       </div>
       <div class="card-body">
-        <PelayananPasien @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien" :dataAnamnesa="DataAnamnesa">
+        <PelayananPasien @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien" :dataAnamnesa="DataAnamnesa"
+          :id-pelayanan="idPelayanan">
           <div class="shadow-sm rounded-5">
             <NavigasiFormPemeriksaan :currentTab="currentTab" @change-currentTab="currentTab = $event">
             </NavigasiFormPemeriksaan>
             <div class="m-4 pb-4 row gx-5">
-              <FormPelayananSubjective v-if="currentTab === 'subjective'" :idLoket="DataPasien.idLoket"
-                :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi" @dataAnamnesa-update="refreshDataAnamnesa" :routeName="routeNameFormSubjective">
+              <FormPelayananSubjective v-if="currentTab === 'subjective'" :idPasien="DataPasien.ID"
+                :idLoket="DataPasien.idLoket" :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi"
+                @dataAnamnesa-update="refreshDataAnamnesa" :routeName="routeNameFormSubjective"
+                :AlergiPasien="AlergiPasien">
               </FormPelayananSubjective>
               <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="umum"
-                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" @dataAnamnesa-update="refreshDataAnamnesa" :routeName="routeNameFormObjective">
+                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" @dataAnamnesa-update="refreshDataAnamnesa"
+                :routeName="routeNameFormObjective" :tenaga-medis-askep="TenagaMedisAskep">
               </FormPelayananObjective>
-              <FormPelayananAssesment v-if="currentTab === 'assesment'" :diagnosaKasus="DiagnosaKasus"
-                :dataPasien="DataPasien" :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis" routeDiagnosaMedis ="ruang-layanan-umum.diagnosa-medis"
-                @dataAnamnesa-update="refreshDataAnamnesa">
+              <FormPelayananAssesment v-if="currentTab === 'assesment'" :diagnosaKasus="DiagnosaKasus" :-alergi-pasien="AlergiPasien"
+                :dataPasien="DataPasien" :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis"
+                routeDiagnosaMedis="ruang-layanan-umum.diagnosa-medis" @dataAnamnesa-update="refreshDataAnamnesa" :idPelayanan="idPelayanan" :idLoket="DataAnamnesa.loketId" :idPoli="idPoli" :diagnosa-keperawatan="DiagnosaKeperawatan">
               </FormPelayananAssesment>
-              <FormPelayananPlanning v-if="currentTab === 'planning'" :dataTindakan="DataTindakan" :dataPasien="DataPasien" :simpusTindakan="SimpusTindakan"   routePlanningTindakan="'ruang-layanan-umum.set PlanningTindakan'">
+              <FormPelayananPlanning v-if="currentTab === 'planning'" :dataTindakan="DataTindakan"
+                :dataPasien="DataPasien" :simpusTindakan="SimpusTindakan" :idPelayanan="idPelayanan" :idLoket="DataPasien.idLoket"  :simpusResepObat="simpusResepObat"
+                route-resep-obat="ruang-layanan.set-resep-obat"
+                routePlanningTindakan="ruang-layanan-umum.set-PlanningTindakan" route-detail-resep-obat="ruang-layanan.set-detail-resep">
               </FormPelayananPlanning>
-              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'">
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'"  @dataRujuk-update="refreshDataAnamnesa" :idPelayanan="idPelayanan" :statusPulang="statusPulang" :DataRujuk="DataRujuk" :TenagaMedisAskep="TenagaMedisAskep">
               </FormPelayananStatusPasien>
             </div>
           </div>
@@ -52,7 +59,7 @@ const isMelayani = ref(false);
 const currentTab = ref('subjective');
 const page = usePage();
 const routeNameFormSubjective = 'ruang-layanan-umum.setAnamnesa';
-const routeNameFormObjective='ruang-layanan-umum.setAnamnesaObjective';
+const routeNameFormObjective = 'ruang-layanan-umum.setAnamnesaObjective';
 
 const DataAnamnesa = computed(() => page.props.DataAnamnesa);
 const DataPasien = computed(() => page.props.DataPasien[0]);
@@ -62,17 +69,27 @@ const MasterAlergi = computed(() => page.props.MasterAlergi);
 const DataTindakan = computed(() => page.props.DataTindakan);
 const SimpusDataDiagnosaMedis = computed(() => page.props.SimpusDataDiagnosa);
 const SimpusTindakan = computed(() => page.props.SimpusTindakan);
+const AlergiPasien = computed(() => page.props.AlergiPasien);
+const statusPulang = computed(() => page.props.StatusPulang);
+const idPelayanan = computed(() => page.props.idPelayanan);
+const TenagaMedisAskep = computed(() => page.props.TenagaMedisAskep);
+const DiagnosaKeperawatan = computed(() => page.props.DiagnosaKeperawatan);
+const DataRujuk = computed(() => page.props.DataRujuk);
+const idPoli =  computed(() => page.props.idPoli);
+const simpusResepObat = computed(() => page.props.SimpusResepObat)
+
+console.log('idPelayanannanysashjbasdsdsdsdid', page.props.SimpusResepObat);
 
 const refreshDataAnamnesa = () => {
   router.reload({
-    only: ['DataAnamnesa', 'SimpusDataDiagnosaMedis', 'SimpusTindakan'],
+    only: ['DataAnamnesa', 'SimpusDataDiagnosaMedis', 'SimpusTindakan', 'DataRujuk'],
     preserveState: true,
     preserveScroll: true
   })
 }
 </script>
 
-<style> 
+<style>
 .tab-item {
   border: none;
   background: transparent;

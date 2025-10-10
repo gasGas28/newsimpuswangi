@@ -4,6 +4,7 @@ namespace App\Http\Controllers\RuangLayanan;
 
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\SimpusMasterObat;
+use App\Models\RuangLayanan\SimpusPermohonanLab;
 use DB;
 use Illuminate\Http\Request;
 
@@ -172,7 +173,7 @@ class indexController extends Controller
         $MasterObat = $query->paginate(10);
 
         $links = [];
-        
+
         // Previous
         $links[] = [
             'label' => 'Previous',
@@ -236,6 +237,16 @@ class indexController extends Controller
             'links' => $links,
         ]);
 
+    }
+
+    public function getPermohonanLaborat($idLoket)
+    {
+        $PermohonanLabs = SimpusPermohonanLab::where('loketId', $idLoket)->with('tenagaMedis')->get();
+        return response()->json(
+            [
+                'PermohonanLabs' => $PermohonanLabs
+            ]
+        );
     }
 
 }
