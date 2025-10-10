@@ -10,6 +10,7 @@ class SimpusAnamnesa extends Model
     protected $primaryKey = 'idAnamnesa';
     public $timestamps = false;
     public $incrementing = false;
+    public $incrementing = false;
     protected $fillable = [
         'idAnamnesa',
         'loketId',
@@ -93,5 +94,9 @@ class SimpusAnamnesa extends Model
     public function loket()
     {
         return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
+    }
+      public function kesadaran()
+    {
+        return $this->belongsTo(SimpusKesadaran::class, 'kdSadar', 'kdSadar');
     }
 }

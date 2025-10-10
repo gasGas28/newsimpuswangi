@@ -99,7 +99,7 @@
             <div class="mb-3 row align-items-center">
               <label class="col-sm-2 col-form-label fw-bold">Puyer/Bukan puyer</label>
               <div class="col-sm-4">
-                <select class="form-select" v-model="FormObat.jenis_obat">
+                <select class="form-select" v-model="FormResepObat.jenis_obat">
                   <option value="0">BUKAN PUYER</option>
                   <option value="1">PUYER</option>
                 </select>
@@ -109,16 +109,18 @@
               <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-bold">Jumlah puyer</label>
                 <div class="col-sm-4">
-                  <input type="number" v-model="FormObat.jumlah_puyer">
+                  <input type="number" v-model="FormResepObat.jumlah_puyer">
                 </div>
               </div>
               <div class="mb-3 row align-items-center">
                 <label class="col-sm-2 col-form-label fw-bold">Dosis pakai puyer</label>
                 <div class="col-sm-4">
                   <div class="input-group">
-                    <input type="number" class="form-control" placeholder="Jumlah" v-model="FormObat.dosis_pakai" />
+                    <input type="number" class="form-control" placeholder="Jumlah"
+                      v-model="FormResepObat.dosis_pakai" />
                     <span class="input-group-text">x Sehari, Setiap</span>
-                    <input type="number" class="form-control" placeholder="Jam" v-model="FormObat.dosis_pakai_jam" />
+                    <input type="number" class="form-control" placeholder="Jam"
+                      v-model="FormResepObat.dosis_pakai_jam" />
                     <span class="input-group-text">Jam Sekali</span>
                   </div>
                 </div>
@@ -129,15 +131,15 @@
                 <div class="col-sm-4">
                   <div class="d-flex gap-4">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Pagi" v-model="FormObat.waktu">
+                      <input class="form-check-input" type="checkbox" value="Pagi" v-model="FormResepObat.waktu">
                       <label class="form-check-label">Pagi</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Siang" v-model="FormObat.waktu">
+                      <input class="form-check-input" type="checkbox" value="Siang" v-model="FormResepObat.waktu">
                       <label class="form-check-label"> Siang</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Malam" v-model="FormObat.waktu">
+                      <input class="form-check-input" type="checkbox" value="Malam" v-model="FormResepObat.waktu">
                       <label class="form-check-label"> Malam</label>
                     </div>
                   </div>
@@ -148,15 +150,15 @@
                 <div class="col-sm-4">
                   <div class="d-flex gap-4">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Baik" v-model="FormObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Baik" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Sebelum makan</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Sedang" v-model="FormObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Sedang" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Saat makan</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Lemah" v-model="FormObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Lemah" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Sesudah makan</label>
                     </div>
                   </div>
@@ -207,7 +209,7 @@
                     <button class="btn btn-sm btn-success me-2" @click="openModalMasterObat(resep)">
                       <i class="bi bi-plus-circle"></i> Tambah Obat
                     </button>
-                    <button class="btn btn-sm btn-danger" @click="hapusResep(resep)">
+                    <button class="btn btn-sm btn-danger" @click="hapusResepObat(resep.id_resep)">
                       <i class="bi bi-trash"></i> Hapus Resep
                     </button>
                   </td>
@@ -241,7 +243,7 @@
                   </td>
                   <td>
                     <!-- Tombol untuk detail -->
-                    <button class="btn btn-sm btn-outline-danger" @click="hapusResepDetail(detail)">
+                    <button class="btn btn-sm btn-outline-danger" @click="hapusDetailResepObat(detail.id_resep_detail)">
                       <i class="bi bi-x-circle"></i> Hapus Obat
                     </button>
                   </td>
@@ -403,7 +405,7 @@
               <button class="btn btn-outline-secondary rounded-pill px-4" @click="showModalTambahObatPuyer = false">
                 Kembali
               </button>
-              <button class="btn btn-primary rounded-pill px-4" @click="submitFormPengobatanDetail">
+              <button class="btn btn-primary rounded-pill px-4" @click="submitFormPengobatanDetail()">
                 Simpan
               </button>
             </div>
@@ -554,6 +556,10 @@ const props = defineProps({
   keterangangigi: String,
   routePlanningTindakan: String,
   simpusResepObat: Array,
+  idPelayanan: String,
+  routeResepObat: String,
+  routeDetailResepObat: String,
+  idLoket: String
 });
 const emit = defineEmits(['dataAnamnesa-update']);
 console.log('data resep obat :', props.simpusResepObat);
@@ -584,20 +590,20 @@ const form = useForm({
   keterangan_tindakan: props.simpusTindakan?.keterangan ?? '',
   loketId: props.dataPasien?.idLoket ?? '',
   kdPoli: props.dataPasien?.kdPoli ?? '',
-  keterangangigi: props.keterangangigi ?? ''
+  keterangangigi: props.keterangangigi ?? '',
+  idPelayanan: props.idPelayanan ?? ''
 });
 watch(() => props.keterangangigi, (baru) => {
   form.keterangangigi = baru
 });
 
-const FormObat = useForm({
+const FormResepObat = useForm({
   jenis_obat: '0',
   jumlah_puyer: '',
   dosis_pakai_jam: '',
   dosis_pakai: '',
   waktu: [],
   kondisi: [],
-  loketId: props.dataPasien?.idLoket ?? '',
 });
 
 const FormDetailResepObat = useForm({
@@ -613,7 +619,7 @@ const FormDetailResepObat = useForm({
   keterangan: ''
 })
 
-const isPuyer = computed(() => FormObat.jenis_obat === '1')
+const isPuyer = computed(() => FormResepObat.jenis_obat === '1')
 console.log('boolean', isPuyer);
 
 function openModal() {
@@ -624,7 +630,7 @@ function openModal() {
 function openModalMasterObat(item) {
   showModalMasterObat.value = true;
   fetchPageMasterObat(route('ruang-layanan.master-obat'));
-  console.log('id resepnya',);
+  console.log('id resepnya', item);
   FormDetailResepObat.resep_id = item.id_resep;
   FormDetailResepObat.kategori = item.kategori;
 }
@@ -669,7 +675,10 @@ function submitForm() {
 }
 
 function submitFormPengobatan() {
-  FormObat.post(route('ruang-layanan-gigi.set-PlanningPengobatan'), {
+  FormResepObat.post(route(props.routeResepObat, {
+    idLoket: props.idLoket,
+    idPelayanan: props.idPelayanan
+  }), {
     preserveScroll: true,
     onSuccess: () => {
       alert("Data Obat tersimpan");
@@ -679,7 +688,10 @@ function submitFormPengobatan() {
 }
 
 function submitFormPengobatanDetail() {
-  FormDetailResepObat.post(route('ruang-layanan-gigi.set-PlanningPengobatanDetail'), {
+  FormDetailResepObat.post(route(props.routeDetailResepObat, {
+    idResep: FormDetailResepObat.resep_id,
+    idObat: FormDetailResepObat.obat_id
+  }), {
     preserveScroll: true,
     onSuccess: () => {
       alert("Obat berhasil disimpan tersimpan");
@@ -697,6 +709,28 @@ function hapusDataTindakan(id) {
     preserveScroll: true,
     onSuccess: () => {
       alert("Diagnosa Medis dihapus");
+      emit('dataAnamnesa-update');
+    },
+  });
+}
+function hapusResepObat(id){
+  FormResepObat.delete(route('ruang-layanan.hapus-resep-obat', id), {
+     data: {
+      _method: 'delete',
+    },
+    preserveScroll: true,
+    onSuccess: () => {
+      alert("Data resep obat terhapus");
+      emit('dataAnamnesa-update');
+    },
+  });
+}
+
+function hapusDetailResepObat(id){
+  FormResepObat.post(route('ruang-layanan.hapus-detail-resep-obat', id), {
+    preserveScroll: true,
+    onSuccess: () => {
+      alert("Data Detail resep obat terhapus");
       emit('dataAnamnesa-update');
     },
   });

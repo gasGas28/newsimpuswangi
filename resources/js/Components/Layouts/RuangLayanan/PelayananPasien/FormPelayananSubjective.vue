@@ -137,7 +137,8 @@ const alergiMakanan =
 const alergiObat =
   props.masterAlergi.filter(item => item.category == 2)
 
-console.log('data anamnesa ny dari formsubjetivea', props.dataAnamnesa)
+console.log('data anamnesa ny dari formsubjetivea', props.dataAnamnesa);
+console.log('data alergi', props);
 const form = useForm({
   idLoket: props.idLoket ?? '',
   tgl_anamnesa: props.dataAnamnesa?.tglAnamnesa ?? '',
@@ -146,9 +147,9 @@ const form = useForm({
   riwayat_penyakit_sekarang: props.dataAnamnesa?.riwayatPenyakitSekarang ?? '',
   riwayat_penyakit_dahulu: props.dataAnamnesa?.riwayatPenyakitDahulu ?? '',
   riwayat_penyakit_keluarga: props.dataAnamnesa?.riwayatPenyakitKeluarga ?? '',
-  alergi_makanan: props.AlergiPasien[0]?.alergi_makanan.kodeSatuSehat ?? '',
-  alergi_obat: props.AlergiPasien[0]?.alergi_obat.kodeSatuSehat ?? '',
-  keterangan_alergi: props.AlergiPasien[0]?.keterangan,
+  alergi_makanan: props.AlergiPasien?.alergi_makanan.kodeSatuSehat ?? '',
+  alergi_obat: props.AlergiPasien?.alergi_obat.kodeSatuSehat ?? '',
+  keterangan_alergi: props.AlergiPasien?.keterangan,
   tindakan: props.dataAnamnesa?.terapiYangPernahDijalani ?? '',
   obat_digunakan: props.dataAnamnesa?.obatSeringDigunakan ?? '',
   obat_dikonsumsi: props.dataAnamnesa?.obatSeringDikonsumsi ?? '',

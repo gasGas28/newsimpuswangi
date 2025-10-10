@@ -32,4 +32,7 @@ class SimpusDataDiagnosa extends Model
      public function SimpusPoliFKTP(){
         return $this->belongsTo(SimpusPoliFKTP::class, 'kdPoli','kdPoli'); 
     }
+      public function Loket(){
+        return $this->belongsTo(SimpusLoket::class, 'loketId','idLoket'); 
+    }
 }

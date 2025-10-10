@@ -15,14 +15,17 @@
             </NavigasiFormPemeriksaan>
             <div class="m-4 pb-4 row gx-5">
               <FormPelayananSubjective v-if="currentTab === 'subjective'" :idLoket="DataPasien.idLoket"
-                :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi" :routeName="routeNameFormSubjective" :idPasien="DataPasien.ID" :AlergiPasien="AlergiPasien" @dataAnamnesa-update="refreshDataAnamnesa">
+                :dataAnamnesa="DataAnamnesa" :masterAlergi="MasterAlergi" :routeName="routeNameFormSubjective"
+                :idPasien="DataPasien.ID" :AlergiPasien="AlergiPasien" @dataAnamnesa-update="refreshDataAnamnesa">
               </FormPelayananSubjective>
               <FormPelayananObjective v-if="currentTab === 'objective'" :currrentSub=true halaman="gigi"
-                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" :routeName="routeNameFormObjective" :statusPasien="statusPasien">
+                :dataKesadaran="DataKesadaran" :dataAnamnesa="DataAnamnesa" :routeName="routeNameFormObjective"
+                :statusPasien="statusPasien" :tenaga-medis-askep="TenagaMedisAskep">
                 <template #status_pasien>
                   <div>
                     <label for="" class="fw-bold">Status</label>
                     <select class="form-control my-3" v-model="statusPasien">
+                      <option value="" selected>-- Pilih --</option>
                       <option value="anak sekolah">ANAK SEKOLAH</option>
                       <option value="apras">APRAS</option>
                       <option value="bumil">BUMIL</option>
@@ -32,12 +35,14 @@
                 </template>
               </FormPelayananObjective>
               <FormPelayananAssesment v-if="currentTab === 'assesment'" :diagnosaKasus="DiagnosaKasus"
-                :dataPasien="DataPasien" routeDiagnosaMedis="ruang-layanan-gigi.diagnosa-medis" :AlergiPasien="AlergiPasien"
-                :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis" @dataAnamnesa-update="refreshDataAnamnesa">
+                :dataPasien="DataPasien" routeDiagnosaMedis="ruang-layanan-gigi.diagnosa-medis"
+                :AlergiPasien="AlergiPasien" :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis"
+                @dataAnamnesa-update="refreshDataAnamnesa" :diagnosa-keperawatan="DiagnosaKeperawatan">
               </FormPelayananAssesment>
               <FormPelayananPlanning v-if="currentTab === 'planning'" :dataTindakan="DataTindakan"
                 :dataPasien="DataPasien" :simpusTindakan="SimpusTindakan" :keterangangigi="keterangangigi"
-                routePlanningTindakan="ruang-layanan-gigi.set-PlanningTindakan" :simpusResepObat="SimpusResepObat" :MasterObat="MasterObat">
+                routePlanningTindakan="ruang-layanan-gigi.set-PlanningTindakan" :simpusResepObat="SimpusResepObat"
+                :MasterObat="MasterObat" route-resep-obat="ruang-layanan-gigi.set-PlanningPengobatan" route-detail-resep-obat="'ruang-layanan-gigi.set-PlanningPengobatanDetail'">
                 <div class="mb-3 row">
                   <div class="col-sm-6">
                     <div class="border p-3">
@@ -62,7 +67,7 @@
                   </div>
                 </div>
               </FormPelayananPlanning>
-              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'" :statusPulang = "statusPulang" >
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'" :statusPulang="statusPulang">
               </FormPelayananStatusPasien>
             </div>
           </div>
@@ -100,9 +105,11 @@ const SimpusDataDiagnosaMedis = computed(() => page.props.SimpusDataDiagnosa);
 const SimpusTindakan = computed(() => page.props.SimpusTindakan);
 const AlergiPasien = computed(() => page.props.AlergiPasien);
 const statusPulang = computed(() => page.props.StatusPulang);
-const SimpusResepObat =computed(() => page.props.SimpusResepObat);
+const SimpusResepObat = computed(() => page.props.SimpusResepObat);
 const MasterObat = computed(() => page.props.MasterObat);
-console.log('master obat', MasterObat.value);
+const TenagaMedisAskep = computed(() => page.props.TenagaMedisAskep);
+const DiagnosaKeperawatan = computed(() => page.props.DiagnosaKeperawatan);
+console.log('Data RUjuk', page.props.DataRujuk);
 
 console.log(' SimpusResepObat', SimpusResepObat.value);
 const layoutKursi = ref([

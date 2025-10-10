@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class SimpusLoket extends Model
 {
 
+
     protected $table = 'simpus_loket';
     protected $primaryKey = 'idLoket';
     public $incrementing = false;
-    protected $keyType = 'string'; 
+    protected $keyType = 'string';
 
     protected $fillable = [
         'idLoket',
@@ -70,11 +71,26 @@ class SimpusLoket extends Model
         return $this->belongsTo(SimpusPasien::class, 'pasienId', 'ID');
     }
 
-    public function SimpusPoli(){
+    public function SimpusPoli()
+    {
         return $this->belongsTo(SimpusPoliFKTP::class, 'kdPoli', 'kdPoli');
     }
     public function anamnesa()
-{
-    return $this->hasMany(SimpusAnamnesa::class, 'loketId', 'idLoket');
-}
+    {
+        return $this->hasMany(SimpusAnamnesa::class, 'loketId', 'idLoket');
+    }
+    public function Diagnosa()
+    {
+        return $this->hasMany(SimpusDataDiagnosa::class, 'loketId', 'idLoket');
+    }
+    public function Tindakan()
+    {
+        return $this->hasMany(SimpusTindakan::class, 'loketId', 'idLoket');
+    }
+
+    public function ResepObat()
+    {
+        return $this->hasMany(SimpusResepObat::class, 'loketId', 'idLoket');
+
+    }
 }

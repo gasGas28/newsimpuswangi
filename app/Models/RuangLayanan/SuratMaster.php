@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SuratMaster extends Model
 {
     protected $table = 'surat_master';
-    protected $primaryKey = 'D_JNS_SURAT';
+    protected $primaryKey = 'ID_JNS_SURAT';
     public $incrementing = true;
     protected $keyType = 'int';
     public $timestamps = false;
@@ -15,4 +15,9 @@ class SuratMaster extends Model
     protected $fillable = [
         'SURAT',
     ];
+    public function suratKeterangan()
+    {
+        return $this->hasMany(SuratKeterangan::class, 'id_jns_suratforeignKey: ', 'ID_JNS_SURAT');
+    }
+
 }

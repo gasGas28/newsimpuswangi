@@ -12,7 +12,7 @@
           <a href="" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'status_generalis' }"
             @click.prevent="currrentSubTabObjective = 'status_generalis'">Status Generalis ></a>
-          <a v-if="props.halaman === 'gigi'" class="text-decoration-none text-primary"
+          <a href="" v-if="props.halaman === 'gigi'" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'pemeriksaan_intra_oral_gigi' }"
             @click.prevent="currrentSubTabObjective = 'pemeriksaan_intra_oral_gigi'">Pemeriksaan Intra Oral Gigi ></a>
           <a href="" class="text-decoration-none text-primary"
@@ -55,22 +55,22 @@
 
             <div class="mb-3">
               <label class="form-label fw-bold">IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imt">
+              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imt" readonly>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Keterangan IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.keterangan_imt">
+              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imtKet" readonly>
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Tinggi Badan (cm)</label>
-              <input type="text" class="form-control" v-model="form.tinggi_badan">
+              <input type="text" class="form-control" v-model="form.tinggi_badan" @change="cekimt">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Berat Badan (kg)</label>
-              <input type="text" class="form-control" v-model="form.berat_badan">
+              <input type="text" class="form-control" v-model="form.berat_badan" @change="cekimt">
             </div>
           </div>
 
@@ -295,7 +295,8 @@
               </slot>
               <label for="" class="fw-bold">Tenaga Media Askep</label>
               <select class="form-control my-3" name="" id="tenaga_medis_askep" v-model="form.tenaga_medis_askep">
-                <option value="pract1">Practioner 1</option>
+                <option value="" selected>-- Pilih --</option>
+                <option v-for="item in props.tenagaMedisAskep" :value=item.idDokter> {{ item.nmDokter }}</option>
               </select>
               <button type="submit" class="btn btn-success">Simpan</button>
             </div>
@@ -321,8 +322,9 @@ const props = defineProps({
   dataAnamnesa: Object,
   routeName: String,
   statusPasien: String,
+  tenagaMedisAskep: Object,
 });
-console.log(props.halaman, 'data anamnesa dari tab objective');
+console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
 
 const form = useForm({
   idAnamnesa: props.dataAnamnesa.idAnamnesa,
@@ -330,7 +332,7 @@ const form = useForm({
   keadaan_umum: props.dataAnamnesa.keadaanUmum,
   kesadaran: props.dataAnamnesa.kdSadar,
   imt: props.dataAnamnesa.imt,
-  keterangan_imt: props.dataAnamnesa.imtKet,
+  imtKet: props.dataAnamnesa.imtKet,
   tinggi_badan: props.dataAnamnesa.tinggiBadan,
   berat_badan: props.dataAnamnesa.beratBadan,
   lingkar_perut: props.dataAnamnesa.lingkarPerut,
@@ -389,5 +391,35 @@ function submitForm() {
 watch(() => props.statusPasien, (newVal) => {
   form.statusPasien = newVal;
 });
+
+function cekimt() {
+  let berat = parseFloat(form.berat_badan);
+  let tinggi = parseFloat(form.tinggi_badan);
+
+  let imt1 = (berat / (tinggi * tinggi));
+  let meter = 10000;
+  let imt = parseFloat((imt1 * meter).toFixed(2));
+  console.log('tipe imt', imt)
+
+  let ket = "";
+  if (imt < 18.5) {
+    ket = 'Berat Badan Kurang';
+  } else if (imt >= 18.5 && imt <= 22.9) {
+    ket = 'Berat Badan Normal';
+  } else if (imt == 23.0) {
+    ket = 'Kelebihan Berat Badan';
+  } else if (imt >= 23.1 && imt <= 24.9) {
+    ket = 'Berisiko Menjadi Obes';
+  } else if (imt >= 25.0 && imt <= 29.9) {
+    ket = 'Obes I';
+  } else if (imt >= 30.0) {
+    ket = 'Obes II';
+  }
+
+  if (berat && tinggi) {
+    form.imt = imt;
+    form.imtKet = ket;
+  }
+}
 
 </script>

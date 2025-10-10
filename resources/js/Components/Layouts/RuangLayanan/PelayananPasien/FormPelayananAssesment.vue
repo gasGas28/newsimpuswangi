@@ -60,7 +60,11 @@
               <div class="text-decoration-underline fw-bold t mb-4">
                 <p class="bg-warning d-inline-block px-2">Pemeriksaan Penunjang</p>
               </div>
-              <Link href="/surat-keterangan" class="btn btn-info">
+              <Link :href="route('ruang-layanan.form-laborat', {
+                idPoli: props.idPoli,
+                idLoket: props.idLoket,
+                idPelayanan: props.idPelayanan
+              })" class="btn btn-info">
               <i class="fas fa-bars me-2"></i>Laboratorium
               </Link>
             </div>
@@ -84,21 +88,21 @@
               </div>
             </div>
           </div>
-          <div class="row">
+          <form @submit.prevent="submitFormDiagnosaKeperawatan" class="row">
             <div class="text-decoration-underline fw-bold t mb-4">
               <p class="bg-warning d-inline-block px-2">Diagnosa Keperawatan</p>
             </div>
-
-            <select class="form-control" name="" id="">
-              <option value="">pilih</option>
+            <select class="form-control" v-model="formDiagnosaKeperawatan.kode_diagnosa" @change="updateNamaDiagnosa">
+              <option value="">-- Pilih --</option>
+              <option v-for="item in props.diagnosaKeperawatan" :key="item.id" :value="item.id">
+                {{ item.nmDiag }}
+              </option>
             </select>
-            <button href="/surat-keterangan" class="btn btn-success mt-4">
+            <button type="submit" href="/surat-keterangan" class="btn btn-success mt-4">
               <i class="far fa-envelope me-2"></i>Simpan Diagnosa Keperawatan
             </button>
-          </div>
-
+          </form>
         </div>
-
         <div class="row mt-4">
           <div class="col-6">
             <table class="table table-bordered table-sm">
@@ -197,7 +201,7 @@
   </template>
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import axios from 'axios';
 
@@ -206,14 +210,18 @@ const props = defineProps({
   dataPasien: Object,
   simpusDataDiagnosaMedis: Array,
   routeDiagnosaMedis: String,
-  AlergiPasien: Object
+  AlergiPasien: Object,
+  diagnosaKeperawatan: Object,
+  idPelayanan: String,
+  idLoket: String,
+  idPoli: String
 });
 const keyword = ref('');
 const showModal = ref(false);
 const diagnosaMedis = ref({ data: [], links: [] });
 const emit = defineEmits(['dataAnamnesa-update']);
 console.log('data diagnosa medis :', props.simpusDataDiagnosaMedis);
-
+console.log('alergi', props.AlergiPasien)
 const form = useForm({
   kode_diagnosa: '',
   nama_diagnosa: '',
@@ -222,10 +230,18 @@ const form = useForm({
   pelayananId: 1,
   loketId: props.dataPasien?.idLoket ?? 1,
   kdPoli: props.dataPasien?.kdPoli ?? '',
-  alergi_makanan: props.AlergiPasien[0]?.alergi_makanan.namaAlergiBpjs ?? '',
-  alergi_obat: props.AlergiPasien[0]?.alergi_obat.namaAlergiBpjs ?? '',
-  keterangan_alergi: props.AlergiPasien[0]?.keterangan,
+  alergi_makanan: props.AlergiPasien?.alergi_makanan.namaAlergiBpjs ?? '',
+  alergi_obat: props.AlergiPasien?.alergi_obat.namaAlergiBpjs ?? '',
+  keterangan_alergi: props.AlergiPasien?.keterangan,
 });
+
+const formDiagnosaKeperawatan = useForm({
+  kode_diagnosa: '',
+  nama_diagnosa: '',
+  kdPoli : props.idPoli ?? ''
+})
+console.log('formnya',formDiagnosaKeperawatan);
+
 
 function openModal() {
   showModal.value = true;
@@ -237,6 +253,13 @@ function pilihDiagnosa(item) {
   form.nama_diagnosa = item.nmDiag;
   showModal.value = false;
 }
+function updateNamaDiagnosa() {
+  const selected = props.diagnosaKeperawatan.find(
+    (item) => item.id === formDiagnosaKeperawatan.kode_diagnosa
+  );
+  formDiagnosaKeperawatan.nama_diagnosa = selected ? selected.nmDiag : '';
+}
+
 
 function submitForm() {
   form.post(route(props.routeDiagnosaMedis), {
@@ -246,6 +269,13 @@ function submitForm() {
       emit('dataAnamnesa-update');
     },
   });
+}
+
+function submitFormDiagnosaKeperawatan() {
+  formDiagnosaKeperawatan.post(route('ruang-layanan.diagnosa-keperawatan', {
+    idLoket: props.idLoket,
+    idPelayanan: props.idPelayanan
+  }), );
 }
 function searchDiagnosa() {
   fetchPage(route('api.diagnosa-medis', { search: keyword.value }));
