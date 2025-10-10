@@ -10,7 +10,8 @@ use App\Models\RuangLayanan\SimpusTindakan;
 use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Str;
+use Illuminate\Support\Str;
+
 
 class PoliBpUmumController extends Controller
 {

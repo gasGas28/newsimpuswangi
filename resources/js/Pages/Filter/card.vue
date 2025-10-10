@@ -1,662 +1,333 @@
 <template>
-  <AppLayout>
-    <div class="container py-4">
-      <div class="d-flex justify-content-end mb-3 gap-2">
-        <Link :href="route('filter.dev')" class="btn btn-outline-primary"> Dev This Page </Link>
-      </div>
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="text-header">
-            <h5 class="text-primary fw-semibold fs-3 mt-2 mb-3 ms-2 gap-4"><i class="bi bi-funnel-fill"></i> Filter Laporan</h5>
-          </div>
-          <hr>
-          <div class="container">
-            <form>
-              <div class="row">
-                <!-- Kolom Pertama -->
-                <!--Form Puskesmas-->
-                <div class="col-md-4">
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <label class="col-form-label fw-semibold mb-0">Puskesmas</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectPuskesmas">
-                        <option>Wongsorejo</option>
-                      </select>
-                    </div>
-                  </div>
+  <div class="container py-4">
+    <div class="row g-4">
+      <!-- Card atas: Filter -->
+      <div class="col-12">
+        <div class="card border-1 border-dark shadow-lg rounded-4">
+          <div class="card-body p-4">
+            <h4 class="text-primary fw-bold mb-3 d-flex align-items-center">
+              <i class="bi bi-funnel-fill me-2"></i> Filter Laporan
+            </h4>
+            <hr />
 
-                  <!--Form Tanggal Awal & Akhir-->
-                  <div class="row mb-2 align-items-center">
-                    <label class="col-sm-4 col-form-label fw-semibold">Tanggal Awal</label>
-                    <div class="col-sm-8">
-                      <input type="date" class="form-control" />
-                    </div>
-                  </div>
-                  <div class="row mb-2">
-                    <label class="col-sm-4 col-form-label fw-semibold">Tanggal Akhir</label>
-                    <div class="col-sm-8">
-                      <input type="date" class="form-control" />
-                    </div>
-                  </div>
-
-                  <!--Form Tempat Kunjungan-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        class="form-check-input me-2 mt-2"
-                        id="cekKasus"
-                        v-model="aktif.tmptKunjungan"
-                      />
-                      <label for="tempatKunjungan" class="col-form-label fw-semibold mb-0">
-                        Tempat Kunjungan
-                      </label>
-                    </div>
-                    <div class="col-sm-8">
-                      <div class="mb-2">
-                        <select
-                          class="form-select"
-                          id="selectTempat"
-                          v-model="selectedKategori"
-                          :disabled="!aktif.tmptKunjungan"
-                        >
-                          <option>-- Pilih Tempat --</option>
-                          <option
-                            v-for="kategori in tempat_kunjungan"
-                            :key="kategori.id_kategori"
-                            :value="kategori.id_kategori"
-                          >
-                            {{ kategori.kategori }}
-                          </option>
-                        </select>
-                      </div>
-
-                      <div class="mb-3">
-                        <select
-                          id="selectUnit"
-                          class="form-select"
-                          v-model="selectedUnit"
-                          :disabled="!selectedKategori || !aktif.tmptKunjungan"
-                        >
-                          <option value="">-- Pilih Unit --</option>
-                          <option
-                            v-for="unit in filteredUnits"
-                            :key="unit.id_detail"
-                            :value="unit.id_detail"
-                          >
-                            {{ unit.nama_unit }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!--Form Kunjungan Kasus-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        class="form-check-input me-2 mt-2"
-                        id="cekKasus"
-                        v-model="aktif.kasus"
-                      />
-                      <label for="cekKasus" class="col-form-label fw-semibold mb-0"
-                        >Kunjungan Kasus</label
-                      >
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectKasus" :disabled="!aktif.kasus">
-                        <option>--Pilih--</option>
-                        <option
-                          v-for="kunjungan in kunj_kasus"
-                          :key="kunjungan.id"
-                          :value="kunjungan.id"
-                        >
-                          {{ kunjungan.kasus }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Kunjungan-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        class="form-check-input me-2 mt-2"
-                        id="cekKunjungan"
-                        v-model="aktif.kunjungan"
-                      />
-                      <label for="cekKunjungan" class="col-form-label fw-semibold">Kunjungan</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select
-                        class="form-select mb-2"
-                        id="selectKunjungan"
-                        :disabled="!aktif.kunjungan"
-                      >
-                        <option>--Pilih--</option>
-                        <option>Lama</option>
-                        <option>Kasus Baru</option>
-                      </select>
-                    </div>
-                  </div>
-                  <hr>
+            <div class="row g-4">
+              <!-- Filter tanggal -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tanggal Kunjungan</label>
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="date"
+                    v-model="startDate"
+                    class="form-control shadow-sm rounded-pill px-3"
+                  />
+                  <span class="fw-semibold">s/d</span>
+                  <input
+                    type="date"
+                    v-model="endDate"
+                    class="form-control shadow-sm rounded-pill px-3"
+                  />
                 </div>
-
-                <!-- Kolom Kedua -->
-                <!--Form Nama-->
-                <div class="col-md-4">
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        class="form-check-input me-2"
-                        id="cekNama"
-                        v-model="aktif.nama"
-                      />
-                      <label for="cekNama" class="col-form-label mb-0 fw-semibold">Nama</label>
-                    </div>
-                    <div class="col-sm-8">
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="selectNama"
-                        :disabled="!aktif.nama"
-                      />
-                    </div>
-                  </div>
-
-                  <!--Form Umur-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        class="form-check-input me-2"
-                        id="cekUmur"
-                        v-model="aktif.umur"
-                      />
-                      <label for="cekUmur" class="col-form-label fw-semibold mb-0">Umur</label>
-                    </div>
-                    <div class="col-auto d-flex">
-                      <input
-                        type="text"
-                        class="form-control text-center"
-                        placeholder="0"
-                        style="width: 60px"
-                        :disabled="!aktif.umur"
-                      />
-                    </div>
-                    <div class="col-auto fw-semibold">s/d</div>
-                    <div class="col-auto">
-                      <input
-                        type="text"
-                        class="form-control text-center"
-                        placeholder="0"
-                        style="width: 60px"
-                        :disabled="!aktif.umur"
-                      />
-                    </div>
-                  </div>
-
-                  <!--Form Jenis Kelamin-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekJK"
-                        class="form-check-input me-2"
-                        v-model="aktif.JK"
-                      />
-                      <label for="cekJK" class="col-form-label mb-0 fw-semibold"
-                        >Jenis Kelamin</label
-                      >
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectJK" :disabled="!aktif.JK">
-                        <option>--Pilih--</option>
-                        <option>Laki-Laki</option>
-                        <option>Perempuan</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Asal Wilayah-->
-                  <div class="row mb-2">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekAsal"
-                        class="form-check-input me-2"
-                        v-model="aktif.asal"
-                      />
-                      <label class="col-form-label fw-semibold">Asal</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectAsal" :disabled="!aktif.asal">
-                        <option>--Pilih--</option>
-                        <option v-for="asl in asal" :key="asl.id_wilayah" :value="asl.id_wilayah">
-                          {{ asl.wilayah }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Kecamatan-->
-                  <div class="row mb-2">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekKecamatan"
-                        class="form-check-input me-2"
-                        v-model="aktif.kecamatan"
-                      />
-                      <label class="col-form-label fw-semibold">Kecamatan</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select
-                        class="form-select"
-                        id="selectKecamatan"
-                        v-model="selectedKecamatan"
-                        :disabled="!aktif.kecamatan"
-                      >
-                        <option>--Pilih--</option>
-                        <option v-for="kec in kecamatan" :key="kec.NO_KEC" :value="kec.NO_KEC">
-                          {{ kec.NAMA_KEC }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Desa-->
-                  <div class="row mb-2">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="selectDesa"
-                        class="form-check-input me-2"
-                        v-model="aktif.desa"
-                      />
-                      <label class="col-form-label fw-semibold">Desa</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select
-                        class="form-select"
-                        id="selectDesa"
-                        v-model="selectedDesa"
-                        :disabled="!aktif.desa"
-                      >
-                        <option>--Pilih--</option>
-                        <option
-                          v-for="desa in filteredDesa"
-                          :key="desa.NO_KEL"
-                          :value="desa.NO_KEL"
-                        >
-                          {{ desa.NAMA_KEL }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Kepesertaan-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekKepesertaan"
-                        class="form-check-input me-2"
-                        v-model="aktif.kepesertaan"
-                      />
-                      <label class="col-form-label fw-semibold">Kepesertaan</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select
-                        class="form-select"
-                        id="selectKepesertaan"
-                        :disabled="!aktif.kepesertaan"
-                      >
-                        <option>--Pilih--</option>
-                        <option>BPJS</option>
-                        <option>Non BPJS</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Kategori-->
-                  <div class="row mb-2">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekKategori"
-                        class="form-check-input me-2"
-                        v-model="aktif.kategori"
-                      />
-                      <label class="col-form-label fw-semibold">Kategori</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectKategori" :disabled="!aktif.kategori">
-                        <option></option>
-                        <option>Non BPJS</option>
-                        <option>JKN PBI</option>
-                        <option>Non JKN PBI</option>
-                      </select>
-                    </div>
-                  </div>
-                  <hr>
-                </div>
-                <!-- Kolom Ketiga -->
-                <!--Form Unit-->
-                <div class="col-md-4">
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekRujuk"
-                        class="form-check-input me-2"
-                        v-model="aktif.unit"
-                      />
-                      <label class="col-form-label fw-semibold">Unit</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectRujuk" :disabled="!aktif.unit">
-                        <option></option>
-                        <option v-for="unt in unit" :key="unt.kdPoli" :value="unt.kdPoli">
-                          {{ unt.nmPoli }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Rujuk Lanjut-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekRujuk"
-                        class="form-check-input me-2"
-                        v-model="aktif.rujukLanjut"
-                      />
-                      <label class="col-form-label fw-semibold">Rujuk Lanjut</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select class="form-select" id="selectRujuk" :disabled="!aktif.rujukLanjut">
-                        <option></option>
-                        <option
-                          v-for="provider in providers"
-                          :key="provider.kdProvider"
-                          :value="provider.kdProvider"
-                        >
-                          {{ provider.nmProvider }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Isi Diagnosa-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekIsiDiagnosa"
-                        class="form-check-input me-2"
-                        v-model="aktif.isiDiagnosa"
-                      />
-                      <label class="col-form-label fw-semibold">Isi Diagnosa</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <select
-                        class="form-select"
-                        id="selectIsiDiagnosa"
-                        :disabled="!aktif.isiDiagnosa"
-                      >
-                        <option>--Pilih--</option>
-                        <option>Diagnosa Kosong</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!--Form Diagnosa-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekDiagnosa"
-                        class="form-check-input me-2"
-                        v-model="aktif.diagnosa"
-                      />
-                      <label class="col-form-label fw-semibold">Diagnosa</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="selectDiagnosa"
-                        v-model="selectedTindakan"
-                        @click="isModalOpen = true"
-                        readonly
-                        :disabled="!aktif.diagnosa"
-                      />
-                      <Modal
-                        :show="isModalOpen"
-                        title="Pilih Diagnosa"
-                        :items="dataTindakan"
-                        @close="isModalOpen = false"
-                        @select="handleSelect"
-                      />
-                    </div>
-                  </div>
-
-                  <!--Form Tindakan-->
-                  <div class="row mb-2 align-items-center">
-                    <div class="col-sm-4 d-flex align-items-center">
-                      <input
-                        type="checkbox"
-                        id="cekTindakan"
-                        class="form-check-input me-2"
-                        v-model="aktif.tindakan"
-                      />
-                      <label class="col-form-label fw-semibold">Tindakan</label>
-                    </div>
-                    <div class="col-sm-8 d-flex">
-                      <input
-                        type="text"
-                        id="selectDiagnosa"
-                        class="form-control"
-                        readonly
-                        :disabled="!aktif.tindakan"
-                        v-model="selectedTindakan"
-                        @click="isModalOpen = true"
-                      />
-                      <Modal
-                        :show="isModalOpen"
-                        title="Pilih Tindakan"
-                        :items="dataTindakan"
-                        @close="isModalOpen = false"
-                        @select="handleSelect"
-                      />
-                    </div>
-                  </div>
-                  <hr>
-                </div>
-                <hr>
               </div>
-              <div class="d-flex justify-content-start gap-2 mt-2">
-                <button type="button" class="btn btn-data fw-semibold" @click="aktif.showData = !aktif.showData">
-                  <i class="bi bi-eye"></i> {{ aktif.showData ? 'Sembunyikan Data' : 'Tampilkan Data' }}
-                </button>
-                <button type="button" class="btn btn-html fw-semibold">
-                  <i class="bi bi-filetype-html"></i>
-                  Tampilkan Data HTML
-                </button>
-                <button type="button" class="btn btn-excel fw-semibold">
-                  <i class="bi bi-download"></i> Download Excel
-                </button>
+
+              <!-- Search -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Cari Pasien</label>
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                  <input
+                    type="text"
+                    class="form-control border-0"
+                    placeholder="Cari pasien..."
+                    v-model="searchQuery"
+                  />
+                  <span class="input-group-text bg-white border-0">
+                    <i class="bi bi-search text-primary"></i>
+                  </span>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
 
-      <div v-show="aktif.showData" class="card shadow-sm mt-4" @click.stop>
-        <div class="card-body">
-          <div class="container">
-            <!-- Tambahkan table-responsive -->
-            <div class="table-responsive">
-              <table class="table table-primary table-bordered table-striped">
-                <thead class="text-center fw-semibold">
+      <!-- Card bawah: Tabel -->
+      <div class="col-12">
+        <div class="card border-1 border-dark shadow-lg rounded-4">
+          <div class="card-body p-4">
+            <!-- Header + Info -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-3">
+              <h4 class="text-primary fw-bold mb-0 d-flex align-items-center">
+                <i class="bi bi-table me-2"></i> Data Laporan Pasien
+                <span class="badge bg-primary-subtle text-primary fw-semibold rounded-pill ms-2">
+                  Total: {{ filteredLaporan.length }}
+                </span>
+              </h4>
+            </div>
+            <hr />
+
+            <!-- Table -->
+            <div class="table-responsive" style="max-height: 65vh; overflow-y: auto">
+              <table class="table table-hover table-striped align-middle text-center mb-0">
+                <thead class="table-light sticky-top">
                   <tr>
-                    <th scope="col">No.</th>
-                    <th scope="col">Tgl Kunjungan</th>
-                    <th scope="col">NIK</th>
-                    <th scope="col">NO RM</th>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Alamat</th>
-                    <th scope="col">Kecamatan</th>
-                    <th scope="col">Desa</th>
-                    <th scope="col">Sex</th>
-                    <th scope="col">Tgl Lahir</th>
-                    <th scope="col">Umur</th>
-                    <th scope="col">Kelompok Umur</th>
-                    <th scope="col">Anamnesa</th>
-                    <th scope="col">Diagnosa</th>
-                    <th scope="col">Obat</th>
-                    <th scope="col">Tindakan/LAB</th>
-                    <th scope="col">BPJS</th>
-                    <th scope="col">Nama Faskes</th>
-                    <th scope="col">Kategori</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Tujuan</th>
-                    <th scope="col">Rujuk Internal</th>
-                    <th scope="col">Rujuk Lanjut</th>
+                    <th>No.</th>
+                    <th>Tanggal Kunjungan</th>
+                    <th>NIK</th>
+                    <th>NO RM</th>
+                    <th>Nama</th>
+                    <th>Alamat</th>
+                    <th>Kecamatan</th>
+                    <th>Desa</th>
+                    <th>Sex</th>
+                    <th>Tanggal Lahir</th>
+                    <th>Umur</th>
+                    <th>Kelompok Umur</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(filter, index) in kunjungan" :key="filter.id">
-                    <td>{{ index + 1 }}</td>
+                  <tr v-for="(filter, index) in paginatedLaporan" :key="filter.idLoket">
+                    <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                     <td>{{ filter.tglKunjungan }}</td>
-                    <td>{{ filter.NIK }}</td>
+                    <td>{{ filter.pasien?.NIK }}</td>
+                    <td>{{ filter.pasien?.NO_MR }}</td>
+                    <td>{{ filter.pasien?.NAMA_LGKP }}</td>
+                    <td>{{ filter.pasien?.ALAMAT }}</td>
+                    <td>{{ filter.pasien?.NO_KEC }}</td>
+                    <td>{{ filter.pasien?.NO_KEL }}</td>
+                    <td>{{ filter.pasien?.JENIS_KLMIN }}</td>
+                    <td>{{ filter.pasien?.TGL_LHR }}</td>
+                    <td>{{ filter.umur }}</td>
+                    <td>{{ filter.pasien?.KEL_UMUR }}</td>
                   </tr>
-                  <!-- data di sini -->
                 </tbody>
               </table>
+            </div>
+
+            <!-- Pagination + Action -->
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+              <nav>
+                <ul class="pagination pagination-sm mb-0">
+                  <li
+                    v-for="page in totalPages"
+                    :key="page"
+                    class="page-item"
+                    :class="{ active: currentPage === page }"
+                  >
+                    <button class="page-link" @click="goToPage(page)">
+                      {{ page }}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-html shadow-sm rounded-pill px-3" @click="showHtml">
+                  <i class="bi bi-eye me-1"></i> Tampilkan Data HTML
+                </button>
+                <button class="btn btn-excel shadow-sm rounded-pill px-3" @click="exportExcel">
+                  <i class="bi bi-download me-1"></i> Download Excel
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </AppLayout>
+    <!-- row -->
+  </div>
 </template>
+
 <script setup>
-  import { ref, computed, watch, reactive } from 'vue';
-  import { Link } from '@inertiajs/vue3';
+  import { ref, computed } from 'vue';
   import AppLayout from '@/Components/Layouts/AppLayouts.vue';
-  import Modal from '@/Components/Layouts/Modal.vue';
+  defineOptions({ layout: AppLayout });
+  import { Link } from '@inertiajs/vue3';
+  import ExcelJS from 'exceljs';
+  import { saveAs } from 'file-saver';
 
-  // Variabel Reactive Untuk CheckBox
-  const aktif = reactive({
-    tempat: false,
-    kasus: false,
-    kunjungan: false,
-    tmptKunjungan: false,
-    nama: false,
-    umur: false,
-    jk: false,
-    asal: false,
-    kecamatan: false,
-    desa: false,
-    kepesertaan: false,
-    kategori: false,
-    isiDiagnosa: false,
-    diagnosa: false,
-    tindakan: false,
-    rujukLanjut: false,
-    unit: false,
-    showData: false
-  });
+  const exportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Laporan Pasien');
 
-  // Setup Modal untuk Diagnosa dan Tindakan
-  const isModalOpen = ref(false);
-  const selectedTindakan = ref('');
-  const dataTindakan = ref([
-    {
-      kode: '00.01',
-      nama: 'Therapeutic ultrasound of vessels of head and neck',
-      translate: 'USG Terapi pembuluh kepala dan leher',
-    },
-    {
-      kode: '00.02',
-      nama: 'Therapeutic ultrasound of heart',
-      translate: 'USG Terapi hati',
-    },
-  ]);
-  const handleSelect = (item) => {
-    selectedTindakan.value = `${item.kode} - ${item.nama}`;
-    openModal.value = false;
+    worksheet.columns = [
+      { header: 'No', key: 'no', width: 5 },
+      { header: 'Tanggal Kunjungan', key: 'tglKunjungan', width: 20 },
+      { header: 'NIK', key: 'nik', width: 20 },
+      { header: 'NO RM', key: 'noRm', width: 15 },
+      { header: 'Nama', key: 'nama', width: 25 },
+      { header: 'Alamat', key: 'alamat', width: 30 },
+      { header: 'Kecamatan', key: 'kec', width: 20 },
+      { header: 'Desa', key: 'desa', width: 20 },
+      { header: 'Sex', key: 'sex', width: 10 },
+      { header: 'Tanggal Lahir', key: 'tglLahir', width: 15 },
+      { header: 'Umur', key: 'umur', width: 10 },
+      { header: 'Kelompok Umur', key: 'kelompokUmur', width: 15 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: '3B82F6' }, // biru (Tailwind blue-500)
+      };
+      cell.font = {
+        color: { argb: 'FFFFFFFF' }, // teks putih
+        bold: true,
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    filteredLaporan.value.forEach((laporan, i) => {
+      worksheet.addRow({
+        no: i + 1,
+        tglKunjungan: laporan.tglKunjungan || '-',
+        nik: laporan.pasien?.NIK || '-',
+        noRm: laporan.pasien?.NO_MR || '-',
+        nama: laporan.pasien?.NAMA_LGKP || '-',
+        alamat: laporan.pasien?.ALAMAT || '-',
+        kec: laporan.pasien?.NO_KEC || '-',
+        desa: laporan.pasien?.NO_KEL || '-',
+        sex: laporan.pasien?.JENIS_KLMIN || '-',
+        tglLahir: laporan.pasien?.TGL_LHR || '-',
+        umur: laporan.umur || '-',
+        kelompokUmur: laporan.pasien?.KEL_UMUR || '-',
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer]), 'laporan_pasien.xlsx');
   };
 
-  // Array Untuk Mengambil Data Pada Database
   const props = defineProps({
-    providers: Array,
-    tempat_kunjungan: Array,
-    detail_tempat_kunjungan: Array,
-    kunj_kasus: Array,
-    asal: Array,
-    kecamatan: Array,
-    desa: Array,
-    unit: Array,
-    kunjungan: Array,
-    Filter: Array,
+    rekamMedis: Array,
   });
 
-  // Fungsi Untuk Filter Tempat Kunjungan
-  const selectedKategori = ref('');
-  const selectedUnit = ref('');
-  const filteredUnits = computed(() => {
-    if (!selectedKategori.value) return [];
+  const searchQuery = ref('');
+  const startDate = ref('');
+  const endDate = ref('');
 
-    return props.detail_tempat_kunjungan.filter(
-      (unit) => unit.id_kategori == selectedKategori.value
-    );
+  const currentPage = ref(1);
+  const itemsPerPage = ref(10);
+
+  const filteredLaporan = computed(() => {
+    let results = props.rekamMedis;
+
+    if (startDate.value && endDate.value) {
+      results = results.filter((item) => {
+        const tgl = (item.tglKunjungan || '').slice(0, 10);
+        return tgl >= startDate.value && tgl <= endDate.value;
+      });
+    } else if (startDate.value) {
+      results = results.filter((item) => (item.tglKunjungan || '').slice(0, 10) >= startDate.value);
+    } else if (endDate.value) {
+      results = results.filter((item) => (item.tglKunjungan || '').slice(0, 10) <= endDate.value);
+    }
+
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase();
+      results = results.filter(
+        (item) =>
+          (item.pasien?.NO_MR || '').toLowerCase().includes(query) ||
+          (item.pasien?.NO_KK || '').toLowerCase().includes(query) ||
+          (item.pasien?.NAMA_LGKP || '').toLowerCase().includes(query) ||
+          (item.pasien?.NIK || '').toLowerCase().includes(query) ||
+          (item.pasien?.ALAMAT || '').toLowerCase().includes(query) ||
+          (item.nama_kecamatan || '').toLowerCase().includes(query) ||
+          (item.nama_kelurahan || '').toLowerCase().includes(query) ||
+          (item.noKartu || '').toLowerCase().includes(query) ||
+          (item.kdProvider || '').toLowerCase().includes(query)
+      );
+    }
+
+    return results;
   });
 
-  watch(selectedKategori, () => {
-    selectedUnit.value = '';
+  const paginatedLaporan = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value;
+    const end = start + itemsPerPage.value;
+    return filteredLaporan.value.slice(start, end);
   });
 
-  // Fungsi Untuk Filter Desa & Kecamatan
-  const selectedKecamatan = ref('');
-  const selectedDesa = ref('');
-  const filteredDesa = computed(() => {
-    if (!selectedKecamatan.value) return [];
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages.value) {
+      currentPage.value = page;
+    }
+  };
 
-    return props.desa.filter((desa) => desa.NO_KEC == selectedKecamatan.value);
+  const totalPages = computed(() => {
+    return Math.ceil(filteredLaporan.value.length / itemsPerPage.value);
   });
 
-  watch(selectedKecamatan, () => {
-    selectedDesa.value = '';
-  });
-  // Opsi 2: Jika menggunakan detail_tempat_kunjungan sebagai array terpisah
-  // return props.detail_tempat_kunjungan.filter(
-  //   (item) => item.id_kategori === selectedKategori.value
+  // fungsi tampilkan HTML
+  function showHtml() {
+  const htmlContent = `
+    <html>
+      <head>
+        <title>Data Laporan Pasien</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h3 { text-align: center; margin-bottom: 16px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
+          th { background: #3b82f6; color: white; }
+          tr:nth-child(even) { background: #f9f9f9; }
+        </style>
+      </head>
+      <body>
+        <h3>Data Laporan Pasien</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama</th>
+              <th>Usia</th>
+              <th>Diagnosa</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredLaporan.value
+              .map(
+                (laporan, i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${laporan.pasien?.NAMA_LGKP || '-'}</td>
+                    <td>${laporan.umur || '-'}</td>
+                    <td>${laporan.diagnosa || '-'}</td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
 
-  // Data Untuk Form
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(htmlContent);
+  newWindow.document.close();
+}
+
 </script>
+
 <style scoped>
-  .card-header {
-    background: linear-gradient(135deg, #3b82f6, #10b981);
-  }
-  .btn-data {
-    background-color: #9faae9;
-  }
   .btn-html {
-    background-color: #eebd95;
+    background: #3b82f6;
+    color: white;
   }
   .btn-excel {
-    background-color: #98ec82;
+    background: #10b981;
+    color: white;
   }
-  th {
-    white-space: nowrap;
+  .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
 </style>

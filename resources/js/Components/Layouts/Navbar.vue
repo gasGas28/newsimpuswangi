@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top" >
+  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top" >
     <div class="container-fluid">
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->
@@ -219,7 +219,7 @@ const show = (menuKey) => {
 <style scoped>
   .navbar {
     padding: 0.5rem 1rem;
-    background-color: #1a1a1a !important;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
   }
 
   .nav-link {

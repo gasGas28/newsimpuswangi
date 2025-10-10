@@ -34,7 +34,6 @@ Route::get('/', function () {
 })->name('home');
 
 
-
 // Login
 Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
@@ -88,10 +87,12 @@ Route::prefix('filter')->controller(FilterController::class)->group(function () 
 });
 
 // Grup Loket
-Route::prefix('loket')->controller(PasienController::class)->group(function () {
+Route::prefix('pasien')->controller(PasienController::class)->group(function () {
     // Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/pasien', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
+    Route::get('/', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
     Route::get('/search', 'index')->name('loket.search');
+    Route::get('/{id}/edit', 'edit')->name('loket.edit');
+    Route::post('/{id}', 'update')->name('pasien.update');
 });
 
 // Grup Templete
@@ -239,13 +240,33 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Biakes
     Route::prefix('biakes')->name('biakes.')->group(function () {
         Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
-        Route::inertia('pembiayaanjaminansehat', 'MalSehat/Biakes/PembiayaanJaminanSehat')->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pembiayaanJaminanSehat'])
+            ->name('pembiayaanjaminansehat');
+
+        Route::get('pembiayaanjaminansehat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pelayanan'])
+            ->name('pembiayaanjaminansehat.pelayanan')
+            ->middleware('web');
     });
 
     // Promkes
     Route::prefix('promkes')->name('promkes.')->group(function () {
         Route::inertia('/', 'MalSehat/Promkes/Index')->name('index');
-        Route::inertia('kesehatanpeduliremaja', 'MalSehat/Promkes/KesehatanPeduliRemaja')->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja', [\App\Http\Controllers\MalSehat\PromkesController::class, 'kesehatanPeduliRemaja'])
+            ->name('kesehatanpeduliremaja');
+
+        Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
+            ->name('kesehatanpeduliremaja.pelayanan')
+            ->middleware('web');
+            
+        // ✅ route untuk diagnosa
+        Route::get('diagnosa/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getDiagnosa'])
+            ->name('diagnosa.list');
+        
+        // ✅ route untuk tindakan
+        Route::get('tindakan/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getTindakan'])
+            ->name('tindakan.list');
     });
 
     // Lain-lain
