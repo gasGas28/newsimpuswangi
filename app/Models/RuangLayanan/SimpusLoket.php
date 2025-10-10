@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SimpusLoket extends Model
 {
 
+
     protected $table = 'simpus_loket';
     protected $primaryKey = 'idLoket';
     public $incrementing = false;

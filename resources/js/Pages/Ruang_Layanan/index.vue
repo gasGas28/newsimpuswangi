@@ -53,7 +53,7 @@ const dataLayanan = [
   { nama: 'Kunjungan Online', jumlah: 10, link: 'ruang-layanan.kunjungan-online', icon: 'bi bi-chat-dots', bg: '#3b82f6' },
   { nama: 'Gizi', jumlah: 0, link: 'ruang-layanan.gizi', icon: 'bi bi-egg-fried', bg: '#10b981' },
   { nama: 'Laborat', jumlah: 0, link: 'ruang-layanan.laborat', icon: 'bi bi-eyedropper', bg: '#facc15' },
-  { nama: 'KIA', jumlah: 0, link: 'ruang-layanan.laborat', icon: 'bi bi-gender-female', bg: '#14b8a6' },
+  { nama: 'KIA', jumlah: 0, link: 'ruang-layanan.kia', icon: 'bi bi-gender-female', bg: '#14b8a6' },
 ]
 
 </script>

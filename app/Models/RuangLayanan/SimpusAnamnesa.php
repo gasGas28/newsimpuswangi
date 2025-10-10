@@ -10,6 +10,7 @@ class SimpusAnamnesa extends Model
     protected $primaryKey = 'idAnamnesa';
     public $timestamps = false;
     public $incrementing = false;
+    public $incrementing = false;
     protected $fillable = [
         'idAnamnesa',
         'loketId',

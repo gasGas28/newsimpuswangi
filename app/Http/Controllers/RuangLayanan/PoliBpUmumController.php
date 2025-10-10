@@ -30,7 +30,8 @@ use DB;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Str;
+use Illuminate\Support\Str;
+
 
 class PoliBpUmumController extends Controller
 {
