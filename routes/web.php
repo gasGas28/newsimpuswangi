@@ -28,6 +28,7 @@ use App\Http\Controllers\Owner\OwnerController;
 use App\Http\Controllers\Owner\PanelController;
 use App\Http\Controllers\Auth\PasswordForceController;
 use App\Http\Controllers\Owner\OwnerLogController;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -41,7 +42,7 @@ Route::get('/login', fn() => Inertia::render('Auth/Login'))->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':owner,kapus'])->get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':loket,owner,admin'])->get('/loket', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-Route::middleware(['auth', CheckRole::class.':pelayanan,owner,admin'])
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':pelayanan,owner,admin'])
     ->get('/ruang-layanan/poli', fn() => Inertia::render('RuangLayanan/Poli'))
     ->name('ruang-layanan.poli.alt');  // nama beda, tidak bentrok
 Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':owner,admin,loket,pelayanan'])->group(function () {
