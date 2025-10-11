@@ -442,7 +442,7 @@ Route::post(
     // Kia
     // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
     Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
-    Route::get('/simpus/kia/pelayanan/{id}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+    Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
 
 
 

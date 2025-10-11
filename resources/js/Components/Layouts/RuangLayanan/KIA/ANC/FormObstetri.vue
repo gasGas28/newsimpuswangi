@@ -5,7 +5,9 @@
       <div class="row g-3">
         <div class="col-md-4">
           <label class="form-label">Gravida</label>
-          <input type="number" class="form-control" />
+          <select class="form-select" v-model="gravida">
+            <option v-for="n in 21" :key="n - 1" :value="n - 1">{{ n - 1 }}</option>
+          </select>
         </div>
 
         <div class="col-md-4">
@@ -41,7 +43,6 @@
           </div>
         </div>
 
-      
         <div class="col-md-6">
           <label class="form-label">Status Imunisasi Tetanus</label>
           <select class="form-select">
@@ -60,6 +61,8 @@
 
 <script setup>
   import { ref } from 'vue';
+  const gravida = ref(0);
+
 
   const saveForm = () => {
     console.log('Data Obstetri:', form.value);
