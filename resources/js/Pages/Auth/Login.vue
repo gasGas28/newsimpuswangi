@@ -70,6 +70,10 @@ const submit = async () => {
 
   loading.value = true
   try {
+    // ⚡ tambahkan ini sebelum axios.post — ambil CSRF cookie dari Laravel Sanctum
+    await axios.get('/sanctum/csrf-cookie')
+
+    // baru kirim login
     const res = await axios.post('/login', {
       username: username.value,
       password: password.value,
@@ -80,14 +84,10 @@ const submit = async () => {
     const redirectUrl = res?.data?.redirect ?? '/dashboard'
 
     if (needChange) {
-      // Tahan redirect, munculkan modal ganti password
       pendingRedirect.value = redirectUrl
       showForceModal.value = true
-
-      // Reset captcha supaya kalau user gagal simpan pwd, gak ngaruh ke sesi login yg sudah berhasil
       if (window.grecaptcha && widgetId !== null) window.grecaptcha.reset(widgetId)
     } else {
-      // Lanjut seperti biasa
       window.location.href = redirectUrl
     }
   } catch (e) {
@@ -104,7 +104,7 @@ const submit = async () => {
   } finally {
     loading.value = false
   }
-} // <<--- PENTING: tutup fungsi submit di sini
+}
 
 async function saveNewPassword() {
   newPassErr.value = ''
