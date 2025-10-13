@@ -174,10 +174,7 @@ class PoliKIAController extends Controller
         return Inertia::render('Ruang_Layanan/KIA/Pelayanan', [
             'DataPasien' => $DataPasien,
             'idPelayanan' => $idPelayanan,
-            'idPoli' => $idPoli
-
-
-
+            'idPoli' => $idPoli,
             // 'DataAnamnesa' => $DataAnamnesa,
             // 'DataKesadaran' => $DataKesadaran,
             // 'DiagnosaKasus' => $DiagnosaKasus,
