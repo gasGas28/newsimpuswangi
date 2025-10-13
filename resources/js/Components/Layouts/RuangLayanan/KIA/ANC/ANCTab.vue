@@ -1,18 +1,24 @@
 <template>
-  <div class="card shadow-sm border-0 rounded-4">
+  <div>
+    <h5 class="mb-2">Pelayanan Antenatal Care / Ibu Hamil</h5>
+  </div>
+  <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
-    <div class="d-flex align-items-center bg-success p-2 rounded-top-4">
+    <div class="d-flex text-white align-items-center border-bottom bg-bottom p-2 rounded-top-3">
       <button
         v-for="tab in tabs"
         :key="tab.name"
-        class="btn text-white fw-semibold me-1"
-        :class="{'btn-primary': selectedTab === tab.name, 'btn-success': selectedTab !== tab.name}"
+        class="btn-tab"
+        :class="{ active: selectedTab === tab.name }"
         @click="selectedTab = tab.name"
       >
         {{ tab.label }}
       </button>
+
       <div class="ms-auto">
-        <button class="btn btn-danger btn-sm fw-semibold">Akhiri ANC</button>
+        <button class="btn btn-danger btn-sm fw-semibold">
+          Akhiri ANC
+        </button>
       </div>
     </div>
 
@@ -26,23 +32,17 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-// import semua form
+// import form
 import FormObstetri from './FormObstetri.vue'
-// import FormSubjektif from './forms/FormSubjektif.vue'
+import FormSubjektif from './FormSubjektif.vue'
 import FormObjektif from './FormObjektif.vue'
-// import FormAssessment from './forms/FormAssessment.vue'
-// import FormImunisasi from './forms/FormImunisasi.vue'
-// import FormPlanning from './forms/FormPlanning.vue'
-// import FormStatusPasien from './forms/FormStatusPasien.vue'
+// (bisa tambahkan form lain nanti)
 
 const tabs = [
   { name: 'obstetri', label: 'Obstetri' },
-  // { name: 'subjektif', label: 'Subjektif' },
+  { name: 'subjektif', label: 'Subjektif' },
   { name: 'objektif', label: 'Objektif' },
-  // { name: 'assessment', label: 'Assessment' },
-  // { name: 'imunisasi', label: 'Imunisasi' },
-  // { name: 'planning', label: 'Planning' },
-  // { name: 'status', label: 'Status Pasien' },
+  { name: 'assesment', label: 'Assesment' },
 ]
 
 const selectedTab = ref('obstetri')
@@ -52,20 +52,42 @@ const currentForm = computed(() => {
     case 'obstetri': return FormObstetri
     case 'subjektif': return FormSubjektif
     case 'objektif': return FormObjektif
-    case 'assessment': return FormAssessment
-    case 'imunisasi': return FormImunisasi
-    case 'planning': return FormPlanning
-    case 'status': return FormStatusPasien
+    case 'assesment': return FormObstetri
     default: return null
   }
 })
 </script>
 
 <style scoped>
-.btn {
-  border-radius: 0 !important;
+.btn-tab {
+  background: transparent;
+  margin: 2px;
+  border: none;
+  padding: 8px 14px;
+  font-weight: 600;
+  color: #e9f2ff;
+  border-radius: 6px;
+  transition: 0.2s;
 }
-.btn-primary {
-  background-color: #0d6efd !important;
+
+/* .btn-tab:hover {
+  background: #e9f2ff;
+  color: #10b981;
+} */
+
+.btn-tab.active {
+  background: #10b981;
+  color: #fff;
+}
+
+.card {
+  border-radius: 10px;
+}
+
+.btn-outline-danger {
+  border-radius: 6px;
+}
+.bg-bottom {
+  background: linear-gradient(135deg, #3b82f6, #10b981);
 }
 </style>

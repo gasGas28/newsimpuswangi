@@ -7,7 +7,7 @@
           <i class="bi bi-person-fill text-primary fs-1"></i>
         </div>
         <div>
-          <h3 class="mb-1 fw-bold">Budi Santoso <span class="text-muted">(-)</span></h3>
+          <h3 v-for="pasien in DataPasien" :key="pasien.ID" :value="pasien.NAMA_LGKP" class="mb-1 fw-bold">{{ pasien.NAMA_LGKP }}  <span class="text-muted">(-)</span></h3>
         </div>
       </div>
 
@@ -19,7 +19,7 @@
               <i class="bi bi-calendar3 text-primary me-2"></i>
               <h6 class="mb-0 text-muted">Jk / Umur</h6>
             </div>
-            <p class="mb-0 fw-semibold">L 35 Tahun - 4 Bulan - 12 Hari</p>
+            <p v-for="pasien in DataPasien" :key="pasien.ID" class="mb-0 fw-semibold">L {{ pasien.umur }} Tahun - {{ pasien.umur_bulan }} Bulan - {{ pasien.umur_hari }} Hari</p>
           </div>
         </div>
 
@@ -30,8 +30,8 @@
               <i class="bi bi-geo-alt-fill text-primary me-2"></i>
               <h6 class="mb-0 text-muted">Alamat</h6>
             </div>
-            <p class="mb-0 fw-semibold">
-              Jl. Melati No. 23 RT 02 RW 05 Kel. Sukamaju Kec. Cempaka Kab. Bandung Prov. Jawa Barat
+            <p v-for="address in DataPasien" :key="address.ID" class="mb-0 fw-semibold">
+              {{ address.alamat }} RT {{ address.no_rt }} RW {{ address.no_rw }} Kel. {{ address.nama_kel }} Kec. {{ address.nama_kec }} <br>{{ address.nama_kab }} Prov. {{ address.nama_prop }}
             </p>
           </div>
         </div>
@@ -43,7 +43,7 @@
               <i class="bi bi-heart-pulse-fill text-success me-2"></i>
               <h6 class="mb-0 text-muted">Jenis/Poli</h6>
             </div>
-            <p class="mb-0 fw-semibold">Kunjungan Sakit (Umum)</p>
+            <p v-for="poli in DataPasien" :key="poli.ID" class="mb-0 fw-semibold">Kunjungan Sakit ({{ poli.nmPoli }})</p>
           </div>
         </div>
 
@@ -54,7 +54,7 @@
               <i class="bi bi-calendar-check-fill text-info me-2"></i>
               <h6 class="mb-0 text-muted">Tanggal Kunjungan</h6>
             </div>
-            <p class="mb-0 fw-semibold">2025-10-10</p>
+            <p v-for="tanggal in DataPasien" :key="tanggal.ID" class="mb-0 fw-semibold">{{ tanggal.tglKunjungan }}</p>
           </div>
         </div>
 
@@ -65,7 +65,7 @@
               <i class="bi bi-credit-card-fill text-warning me-2"></i>
               <h6 class="mb-0 text-muted">No. RM / NIK</h6>
             </div>
-            <p class="mb-0 fw-semibold">RM123456 / 3201123456789001</p>
+            <p v-for="no in DataPasien" :key="no.ID" class="mb-0 fw-semibold">{{ no.NO_MR }} / {{ no.NIK }}</p>
           </div>
         </div>
 
@@ -145,6 +145,9 @@
 
   const activeForm = ref(null);
 
+  const props = defineProps({
+    DataPasien: Array,
+  });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;
   };
