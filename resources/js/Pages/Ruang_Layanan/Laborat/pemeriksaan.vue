@@ -952,4 +952,55 @@ onMounted(() => {
 }
 .modal-body { padding: 1rem; }
 .btn-close { border: 0; background: transparent; }
+
+/* --- Simple Modal (update) --- */
+.modal-mask {
+  position: fixed; z-index: 1050; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: grid; place-items: center;
+  padding: 1rem;
+  /* biar aman kalau konten tinggi */
+  overflow: auto;
+}
+
+.modal-card {
+  /* lebar responsif */
+  width: min(96vw, 720px);
+  background: #fff; border-radius: 1rem;
+  box-shadow: 0 1rem 2rem rgba(0,0,0,.2);
+  overflow: hidden;
+
+  /* KUNCI: jadikan flex column & batasi tinggi */
+  display: flex; flex-direction: column;
+  max-height: 90vh;        /* cegah full-screen */
+}
+
+.modal-card.modal-xl {
+  width: min(96vw, 1100px); /* modal master lebih lebar */
+  max-height: 90vh;         /* tetap dibatasi tinggi */
+}
+
+/* header/footer tetap ukuran kontennya saja */
+.modal-header, .modal-footer {
+  padding: .75rem 1rem;
+  background: #f8fafc;
+  display: flex; align-items: center; justify-content: space-between;
+  flex: 0 0 auto;
+}
+
+/* KUNCI: body yang scroll */
+.modal-body {
+  padding: 1rem;
+  flex: 1 1 auto;
+  min-height: 0;      /* penting supaya flex child boleh overflow */
+  overflow: auto;     /* scroll di dalam modal */
+}
+
+/* opsional: sedikit tweak mobile */
+@media (max-width: 576px) {
+  .modal-card, .modal-card.modal-xl {
+    border-radius: .75rem;
+  }
+}
+
 </style>

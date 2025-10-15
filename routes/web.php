@@ -28,6 +28,30 @@ use App\Http\Controllers\Owner\OwnerController;
 use App\Http\Controllers\Owner\PanelController;
 use App\Http\Controllers\Auth\PasswordForceController;
 use App\Http\Controllers\Owner\OwnerLogController;
+use Illuminate\Session\TokenMismatchException;
+
+
+
+
+
+
+
+Route::match(['GET','POST'], '/_csrf-debug', function (Request $r) {
+    return response()->json([
+        'method'          => $r->method(),
+        'has_cookie_xsrf' => $r->cookies->has('XSRF-TOKEN'),
+        'has_cookie_sess' => $r->cookies->has(config('session.cookie')),
+        'token_input'     => $r->input('_token') ? 'YES' : 'NO',
+        'token_header'    => $r->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
+        'token_x_xsrf'    => $r->header('X-XSRF-TOKEN') ? 'YES' : 'NO',
+        'session_driver'  => config('session.driver'),
+        'session_id'      => $r->session()->getId(),
+        'host'            => $r->getHost(),
+        'origin'          => $r->headers->get('Origin'),
+        'referer'         => $r->headers->get('Referer'),
+    ]);
+})->middleware('web');
+
 
 
 

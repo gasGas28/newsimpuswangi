@@ -2,6 +2,16 @@
 import { ref, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 
+
+
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
+axios.defaults.xsrfHeaderName = 'X-XSRF-TOKEN';
+delete axios.defaults.headers.common['X-CSRF-TOKEN']; // pastikan ini tidak ada
+
+
 // ====== State popup ganti password ======
 const showForceModal = ref(false)
 const newPass = ref('')
@@ -20,7 +30,6 @@ let widgetId   = null
 
 // (aman) set CSRF header kalau meta tag ada
 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-if (csrf) axios.defaults.headers.common['X-CSRF-TOKEN'] = csrf
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
 // Loader reCAPTCHA idempotent
@@ -73,12 +82,26 @@ const submit = async () => {
     // ⚡ tambahkan ini sebelum axios.post — ambil CSRF cookie dari Laravel Sanctum
     await axios.get('/sanctum/csrf-cookie')
 
+
+
+    // ambil CSRF cookie dulu
+await axios.get('/sanctum/csrf-cookie');
+
+// debug, kirim POST ke endpoint /_csrf-debug
+const debugRes = await axios.post('/_csrf-debug', {});
+console.log('CSRF-DEBUG', debugRes.data);
+await axios.get('/sanctum/csrf-cookie');   // set cookie
+const dbg = await axios.post('/_csrf-debug', {}); // harus 200, bukan 419
+console.log(dbg.data);
+
+// baru kirim login (pakai nama res yg lama)
+const res = await axios.post('/login', {
+  username: username.value,
+  password: password.value,
+  'g-recaptcha-response': recaptchaToken,
+});
     // baru kirim login
-    const res = await axios.post('/login', {
-      username: username.value,
-      password: password.value,
-      'g-recaptcha-response': recaptchaToken,
-    })
+
 
     const needChange = !!res?.data?.require_password_change
     const redirectUrl = res?.data?.redirect ?? '/dashboard'
