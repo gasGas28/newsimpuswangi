@@ -1,21 +1,36 @@
 <template>
   <div>
-    <h5 class="fw-bold text-primary mb-3">Pemeriksaan Obstetri</h5>
+    <h5 class="fw-bold mb-3">Pemeriksaan Obstetri</h5>
     <form @submit.prevent="saveForm">
       <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-2">
           <label class="form-label">Gravida</label>
-          <input type="number" class="form-control" />
+          <select class="form-select" v-model="gravida">
+            <option v-for="n in 21" :key="n - 1" :value="n - 1">{{ n - 1 }}</option>
+          </select>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
           <label class="form-label">Partus</label>
-          <input type="number" class="form-control" />
+          <select class="form-select" v-model="partus">
+            <option v-for="n in 21" :key="n - 1" :value="n - 1">{{ n - 1 }}</option>
+          </select>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-2">
           <label class="form-label">Abortus</label>
-          <input type="number" class="form-control" />
+          <select class="form-select" v-model="abortus">
+            <option v-for="n in 21" :key="n - 1" :value="n - 1">{{ n - 1 }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">IMT</label>
+          <input type="text" disabled class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Status</label>
+          <input type="text" disabled class="form-control">
         </div>
 
         <div class="col-md-6">
@@ -36,12 +51,11 @@
         <div class="col-md-6">
           <label class="form-label">Target Kenaikan Berat Badan</label>
           <div class="input-group">
-            <input type="number" class="form-control" />
+            <input type="number" disabled class="form-control" />
             <span class="input-group-text">Kg</span>
           </div>
         </div>
 
-      
         <div class="col-md-6">
           <label class="form-label">Status Imunisasi Tetanus</label>
           <select class="form-select">
@@ -52,7 +66,7 @@
       </div>
 
       <div class="mt-3 text-end">
-        <button class="btn btn-success"><i class="bi bi-save me-1"></i> Simpan</button>
+        <button class="btn btn-success shadow-sm rounded-pill px-3"><i class="bi bi-save me-1"></i> Simpan</button>
       </div>
     </form>
   </div>
@@ -60,6 +74,9 @@
 
 <script setup>
   import { ref } from 'vue';
+  const gravida = ref(0);
+  const partus = ref(0);
+  const abortus = ref(0);
 
   const saveForm = () => {
     console.log('Data Obstetri:', form.value);
