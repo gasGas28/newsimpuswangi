@@ -7,6 +7,7 @@ use App\Models\RuangLayanan\DataMasterUnitDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\RuangLayanan\SimpusDataDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosa;
 use App\Models\RuangLayanan\SimpusLoket;
 use App\Models\RuangLayanan\SimpusTindakan;
 use Inertia\Inertia;
@@ -164,23 +165,116 @@ class PoliKIAController extends Controller
                 'l.idLoket'
             )
             ->get();
+        $diagnosa = SimpusDiagnosa::all();
         // $DataAnamnesa = DB::table('simpus_anamnesa')->where('loketId', $DataPasien[0]->idLoket)->first();
         // $DataKesadaran = DB::table('simpus_kesadaran')->get();
         // $DiagnosaKasus = DB::table('master_diagnosa_kasus')->get();
         // $MasterAlergi = DB::table('master_alergi')->get();
         // $SimpusDataDiagnosa = SimpusDataDiagnosa::with(['SimpusPoliFKTP', 'MasterDiagnosaKasus'])->where('kdPoli', '001')->where('loketId', $DataPasien[0]->idLoket)->get();
         // $SimpusTindakan = SimpusTindakan::where('loketId', $DataPasien[0]->idLoket)->get();
+        // $DiagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();
+        // $diagnosa = SimpusDiagnosa::where('kategori', 1)->get();
+        $diagnosa = SimpusDiagnosa::where('kategori', 0)->get();
+
         // dd($DataPasien);
+        // dd($DiagnosaKeperawatan);
         return Inertia::render('Ruang_Layanan/KIA/Pelayanan', [
             'DataPasien' => $DataPasien,
             'idPelayanan' => $idPelayanan,
             'idPoli' => $idPoli,
+            'diagnosa' => $diagnosa,
             // 'DataAnamnesa' => $DataAnamnesa,
             // 'DataKesadaran' => $DataKesadaran,
             // 'DiagnosaKasus' => $DiagnosaKasus,
             // 'MasterAlergi' => $MasterAlergi,
             // 'SimpusDataDiagnosa' => $SimpusDataDiagnosa,
             // 'SimpusTindakan' => $SimpusTindakan
+        ]);
+
+    }
+    public function searchDiagnosa(Request $request)
+    {
+        $search = $request->get('search');
+
+        // query awal
+        $query = DB::table('simpus_diagnosa');
+
+        // kalau ada search, filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nmDiag', 'like', "%{$search}%")
+                    ->orWhere('kdDiag', 'like', "%{$search}%");
+            });
+        }
+
+        $DiagnosaMedis = $query->paginate(10);
+
+        // simpan query string search supaya ikut di pagination
+        $DiagnosaMedis->appends(['search' => $search]);
+
+        $links = [];
+
+        // Previous
+        $links[] = [
+            'label' => 'Previous',
+            'url' => $DiagnosaMedis->previousPageUrl(),
+            'active' => false,
+        ];
+
+        $lastPage = $DiagnosaMedis->lastPage();
+        $current = $DiagnosaMedis->currentPage();
+
+        // Always tampil halaman pertama
+        $links[] = [
+            'label' => 1,
+            'url' => $DiagnosaMedis->url(1),
+            'active' => $current === 1,
+        ];
+
+        // Tambah "..." kalau current jauh dari 1
+        if ($current > 3) {
+            $links[] = ['label' => '...', 'url' => null, 'active' => false];
+        }
+
+        // Window: current-1, current, current+1
+        for ($i = max(2, $current - 1); $i <= min($lastPage - 1, $current + 1); $i++) {
+            $links[] = [
+                'label' => $i,
+                'url' => $DiagnosaMedis->url($i),
+                'active' => $current === $i,
+            ];
+        }
+
+        // Tambah "..." kalau current jauh dari lastPage
+        if ($current < $lastPage - 2) {
+            $links[] = ['label' => '...', 'url' => null, 'active' => false];
+        }
+
+        // Always tampil halaman terakhir (kalau lebih dari 1)
+        if ($lastPage > 1) {
+            $links[] = [
+                'label' => $lastPage,
+                'url' => $DiagnosaMedis->url($lastPage),
+                'active' => $current === $lastPage,
+            ];
+        }
+
+        // Next
+        $links[] = [
+            'label' => 'Next',
+            'url' => $DiagnosaMedis->nextPageUrl(),
+            'active' => false,
+        ];
+
+        return response()->json([
+            'data' => $DiagnosaMedis->items(),
+            'meta' => [
+                'current_page' => $DiagnosaMedis->currentPage(),
+                'last_page' => $DiagnosaMedis->lastPage(),
+                'per_page' => $DiagnosaMedis->perPage(),
+                'total' => $DiagnosaMedis->total(),
+            ],
+            'links' => $links,
         ]);
     }
 }

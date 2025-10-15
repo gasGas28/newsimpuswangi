@@ -82,6 +82,8 @@
       </div>
     </div>
 
+    <h5 class="fw-semibold">Pelayanan KIA</h5>
+
     <div class="quick-actions mb-2">
       <div class="action-grid">
         <a href="#" class="action-card doc-action" @click.prevent="toggleForm('anc')">
@@ -128,9 +130,9 @@
       </div>
     </div>
     <div class="mt-4">
-      <FormAnc v-if="activeForm === 'anc'" />
+      <FormAnc :diagnosa="props.diagnosa" v-if="activeForm === 'anc'" />
       <FormPnc v-if="activeForm === 'pnc'" />
-      <FormTumbuhKembang v-if="activeForm === 'tumbuhKembang'" />
+      <FormTumbuhKembang   v-if="activeForm === 'tumbuhKembang'" />
     </div>
   </div>
 </template>
@@ -147,6 +149,7 @@
 
   const props = defineProps({
     DataPasien: Array,
+    diagnosa: Array,
   });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;

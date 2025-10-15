@@ -62,14 +62,27 @@
               <label class="form-label fw-semibold d-block">Complikasi</label>
               <div class="row mb-3">
                 <div class="col-3">
-                  <input type="text" class="form-control" placeholder="" disabled />
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder=""
+                    disabled
+                    v-model="form.kode_complikasi"
+                  />
                 </div>
                 <div class="col-9">
                   <div class="input-group">
-                    <input type="text" class="form-control bg-light" disabled />
-                    <button type="button" class="btn btn-info" @click="openModal()">Cari</button>
+                    <input
+                      type="text"
+                      class="form-control bg-light"
+                      disabled
+                      v-model="form.nama_complikasi"
+                    />
+                    <button type="button" class="btn btn-info" @click="showModal = true">
+                      Cari
+                    </button>
 
-                    <button type="button" class="btn btn-danger">Del</button>
+                    <button type="button" class="btn btn-danger" @click="hapusForm">Del</button>
                   </div>
                 </div>
               </div>
@@ -91,9 +104,11 @@
                 <div class="col-9">
                   <div class="input-group">
                     <input type="text" class="form-control bg-light" disabled />
-                    <button type="button" class="btn btn-info" @click="openModal()">Cari</button>
+                    <button type="button" class="btn btn-info" @click="showModal = true">
+                      Cari
+                    </button>
 
-                    <button type="button" class="btn btn-danger">Del</button>
+                    <button type="button" class="btn btn-danger" @click="hapusForm">Del</button>
                   </div>
                 </div>
               </div>
@@ -204,11 +219,81 @@
         </div>
       </form>
     </div>
+
+    <div v-if="showModal" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5)">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header d-flex justify-content-between align-items-center">
+            <h5>Pilih Diagnosa</h5>
+            <button class="btn-close" @click="showModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="text"
+              v-model="keyword"
+              class="form-control mb-3"
+              placeholder="Cari diagnosa..."
+            />
+            <table class="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>KODE</th>
+                  <th>NAMA</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in diagnosa" :key="item.id">
+                  <td>{{ item.kdDiag }}</td>
+                  <td>{{ item.nmDiag }}</td>
+                  <td>
+                    <button class="btn btn-info btn-sm" @click="pilihDiagnosa(item)">Pilih</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
+
+  const showModal = ref(false);
+  const keyword = ref('');
+
+  // Form utama
+  const form = ref({
+    kode_complikasi: '',
+    nama_complikasi: '',
+  });
+
+  const props = defineProps({
+    diagnosa: Array,
+  });
+
+  const pilihDiagnosa = (item) => {
+    form.value.kode_complikasi = item.kdDiag;
+    form.value.nama_complikasi = item.nmDiag;
+    showModal.value = false;
+  };
+
+  const hapusForm = () => {
+    form.value.kode_complikasi = '';
+    form.value.nama_complikasi = '';
+  };
+
+  const simpanDiagnosaMedis = () => {
+    daftarDiagnosaMedis.value.push({ ...form.value });
+    alert('Diagnosa Medis Disimpan');
+  };
+
+  const hapusDiagnosa = (index) => {
+    daftarDiagnosaMedis.value.splice(index, 1);
+  };
 
   const saveForm = () => {
     alert(`Data disimpan!`);
