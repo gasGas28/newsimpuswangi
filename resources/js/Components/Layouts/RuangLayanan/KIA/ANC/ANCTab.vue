@@ -24,7 +24,7 @@
 
     <!-- Dynamic Form -->
     <div class="card-body bg-white">
-      <component :is="currentForm" />
+      <component :diagnosa="props.diagnosa" :is="currentForm" />
     </div>
   </div>
 </template>
@@ -36,14 +36,25 @@ import { ref, computed } from 'vue'
 import FormObstetri from './FormObstetri.vue'
 import FormSubjektif from './FormSubjektif.vue'
 import FormObjektif from './FormObjektif.vue'
+import FormAssessment from './FormAssessment.vue'
+import FormImunisasi from './FormImunisasi.vue'
+import FormPlanning from './FormPlanning.vue'
+import FormStatusPasien from './FormStatusPasien.vue'
 // (bisa tambahkan form lain nanti)
 
 const tabs = [
   { name: 'obstetri', label: 'Obstetri' },
   { name: 'subjektif', label: 'Subjektif' },
   { name: 'objektif', label: 'Objektif' },
-  { name: 'assesment', label: 'Assesment' },
+  { name: 'assessment', label: 'Assessment' },
+  { name: 'imunisasi', label: 'Imunisasi' },
+  { name: 'planning', label: 'Planning' },
+  { name: 'status_pasien', label: 'Status Pasien' },
 ]
+
+const props = defineProps({
+ diagnosa: Array,
+});
 
 const selectedTab = ref('obstetri')
 
@@ -52,7 +63,10 @@ const currentForm = computed(() => {
     case 'obstetri': return FormObstetri
     case 'subjektif': return FormSubjektif
     case 'objektif': return FormObjektif
-    case 'assesment': return FormObstetri
+    case 'assessment': return FormAssessment
+    case 'imunisasi': return FormImunisasi
+    case 'planning': return FormPlanning
+    case 'status_pasien': return FormStatusPasien
     default: return null
   }
 })

@@ -4,33 +4,29 @@
 
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('dataKunjungan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('tindakan')">
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Data Kunjungan</div>
+        <div class="action-label">Tindakan</div>
       </a>
 
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pemantauan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pengobatan')">
         <div class="action-icon"><i class="bi bi-activity"></i></div>
-        <div class="action-label">Pemantauan Dan Riwayat</div>
+        <div class="action-label">Pengobatan</div>
       </a>
     </div>
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <component :diagnosa="props.diagnosa" :is="activeComponent" v-if="activeComponent" />
+      <component :is="activeComponent" v-if="activeComponent" />
     </div>
   </div>
 </template>
 
 <script setup>
   import { ref, computed } from 'vue';
-  import FormDataKunjungan from './Subjektif/FormDataKunjungan.vue';
-  import FormPemantauan from './Subjektif/FormPemantauan.vue';
+  import Pengobatan from './Planning/Pengobatan.vue';
+  import Tindakan from './Planning/Tindakan.vue';
 
   const activeForm = ref(null);
-
-  const props = defineProps({
-    diagnosa: Array,
-  });
 
   // Fungsi toggle form
   const toggleForm = (form) => {
@@ -40,12 +36,12 @@
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
     switch (activeForm.value) {
-      case 'dataKunjungan':
-        return FormDataKunjungan;
-      case 'pemantauan':
-        return FormPemantauan;
+      case 'pengobatan':
+        return Pengobatan;
+      case 'tindakan':
+        return Tindakan;
       default:
-        return FormDataKunjungan;
+        return Tindakan;
     }
   });
 </script>
