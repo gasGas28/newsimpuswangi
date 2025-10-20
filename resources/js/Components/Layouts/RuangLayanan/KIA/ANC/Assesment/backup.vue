@@ -2,7 +2,7 @@
   <div class="container-fluid p-3">
     <div class="row">
       <!-- ========================= Diagnosa Medis ========================= -->
-      <form class="col-6">
+      <form class="col-6" @submit.prevent="simpanDiagnosaMedis">
         <h5 class="fw-semibold mb-3">Diagnosa</h5>
 
         <!-- Kode & Nama Diagnosa -->
@@ -35,49 +35,47 @@
         <div class="row mb-3">
           <div class="col-3 d-flex flex-column">
             <label class="fw-bold">Alergi Makanan</label>
-            <select class="form-select">
-              <option v-for="alrgm in AlergiMakanan" :key="alrgm.kodeBpjs">
-                {{ alrgm.namaAlergiBpjs }}
-              </option>
-            </select>
+            <input
+              type="text"
+              class="form-control bg-warning bg-opacity-75"
+              v-model="form.alergi_makanan"
+            />
           </div>
           <div class="col-3 d-flex flex-column">
             <label class="fw-bold">Alergi Obat</label>
-            <select class="form-select">
-              <option
-                v-for="alrgo in AlergiObat"
-                :key="alrgo.kodeBpjs"
-                :value="alrgo.namaAlergiBpjs"
-              >
-                {{ alrgo.namaAlergiBpjs }}
-              </option>
-            </select>
+            <input
+              type="text"
+              class="form-control bg-warning bg-opacity-75"
+              v-model="form.alergi_obat"
+            />
           </div>
           <div class="col-6 d-flex flex-column">
             <label class="fw-bold">Keterangan Alergi</label>
-            <input type="text" class="form-control bg-warning bg-opacity-75" />
+            <input
+              type="text"
+              class="form-control bg-warning bg-opacity-75"
+              v-model="form.keterangan_alergi"
+            />
           </div>
         </div>
 
         <!-- Kunjungan -->
         <div class="row mb-3">
           <div class="col-3 d-flex flex-column">
-            <label class="fw-bold">Kunjungan Kasus</label>
+            <label class="fw-bold">Kunjungan Khusus</label>
             <select class="form-control" v-model="form.kunjungan_khusus">
               <option value="">- Pilih -</option>
-              <option value="1">Kasus Baru</option>
-              <option value="2">Kasus Lama</option>
-              <option value="3">Kunjungan Kasus Lama</option>
-              <option value="4">Kunjungan Kasus Baru</option>
+              <option value="Kasus Baru">Kasus Baru</option>
+              <option value="Kasus Lama">Kasus Lama</option>
             </select>
           </div>
           <div class="col-9 d-flex flex-column">
             <label class="fw-bold">Keterangan</label>
-            <input type="text" class="form-control" v-model="form.keterangan" />
+            <input type="text" class="form-control" v-model="form.keterangan_kunjungan" />
           </div>
         </div>
 
-        <button @click="saveForm" class="btn btn-success">
+        <button type="submit" class="btn btn-success">
           <i class="far fa-save me-2"></i> SIMPAN DIAGNOSA MEDIS
         </button>
       </form>
@@ -111,18 +109,18 @@
           </div>
         </div>
 
-        <form class="row">
+        <form @submit.prevent="simpanDiagnosaKeperawatan" class="row">
           <div class="fw-bold t mb-4">
             <p class="d-inline-block px-2">Diagnosa Keperawatan</p>
           </div>
-          <select class="form-control">
+          <select class="form-control" v-model="formDiagnosaKeperawatan.kode_diagnosa">
             <option value="">-- Pilih --</option>
-            <option v-for="item in diagnosaKeperawatan" :key="item.kdDiag">
-              {{ item.nmDiag }}
+            <option v-for="item in daftarDiagnosaKeperawatan" :key="item.id" :value="item.id">
+              {{ item.nama }}
             </option>
           </select>
 
-          <button type="button" @click="formDiagnosaKep" class="btn btn-success mt-4">
+          <button type="submit" class="btn btn-success mt-4">
             <i class="far fa-save me-2"></i> Simpan Diagnosa Keperawatan
           </button>
         </form>
@@ -144,16 +142,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(diag, index) in DataDiagnosa" :key="diag.idDiagnosa">
+            <tr v-for="(item, index) in daftarDiagnosaMedis" :key="index">
               <td>{{ index + 1 }}</td>
-              <td>{{ diag.nmDiagnosa }}</td>
-              <td>{{ diag.keterangan }}</td>
-              <td>{{ diag.diagnosaKasus }}</td>
-              <td>KIA</td>
+              <td>{{ item.nama_diagnosa }}</td>
+              <td>{{ item.keterangan_kunjungan }}</td>
+              <td>{{ item.kunjungan_khusus }}</td>
+              <td>Umum</td>
               <td>
-                <button @click="hapusData(diag.idDiagnosa)" class="btn btn-danger btn-sm">
-                  Hapus
-                </button>
+                <button class="btn btn-danger btn-sm" @click="hapusDiagnosa(index)">Hapus</button>
               </td>
             </tr>
           </tbody>
@@ -173,14 +169,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>-</td>
-              <td>-</td>
+            <tr v-for="(item, index) in daftarDiagnosaKeperawatanSimpan" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>{{ item.nama_diagnosa }}</td>
               <td>-</td>
               <td>-</td>
               <td>Umum</td>
               <td>
-                <button class="btn btn-danger btn-sm">Hapus</button>
+                <button class="btn btn-danger btn-sm" @click="hapusDiagnosaKeperawatan(index)">
+                  Hapus
+                </button>
               </td>
             </tr>
           </tbody>
@@ -204,6 +202,7 @@
               v-model="keyword"
               class="form-control mb-3"
               placeholder="Cari diagnosa..."
+              @keyup.enter="doSearch"
             />
 
             <!-- Tabel -->
@@ -216,43 +215,35 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in paginatedDiagnosa" :key="item.id">
+                <tr v-for="item in diagnosa.data" :key="item.id">
                   <td>{{ item.kdDiag }}</td>
                   <td>{{ item.nmDiag }}</td>
                   <td>
                     <button class="btn btn-info btn-sm" @click="pilihDiagnosa(item)">Pilih</button>
                   </td>
                 </tr>
-                <tr v-if="paginatedDiagnosa.length === 0">
-                  <td colspan="3" class="text-center text-muted">Tidak ada data</td>
-                </tr>
               </tbody>
             </table>
 
-            <nav class="d-flex justify-content-between align-items-center mt-2">
-              <p class="mb-0 text-muted small">
-                Menampilkan {{ startItem }} - {{ endItem }} dari {{ filteredDiagnosa.length }} data
-              </p>
-
+            <!-- PAGINATION -->
+            <nav class="d-flex justify-content-between align-items-center mt-3">
               <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                  <button class="page-link" @click="prevPage">&laquo;</button>
+                <li class="page-item" :class="{ disabled: !diagnosa.prev_page_url }">
+                  <Link class="page-link" :href="diagnosa.prev_page_url">«</Link>
                 </li>
 
                 <li
-                  v-for="(page, index) in visiblePages"
-                  :key="index"
+                  v-for="page in diagnosa.links"
+                  :key="page.label"
                   class="page-item"
-                  :class="{ active: page === currentPage, disabled: page === '...' }"
+                  :class="{ active: page.active }"
                 >
-                  <button v-if="page !== '...'" class="page-link" @click="goToPage(page)">
-                    {{ page }}
-                  </button>
-                  <span v-else class="page-link">...</span>
+                  <Link v-if="page.url" class="page-link" :href="page.url" v-html="page.label" />
+                  <span v-else class="page-link" v-html="page.label" />
                 </li>
 
-                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                  <button class="page-link" @click="nextPage">&raquo;</button>
+                <li class="page-item" :class="{ disabled: !diagnosa.next_page_url }">
+                  <Link class="page-link" :href="diagnosa.next_page_url">»</Link>
                 </li>
               </ul>
             </nav>
@@ -265,64 +256,42 @@
 
 <script setup>
   import { ref, computed } from 'vue';
-  import { route } from 'ziggy-js';
-  import { router } from '@inertiajs/vue3';
-
-  const props = defineProps({
-    DataPasien: Array,
-    DataDiagnosa: Array,
-    diagnosa: Array,
-    diagnosaKeperawatan: Array,
-    AlergiMakanan: Array,
-    AlergiObat: Array,
-  });
 
   // Form utama
   const form = ref({
     kode_diagnosa: '',
     nama_diagnosa: '',
+    alergi_makanan: 'Tidak Ada Alergi',
+    alergi_obat: 'Tidak Ada Alergi',
+    keterangan_alergi: '',
     kunjungan_khusus: '',
-    keterangan: '',
-    kdPoli: props.DataPasien[0].kdPoli,
-    loketId: props.DataPasien[0].idLoket,
-    pelayananId: props.DataPasien[0].idPelayanan,
+    keterangan_kunjungan: '',
   });
 
-  const saveForm = () => {
-    router.post(route('ruang-layanan-anc.dataDiagnosa'), form.value, {
-      onSuccess: () => {
-        alert('Data Diagnosa berhasil disimpan!');
-        form.value = {
-          kode_diagnosa: '',
-          nama_diagnosa: '',
-          kunjungan_khusus: '',
-          keterangan: '',
-        };
-      },
-      onError: (errors) => {
-        console.error(errors);
-        alert('Gagal menyimpan data.');
-      },
-    });
-  };
-  const formDiagnosaKep = () => {
-    router.post(route('ruang-layanan-anc.diagnosaKep'), form.value, {
-      onSuccess: () => {
-        alert('Data Diagnosa berhasil disimpan!');
-        form.value = {
-          diagnosaKep: '',
-        };
-      },
-      onError: (errors) => {
-        console.error(errors);
-        alert('Gagal menyimpan data.');
-      },
-    });
-  };
+  const keyword = ref(props.filters?.search || '');
+
+  function doSearch() {
+    router.get(
+      route('pelayanan.index', {
+        id: props.DataPasien[0]?.idLoket,
+        idPoli: props.idPoli,
+        idPelayanan: props.idPelayanan,
+      }),
+      { search: keyword.value },
+      { preserveState: true, replace: true }
+    );
+  }
+
+  const props = defineProps({
+    diagnosa: Object,
+    filters: Object,
+    idPelayanan: String,
+    idPoli: String,
+    DataPasien: Object,
+  });
+
   // Modal control
   const showModal = ref(false);
-  const keyword = ref('');
-
   // Pagination
   const currentPage = ref(1);
   const perPage = 10;
@@ -338,27 +307,6 @@
 
   // Hitung total halaman
   const totalPages = computed(() => Math.ceil(filteredDiagnosa.value.length / perPage));
-
-  // Pagination ringkas: hanya tampilkan beberapa halaman di sekitar halaman aktif
-  const visiblePages = computed(() => {
-    const total = totalPages.value;
-    const current = currentPage.value;
-    const maxVisible = 5; // jumlah maksimum nomor halaman yang ditampilkan
-    const pages = [];
-
-    if (total <= maxVisible) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      if (current <= 3) {
-        pages.push(1, 2, 3, 4, '...', total);
-      } else if (current >= total - 2) {
-        pages.push(1, '...', total - 3, total - 2, total - 1, total);
-      } else {
-        pages.push(1, '...', current - 1, current, current + 1, '...', total);
-      }
-    }
-    return pages;
-  });
 
   // Ambil data sesuai halaman aktif
   const paginatedDiagnosa = computed(() => {
@@ -386,6 +334,25 @@
     Math.min(currentPage.value * perPage, filteredDiagnosa.value.length)
   );
 
+  function searchDiagnosa() {
+    fetchPage(route('api.diagnosa-medis', { search: keyword.value }));
+  }
+
+  // Simpanan data tabel
+  const daftarDiagnosaMedis = ref([]);
+  const daftarDiagnosaKeperawatanSimpan = ref([]);
+
+  // Diagnosa keperawatan dummy
+  const daftarDiagnosaKeperawatan = ref([
+    { id: 'KP01', nama: 'Asuhan Luka' },
+    { id: 'KP02', nama: 'Perawatan Lansia' },
+  ]);
+
+  const formDiagnosaKeperawatan = ref({
+    kode_diagnosa: '',
+    nama_diagnosa: '',
+  });
+
   // Fungsi
   const pilihDiagnosa = (item) => {
     form.value.kode_diagnosa = item.kdDiag;
@@ -397,16 +364,31 @@
     form.value.kode_diagnosa = '';
     form.value.nama_diagnosa = '';
   };
-  const hapusData = (id) => {
-    if (confirm('Yakin ingin menghapus data ini?')) {
-      router.delete(route('diagnosa.destroy', id), {
-        onSuccess: () => alert('Data berhasil dihapus!'),
-        onError: (error) => {
-          console.error(error);
-          alert('Gagal menghapus data!');
-        },
+
+  const simpanDiagnosaMedis = () => {
+    daftarDiagnosaMedis.value.push({ ...form.value });
+    alert('Diagnosa Medis Disimpan');
+  };
+
+  const hapusDiagnosa = (index) => {
+    daftarDiagnosaMedis.value.splice(index, 1);
+  };
+
+  const simpanDiagnosaKeperawatan = () => {
+    const selected = daftarDiagnosaKeperawatan.value.find(
+      (d) => d.id === formDiagnosaKeperawatan.value.kode_diagnosa
+    );
+    if (selected) {
+      daftarDiagnosaKeperawatanSimpan.value.push({
+        ...formDiagnosaKeperawatan.value,
+        nama_diagnosa: selected.nama,
       });
+      alert('Diagnosa Keperawatan Disimpan');
     }
+  };
+
+  const hapusDiagnosaKeperawatan = (index) => {
+    daftarDiagnosaKeperawatanSimpan.value.splice(index, 1);
   };
 </script>
 
@@ -416,22 +398,5 @@
   }
   .bg-warning {
     color: #000;
-  }
-
-  .pagination .page-link {
-    border-radius: 50%;
-    margin: 0 2px;
-    min-width: 32px;
-    text-align: center;
-  }
-
-  .pagination .page-item.active .page-link {
-    background-color: #198754;
-    border-color: #198754;
-    color: #fff;
-  }
-
-  .pagination .page-item.disabled .page-link {
-    color: #aaa;
   }
 </style>
