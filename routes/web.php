@@ -4,8 +4,9 @@ use App\Http\Controllers\Filter\FilterController;
 use App\Http\Controllers\RuangLayanan\indexController;
 use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
 use App\Http\Controllers\RuangLayanan\PoliGigiController;
-use App\Http\Controllers\RuangLayanan\PoliKIAController;
 use App\Http\Controllers\RuangLayananController;
+use App\Http\Controllers\RuangLayanan\PoliKIAController;
+use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -471,10 +472,21 @@ Route::prefix('ruang_layanan')->group(function () {
     )->name('ruang-layanan.laborat.hapusTindakan');
 
     // Kia
-    // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
-    Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+    Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+
+    //ANC
+    Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
+
+    // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
     Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
-    Route::get('/api/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+    // Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
 
 
 

@@ -16,7 +16,7 @@
     </div>
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <component :is="activeComponent" v-if="activeComponent" />
+      <component :tindakan="props.tindakan"  :is="activeComponent" v-if="activeComponent" />
     </div>
   </div>
 </template>
@@ -32,6 +32,10 @@
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;
   };
+
+    const props = defineProps({
+    tindakan: Array,
+  });
 
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {

@@ -16,7 +16,16 @@
     </div>
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <component :diagnosa="props.diagnosa" :is="activeComponent" v-if="activeComponent" />
+      <component
+        :DataPasien="props.DataPasien"
+        :DataDiagnosa="props.DataDiagnosa"
+        :diagnosa="props.diagnosa"
+        :AlergiMakanan="props.AlergiMakanan"
+        :AlergiObat="props.AlergiObat"
+        :diagnosaKeperawatan="props.diagnosaKeperawatan"
+        :is="activeComponent"
+        v-if="activeComponent"
+      />
     </div>
   </div>
 </template>
@@ -29,7 +38,12 @@
   const activeForm = ref(null);
 
   const props = defineProps({
+    DataPasien: Array,
     diagnosa: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataDiagnosa: Array,
   });
 
   // Fungsi toggle form

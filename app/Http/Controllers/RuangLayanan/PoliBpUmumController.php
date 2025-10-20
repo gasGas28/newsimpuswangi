@@ -310,7 +310,6 @@ class PoliBpUmumController extends Controller
             'pelayananId' => $idPelayanan,
         ]);
         return redirect()->back();
-
     }
 
     public function setPlanningTindakan(Request $request)
