@@ -34,12 +34,13 @@
         </div>
 
         <div class="col-md-3">
-          <label class="form-label fw-semibold">IMT</label>
-          <input v-model="form.imt" type="text" class="form-control" />
+          <label class="form-label fw-semibold">Tinggi Badan</label>
+          <input v-model="form.tbadan" type="number" class="form-control" />
         </div>
+
         <div class="col-md-3">
-          <label class="form-label fw-semibold">Status</label>
-          <input v-model="form.status_imt" type="text" class="form-control" />
+          <label class="form-label fw-semibold">Berat Badan Sebelum Hamil</label>
+          <input v-model="form.bb_sebelum" type="number" class="form-control" />
         </div>
 
         <div class="col-md-6">
@@ -48,26 +49,18 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label fw-semibold">Berat Badan Sebelum Hamil</label>
-          <input v-model="form.bb_sebelum" type="number" class="form-control" />
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold">Tinggi Badan</label>
-          <input v-model="form.tbadan" type="number" class="form-control" />
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label fw-semibold">Target Kenaikan Berat Badan</label>
-          <div class="input-group">
-            <input v-model="form.bbTarget" type="number" class="form-control" />
-            <span class="input-group-text">Kg</span>
-          </div>
+          <label class="form-label fw-semibold">IMT</label>
+          <input v-model="form.imt" disabled type="text" class="form-control" />
         </div>
 
         <div class="col-md-6">
           <label class="form-label fw-semibold">Jarak Hamil</label>
           <input v-model="form.jarak_hamil" type="number" class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Status</label>
+          <input v-model="form.status_imt" disabled type="text" class="form-control" />
         </div>
 
         <div class="col-md-6">
@@ -77,6 +70,15 @@
             <option value="1">Sudah Pernah</option>
           </select>
         </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Target Kenaikan Berat Badan</label>
+          <div class="input-group">
+            <input v-model="form.bbTarget" disabled type="text" class="form-control" />
+            <span class="input-group-text">Kg</span>
+          </div>
+        </div>
+
         <div v-if="form.statusImunisasi == '1'" class="col-12 mt-3">
           <div class="row g-2">
             <div
@@ -118,7 +120,7 @@
         </div>
       </div>
 
-      <div class="mt-3 text-center">
+      <div class="mt-4 text-center">
         <button class="btn btn-success w-50 shadow-sm px-3">
           <i class="bi bi-save me-1"></i> Simpan
         </button>
@@ -158,6 +160,31 @@
     ],
   });
 
+  // Fungsi hitung IMT
+  const hitungIMT = () => {
+    const bb = parseFloat(form.value.bb_sebelum);
+    const tb = parseFloat(form.value.tbadan) / 100; // ubah cm ke meter
+
+    if (bb && tb) {
+      const imt = bb / (tb * tb);
+      form.value.imt = imt.toFixed(1);
+
+      // Tentukan status IMT
+      if (imt < 18.5) {
+        form.value.status_imt = 'Kekurangan Berat Badan';
+        form.value.bbTarget = '12.5 - 15';
+      } else if (imt < 25) form.value.status_imt = 'Normal';
+      else if (imt < 30) form.value.status_imt = 'Kelebihan Berat badan';
+      else form.value.status_imt = 'Obesitas';
+    } else {
+      form.value.imt = '';
+      form.value.status_imt = '';
+    }
+  };
+
+  // Watcher — akan otomatis jalan saat berat atau tinggi berubah
+  watch(() => [form.value.bb_sebelum, form.value.tbadan, form.value.bbTarget], hitungIMT);
+
   const saveForm = () => {
     router.post(route('ruang-layanan-anc.obstetri'), form.value, {
       onSuccess: () => {
@@ -173,7 +200,7 @@
           imt: '',
           status_imt: '',
           jarak_hamil: '',
-          statusImunisasi: '',
+          statusImunisasi: '0',
         };
       },
       onError: (errors) => {

@@ -6,61 +6,74 @@
       <label class="col-sm-2 col-form-label">Puyer / Bukan Puyer</label>
       <div class="col-sm-3">
         <select class="form-select" v-model="jenisPuyer">
-          <option value="PUYER">PUYER</option>
-          <option value="NON-PUYER">BUKAN PUYER</option>
+          <option value="Puyer">PUYER</option>
+          <option value="Bukan Puyer">BUKAN PUYER</option>
         </select>
       </div>
     </div>
 
-    <div class="row mb-2 align-items-center">
-      <label class="col-sm-2 col-form-label">Jumlah Puyer</label>
-      <div class="col-sm-2">
-        <input type="number" class="form-control" v-model="jumlahPuyer" />
-      </div>
-    </div>
-
-    <div class="row mb-2 align-items-center">
-      <label class="col-sm-2 col-form-label">Dosis Pakai Puyer</label>
-      <div class="col-sm-5 d-flex align-items-center">
-        <input type="number" class="form-control w-auto" v-model="dosisPerHari" />
-        <span class="mx-2">x Sehari, setiap</span>
-        <input type="number" class="form-control w-auto" v-model="intervalJam" />
-        <span class="ms-2">Jam Sekali</span>
-      </div>
-    </div>
-
-    <div class="row mb-2">
-      <label class="col-sm-2 col-form-label">Waktu</label>
-      <div class="col-sm-6 d-flex align-items-center">
-        <div class="form-check me-3">
-          <input class="form-check-input" type="checkbox" value="pagi" v-model="waktu" />
-          <label class="form-check-label">Pagi</label>
-        </div>
-        <div class="form-check me-3">
-          <input class="form-check-input" type="checkbox" value="siang" v-model="waktu" />
-          <label class="form-check-label">Siang</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="malam" v-model="waktu" />
-          <label class="form-check-label">Malam</label>
+    <!-- Bagian ini hanya muncul kalau jenisPuyer = 'Puyer' -->
+    <div v-if="jenisPuyer === 'Puyer'">
+      <div class="row mb-2 align-items-center">
+        <label class="col-sm-2 col-form-label">Jumlah Puyer</label>
+        <div class="col-sm-2">
+          <input type="number" class="form-control" v-model="jumlahPuyer" />
         </div>
       </div>
-    </div>
 
-    <div class="row mb-3">
-      <label class="col-sm-2 col-form-label">Kondisi</label>
-      <div class="col-sm-6 d-flex align-items-center">
-        <div class="form-check me-3">
-          <input class="form-check-input" type="checkbox" value="sebelum makan" v-model="kondisi" />
-          <label class="form-check-label">Sebelum makan</label>
+      <div class="row mb-2 align-items-center">
+        <label class="col-sm-2 col-form-label">Dosis Pakai Puyer</label>
+        <div class="col-sm-5 d-flex align-items-center">
+          <input type="number" class="form-control w-auto" v-model="dosisPerHari" />
+          <span class="mx-2">x Sehari, setiap</span>
+          <input type="number" class="form-control w-auto" v-model="intervalJam" />
+          <span class="ms-2">Jam Sekali</span>
         </div>
-        <div class="form-check me-3">
-          <input class="form-check-input" type="checkbox" value="saat makan" v-model="kondisi" />
-          <label class="form-check-label">Saat makan</label>
+      </div>
+
+      <div class="row mb-2">
+        <label class="col-sm-2 col-form-label">Waktu</label>
+        <div class="col-sm-6 d-flex align-items-center">
+          <div class="form-check me-3">
+            <input class="form-check-input" type="checkbox" value="pagi" v-model="waktu" />
+            <label class="form-check-label">Pagi</label>
+          </div>
+          <div class="form-check me-3">
+            <input class="form-check-input" type="checkbox" value="siang" v-model="waktu" />
+            <label class="form-check-label">Siang</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="malam" v-model="waktu" />
+            <label class="form-check-label">Malam</label>
+          </div>
         </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" value="setelah makan" v-model="kondisi" />
-          <label class="form-check-label">Setelah makan</label>
+      </div>
+
+      <div class="row mb-3">
+        <label class="col-sm-2 col-form-label">Kondisi</label>
+        <div class="col-sm-6 d-flex align-items-center">
+          <div class="form-check me-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="sebelum makan"
+              v-model="kondisi"
+            />
+            <label class="form-check-label">Sebelum makan</label>
+          </div>
+          <div class="form-check me-3">
+            <input class="form-check-input" type="checkbox" value="saat makan" v-model="kondisi" />
+            <label class="form-check-label">Saat makan</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value="setelah makan"
+              v-model="kondisi"
+            />
+            <label class="form-check-label">Setelah makan</label>
+          </div>
         </div>
       </div>
     </div>
@@ -108,7 +121,7 @@
 <script setup>
   import { ref } from 'vue';
 
-  const jenisPuyer = ref('PUYER');
+  const jenisPuyer = ref('Bukan Puyer');
   const jumlahPuyer = ref('');
   const dosisPerHari = ref('');
   const intervalJam = ref('');
