@@ -4,17 +4,24 @@ namespace App\Http\Controllers\RuangLayanan;
 
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\DataMasterUnitDetail;
+use App\Models\RuangLayanan\KIA\Alergi;
+use App\Models\RuangLayanan\KIA\KunjunganAnc;
+use App\Models\RuangLayanan\MasterDiagnosaKasus;
+use App\Models\RuangLayanan\MasterAlergi;
+use App\Models\RuangLayanan\MasterObstetri;
 use App\Models\RuangLayanan\MasterRiwayat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\RuangLayanan\SimpusDataDiagnosa;
 use App\Models\RuangLayanan\SimpusDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosaaa;
 use App\Models\RuangLayanan\SimpusLoket;
 use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\tindakan;
+use Illuminate\Support\Facades\Request as FacadesRequest;
 use Inertia\Inertia;
 
-class PoliKIAController extends Controller
+class AncController extends Controller
 {
     // public function index()
     // {
@@ -118,7 +125,7 @@ class PoliKIAController extends Controller
             ->get();
         //dd($DataPasien);
 
-        return Inertia::render('Ruang_Layanan/KIA/RuangLayanan', [
+        return Inertia::render('Ruang_Layanan/KIA/ANC/Index', [
             'DataUnit' => $DataUnit,
             'DataPasien' => $DataPasien,
         ]);
@@ -127,6 +134,7 @@ class PoliKIAController extends Controller
     {
         $DataPasien = DB::table('simpus_loket as l')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
+            ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
             ->join('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -147,6 +155,7 @@ class PoliKIAController extends Controller
             ->where('l.kdPoli', operator: 003)
             ->where('idLoket', $id)
             ->select(
+                'p.ID',
                 'p.NO_MR',
                 'p.NAMA_LGKP',
                 'p.NIK',
@@ -164,36 +173,35 @@ class PoliKIAController extends Controller
                 'l.umur_bulan',
                 'umur_hari',
                 'l.tglKunjungan',
-                'l.idLoket'
+                'l.idLoket',
+                'pel.idPelayanan'
             )
             ->get();
-        $diagnosa = SimpusDiagnosa::all();
-        // $DataAnamnesa = DB::table('simpus_anamnesa')->where('loketId', $DataPasien[0]->idLoket)->first();
-        // $DataKesadaran = DB::table('simpus_kesadaran')->get();
-        // $DiagnosaKasus = DB::table('master_diagnosa_kasus')->get();
-        // $MasterAlergi = DB::table('master_alergi')->get();
-        // $SimpusDataDiagnosa = SimpusDataDiagnosa::with(['SimpusPoliFKTP', 'MasterDiagnosaKasus'])->where('kdPoli', '001')->where('loketId', $DataPasien[0]->idLoket)->get();
-        // $SimpusTindakan = SimpusTindakan::where('loketId', $DataPasien[0]->idLoket)->get();
-        // $DiagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();
-        // $diagnosa = SimpusDiagnosa::where('kategori', 1)->get();
-        $diagnosa = SimpusDiagnosa::where('F6', 1)->get();
-        // $tindakan = tindakan::where('idTindakan', 256);
+        $diagnosa = SimpusDiagnosaaa::whereNotNull('F3')->get();
+        $diagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();
         $tindakan = tindakan::where('kdPoli', 003)->get();
         $riwayat = MasterRiwayat::all();
-
+        $AlergiMakanan = Alergi::where('category', 1)->get();
+        $AlergiObat = Alergi::where('category', 2)->get();
+        $KunjunganAnc = KunjunganAnc::all();
+        $DataDiagnosa = SimpusDataDiagnosa::all();
+        // dd($AlergiObat);
         // dd($riwayat);
-
-
         // dd($DataPasien);
         // dd($DiagnosaKeperawatan);
-        // dd($tindakan);
-        return Inertia::render('Ruang_Layanan/KIA/Pelayanan', [
+        // dd($diagnosa);
+        return Inertia::render('Ruang_Layanan/KIA/ANC/Pelayanan', [
             'DataPasien' => $DataPasien,
             'idPelayanan' => $idPelayanan,
             'idPoli' => $idPoli,
             'diagnosa' => $diagnosa,
             'tindakan' => $tindakan,
             'riwayat' => $riwayat,
+            'diagnosaKeperawatan' => $diagnosaKeperawatan,
+            'AlergiMakanan' => $AlergiMakanan,
+            'AlergiObat' => $AlergiObat,
+            'KunjunganAnc' => $KunjunganAnc,
+            'DataDiagnosa' => $DataDiagnosa,
             // 'DataAnamnesa' => $DataAnamnesa,
             // 'DataKesadaran' => $DataKesadaran,
             // 'DiagnosaKasus' => $DiagnosaKasus,
@@ -201,91 +209,89 @@ class PoliKIAController extends Controller
             // 'SimpusDataDiagnosa' => $SimpusDataDiagnosa,
             // 'SimpusTindakan' => $SimpusTindakan
         ]);
-
     }
-    public function searchDiagnosa(Request $request)
+
+    public function setKunjunganANC(Request $request)
     {
-        $search = $request->get('search');
-
-        // query awal
-        $query = DB::table('simpus_diagnosa');
-
-        // kalau ada search, filter
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nmDiag', 'like', "%{$search}%")
-                    ->orWhere('kdDiag', 'like', "%{$search}%");
-            });
-        }
-
-        $DiagnosaMedis = $query->paginate(10);
-
-        // simpan query string search supaya ikut di pagination
-        $DiagnosaMedis->appends(['search' => $search]);
-
-        $links = [];
-
-        // Previous
-        $links[] = [
-            'label' => 'Previous',
-            'url' => $DiagnosaMedis->previousPageUrl(),
-            'active' => false,
-        ];
-
-        $lastPage = $DiagnosaMedis->lastPage();
-        $current = $DiagnosaMedis->currentPage();
-
-        // Always tampil halaman pertama
-        $links[] = [
-            'label' => 1,
-            'url' => $DiagnosaMedis->url(1),
-            'active' => $current === 1,
-        ];
-
-        // Tambah "..." kalau current jauh dari 1
-        if ($current > 3) {
-            $links[] = ['label' => '...', 'url' => null, 'active' => false];
-        }
-
-        // Window: current-1, current, current+1
-        for ($i = max(2, $current - 1); $i <= min($lastPage - 1, $current + 1); $i++) {
-            $links[] = [
-                'label' => $i,
-                'url' => $DiagnosaMedis->url($i),
-                'active' => $current === $i,
-            ];
-        }
-
-        // Tambah "..." kalau current jauh dari lastPage
-        if ($current < $lastPage - 2) {
-            $links[] = ['label' => '...', 'url' => null, 'active' => false];
-        }
-
-        // Always tampil halaman terakhir (kalau lebih dari 1)
-        if ($lastPage > 1) {
-            $links[] = [
-                'label' => $lastPage,
-                'url' => $DiagnosaMedis->url($lastPage),
-                'active' => $current === $lastPage,
-            ];
-        }
-
-        // Next
-        $links[] = [
-            'label' => 'Next',
-            'url' => $DiagnosaMedis->nextPageUrl(),
-            'active' => false,
-        ];
-
-        return response()->json([
-            'data' => $DiagnosaMedis->items(),
-            'meta' => [
-                'current_page' => $DiagnosaMedis->currentPage(),
-                'last_page' => $DiagnosaMedis->lastPage(),
-                'per_page' => $DiagnosaMedis->perPage(),
-                'total' => $DiagnosaMedis->total(),
-            ],
-            'links' => $links,
+        KunjunganAnc::create([
+            'loketId' => $request->loketId,
+            'pasienId' => $request->pasienId,
+            'tanggal_kunjungan' => $request->tgl_kunjungan,
+            'usia_kehamilan' => $request->usia_hamil,
+            'trimester' => $request->trimester,
         ]);
+        return redirect()->back();
+    }
+    public function setObstetri(Request $request)
+    {
+        // Validasi awal (opsional tapi bagus untuk keamanan)
+        $request->validate([
+            'pasienId' => 'required',
+            'statusImunisasi' => 'required',
+            'imunisasi' => 'array',
+        ]);
+
+        MasterObstetri::create([
+            'pasienId' => $request->pasienId,
+            'gravida' => $request->gravida,
+            'partus' => $request->partus,
+            'abortus' => $request->abortus,
+            'tphtDate' => $request->tanggal_tpht,
+            'bbSebelumHamil' => $request->bb_sebelum,
+            'bb_target' => $request->bbTarget,
+            'tinggiBadan' => $request->tbadan,
+            'imt' => $request->imt,
+            'status_imt' => $request->status_imt,
+            'jarak_hamil' => $request->jarak_hamil,
+            'imunisasiTtStatus' => $request->statusImunisasi,
+            //   tanggal_tpht: '',
+            //   bb_sebelum: '',
+            //   bbTarget: '',
+            //   imt: '',
+            //   status_imt: '',
+            //   jarak_hamil: '',
+            //   statusImunisasi
+        ]);
+        // dd($data);
+        return redirect()->back();
+    }
+
+    public function setDataDiagnosa(Request $request)
+    {
+        SimpusDataDiagnosa::create([
+            'kdDiagnosa' => $request->kode_diagnosa,
+            'nmDiagnosa' => $request->nama_diagnosa,
+            'diagnosaKasus' => $request->kunjungan_khusus,
+            'keterangan' => $request->keterangan,
+            'kdPoli' => $request->kdPoli,
+            'loketId' => $request->loketId,
+            'pelayananId' => $request->pelayananId,
+        ]);
+        // dd($data);
+        return redirect()->back();
+    }
+    public function setDataDiagnosaKep(Request $request)
+    {
+        $data = SimpusDataDiagnosa::create([
+            'kdDiagnosa' => $request->kode_diagnosa,
+            'nmDiagnosa' => $request->diagnosaKep,
+            'kdPoli' => $request->kdPoli,
+            'loketId' => $request->loketId,
+            'pelayananId' => $request->pelayananId,
+        ]);
+        dd($data);
+        return redirect()->back();
+    }
+    public function hapusDataDiagnosa($id)
+    {
+        $diagnosa = SimpusDataDiagnosa::find($id);
+
+        if (!$diagnosa) {
+            return back()->withErrors(['msg' => 'Data tidak ditemukan']);
+        }
+
+        $diagnosa->delete();
+
+        return back()->with('success', 'Data berhasil dihapus');
     }
 }

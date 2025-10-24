@@ -1,0 +1,143 @@
+<template>
+  <h5 class="fw-semibold text-danger">Pengobatan</h5>
+  <div class="card border-0 shadow-sm rounded-4 p-3">
+    <!-- Form Input -->
+    <div class="row mb-2 align-items-center">
+      <label class="col-sm-2 col-form-label">Puyer / Bukan Puyer</label>
+      <div class="col-sm-3">
+        <select class="form-select" v-model="jenisPuyer">
+          <option value="PUYER">PUYER</option>
+          <option value="NON-PUYER">BUKAN PUYER</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mb-2 align-items-center">
+      <label class="col-sm-2 col-form-label">Jumlah Puyer</label>
+      <div class="col-sm-2">
+        <input type="number" class="form-control" v-model="jumlahPuyer" />
+      </div>
+    </div>
+
+    <div class="row mb-2 align-items-center">
+      <label class="col-sm-2 col-form-label">Dosis Pakai Puyer</label>
+      <div class="col-sm-5 d-flex align-items-center">
+        <input type="number" class="form-control w-auto" v-model="dosisPerHari" />
+        <span class="mx-2">x Sehari, setiap</span>
+        <input type="number" class="form-control w-auto" v-model="intervalJam" />
+        <span class="ms-2">Jam Sekali</span>
+      </div>
+    </div>
+
+    <div class="row mb-2">
+      <label class="col-sm-2 col-form-label">Waktu</label>
+      <div class="col-sm-6 d-flex align-items-center">
+        <div class="form-check me-3">
+          <input class="form-check-input" type="checkbox" value="pagi" v-model="waktu" />
+          <label class="form-check-label">Pagi</label>
+        </div>
+        <div class="form-check me-3">
+          <input class="form-check-input" type="checkbox" value="siang" v-model="waktu" />
+          <label class="form-check-label">Siang</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="malam" v-model="waktu" />
+          <label class="form-check-label">Malam</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label">Kondisi</label>
+      <div class="col-sm-6 d-flex align-items-center">
+        <div class="form-check me-3">
+          <input class="form-check-input" type="checkbox" value="sebelum makan" v-model="kondisi" />
+          <label class="form-check-label">Sebelum makan</label>
+        </div>
+        <div class="form-check me-3">
+          <input class="form-check-input" type="checkbox" value="saat makan" v-model="kondisi" />
+          <label class="form-check-label">Saat makan</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="setelah makan" v-model="kondisi" />
+          <label class="form-check-label">Setelah makan</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-6">
+        <button class="btn btn-success btn-sm" @click="simpanResep">Simpan Resep</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive mt-3">
+      <table class="table table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Poli</th>
+            <th>Jenis / Nama Puyer</th>
+            <th>Jumlah Obat / Puyer</th>
+            <th>Dosis Pakai</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in dataResep" :key="index">
+            <td>{{ item.poli }}</td>
+            <td>{{ item.jenis }}</td>
+            <td>{{ item.jumlah }}</td>
+            <td>{{ item.dosis }}</td>
+            <td>
+              <button class="btn btn-outline-danger btn-sm" @click="hapusResep(index)">
+                Hapus
+              </button>
+            </td>
+          </tr>
+          <tr v-if="dataResep.length === 0">
+            <td colspan="5" class="text-center text-muted">Belum ada resep</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script setup>
+  import { ref } from 'vue';
+
+  const jenisPuyer = ref('PUYER');
+  const jumlahPuyer = ref('');
+  const dosisPerHari = ref('');
+  const intervalJam = ref('');
+  const waktu = ref([]);
+  const kondisi = ref([]);
+
+  const dataResep = ref([]);
+
+  const simpanResep = () => {
+    dataResep.value.push({
+      poli: 'Umum',
+      jenis: jenisPuyer.value,
+      jumlah: jumlahPuyer.value,
+      dosis: `${dosisPerHari.value}x / ${intervalJam.value} jam`,
+    });
+    alert('Resep berhasil disimpan!');
+  };
+
+  const hapusResep = (index) => {
+    dataResep.value.splice(index, 1);
+  };
+</script>
+
+<style scoped>
+  .card {
+    background: #fff;
+  }
+  .table th,
+  .table td {
+    font-size: 0.9rem;
+  }
+</style>

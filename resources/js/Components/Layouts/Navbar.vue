@@ -4,9 +4,15 @@
       <div class="d-flex flex-grow-1">
         <!-- Brand di kiri -->
         <Link href="/" class="navbar-brand fw-bold d-flex align-items-center">
-          <span class="bg-primary bg-gradient p-2 rounded me-2">
-            <i class="bi bi-app-indicator text-white"></i>
-          </span>
+
+            <!-- Logo -->
+  <img
+    src="../../../../public/images/Pukesmas.png"
+    alt="Logo SIMPUSWANGI"
+    class="me-2"
+    style="height: 38px; width: auto; border-radius: 8px;"
+  />
+
           <span class="text-gradient">SIMPUSWANGI</span>
         </Link>
 

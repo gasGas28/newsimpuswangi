@@ -373,7 +373,6 @@ class PoliBpUmumController extends Controller
             'pelayananId' => $idPelayanan,
         ]);
         return redirect()->back();
-
     }
 
     public function removeDiagnosaMedis($idDiagnosa)
