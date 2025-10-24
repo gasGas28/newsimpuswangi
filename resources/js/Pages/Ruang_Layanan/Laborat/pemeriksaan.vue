@@ -324,7 +324,6 @@
         </div>
       </div>
 
-      <!-- ===== MODAL: MASTER PEMERIKSAAN (ala CI) ===== -->
       <div v-if="showMaster" class="modal-mask" @click.self="showMaster=false">
         <div class="modal-card modal-xl">
           <div class="modal-header">
@@ -332,70 +331,116 @@
           <button class="btn-close" @click="showMaster=false"></button>
           </div>
 
+          
+<div class="col-lg-6 px-4 mb-3">
+  <label class="form-label fw-semibold text-secondary mb-1">
+    <i class="bi bi-funnel me-1 text-primary"></i>
+    Cari Jenis Pemeriksaan
+  </label>
+
+  <div class="input-group shadow-sm rounded-3">
+    <span class="input-group-text bg-primary text-white border-0 px-3">
+      <i class="bi bi-search"></i>
+    </span>
+    <input
+      type="text"
+      class="form-control border-0 ps-1"
+      v-model="master.search"
+      placeholder="Ketik nama atau kode pemeriksaan..."
+      @keyup.enter="doSearchAll"
+    >
+    <button
+      class="btn btn-primary px-3 fw-semibold"
+      @click="doSearchAll"
+      style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"
+    >
+      Cari / Tampilkan Semua
+    </button>
+  </div>
+</div>
           <div class="modal-body">
-            <div class="row g-3 align-items-end mb-3">
-              <div class="col-lg-6">
-                <label class="form-label small text-danger">Input nama jenis pemeriksaan</label>
-                <div class="input-group">
-                  <input class="form-control" v-model="master.search" placeholder="input nama jenis pemeriksaan" @keyup.enter="loadMaster(1)" />
-                  <button class="btn btn-primary" @click="loadMaster(1)">
-                    <i class="bi bi-search me-1"></i> CARI / TAMPILKAN SEMUA
-                  </button>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <label class="form-label small text-danger">Input Paket Pemeriksaan</label>
-                <div class="d-flex flex-wrap gap-2">
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketCatin')" :disabled="!order">PAKET CATIN</button>
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketAnck1')" :disabled="!order">PAKET ANC K1</button>
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketAnck3')" :disabled="!order">PAKET ANC K3</button>
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketPtm')" :disabled="!order">PAKET PTM</button>
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketDarahLengkap')" :disabled="!order">PAKET DARAH LENGKAP</button>
-                  <button class="btn btn-outline-success btn-sm" @click="addPaket('paketWidal')" :disabled="!order">PAKET WIDAL</button>
-                </div>
-              </div>
+            
+            <div class="row g-3 align-items-end mb-3 px-3">
+<div class="col-lg-6">
+  <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label>
+<!-- HEADER (paket) -->
+<div class="d-flex flex-wrap gap-2 mb-2">
+  <button
+    v-for="ph in paketHeaders"
+    :key="'h-'+ph.header"
+    class="btn btn-outline-success btn-sm"
+    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
+    @click="pickHeader(ph)"
+    :disabled="!order"
+  >
+    {{ ph.header_name || ('Header ' + ph.header) }}
+    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
+  </button>
+</div>
+
+<!-- SUBHEADER (opsional) -->
+<div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
+  <button
+    class="btn btn-outline-primary btn-sm"
+    @click="addPaketHeader(selectedHeader)"
+    :disabled="!order"
+    title="Tambahkan semua item di header ini"
+  >
+    + Tambah SEMUA ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
+  </button>
+
+  
+
+  <button
+    v-for="sh in paketSubs"
+    :key="'s-'+sh.sub_header"
+    class="btn btn-outline-secondary btn-sm"
+    @click="addPaketSub(selectedHeader, sh)"
+    :disabled="!order"
+  >
+    Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
+  </button>
+</div>
+</div>
             </div>
 
             <div class="table-responsive border rounded">
-              <table class="table table-striped align-middle mb-0">
-                <thead class="table-dark">
-                  <tr>
-                    <th style="width:120px;">Kode</th>
-                    <th>Jenis Pemeriksaan</th>
-                    <th style="width:120px;">Satuan</th>
-                    <th style="width:260px;">Nilai normal / kritis</th>
-                    <th style="width:180px;">Hasil Lab</th>
-                    <th style="width:60px;" class="text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-if="master.loading">
-                    <td colspan="6" class="text-center py-4">Memuat...</td>
-                  </tr>
-                  <tr v-for="(it, idx) in master.items" :key="`m-${it.idPemeriksaan || it.id || idx}`">
-                    <td class="text-muted">{{ it.kode || '-' }}</td>
-                    <td>
-                      <div class="fw-semibold">{{ it.nama || it.nmPemeriksaan || '-' }}</div>
-                      <div class="text-muted fst-italic small" v-if="it.nmPemeriksaanInd">{{ it.nmPemeriksaanInd }}</div>
-                    </td>
-                    <td>{{ it.satuan || '-' }}</td>
-                    <td class="small">
-                      <div class="text-muted">{{ it.nilaiNormalKritis || it.nilai_normal_kritis || '-' }}</div>
-                    </td>
-                    <td>
-                      <input class="form-control form-control-sm"
-                             v-model="valueMap[it.idPemeriksaan || it.id]" placeholder="isian opsional" />
-                    </td>
-                    <td class="text-center">
-                      <input type="checkbox" class="form-check-input"
-                             v-model="selectedMap[it.idPemeriksaan || it.id]" />
-                    </td>
-                  </tr>
-                  <tr v-if="!master.loading && master.items.length === 0">
-                    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
-                  </tr>
-                </tbody>
-              </table>
+<table class="table table-striped align-middle mb-0">
+  <thead class="table-dark">
+    <tr>
+      <th style="width:120px;">Kode</th>
+      <th>Jenis Pemeriksaan</th>
+      <th style="width:120px;">Satuan</th>
+      <th style="width:260px;">Nilai normal / kritis</th>
+      <th style="width:180px;">Hasil Lab</th>
+      <th style="width:60px;" class="text-center">Aksi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-if="browse.loading">
+      <td colspan="6" class="text-center py-4">Memuat...</td>
+    </tr>
+    <tr v-for="(it, idx) in master.items" :key="'m-'+it.id">
+      <td class="text-muted">{{ it.kode || '-' }}</td>
+      <td class="fw-semibold">
+        {{ it.nama || '-' }}
+      </td>
+      <td>{{ it.satuan || '-' }}</td>
+      <td class="small"><div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div></td>
+      <td>
+        <input class="form-control form-control-sm"
+               v-model="valueMap[it.id]" placeholder="isian opsional" />
+      </td>
+      <td class="text-center">
+        <input type="checkbox" class="form-check-input"
+               v-model="selectedMap[it.id]" />
+      </td>
+    </tr>
+    <tr v-if="!browse.loading && master.items.length === 0">
+      <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
+    </tr>
+  </tbody>
+</table>
             </div>
 
             <!-- pagination simple -->
@@ -521,6 +566,7 @@
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch, isRef, onMounted } from 'vue';
+import Swal from 'sweetalert2'
 
 const page = usePage();
 const pageProps = computed(() => (isRef(page?.props) ? (page.props.value || {}) : (page?.props || {})));
@@ -531,6 +577,99 @@ const order       = computed(() => pageProps.value.DataPermohonan || null);
 const rows        = computed(() => pageProps.value.DataPemeriksaan || []);
 const objective   = computed(() => pageProps.value.DataObjective || null);
 const tenagaMedis = computed(() => pageProps.value.TenagaMedis || []);
+const paketHeaders = ref([]);
+const paketSubs = ref([]);
+const selectedHeader = ref(null);
+const selectedSub = ref(null);
+// === STATE TAMBAHAN UNTUK PAKET PARAMETER_UJI
+
+async function loadPaketHeaders() {
+  try {
+    const url = route('ruang-layanan.laborat.param.headers');
+    const res = await fetch(url, { headers: { 'Accept':'application/json' }});
+    paketHeaders.value = await res.json(); // [{header, header_name, jumlah}]
+  } catch (e) {
+    console.error(e);
+    paketHeaders.value = [];
+  }
+}
+
+
+
+function addPaketHeader(headerObj) {
+  if (permId.value === null) { alert('Permohonan ID tidak valid.'); return; }
+  const payload = {
+    loketId: pasien.value?.idLoket || '',
+    permohonanId: permId.value,
+    pelayananId: order.value?.idPelayanan || '',
+  };
+  router.post(route('ruang-layanan.laborat.param.simpan', { header: headerObj.header }), payload, {
+    preserveScroll: true,
+    onError: showErrors,
+    onSuccess: reloadPage
+  });
+}
+
+
+
+
+async function loadParamItems(header, sub=null) {
+  try {
+    const base = route('ruang-layanan.laborat.param.items', { header });
+    const url = new URL(base, window.location.origin);
+    if (sub !== null && sub !== undefined) url.searchParams.set('sub_header', String(sub));
+
+    const res = await fetch(url.toString(), { headers:{'Accept':'application/json'} });
+    const items = await res.json();
+
+    // mapping ke bentuk master.items biar tabelnya tetap jalan
+    master.items = (items || []).map(x => ({
+      id: x.id_parameter,
+      idPemeriksaan: x.id_parameter,
+      kode: x.kode,
+      nama: x.nama,
+      nmPemeriksaanInd: x.nama, // optional
+      satuan: x.satuan,
+      nilaiNormalKritis: x.nilai_normal_kritis,
+    }));
+    master.meta = { total: master.items.length };
+    master.links = [];
+  } catch(e) {
+    console.error(e);
+    master.items = [];
+    master.meta = { total: 0 };
+    master.links = [];
+  }
+}
+
+
+
+
+async function showSub(sub) {
+  selectedSub.value = sub;
+  await loadParamItems(selectedHeader.value.header, sub.sub_header);
+}
+
+
+function addPaketSub(headerObj, sub) {
+  if (permId.value === null) { alert('Permohonan ID tidak valid.'); return; }
+  const form = new FormData();
+  form.append('loketId', pasien.value?.idLoket || '');
+  form.append('permohonanId', permId.value);
+  if (order.value?.idPelayanan) form.append('pelayananId', order.value.idPelayanan);
+  // NOTE: saat ini sub_header = header (model datamu), tetap kirim agar future-proof
+  form.append('sub_header', sub.sub_header);
+
+  fetch(route('ruang-layanan.laborat.param.simpan', { header: headerObj.header }), {
+    method: 'POST',
+    body: form,
+    headers: { 'X-Requested-With':'XMLHttpRequest' }
+  }).then(() => reloadPage())
+    .catch(console.error);
+}
+
+
+// Saat modal master dibuka, sekalian load header paket
 
 // ===== Helpers umum =====
 function toInt(x) {
@@ -591,7 +730,23 @@ function hapusRow(row) {
       // refresh daftar & nilai lokal
       reloadPage();
       // popup sederhana
-      try { alert('Item pemeriksaan dihapus.'); } catch {}
+try {
+  Swal.fire({
+    title: 'Berhasil!',
+    text: 'Item berhasil dihapus.',
+    icon: 'success',
+    showConfirmButton: false,
+    timer: 1800,
+    timerProgressBar: true,
+    position: 'center',
+    background: '#f0fdf4',
+    color: '#14532d',
+  });
+} catch (e) {
+  console.error(e);
+}
+
+
     }
   });
 }
@@ -755,10 +910,113 @@ const master = reactive({
 const selectedMap = reactive({});
 const valueMap = reactive({});
 
+// ==== STATE UNTUK BROWSE SEMUA ====
+master.search = '';                 // sudah ada di state mu
+const browse = reactive({
+  filters: { header: null, sub_header: null }, // untuk paket filter
+  loading: false,
+});
+
+// ambil data ke tabel (parameter_uji) — bisa search + paket filter
+async function loadParams(page = 1) {
+  browse.loading = true;
+  try {
+    const url = new URL(route('ruang-layanan.laborat.param.browse'), window.location.origin);
+    if (master.search) url.searchParams.set('search', master.search);
+    if (browse.filters.header != null)     url.searchParams.set('header', String(browse.filters.header));
+    if (browse.filters.sub_header != null) url.searchParams.set('sub_header', String(browse.filters.sub_header));
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('per_page', '25');
+
+    const res  = await fetch(url.toString(), { headers: { 'Accept':'application/json' }});
+    const data = await res.json();
+
+    master.items = (data?.data || []).map((x) => ({
+      id: x.id_parameter,
+      kode: x.kode,
+      nama: x.nama,
+      satuan: x.satuan,
+      nilaiNormalKritis: x.nilai_normal_kritis,
+    }));
+    master.meta  = data?.meta || {};
+    master.links = data?.links || [];
+  } catch (e) {
+    console.error(e);
+    master.items = []; master.meta = { total: 0 }; master.links = [];
+  } finally {
+    browse.loading = false;
+  }
+}
+
+// klik paging
+function gotoLink(url) {
+  if (!url) return;
+  const u = new URL(url, window.location.origin);
+  const p = u.searchParams.get('page') || '1';
+  loadParams(Number(p));
+}
+// tombol: CARI / TAMPILKAN SEMUA
+function doSearchAll() {
+  browse.filters.header = null;
+  browse.filters.sub_header = null;
+  loadParams(1);
+}
+
+// ----- Paket (header/sub) -----
+async function pickHeader(hdr) {
+  selectedHeader.value = hdr;
+  // tampilkan isi paket di tabel
+  browse.filters.header = hdr.header;  // filter ke isi paket
+  browse.filters.sub_header = null;
+  await loadParams(1);
+
+  // (tetap load daftar sub kalau suatu saat kamu butuh tombol sub)
+  try {
+    const url = route('ruang-layanan.laborat.param.subheaders', { header: hdr.header });
+    const res = await fetch(url, { headers: { 'Accept':'application/json' }});
+    paketSubs.value = await res.json();
+  } catch { paketSubs.value = []; }
+}
+function pickSub(sub) {
+  browse.filters.header = null;
+  browse.filters.sub_header = sub.sub_header;
+  loadParams(1);
+}
+
+
+// SIMPAN pilihan manual (checkbox)
+function submitSelected() {
+  if (permId.value === null) { alert('Permohonan ID tidak valid.'); return; }
+  const pilih = Object.entries(selectedMap)
+    .filter(([, v]) => !!v)
+    .map(([k]) => toInt(k))
+    .filter((n) => n !== null);
+
+  if (pilih.length === 0) { alert('Pilih minimal satu pemeriksaan.'); return; }
+
+  const payload = {
+    loketId: pasien.value?.idLoket || '',
+    permohonanId: permId.value,
+    pelayananId: order.value?.idPelayanan || '',
+    ids: pilih,
+    nilaiLab: valueMap, // kalau kamu mau ikut kirim nilai awal
+  };
+  router.post(route('ruang-layanan.laborat.param.simpanTerpilih'), payload, {
+    preserveScroll: true,
+    onError: showErrors,
+    onSuccess: () => { showMaster.value = false; reloadPage(); }
+  });
+}
+
+
+
+// PASTIKAN hanya SATU versi ini
 function openMasterModal() {
   if (!order.value) return;
   showMaster.value = true;
-  if (master.items.length === 0) loadMaster(1);
+  if (!paketHeaders.value.length) loadPaketHeaders();
+  // default: tampilkan semua
+  doSearchAll();
 }
 async function loadMaster(page = 1) {
   master.loading = true;
@@ -788,12 +1046,7 @@ async function loadMaster(page = 1) {
     master.loading = false;
   }
 }
-function gotoLink(url) {
-  if (!url) return;
-  const u = new URL(url, window.location.origin);
-  const p = u.searchParams.get('page') || '1';
-  loadMaster(Number(p));
-}
+
 
 const jenisKelaminLabel = computed(() => {
   const jk = pasien.value?.jenis_klmin;
@@ -818,35 +1071,7 @@ function addPaket(paketKey) {
     onSuccess: () => { reloadPage(); }
   });
 }
-function submitSelected() {
-  if (permId.value === null) {
-    alert('Permohonan ID tidak valid.\nSilakan muat ulang halaman.');
-    return;
-  }
-  const pilih = Object.entries(selectedMap)
-    .filter(([, v]) => !!v)
-    .map(([k]) => toInt(k))
-    .filter((n) => n !== null);
 
-  if (pilih.length === 0) {
-    alert('Pilih minimal satu pemeriksaan.');
-    return;
-  }
-
-
-  const payload = {
-    loketId: pasien.value?.idLoket || '',
-    permohonanId: permId.value,
-    pelayananId: order.value?.idPelayanan || '',
-    pilih,
-    nilaiLab: valueMap
-  };
-  router.post(route('ruang-layanan.laborat.pemeriksaanSimpan'), payload, {
-    preserveScroll: true,
-    onError: (errs) => showErrors(errs),
-    onSuccess: () => { showMaster.value = false; reloadPage(); }
-  });
-}
 
 // debug helper (opsional)
 onMounted(() => {
