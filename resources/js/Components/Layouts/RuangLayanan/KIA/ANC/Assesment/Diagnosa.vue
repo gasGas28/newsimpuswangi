@@ -77,7 +77,7 @@
           </div>
         </div>
 
-        <button @click="saveForm" class="btn btn-success">
+        <button type="button" @click="saveForm" class="btn btn-success">
           <i class="far fa-save me-2"></i> SIMPAN DIAGNOSA MEDIS
         </button>
       </form>
