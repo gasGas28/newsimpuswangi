@@ -7,7 +7,7 @@
 
 <script setup>
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue'
-import SuratRujukanForm from '../../../Components/Layouts/RuangLayanan/SuratRujukanForm.vue'
+import SuratRujukanForm from '../../../Components/Layouts/RuangLayanan/SuratRujukan/SuratRujukanForm.vue'
 import { usePage } from '@inertiajs/vue3'
 
 const { props } = usePage()

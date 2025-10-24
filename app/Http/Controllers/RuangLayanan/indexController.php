@@ -5,11 +5,60 @@ namespace App\Http\Controllers\RuangLayanan;
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\SimpusMasterObat;
 use App\Models\RuangLayanan\SimpusPermohonanLab;
+use App\Models\RuangLayanan\SimpusPoliFKTP;
 use DB;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class indexController extends Controller
 {
+    public function listPoli()
+    {
+        $listPoli = SimpusPoliFKTP::where('pelayanan', 'true')->get();
+        return Inertia::render(
+            'Ruang_Layanan/indexPoli',
+            ['listPoli' => $listPoli]
+        );
+    }
+
+    public function listPoliKluster($kluster)
+    {
+
+
+        if ($kluster == '2') {
+            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
+            // dd($listPoli);
+            return Inertia::render(
+                'Ruang_Layanan/klusterPasien/kluster2',
+                [
+                    'listPoli' => $listPoli
+                ]
+            );
+
+        } elseif ($kluster == '3') {
+            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008'])->get();
+            // dd($listPoli);
+            return Inertia::render(
+                'Ruang_Layanan/klusterPasien/kluster3',
+                [
+                    'listPoli' => $listPoli
+                ]
+            );
+
+        } else {
+            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['002', '005', '098',])->get();
+            // dd($listPoli);
+            return Inertia::render(
+                'Ruang_Layanan/klusterPasien/kluster3',
+                [
+                    'listPoli' => $listPoli
+                ]
+            );
+
+        }
+
+    }
+
     public function paginasiSimpusDiagnosa(Request $request)
     {
         $DiagnosaMedis = DB::table('simpus_diagnosa')->paginate(10);
@@ -163,7 +212,7 @@ class indexController extends Controller
     public function MasterObat(Request $request)
     {
         $search = $request->get('search');
-        $query = SimpusMasterObat::query();
+        $query = SimpusMasterObat::where('AKTIF', '1');
 
         if ($search) {
             $query->where(function ($q) use ($search) {

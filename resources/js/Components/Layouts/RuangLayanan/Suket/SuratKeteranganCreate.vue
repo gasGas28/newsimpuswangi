@@ -19,7 +19,7 @@
                         <i class="bi bi-person-vcard text-primary"></i> Data Pasien
                     </h6>
 
-                    <div class="row g-3">
+                    <div class="row g-5">
                         <div class="col-md-6">
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">No MR</label>
@@ -52,32 +52,32 @@
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">Agama</label>
                                 <input type="text" class="form-control"
-                                    v-model.trim="props.dataAnamnesa.loket.simpus_pasien.AGAMA" disabled>
+                                  :value="props.dataAnamnesa?.loket.simpus_pasien?.AGAMA" disabled>
                             </div>
 
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">Pekerjaan</label>
                                 <input type="text" class="form-control"
-                                    v-model.trim="props.dataAnamnesa.loket.simpus_pasien.JENIS_PKRJN" disabled>
+                                   :value="props.dataAnamnesa?.loket.simpus_pasien?.JENIS_PKRJN" disabled>
                             </div>
 
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">Alamat</label>
                                 <input type="text" class="form-control"
-                                    :value="props.dataAnamnesa.loket.simpus_pasien.ALAMAT" disabled>
+                                    :value="props.dataAnamnesa?.loket.simpus_pasien?.ALAMAT" disabled>
                             </div>
 
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="form-label small text-muted mb-1">Kecamatan</label>
                                     <input type="text" class="form-control"
-                                        :value="props.dataAnamnesa.loket.simpus_pasien.setup_kab.NAMA_KAB ?? ''"
+                                        :value="props.dataAnamnesa?.loket.simpus_pasien.setup_kab.NAMA_KAB ?? ''"
                                         disabled>
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label small text-muted mb-1">Kel/Desa</label>
                                     <input type="text" class="form-control"
-                                        :value="props.dataAnamnesa.loket.simpus_pasien.setup_kel.NAMA_KEL ?? ''"
+                                        :value="props.dataAnamnesa?.loket.simpus_pasien?.setup_kel?.NAMA_KEL ?? ''"
                                         disabled>
                                 </div>
                             </div>
@@ -91,7 +91,7 @@
                         <i class="bi bi-envelope-paper text-primary"></i> Data Surat
                     </h6>
 
-                    <div class="row g-3">
+                    <div class="row g-5">
                         <div class="col-md-6">
 
                             <!-- Jenis Surat -->
@@ -99,8 +99,7 @@
                                 <label class="form-label small text-muted mb-1">Jenis Surat</label>
                                 <select class="form-select" v-model="form.id_jns_surat">
                                     <option value="" selected>--Pilih--</option>
-                                    <option :key="item.ID_JNS_SURAT" :value="item.ID_JNS_SURAT"
-                                        v-for="item in props.jenisSurat">{{ item.SURAT
+                                    <option :value="item.ID_JNS_SURAT" v-for="item in props.jenisSurat">{{ item.SURAT
                                         }}</option>
 
                                 </select>
@@ -152,12 +151,12 @@
                 </div>
                 <!-- Data Pemeriksaan -->
                 <div class="bg-white rounded-4 shadow-sm p-4 mt-4"
-                    v-if="form.id_jns_surat !== 5 && form.id_jns_surat !== 6">
+                    v-if="form.id_jns_surat !== 5 && form.id_jns_surat !== 6 && form.id_jns_surat !== ''">
                     <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                         <i class="bi bi-heart-pulse text-primary"></i> Data Pemeriksaan
                     </h6>
 
-                    <div class="row g-3">
+                    <div class="row g-5">
                         <div class="col-md-6">
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
@@ -246,7 +245,7 @@
 
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">Keterangan Lain</label>
-                                <textarea class="form-control" v-model="form.keterangan"></textarea>
+                                <textarea class="form-control" v-model="form.ket_lain"></textarea>
                             </div>
 
                             <div class="mb-2">
@@ -267,20 +266,16 @@
                 </div>
                 <!-- Actions -->
                 <div class="row mt-3">
-                    <div class="col-md-6">
-                        <Link :href="backRoute" class="btn w-100 btn-outline-secondary rounded-3">
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <Link :href="backRoute" class="btn btn-outline-secondary rounded-3">
                         Kembali
                         </Link>
-                    </div>
-                    <div class="col-md-6">
-                        <button type="submit" :disabled="formProcessing"
-                            class="btn btn-info text-white w-100 rounded-3">
+                        <button type="submit" :disabled="formProcessing" class="btn btn-info text-white rounded-3">
                             <span v-if="!formProcessing"><i class="bi bi-save me-1"></i> Simpan</span>
                             <span v-else>Menyimpan…</span>
                         </button>
                     </div>
                 </div>
-
 
             </form>
         </div>
@@ -288,36 +283,42 @@
 </template>
 
 <script setup>
+import { computed, reactive, ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const props = defineProps({
-    suket: Object,
+    dataPasien: { type: Object, required: true },     // { idLoket, NO_MR, NAMA_LGKP, ... }
+    backRoute: { type: String, required: true },     // url untuk tombol kembali
+    saveRoute: { type: String, required: true },     // route POST simpan rujukan
+    rumahSakitOptions: { type: Array, default: () => [] }, // [{kdppk, nama_unit}]
+    poliOptions: { type: Array, default: () => [] }, // [{kdPoli, nmPoli}]
+    dokterOptions: { type: Array, default: () => [] }, // [{kode, nama}],
+    jenisSurat: Array,
     dataAnamnesa: Object,
-    idPoli: String,
-    idPelayanan: String,
-    jenisSurat: Object,
     tenagaMedisAskep: Array,
+    idPelayanan: String,
+    idPoli: String
 })
 
-console.log('idPElayanananan', props.idPelayanan)
+console.log('Data anamnesa Su', props.dataAnamnesa)
 const form = useForm({
-    idSurat: props.suket.id_surat,
-    id_jns_surat: props.suket.id_jns_surat ?? '',
+    id_jns_surat: '',
     id_pelayanan: props.idPelayanan ?? '',
-    no_surat: props.suket.no_surat ?? '',
-    keperluan: props.suket.keperluan ?? '',
-    hasil_pemeriksaan: props.suket.hasil_pemeriksaan ?? '',
-    mata_ka_ki: props.suket?.mata_ka_ki ?? '',
-    telinga_ka_ki: props.suket?.telinga_ka_ki ?? '',
-    test_buta_warna: props.suket?.test_buta_warna ?? '',
-    tgl_ijin_awal: props.suket.tgl_ijin_awal ?? '',
-    tgl_ijin_akhir: props.suket.tgl_ijin_akhir ?? '',
-    tgl_kematian: props.suket.tgl_kematian ?? '',
-    jam_kematian: props.suket.jam_kematian ?? '',
-    ket_kematian: props.suket.ket_kematian ?? '',
-    tenagaMedis: props.suket.tenagaMedis ?? '',
-    idAnamnesa: props.dataAnamnesa.idAnamnesa ?? '',
+    no_surat: '',
+    keperluan: props.dataAnamnesa?.keluhan ?? '',
+    keterangan: '',
+    hasil_pemeriksaan: props.dataAnamnesa?.hasil_pemeriksaan ?? '',
+    mata_ka_ki: props.dataAnamnesa?.mata_ka_ki ?? '',
+    telinga_ka_ki: props.dataAnamnesa?.telinga_ka_ki ?? '',
+    test_buta_warna: props.dataAnamnesa?.test_buta_warna ?? '',
+    tgl_ijin_awal: '',
+    tgl_ijin_akhir: '',
+    tgl_kematian: '',
+    jam_kematian: '',
+    ket_kematian: '',
+    tenagaMedis: props.dataAnamnesa?.tenagaMedis ?? '',
+    idAnamnesa: props.dataAnamnesa?.idAnamnesa,
 
     beratBadan: props.dataAnamnesa?.beratBadan ?? '',
     tinggiBadan: props.dataAnamnesa?.tinggiBadan ?? '',
@@ -326,16 +327,26 @@ const form = useForm({
     suhu: props.dataAnamnesa?.suhu ?? '',
     sistole: props.dataAnamnesa?.sistole ?? '',
     diastole: props.dataAnamnesa?.diastole ?? '',
-    keterangan: props.suket.keterangan ?? '',
+    ket_lain: props.dataAnamnesa?.ket_lain ?? '',
     tempat_lahir: props.dataAnamnesa?.tempat_lahir ?? '',
     tgl_lahir: props.dataAnamnesa?.tgl_lahir ?? '',
     agama: props.dataAnamnesa?.agama ?? '',
     pekerjaan: props.dataAnamnesa?.pekerjaan ?? '',
 })
+
+const formProcessing = ref(false)
+const errors = computed(() => form.errors || {})
+const hasErrors = computed(() => Object.keys(errors.value).length > 0)
+
 function submit() {
-    form.post(route('ruang-layanan-umum.update-suket'), {
+    formProcessing.value = true
+    form.post(route('ruang-layanan.simpanSuket', {
+        idPoli: props.idPoli
+    }), {
+        preserveScroll: true,
+        onFinish: () => { formProcessing.value = false },
         onSuccess: () => {
-            router.visit(route('ruang-layanan-umum.surat-keterangan', {
+            router.visit(route('ruang-layanan.surat-keterangan-list', {
                 idPoli: props.idPoli,
                 idPelayanan: props.idPelayanan
             }))

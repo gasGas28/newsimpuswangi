@@ -12,7 +12,7 @@
       </div>
       <div class="row g-4">
         <div class="col-6 col-md-4 col-lg-3" v-for="poli in listPoliWithStyle" :key="listPoli.id">
-          <Link :href="route('ruang-layanan.index' , {idPoli : poli.kdPoli})" class="text-decoration-none">
+          <Link :href="route('ruang-layanan.index' , {idPoli : poli.kdPoli, kluster : '2'})" class="text-decoration-none">
           <div class="card shadow ">
             <div class="card-body ">
               <div class="mb-3 rounded-4 d-flex justify-content-center"
@@ -34,7 +34,7 @@
 </template>
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
-import AppLayouts from '../../Components/Layouts/AppLayouts.vue';
+import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 import { route } from 'ziggy-js';
 const { props } = usePage();
 
@@ -50,13 +50,6 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
 
 const poliStyles = {
   'Umum': { bg: '#3b82f6', icon: 'bi bi-person-fill' },
-  'Gigi': { bg: '#10b981', icon: 'bi bi-clipboard-check' },
-  'UGD': { bg: '#facc15', icon: 'bi bi-hospital' },
-  'KB': { bg: '#6366f1', icon: 'bi bi-people-fill' },
-  'Sanitasi': { bg: '#14b8a6', icon: 'bi bi-droplet-half' },
-  'Rawat Inap': { bg: '#ef4444', icon: 'bi bi-heart-pulse' },
-  'Kunjungan Online': { bg: '#3b82f6', icon: 'bi bi-chat-dots' },
-  'Gizi': { bg: '#22c55e', icon: 'bi bi-egg-fried' },
   'KIA': { bg: '#f97316', icon: 'bi bi-gender-female' },
 }
 

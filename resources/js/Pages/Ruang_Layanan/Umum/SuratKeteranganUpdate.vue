@@ -10,7 +10,7 @@
 
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-import SuratKeteranganUpdate from '../../../Components/Layouts/RuangLayanan/SuratKeteranganUpdate.vue';
+import SuratKeteranganUpdate from '../../../Components/Layouts/RuangLayanan/Suket/SuratKeteranganUpdate.vue';
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 const { props } = usePage();
 const suket = props.suket

@@ -55,8 +55,8 @@
         <tr v-for="(data, index) in props.riwayatPasien.simpus_loket">
           <td>{{ index + 1 }}</td>
           <td>{{ data.tglKunjungan || '-' }}</td>
-          <td>{{ data.lokasi || '-' }}</td>
-          <td>Poli : {{ data.kdPoli || '-' }}</td>
+          <td>{{ data.unitprofile.nama_unit || '-' }}</td>
+          <td>Poli : {{ data.simpus_poli.nmPoli || '-' }}</td>
           <td v-if="data.anamnesa?.length">
             <div v-for="(data, i) in data.anamnesa" :key="i">
               TB: {{ data.tinggiBadan || '-' }} cm<br>
@@ -87,7 +87,7 @@
             <template v-if="data.tindakan && data.tindakan.length">
               <div v-for="(t, i) in data.tindakan" :key="i" class="mb-2">
                 <strong>Tindakan {{ i + 1 }} :</strong>
-                [{{ t.kdTindakan }}] {{ t.nmTindakan }}<br>
+                [{{ t.kdTindakan }}] {{ t.nmTindakan }} <br>
                 <strong>Ket :</strong> {{ t.keterangan && t.keterangan.trim() !== '' ? t.keterangan : '-' }}<br>
                 <strong>Ket Gigi :</strong> {{ t.ketGigi && t.ketGigi.trim() !== '' ? t.ketGigi : '-' }}<br>
               </div>
@@ -103,21 +103,20 @@
                 <div>
                   <strong>{{ r.nama_puyer || 'Bukan Puyer' }}</strong>
                   <template v-if="r.kategori == '1'">
-                    — {{ r.jumlah_puyer }} Puyer
+                    — ({{ r.jumlah_puyer }})
                     <br />
                     <small>
                       Dosis: {{ r.dosis_pakai_puyer }} |
                       Setiap {{ r.tiapJam }} jam sekali |
-                      Waktu: {{ r.waktu }} |
-                      Kondisi: {{ r.kondisi }}
+                      Waktu: {{ r.waktu }} 
                     </small>
                   </template>
                 </div>
 
                 <!-- Detail Obat di dalam resep -->
                 <div v-if="r.detail_resep_obat && r.detail_resep_obat.length" class="ms-3 mt-1">
-                  <div v-for="(d, j) in r.detail_resep_obat" :key="j" class="text-muted" style="font-size: 13px;">
-                    • {{ d.master_obat.NAMA }} ({{ d.jumlah }})
+                  <div v-for="(d, j) in r.detail_resep_obat" :key="j" class="text-bold" style="font-size: 13px;">
+                  <span class="fw-bold"> • {{ d.master_obat.NAMA }} ({{ d.jumlah }})</span>
                     <br />
                     <small>
                       Dosis: {{ d.dosis_pakai }}
