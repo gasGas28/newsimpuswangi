@@ -56,9 +56,11 @@ Route::match(['GET','POST'], '/_csrf-debug', function (Request $r) {
 
 
 
+// Protect home (wajib login)
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
-})->name('home');
+})->middleware('auth')->name('home');
+;
 
 
 // Login
@@ -464,12 +466,31 @@ Route::prefix('ruang_layanan')->group(function () {
         '/simpus/laborat/detail/{idPermohonan}',
         [LaboratoriumController::class, 'detail']
     )->name('ruang-layanan.laborat.detail');
+// Paket dari parameter_uji
+Route::get('/simpus/laborat/param/headers',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramHeaders']
+)->name('ruang-layanan.laborat.param.headers');
 
+Route::get('/simpus/laborat/param/{header}/subheaders',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.subheaders');
 
-    Route::post(
-        '/simpus/laborat/tindakan/hapus',
-        [LaboratoriumController::class, 'hapusTindakan']
-    )->name('ruang-layanan.laborat.hapusTindakan');
+Route::post('/simpus/laborat/param/{header}/simpan',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpan']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.simpan');
+
+Route::post('/simpus/laborat/tindakan/hapus',[LaboratoriumController::class, 'hapusTindakan'])->name('ruang-layanan.laborat.hapusTindakan');
+// LIST semua parameter_uji (bisa search + filter paket) — paginated
+Route::get('/simpus/laborat/param/browse',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramBrowse']
+)->name('ruang-layanan.laborat.param.browse');
+
+// Simpan pilihan manual (by id_parameter[])
+Route::post('/simpus/laborat/param/simpan-terpilih',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
+)->name('ruang-layanan.laborat.param.simpanTerpilih');
 
     // Kia
     Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
