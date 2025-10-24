@@ -4,35 +4,46 @@
 
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('dataKunjungan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('diagnosa')">
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Data Kunjungan</div>
+        <div class="action-label">Diagnosa</div>
       </a>
 
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pemantauan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('skrining')">
         <div class="action-icon"><i class="bi bi-activity"></i></div>
-        <div class="action-label">Pemantauan Dan Riwayat</div>
+        <div class="action-label">Skrining</div>
       </a>
     </div>
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <component :DataPasien="props.DataPasien" :KunjunganAnc="props.KunjunganAnc" :diagnosa="props.diagnosa" :riwayat="props.riwayat" :is="activeComponent" v-if="activeComponent" />
+      <component
+        :DataPasien="props.DataPasien"
+        :DataDiagnosa="props.DataDiagnosa"
+        :diagnosa="props.diagnosa"
+        :AlergiMakanan="props.AlergiMakanan"
+        :AlergiObat="props.AlergiObat"
+        :diagnosaKeperawatan="props.diagnosaKeperawatan"
+        :is="activeComponent"
+        v-if="activeComponent"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
   import { ref, computed } from 'vue';
-  import FormDataKunjungan from './Subjektif/FormDataKunjungan.vue';
-  import FormPemantauan from './Subjektif/FormPemantauan.vue';
+  import Diagnosa from './Assesment/Diagnosa.vue';
+  import Skrining from './Assesment/Skrining.vue';
 
   const activeForm = ref(null);
 
   const props = defineProps({
-    DataPasien: Object,
-    KunjunganAnc: Array,
+    DataPasien: Array,
     diagnosa: Array,
-    riwayat: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataDiagnosa: Array,
   });
 
   // Fungsi toggle form
@@ -43,12 +54,12 @@
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
     switch (activeForm.value) {
-      case 'dataKunjungan':
-        return FormDataKunjungan;
-      case 'pemantauan':
-        return FormPemantauan;
+      case 'diagnosa':
+        return Diagnosa;
+      case 'skrining':
+        return Skrining;
       default:
-        return FormDataKunjungan;
+        return Diagnosa;
     }
   });
 </script>

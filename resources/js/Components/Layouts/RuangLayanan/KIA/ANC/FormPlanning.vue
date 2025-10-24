@@ -4,51 +4,48 @@
 
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('dataKunjungan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('tindakan')">
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Data Kunjungan</div>
+        <div class="action-label">Tindakan</div>
       </a>
 
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pemantauan')">
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pengobatan')">
         <div class="action-icon"><i class="bi bi-activity"></i></div>
-        <div class="action-label">Pemantauan Dan Riwayat</div>
+        <div class="action-label">Pengobatan</div>
       </a>
     </div>
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <component :DataPasien="props.DataPasien" :KunjunganAnc="props.KunjunganAnc" :diagnosa="props.diagnosa" :riwayat="props.riwayat" :is="activeComponent" v-if="activeComponent" />
+      <component :tindakan="props.tindakan"  :is="activeComponent" v-if="activeComponent" />
     </div>
   </div>
 </template>
 
 <script setup>
   import { ref, computed } from 'vue';
-  import FormDataKunjungan from './Subjektif/FormDataKunjungan.vue';
-  import FormPemantauan from './Subjektif/FormPemantauan.vue';
+  import Pengobatan from './Planning/Pengobatan.vue';
+  import Tindakan from './Planning/Tindakan.vue';
 
   const activeForm = ref(null);
-
-  const props = defineProps({
-    DataPasien: Object,
-    KunjunganAnc: Array,
-    diagnosa: Array,
-    riwayat: Array,
-  });
 
   // Fungsi toggle form
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;
   };
 
+    const props = defineProps({
+    tindakan: Array,
+  });
+
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
     switch (activeForm.value) {
-      case 'dataKunjungan':
-        return FormDataKunjungan;
-      case 'pemantauan':
-        return FormPemantauan;
+      case 'pengobatan':
+        return Pengobatan;
+      case 'tindakan':
+        return Tindakan;
       default:
-        return FormDataKunjungan;
+        return Tindakan;
     }
   });
 </script>
