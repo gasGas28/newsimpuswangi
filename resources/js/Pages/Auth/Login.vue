@@ -2,6 +2,15 @@
 import { ref, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 
+// ====== State popup ganti password ======
+const showForceModal = ref(false)
+const newPass = ref('')
+const newPassConfirm = ref('')
+const savingNew = ref(false)
+const newPassErr = ref('')
+const pendingRedirect = ref('/') // redirect tujuan setelah ganti password
+
+// ====== State login ======
 const username = ref('')
 const password = ref('')
 const loading  = ref(false)
@@ -66,8 +75,21 @@ const submit = async () => {
       password: password.value,
       'g-recaptcha-response': recaptchaToken,
     })
+
+    const needChange = !!res?.data?.require_password_change
     const redirectUrl = res?.data?.redirect ?? '/dashboard'
-    window.location.href = redirectUrl
+
+    if (needChange) {
+      // Tahan redirect, munculkan modal ganti password
+      pendingRedirect.value = redirectUrl
+      showForceModal.value = true
+
+      // Reset captcha supaya kalau user gagal simpan pwd, gak ngaruh ke sesi login yg sudah berhasil
+      if (window.grecaptcha && widgetId !== null) window.grecaptcha.reset(widgetId)
+    } else {
+      // Lanjut seperti biasa
+      window.location.href = redirectUrl
+    }
   } catch (e) {
     if (window.grecaptcha && widgetId !== null) window.grecaptcha.reset(widgetId)
 
@@ -82,9 +104,39 @@ const submit = async () => {
   } finally {
     loading.value = false
   }
-}
+} // <<--- PENTING: tutup fungsi submit di sini
 
+async function saveNewPassword() {
+  newPassErr.value = ''
+
+  if (!newPass.value || newPass.value.length < 8) {
+    newPassErr.value = 'Minimal 8 karakter.'
+    return
+  }
+  if (newPass.value !== newPassConfirm.value) {
+    newPassErr.value = 'Konfirmasi password tidak cocok.'
+    return
+  }
+
+  savingNew.value = true
+  try {
+    // Endpoint backend yg kita buat: /auth/password/force-update
+    await axios.post('/auth/password/force-update', {
+      new_password: newPass.value,
+      new_password_confirmation: newPassConfirm.value,
+    })
+
+    // Tutup modal dan redirect ke halaman tujuan
+    showForceModal.value = false
+    window.location.href = pendingRedirect.value || '/dashboard'
+  } catch (e) {
+    newPassErr.value = e?.response?.data?.message || 'Gagal menyimpan password baru.'
+  } finally {
+    savingNew.value = false
+  }
+}
 </script>
+
 
 
 <template>
@@ -145,7 +197,7 @@ const submit = async () => {
           class="img-fluid px-5 px-md-4"
           style="max-height: 260px"
         />
-        <p class="small mt-3 text-muted mb-4 mb-md-0">&copy; 2025 Puskesmas App<br />Powered by NOC</p>
+        <p class="small mt-3 text-muted mb-4 mb-md-0">&copy; 2025 Puskesmas App<br />Powered by FAIZ</p>
       </div>
 
       <!-- Panel Kanan -->
@@ -176,20 +228,47 @@ const submit = async () => {
             </button>
           </div>
 
-          <div class="text-center small">
-            <span class="text-white-50">Don't have an account?</span>
-            <a href="#" class="text-info text-decoration-none">Register Now</a>
-          </div>
 
-          <div class="text-center mt-3 small">
-            <a href="#" class="text-white-50 text-decoration-underline">Terms and Services</a><br />
-            <span class="text-white-50">Need help? <a href="mailto:support@email.com" class="text-info">Contact us</a></span>
-          </div>
+
         </form>
       </div>
     </div>
 
   </div>
+
+  <!-- Modal Paksa Ganti Password (muncul setelah login sukses & expired) -->
+<div v-if="showForceModal"
+     class="modal fade show"
+     style="display:block; background: rgba(0,0,0,.35);"
+     data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title">Password Kedaluwarsa</h5>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3">Password Anda sudah lebih dari 15 hari. Silakan perbarui untuk melanjutkan.</p>
+
+        <div class="mb-2">
+          <label class="form-label">Password Baru</label>
+          <input type="password" v-model="newPass" class="form-control" />
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Konfirmasi Password Baru</label>
+          <input type="password" v-model="newPassConfirm" class="form-control" />
+        </div>
+
+        <div v-if="newPassErr" class="text-danger small mt-2">{{ newPassErr }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary w-100" :disabled="savingNew" @click="saveNewPassword">
+          {{ savingNew ? 'Menyimpan...' : 'Simpan Password' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </template>
 
 <style>

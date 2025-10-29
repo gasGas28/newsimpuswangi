@@ -37,4 +37,7 @@ class SimpusDetailResepObat extends Model
     public function MasterObat(){
         return $this->belongsTo(SimpusMasterObat::class, 'obat_id', 'OBAT_ID');
     }
+      public function ResepObat(){
+        return $this->belongsTo(SimpusResepObat::class, 'resep_id', 'id_resep');
+    }
 }

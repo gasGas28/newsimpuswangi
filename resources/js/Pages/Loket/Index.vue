@@ -120,32 +120,51 @@
                 </div>
               </div>
 
+              <!-- KATEGORI UNIT -->
               <div class="mb-2">
                 <div class="row">
                   <div class="col-4">
                     <label class="form-label form-label-sm fw-bold">Kategori Unit</label>
                   </div>
                   <div class="col-8">
-                    <select class="form-select form-select-sm" v-model="form.kategoriUnit">
-                      <option selected disabled>- Pilih Kategori Unit -</option>
-                      <option value="PUSKESMAS">PUSKESMAS</option>
-                      <option value="KLINIK">KLINIK</option>
+                    <select
+                      class="form-select form-select-sm"
+                      v-model="form.kategoriUnitId"
+                      @change="loadUnitList"
+                      :disabled="loading.kategoriUnit"
+                    >
+                      <option value="">- Pilih Kategori Unit -</option>
+                      <option v-for="(name, id) in kategoriUnits" :key="id" :value="id">
+                        {{ name }}
+                      </option>
                     </select>
+                    <div v-if="loading.kategoriUnit" class="text-muted small mt-1">
+                      <i class="bi bi-arrow-repeat spinner"></i> Loading...
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- UNIT -->
               <div class="mb-2">
                 <div class="row">
                   <div class="col-4">
                     <label class="form-label form-label-sm fw-bold">Unit</label>
                   </div>
                   <div class="col-8">
-                    <select class="form-select form-select-sm" v-model="form.unit">
-                      <option selected disabled>- Pilih Unit -</option>
-                      <option value="PUSKESMAS WONGSOREJO">PUSKESMAS WONGSOREJO</option>
-                      <option value="PUSKESMAS PESANGGARAN">PUSKESMAS PESANGGARAN</option>
+                    <select
+                      class="form-select form-select-sm"
+                      v-model="form.unitId"
+                      :disabled="!form.kategoriUnitId || loading.unitList"
+                    >
+                      <option value="">- Pilih Unit -</option>
+                      <option v-for="(name, id) in unitList" :key="id" :value="id">
+                        {{ name }}
+                      </option>
                     </select>
+                    <div v-if="loading.unitList" class="text-muted small mt-1">
+                      <i class="bi bi-arrow-repeat spinner"></i> Loading unit...
+                    </div>
                   </div>
                 </div>
               </div>
@@ -226,24 +245,34 @@
                     <textarea
                       class="form-control form-control-sm"
                       rows="2"
-                      v-model="selectedPasien.ALAMAT"
+                      :value="formatKecamatanKelurahan"
                       disabled
+                      style="height: 60px"
                     ></textarea>
                   </div>
                 </div>
               </div>
 
+              <!-- WILAYAH -->
               <div class="mb-2">
                 <div class="row">
                   <div class="col-4">
                     <label class="form-label form-label-sm fw-bold">Wilayah *</label>
                   </div>
                   <div class="col-8">
-                    <select class="form-select form-select-sm bg-warning" v-model="form.wilayah">
+                    <select
+                      class="form-select form-select-sm bg-warning"
+                      v-model="form.wilayah"
+                      :disabled="loading.wilayah"
+                    >
                       <option value="">- Pilih -</option>
-                      <option value="Dalam Wilayah">Dalam Wilayah</option>
-                      <option value="Luar Wilayah">Luar Wilayah</option>
+                      <option v-for="(name, id) in wilayahList" :key="id" :value="id">
+                        {{ name }}
+                      </option>
                     </select>
+                    <div v-if="loading.wilayah" class="text-muted small mt-1">
+                      <i class="bi bi-arrow-repeat spinner"></i> Loading wilayah...
+                    </div>
                     <small class="text-muted"
                       >*) Pemilihan wilayah, sesuaikan dengan alamat pasien !!</small
                     >
@@ -257,10 +286,7 @@
                     <label class="form-label form-label-sm fw-bold">Jenis Pengunjung *</label>
                   </div>
                   <div class="col-8">
-                    <select
-                      class="form-select form-select-sm bg-warning"
-                      v-model="form.jenisPengunjung"
-                    >
+                    <select class="form-select form-select-sm bg-warning" v-model="jenisPengunjung">
                       <option value="Pengunjung Lama">Pengunjung Lama</option>
                       <option value="Pengunjung Baru">Pengunjung Baru</option>
                     </select>
@@ -274,9 +300,10 @@
                     <label class="form-label form-label-sm fw-bold">Kategori *</label>
                   </div>
                   <div class="col-8">
-                    <select class="form-select form-select-sm bg-warning" v-model="form.kategori">
-                      <option value="NON BPJS">NON BPJS</option>
-                      <option value="BPJS">BPJS</option>
+                    <select class="form-select form-select-sm bg-warning" v-model="kategori">
+                      <option value="NON_BPJS">NON BPJS</option>
+                      <option value="JKN_PBI">JKN PBI</option>
+                      <option value="JKN_NON_PBI">JKN NON PBI</option>
                     </select>
                   </div>
                 </div>
@@ -290,7 +317,7 @@
                   <div class="col-8">
                     <select
                       class="form-select form-select-sm"
-                      v-model="form.jenisKunjungan"
+                      v-model="jenisKunjungan"
                       @change="updatePoliOptions"
                     >
                       <option value="Kunjungan Sakit">Kunjungan Sakit</option>
@@ -303,11 +330,11 @@
               <div class="mb-2">
                 <div class="row">
                   <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Poli Tujuan</label>
+                    <label class="form-label form-label-sm fw-bold">Kegiatan</label>
                   </div>
                   <div class="col-8">
                     <select class="form-select form-select-sm" v-model="form.kdPoli">
-                      <option value="">- Pilih Poli -</option>
+                      <option value="">- Pilih Kegiatan -</option>
                       <option v-for="poli in filteredPoliList" :value="poli.kdPoli">
                         {{ poli.nmPoli }}
                       </option>
@@ -333,11 +360,12 @@
                     <label class="form-label form-label-sm fw-bold">Kode TKP</label>
                   </div>
                   <div class="col-8">
-                    <select class="form-select form-select-sm" v-model="form.kodeTKP">
+                    <select class="form-select form-select-sm" v-model="kodeTKP">
                       <option value="RJTP (RAWAT JALAN)">RJTP (RAWAT JALAN)</option>
                       <option value="RJTL (RAWAT JALAN LANJUTAN)">
                         RJTL (RAWAT JALAN LANJUTAN)
                       </option>
+                      <option value="Promotif">Promotif</option>
                     </select>
                   </div>
                 </div>
@@ -347,8 +375,18 @@
 
           <!-- Tombol Bawah -->
           <div class="d-flex justify-content-end mt-4 gap-2">
-            <button class="btn btn-success">RIWAYAT KUNJUNGAN</button>
-            <button class="btn btn-primary" @click="registerPasien" :disabled="!selectedPasien.ID">
+            <button
+              class="btn btn-success"
+              @click="showRiwayatKunjungan"
+              :disabled="!selectedPasien.ID"
+            >
+              RIWAYAT KUNJUNGAN
+            </button>
+            <button
+              class="btn btn-primary"
+              @click="registerPasien"
+              :disabled="!selectedPasien.ID || !formValid"
+            >
               SIMPAN
             </button>
           </div>
@@ -474,7 +512,7 @@
 <script setup>
   import AppLayout from '@/Components/Layouts/AppLayouts.vue';
   import { Link, useForm, router } from '@inertiajs/vue3';
-  import { ref, defineProps, watch, onMounted } from 'vue';
+  import { ref, defineProps, watch, onMounted, computed } from 'vue';
 
   const props = defineProps({
     loket: {
@@ -485,6 +523,88 @@
       type: Array,
       default: () => [],
     },
+    kategoriUnits: {
+      type: Object,
+      default: () => ({}),
+    },
+    wilayah: {
+      type: Object,
+      default: () => ({}),
+    },
+  });
+
+  // Data untuk master data
+  const kategoriUnits = ref({});
+  const unitList = ref({});
+  const wilayahList = ref({});
+  const masterKecamatan = ref({});
+  const masterKelurahan = ref({});
+
+  // Fungsi untuk load master data wilayah
+  const loadMasterWilayah = async () => {
+    try {
+      // Load kecamatan untuk Banyuwangi (NO_PROP=35, NO_KAB=10)
+      const responseKecamatan = await fetch(
+        route('loket.api.kecamatan') + '?propinsi=35&kabupaten=10'
+      );
+      if (responseKecamatan.ok) {
+        const dataKecamatan = await responseKecamatan.json();
+        // Convert array to object for easy lookup
+        masterKecamatan.value = {};
+        dataKecamatan.forEach((kec) => {
+          masterKecamatan.value[kec.NO_KEC] = kec.NAMA_KEC;
+        });
+      }
+
+      // Load kelurahan akan dilakukan on-demand saat ada data pasien
+    } catch (error) {
+      console.error('Error loading master wilayah:', error);
+    }
+  };
+
+  // Mapping kecamatan & kelurahan kode ke nama
+  const formatKecamatanKelurahan = computed(() => {
+    const pasien = selectedPasien.value;
+
+    // Cek jika data sudah dalam bentuk object (sudah ada nama)
+    if (
+      pasien.kecamatan &&
+      pasien.kecamatan.NAMA_KEC &&
+      pasien.kelurahan &&
+      pasien.kelurahan.NAMA_KEL
+    ) {
+      return `${pasien.kecamatan.NAMA_KEC} - ${pasien.kelurahan.NAMA_KEL}`;
+    }
+
+    // Jika masih kode, lakukan mapping
+    const kodeKecamatan = pasien.NO_KEC;
+    const kodeKelurahan = pasien.NO_KEL;
+
+    const namaKecamatan = masterKecamatan.value[kodeKecamatan] || kodeKecamatan;
+
+    // Untuk kelurahan, kita perlu load berdasarkan kecamatan
+    let namaKelurahan = kodeKelurahan;
+
+    if (kodeKecamatan && kodeKelurahan && masterKelurahan.value[kodeKecamatan]) {
+      namaKelurahan = masterKelurahan.value[kodeKecamatan][kodeKelurahan] || kodeKelurahan;
+    }
+
+    if (namaKecamatan && namaKelurahan) {
+      return `${namaKecamatan} - ${namaKelurahan}`;
+    } else if (namaKecamatan) {
+      return namaKecamatan;
+    } else if (namaKelurahan) {
+      return namaKelurahan;
+    } else {
+      return '';
+    }
+  });
+
+  // Loading states
+  const loading = ref({
+    kategoriUnit: false,
+    unitList: false,
+    wilayah: false,
   });
 
   // Data pencarian
@@ -506,28 +626,31 @@
     kdProvider: '',
     jenisPeserta: '',
     PHONE: '',
+    TGL_LHR: '',
+    kecamatan: null,
+    kelurahan: null,
+    NO_KEC: '',
+    NO_KEL: '',
+    NO_RT: '',
+    NO_RW: '',
   });
 
   // Form pendaftaran
   const form = useForm({
     pasienId: '',
     tglKunjungan: new Date().toISOString().split('T')[0],
-    kategoriUnit: 'PUSKESMAS',
-    unit: 'PUSKESMAS WONGSOREJO',
+    kategoriUnitId: '',
+    unitId: '',
     PHONE: '',
-    wilayah: 'Dalam Wilayah',
-    jenisPengunjung: 'Pengunjung Lama',
-    kategori: 'NON BPJS',
-    jenisKunjungan: 'Kunjungan Sakit',
-    kdPoli: '',
-    kodeTKP: 'RJTP (RAWAT JALAN)',
-    // Field-field required untuk database
-    noUrut: '',
-    kunjSakit: true,
+    wilayah: '',
     kunjBaru: 'false',
+    jknPbi: 'NON_BPJS',
+    kunjSakit: 'true',
+    kdPoli: '',
+    kdTkp: '10',
+    noUrut: '',
     kelUmur: 1,
     umur: 30,
-    jknPbi: 'NON BPJS',
     statusPasien: 'umum',
     createdBy: 'test_user',
     kdProvider: '',
@@ -535,8 +658,51 @@
     noKartu: '',
     kdKegiatan: 1,
     puskId: 1,
-    unitId: 1,
-    kategoriUnitId: 1,
+    TGL_LHR: '',
+  });
+
+  // Computed properties untuk mapping UI ke database
+  const jenisPengunjung = computed({
+    get: () => (form.kunjBaru === 'true' ? 'Pengunjung Baru' : 'Pengunjung Lama'),
+    set: (value) => {
+      form.kunjBaru = value === 'Pengunjung Baru' ? 'true' : 'false';
+    },
+  });
+
+  const jenisKunjungan = computed({
+    get: () => (form.kunjSakit === 'true' ? 'Kunjungan Sakit' : 'Kunjungan Sehat'),
+    set: (value) => {
+      form.kunjSakit = value === 'Kunjungan Sakit' ? 'true' : 'false';
+    },
+  });
+
+  const kategori = computed({
+    get: () => form.jknPbi,
+    set: (value) => {
+      form.jknPbi = value;
+    },
+  });
+
+  // ✅ COMPUTED UNTUK KODE TKP DENGAN DEFAULT
+  const kodeTKP = computed({
+    get: () => {
+      // Mapping dari kdTkp (database) ke kodeTKP (UI)
+      const mappings = {
+        10: 'RJTP (RAWAT JALAN)',
+        20: 'RJTL (RAWAT JALAN LANJUTAN)',
+        50: 'Promotif',
+      };
+      return mappings[form.kdTkp] || 'RJTP (RAWAT JALAN)'; // ✅ DEFAULT
+    },
+    set: (value) => {
+      // Mapping dari kodeTKP (UI) ke kdTkp (database)
+      const mappings = {
+        'RJTP (RAWAT JALAN)': '10',
+        'RJTL (RAWAT JALAN LANJUTAN)': '20',
+        Promotif: '50',
+      };
+      form.kdTkp = mappings[value] || '10'; // ✅ DEFAULT
+    },
   });
 
   // Data untuk menyimpan daftar poli
@@ -546,11 +712,83 @@
   const searchQuery = ref('');
   const perPage = ref(10);
 
+  // Computed property untuk validasi form
+  const formValid = computed(() => {
+    return selectedPasien.value.ID && form.kategoriUnitId && form.unitId && form.wilayah;
+  });
+
+  // Fungsi untuk memuat daftar unit berdasarkan kategori
+  const loadUnitList = async () => {
+    if (!form.kategoriUnitId) {
+      unitList.value = {};
+      form.unitId = '';
+      return;
+    }
+
+    loading.value.unitList = true;
+    try {
+      const response = await fetch(route('loket.api.unit-list', form.kategoriUnitId));
+      if (response.ok) {
+        const data = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data, 'text/html');
+        const options = doc.querySelectorAll('option');
+
+        unitList.value = {};
+        options.forEach((option) => {
+          if (option.value) {
+            unitList.value[option.value] = option.textContent;
+          }
+        });
+      } else {
+        console.error('Gagal memuat daftar unit');
+      }
+    } catch (error) {
+      console.error('Error memuat unit:', error);
+    } finally {
+      loading.value.unitList = false;
+    }
+  };
+
+  // Fungsi untuk memuat data master saat komponen dimuat
+  const loadMasterData = async () => {
+    kategoriUnits.value = props.kategoriUnits || {};
+    wilayahList.value = props.wilayah || {};
+
+    if (Object.keys(kategoriUnits.value).length === 0) {
+      loading.value.kategoriUnit = true;
+      try {
+        const response = await fetch(route('loket.api.kategori-unit'));
+        if (response.ok) {
+          kategoriUnits.value = await response.json();
+        }
+      } catch (error) {
+        console.error('Error memuat kategori unit:', error);
+      } finally {
+        loading.value.kategoriUnit = false;
+      }
+    }
+
+    if (Object.keys(wilayahList.value).length === 0) {
+      loading.value.wilayah = true;
+      try {
+        const response = await fetch(route('loket.api.wilayah'));
+        if (response.ok) {
+          wilayahList.value = await response.json();
+        }
+      } catch (error) {
+        console.error('Error memuat wilayah:', error);
+      } finally {
+        loading.value.wilayah = false;
+      }
+    }
+  };
+
   // Fungsi untuk memperbarui opsi poli berdasarkan jenis kunjungan
   const updatePoliOptions = async () => {
     try {
       const params = new URLSearchParams({
-        jenisKunjungan: form.jenisKunjungan,
+        jenisKunjungan: jenisKunjungan.value,
       });
 
       const response = await fetch(route('loket.api.poli-by-jenis') + '?' + params.toString(), {
@@ -605,23 +843,33 @@
         ALAMAT: data.ALAMAT || '',
         noKartu: data.noKartu || '',
         PHONE: data.PHONE || '',
+        TGL_LHR: data.TGL_LHR || '',
+        kecamatan: data.kecamatan || null,
+        kelurahan: data.kelurahan || null,
+        NO_KEC: data.NO_KEC || '',
+        NO_KEL: data.NO_KEL || '',
       };
 
-      // Isi juga field pencarian dengan data yang ditemukan
+      if (data.NO_KEC && data.NO_KEL) {
+        await loadKelurahanByKecamatan(data.NO_KEC);
+      }
+
+      // Mengisi field pencarian dengan data yang ditemukan
       searchParams.value.no_mr = data.NO_MR || '';
       searchParams.value.nik = data.NIK || '';
       searchParams.value.no_bpjs = data.noKartu || '';
 
       form.pasienId = data.ID;
       form.PHONE = data.PHONE || '';
+      form.TGL_LHR = data.TGL_LHR || '';
 
       // Set nilai untuk field required
-      form.kunjSakit = form.jenisKunjungan === 'Kunjungan Sakit';
-      form.kunjBaru = form.jenisPengunjung === 'Pengunjung Baru';
-      form.jknPbi = form.kategori;
-      form.kdProvider = form.kategori === 'BPJS' ? 'BPJS' : '';
-      form.statusKartu = form.kategori === 'BPJS' ? 'Aktif' : '';
-      form.noKartu = form.kategori === 'BPJS' ? data.noKartu || '' : '';
+      form.kunjSakit = jenisKunjungan.value === 'Kunjungan Sakit';
+      form.kunjBaru = jenisPengunjung.value === 'Pengunjung Baru';
+      form.jknPbi = kategori.value;
+      form.kdProvider = kategori.value === 'BPJS' ? 'BPJS' : '';
+      form.statusKartu = kategori.value === 'BPJS' ? 'Aktif' : '';
+      form.noKartu = kategori.value === 'BPJS' ? data.noKartu || '' : '';
     } catch (error) {
       alert(error.message);
       console.error('Error:', error);
@@ -638,10 +886,36 @@
         kdProvider: '',
         jenisPeserta: '',
         PHONE: '',
+        TGL_LHR: '',
+        kecamatan: null,
+        kelurahan: null,
+        NO_KEC: '',
+        NO_KEL: '',
+        NO_RT: '',
+        NO_RW: '',
       };
 
       form.pasienId = '';
       form.PHONE = '';
+      form.TGL_LHR = '';
+    }
+  };
+
+  // Fungsi untuk load kelurahan berdasarkan kecamatan
+  const loadKelurahanByKecamatan = async (kodeKecamatan) => {
+    try {
+      const response = await fetch(route('loket.api.kelurahan') + '?kecamatan=' + kodeKecamatan);
+      if (response.ok) {
+        const dataKelurahan = await response.json();
+
+        // Simpan ke masterKelurahan dengan struktur: { [kodeKecamatan]: { [kodeKelurahan]: nama } }
+        masterKelurahan.value[kodeKecamatan] = {};
+        dataKelurahan.forEach((kel) => {
+          masterKelurahan.value[kodeKecamatan][kel.NO_KEL] = kel.NAMA_KEL;
+        });
+      }
+    } catch (error) {
+      console.error('Error loading kelurahan:', error);
     }
   };
 
@@ -652,49 +926,104 @@
       return;
     }
 
+    if (!formValid.value) {
+      alert('Harap lengkapi semua field yang wajib diisi (Kategori Unit, Unit, dan Wilayah)');
+      return;
+    }
+
     // Debug: tampilkan data yang akan dikirim
     console.log('Data yang dikirim:', form.data());
 
-    form.post(route('loket.register'), {
-      onSuccess: () => {
-        alert('Pasien berhasil didaftarkan!');
+    form.post(route('loket.simpan'), {
+      preserveScroll: true,
+      onSuccess: (page) => {
+        // Handle success message dari Inertia
+        if (page.props.success) {
+          alert(page.props.success);
+        }
 
         // Reset form setelah berhasil
-        selectedPasien.value = {
-          ID: '',
-          NO_MR: '',
-          NIK: '',
-          NAMA_LGKP: '',
-          ALAMAT: '',
-          noKartu: '',
-          statusKartu: '',
-          kdProvider: '',
-          jenisPeserta: '',
-          PHONE: '',
-        };
-
-        searchParams.value = {
-          no_mr: '',
-          nik: '',
-          no_bpjs: '',
-        };
-
-        form.reset();
-        form.tglKunjungan = new Date().toISOString().split('T')[0];
-        form.jenisKunjungan = 'Kunjungan Sakit';
-        form.kunjSakit = true;
-        form.kategoriUnit = 'PUSKESMAS';
-        form.unit = 'PUSKESMAS WONGSOREJO';
-        form.wilayah = 'Dalam Wilayah';
-        form.jenisPengunjung = 'Pengunjung Lama';
-        form.kategori = 'NON BPJS';
-        form.kodeTKP = 'RJTP (RAWAT JALAN)';
+        resetForm();
       },
       onError: (errors) => {
         console.error('Errors:', errors);
-        alert('Terjadi kesalahan: ' + (errors.message || Object.values(errors).join(', ')));
+        if (errors.message) {
+          alert('Terjadi kesalahan: ' + errors.message);
+        } else {
+          alert('Terjadi kesalahan. Silakan coba lagi.');
+        }
+      },
+      onFinish: () => {
+        // Loading state cleanup jika needed
       },
     });
+  };
+
+  // Fungsi reset form yang komprehensif
+  const resetForm = () => {
+    // Reset selected pasien
+    selectedPasien.value = {
+      ID: '',
+      NO_MR: '',
+      NIK: '',
+      NAMA_LGKP: '',
+      ALAMAT: '',
+      noKartu: '',
+      statusKartu: '',
+      kdProvider: '',
+      jenisPeserta: '',
+      PHONE: '',
+      TGL_LHR: '',
+      kecamatan: null,
+      kelurahan: null,
+      NO_KEC: '',
+      NO_KEL: '',
+      NO_RT: '',
+      NO_RW: '',
+    };
+
+    // Reset search params
+    searchParams.value = {
+      no_mr: '',
+      nik: '',
+      no_bpjs: '',
+    };
+
+    // Reset form fields
+    form.reset();
+
+    // Set default values
+    form.tglKunjungan = new Date().toISOString().split('T')[0];
+    form.kunjSakit = 'true';
+    form.kunjBaru = 'false';
+    form.jknPbi = 'NON_BPJS';
+    form.kategoriUnitId = '';
+    form.unitId = '';
+    form.wilayah = '';
+    form.kdTkp = '10'; // ✅ DEFAULT: RJTP (RAWAT JALAN)
+    form.kdPoli = '';
+    form.PHONE = '';
+    form.TGL_LHR = '';
+    form.kelUmur = 1;
+    form.umur = 30;
+
+    // Reset computed values
+    jenisPengunjung.value = 'Pengunjung Lama';
+    jenisKunjungan.value = 'Kunjungan Sakit';
+    kategori.value = 'NON_BPJS';
+    kodeTKP.value = 'RJTP (RAWAT JALAN)';
+
+    // Reset unit list
+    unitList.value = {};
+  };
+
+  // Fungsi untuk menampilkan riwayat kunjungan
+  const showRiwayatKunjungan = () => {
+    if (!selectedPasien.value.ID) {
+      alert('Silakan pilih pasien terlebih dahulu');
+      return;
+    }
+    alert('Fitur riwayat kunjungan akan segera tersedia');
   };
 
   // Format tanggal
@@ -720,43 +1049,40 @@
     router.visit(route('loket.search'));
   };
 
-  // Watch perubahan pada jenis kunjungan
-  watch(
-    () => form.jenisKunjungan,
-    (newValue) => {
-      form.kunjSakit = newValue === 'Kunjungan Sakit';
-      updatePoliOptions();
-      form.kdPoli = '';
+  // Watch perubahan pada computed properties
+  watch(jenisPengunjung, (newValue) => {
+    form.kunjBaru = newValue === 'Pengunjung Baru' ? 'true' : 'false';
+  });
+
+  watch(jenisKunjungan, (newValue) => {
+    form.kunjSakit = newValue === 'Kunjungan Sakit' ? 'true' : 'false';
+    updatePoliOptions();
+    form.kdPoli = '';
+  });
+
+  watch(kategori, (newValue) => {
+    form.jknPbi = newValue;
+    form.kdProvider = newValue === 'BPJS' ? 'BPJS' : '';
+    form.statusKartu = newValue === 'BPJS' ? 'Aktif' : '';
+
+    if (newValue === 'BPJS' && selectedPasien.value.noKartu) {
+      form.noKartu = selectedPasien.value.noKartu;
+    } else {
+      form.noKartu = '';
     }
-  );
+  });
 
-  // Watch perubahan pada jenis pengunjung
-  watch(
-    () => form.jenisPengunjung,
-    (newValue) => {
-      form.kunjBaru = newValue === 'Pengunjung Baru';
-    }
-  );
-
-  // Watch perubahan pada kategori
-  watch(
-    () => form.kategori,
-    (newValue) => {
-      form.jknPbi = newValue;
-      form.kdProvider = newValue === 'BPJS' ? 'BPJS' : '';
-      form.statusKartu = newValue === 'BPJS' ? 'Aktif' : '';
-
-      if (newValue === 'BPJS' && selectedPasien.value.noKartu) {
-        form.noKartu = selectedPasien.value.noKartu;
-      } else {
-        form.noKartu = '';
-      }
-    }
-  );
-
-  // Inisialisasi data poli saat komponen dimuat
+  // Inisialisasi data saat komponen dimuat
   onMounted(() => {
     filteredPoliList.value = props.poliList;
+    loadMasterData();
+    loadMasterWilayah();
+
+    // Set initial values untuk computed properties
+    jenisPengunjung.value = 'Pengunjung Lama';
+    jenisKunjungan.value = 'Kunjungan Sakit';
+    kategori.value = 'NON_BPJS';
+    kodeTKP.value = 'RJTP (RAWAT JALAN)'; // ✅ DEFAULT saat pertama load
   });
 </script>
 
@@ -767,5 +1093,16 @@
   .table th,
   .table td {
     vertical-align: middle;
+  }
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>

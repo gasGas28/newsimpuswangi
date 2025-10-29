@@ -39,7 +39,19 @@ class SimpusResepObat extends Model
         'tgl_pengeluaran',
     ];
 
-    public function SimpusDetailResepObat(){
+    public function DetailResepObat(){
         return $this->hasMany(SimpusDetailResepObat::class, 'resep_id', 'id_resep');
     }
+    public function Loket(){
+        return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
+    }
+ 
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::deleting(function ($resep) {
+    //         $resep->SimpusDetailResepObat()->delete();
+    //     });
+    // }
 }

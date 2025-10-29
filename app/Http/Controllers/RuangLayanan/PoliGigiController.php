@@ -4,11 +4,17 @@ namespace App\Http\Controllers\RuangLayanan;
 
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\DataMasterUnitDetail;
+use App\Models\RuangLayanan\MasterAlergi;
+use App\Models\RuangLayanan\MasterDiagnosaKasus;
+use App\Models\RuangLayanan\MasterDokter;
 use App\Models\RuangLayanan\SimpusAlergiData;
 use App\Models\RuangLayanan\SimpusAnamnesa;
 use App\Models\RuangLayanan\SimpusDataDiagnosa;
 use App\Models\RuangLayanan\SimpusDetailResepObat;
+use App\Models\RuangLayanan\SimpusDiagnosa;
+use App\Models\RuangLayanan\SimpusKesadaran;
 use App\Models\RuangLayanan\SimpusMasterObat;
+use App\Models\RuangLayanan\SimpusPelayanan;
 use App\Models\RuangLayanan\SimpusResepObat;
 use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\StatusPulang;
@@ -29,7 +35,8 @@ class PoliGigiController extends Controller
             ->orderBy('id_kategori')
             ->get();
 
-        $DataPasien = DB::table('simpus_loket as l')
+        $DataPasien = DB::table('simpus_pelayanan as pel')
+            ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
             ->join('setup_kel as kel', function ($join) {
@@ -48,8 +55,11 @@ class PoliGigiController extends Controller
                     ->on('p.NO_PROP', '=', 'kab.NO_PROP');
             })
             ->join('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
-            ->where('l.kdPoli', operator: 002)
+            ->where('l.kdPoli', '002')
             ->select(
+                'pel.idpelayanan',
+                'pel.tglPelayanan',
+                'pel.sudahDilayani',
                 'p.NO_MR',
                 'p.NAMA_LGKP',
                 'p.NIK',
@@ -65,6 +75,7 @@ class PoliGigiController extends Controller
                 'l.idLoket'
             )
             ->get();
+        // dd($DataPasien);
 
         return Inertia::render('Ruang_Layanan/Gigi/pasien_poli', [
             'DataUnit' => $DataUnit,
@@ -118,16 +129,19 @@ class PoliGigiController extends Controller
             )
             ->get();
 
-        $DataAnamnesa = DB::table('simpus_anamnesa')->where('loketId', $DataPasien[0]->idLoket)->first();
-        $DataKesadaran = DB::table('simpus_kesadaran')->get();
-        $DiagnosaKasus = DB::table('master_diagnosa_kasus')->get();
-        $MasterAlergi = DB::table('master_alergi')->get();
+        $DataAnamnesa = SimpusAnamnesa::where('loketId', $DataPasien[0]->idLoket)->first();
+        $DataKesadaran = SimpusKesadaran::get();
+        $DiagnosaKasus = MasterDiagnosaKasus::get();
+        $MasterAlergi = MasterAlergi::get();
         $SimpusDataDiagnosa = SimpusDataDiagnosa::with(['SimpusPoliFKTP', 'MasterDiagnosaKasus'])->where('kdPoli', '002')->where('loketId', $DataPasien[0]->idLoket)->get();
         $SimpusTindakan = SimpusTindakan::where('loketId', $DataPasien[0]->idLoket)->get();
         $AlergiPasien = SimpusAlergiData::with(['alergiObat', 'alergiMakanan'])->where('pasienId', $DataPasien[0]->ID)->get();
         $StatusPulang = StatusPulang::all();
         $SimpusResepObat = SimpusResepObat::with('SimpusDetailResepObat.MasterObat')->where('loketId', $DataPasien[0]->idLoket)->get();
         $MasterObat = SimpusMasterObat::all();
+        $TenagaMedisAskep = MasterDokter::whereIn('profesi_id', [19, 20])->get();
+        $DiagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();
+        $DataRujuk = SimpusPelayanan::with(['SimpusLoket', 'SimpusPoli', 'StatusPulang'])->where('loketId', $DataPasien[0]->idLoket)->orderBy('createdDate', 'desc')->get();
         return Inertia::render('Ruang_Layanan/Gigi/pelayanan', [
             'DataPasien' => $DataPasien,
             'DataAnamnesa' => $DataAnamnesa,
@@ -136,10 +150,13 @@ class PoliGigiController extends Controller
             'MasterAlergi' => $MasterAlergi,
             'SimpusDataDiagnosa' => $SimpusDataDiagnosa,
             'SimpusTindakan' => $SimpusTindakan,
-            'AlergiPasien' => $AlergiPasien,
+            'AlergiPasien' => $AlergiPasien[0],
             'StatusPulang' => $StatusPulang,
             'SimpusResepObat' => $SimpusResepObat,
-            'MasterObat' => $MasterObat
+            'MasterObat' => $MasterObat,
+            'TenagaMedisAskep' => $TenagaMedisAskep,
+            'DiagnosaKeperawatan' => $DiagnosaKeperawatan,
+            'DataRujuk' => $DataRujuk
         ]);
     }
 
@@ -179,13 +196,14 @@ class PoliGigiController extends Controller
     }
     public function setAnamnesaObjective(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
 
         $anamnesa = SimpusAnamnesa::where('idAnamnesa', $request->idAnamnesa)->first();
         $dataUpdate = [
             'keadaanUmum' => $request->keadaan_umum ?? $anamnesa->keadaanUmum,
             'kdSadar' => $request->kesadaran ?? $anamnesa->kdSadar,
             'imt' => $request->imt ?? $anamnesa->imt,
+            'imtKet' => $request->imtKet ?? $anamnesa->imtKet,
             'tinggiBadan' => $request->tinggi_badan ?? $anamnesa->tinggiBadan,
             'beratBadan' => $request->berat_badan ?? $anamnesa->beratBadan,
             'lingkarPerut' => $request->lingkar_perut ?? $anamnesa->lingkarPerut,
@@ -254,7 +272,7 @@ class PoliGigiController extends Controller
     }
     public function setPlanningTindakan(Request $request)
     {
-        // dd($request->all());
+        dd($request->all());
         SimpusTindakan::create([
             'idPelayanan' => 1,
             'loketId' => $request->loketId,

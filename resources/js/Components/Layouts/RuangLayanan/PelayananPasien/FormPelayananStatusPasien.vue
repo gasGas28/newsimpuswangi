@@ -4,7 +4,7 @@
       <p class="bg-warning d-inline-block px-2 rounded">Rujukan</p>
     </div>
     <!-- FORM -->
-    <form>
+    <form @submit.prevent="submit_rujukan">
       <div class="row mb-3">
         <label class="col-sm-2 col-form-label fw-bold">Status Pulang</label>
         <div class="col-sm-4">
@@ -77,10 +77,9 @@
       <div class="row mb-3">
         <label class="col-sm-2 col-form-label fw-bold">Tenaga Medis</label>
         <div class="col-sm-4">
-          <select class="form-select">
+          <select class="form-select"  v-model="form.tenaga_medis">
             <option selected>- pilih -</option>
-            <option>dr. Agus</option>
-            <option>dr. Sari</option>
+            <option v-for="item in TenagaMedisAskep" >{{ item.nmDokter }}</option>
           </select>
         </div>
       </div>
@@ -109,16 +108,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td><span class="badge bg-primary bg-opacity-75">Umum</span></td>
+          <tr v-for="(item, index) in DataRujuk" :key="item.idPelayanan">
+            <td>{{ index + 1 }}</td>
+            <td><span class="badge bg-primary bg-opacity-75"> {{ item.simpus_poli.nmPoli }}</span></td>
+            <td>{{ item.status_pulang?.nmStatusPulang ?? '' }}</td>
             <td>-</td>
+            <td>{{ item.tenagaMedis }}</td>
             <td>-</td>
-            <td>-</td>
-            <td>user1</td>
-            <td>2025-07-29 08:17:36</td>
-            <td>-</td>
-            <td><button class="btn btn-outline-secondary btn-sm">Poli awal</button></td>
+            <td>{{ item.tglPelayanan }}</td>
+            <td>{{ item.endTIme }}</td>
+            <td><button class="btn btn-outline-secondary btn-sm" v-if=" item.pelIdSebelum === null||item.kdStatusPulang!=1">Poli awal</button>
+            <span class="btn btn-sm btn-warning" v-if="item.kdStatusPulang === 1">Batal Berobat Jalan</span></td>
           </tr>
         </tbody>
       </table>
@@ -129,11 +129,21 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { route } from 'ziggy-js';
 const props = defineProps({
-  statusPulang: Array
-})
+  statusPulang: Array,
+  DataRujuk : Array,
+  TenagaMedisAskep : Object,
+  idPelayanan : String,
+});
+const emit = defineEmits(['dataRujuk-update'])
+const DataRujuk = props.DataRujuk ?? '';
+const TenagaMedisAskep = props.TenagaMedisAskep ?? '';
+console.log('data rujuk dari form status pasiesn', DataRujuk)
 const form = useForm({
-  status_pulang: ''
+  status_pulang: '',
+  tenaga_medis: '',
+  idPelayanan : props.idPelayanan ?? ''
 });
 
 const statusPulangLabel = computed(() => {
@@ -142,4 +152,14 @@ const statusPulangLabel = computed(() => {
   )
   return found ? found.nmStatusPulang : ''
 })
+
+function submit_rujukan(){
+  form.post(route('ruang-layanan-umum.simpanRujukan'), {
+  preserveScroll: true,
+      onSuccess: () => {
+        alert("Rujuk tersimpan");
+        emit('dataRujuk-update');
+      },
+  });
+}
 </script>

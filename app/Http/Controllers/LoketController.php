@@ -12,8 +12,13 @@ use App\Models\Agama;
 use App\Models\Pekerjaan;
 use App\Models\Provinsi;
 use App\Models\Kabupaten;
+use App\Models\MasterUnit;
+use App\Models\UnitDetail;
+use App\Models\Wilayah;
+use App\Models\UnitProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\LoketService;
@@ -25,26 +30,29 @@ class LoketController extends Controller
 
     public function __construct(LoketService $service)
     {
-        // NOTE: autentikasi/middleware ditunda sesuai permintaan
         $this->service = $service;
     }
 
     public function index(Request $request)
     {
-        $poliList = Poli::query()->where('kategori', 'sakit')->orWhere('tipe', 'sakit')->get(['kdPoli', 'nmPoli']);
+        $poliList = Poli::where('poliSakit', 'true')->aktif()->get(['kdPoli', 'nmPoli']);
         $loket = Loket::with(['pasien', 'poli'])
             ->orderBy('tglKunjungan', 'desc')
             ->paginate(10);
+
+        $kategoriUnits = $this->getKategoriUnit();
+        $wilayah = $this->getWilayah();
 
         return Inertia::render('Loket/Index', [
             'loket' => $loket,
             'poliList' => $poliList,
             'pasienId' => $request->query('pasienId', null),
             'message' => session('message'),
+            'kategoriUnits' => $kategoriUnits,
+            'wilayah' => $wilayah,
         ]);
     }
 
-    // ajax_list -> sebagai API endpoint untuk DataTables
     public function ajaxList(Request $request)
     {
         $result = $this->service->datatable($request->all());
@@ -64,6 +72,11 @@ class LoketController extends Controller
             'agamaList' => Agama::orderBy('NO')->get(),
             'poliList' => Poli::all(),
             'pekerjaanList' => Pekerjaan::orderBy('NO')->get(),
+            'kategoriUnits' => $this->getKategoriUnit(),
+            'wilayah' => $this->getWilayah(),
+            'puskesmas' => $this->getPuskesmas(),
+            'providers' => $this->getProvider(),
+            'poliDropdown' => $this->getPoli(),
         ]);
     }
 
@@ -158,11 +171,11 @@ class LoketController extends Controller
 
         $data['noUrut'] = str_pad($lastNoUrut + 1, 4, '0', STR_PAD_LEFT);
 
-        $data['createdBy'] = auth()->user()->username ?? 'test_user';
+        $data['createdBy'] = Auth::user()?->username ?? 'test_user';
 
-        // Konversi boolean
+        // KONVERSI MENGGUNAKAN LOGIKA OTOMATIS
+        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
         $data['kunjSakit'] = ($data['jenisKunjungan'] ?? '') === 'Kunjungan Sakit' ? 'true' : 'false';
-        $data['kunjBaru'] = ($data['jenisPengunjung'] ?? '') === 'Pengunjung Baru' ? 'true' : 'false';
 
         $defaultValues = [
             'kelUmur' => 1,
@@ -189,6 +202,161 @@ class LoketController extends Controller
             Log::error('Error creating loket: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal mendaftarkan pasien: ' . $e->getMessage())->withInput();
         }
+    }
+
+    /**
+     * METHOD BARU: Menentukan jenis pengunjung otomatis
+     * - Pengunjung Baru: Jika pertama kali daftar dalam bulan berjalan
+     * - Pengunjung Lama: Jika sudah pernah daftar dalam bulan yang sama
+     */
+    private function tentukanJenisPengunjung($data)
+    {
+        $pasienId = $data['pasienId'] ?? null;
+        $tglKunjungan = $data['tglKunjungan'] ?? date('Y-m-d');
+
+        if (!$pasienId) {
+            // Jika pasien baru (belum ada ID), otomatis Pengunjung Baru
+            return 'true';
+        }
+
+        try {
+            // Cek apakah pasien sudah pernah berkunjung di bulan dan tahun yang sama
+            $riwayatBulanIni = DB::table('simpus_loket')
+                ->where('pasienId', $pasienId)
+                ->whereYear('tglKunjungan', date('Y', strtotime($tglKunjungan)))
+                ->whereMonth('tglKunjungan', date('m', strtotime($tglKunjungan)))
+                ->count();
+
+            Log::info("Cek riwayat pengunjung - PasienID: {$pasienId}, Tanggal: {$tglKunjungan}, Riwayat: {$riwayatBulanIni}");
+
+            // Jika belum ada riwayat di bulan ini -> Pengunjung Baru (true)
+            // Jika sudah ada riwayat di bulan ini -> Pengunjung Lama (false)
+            return $riwayatBulanIni > 0 ? 'false' : 'true';
+        } catch (\Exception $e) {
+            Log::error('Error menentukan jenis pengunjung: ' . $e->getMessage());
+            // Default ke Pengunjung Baru jika terjadi error
+            return 'true';
+        }
+    }
+
+    /**
+     * MASTER DATA FUNCTIONS
+     */
+    public function getKategoriUnit($id = null)
+    {
+        $query = MasterUnit::query();
+
+        if ($id) {
+            $query->where('id_kategori', '<>', 1);
+        }
+
+        $kategori = $query->orderBy('id_kategori')->pluck('kategori', 'id_kategori')->toArray();
+
+        return count($kategori) > 0 ? $kategori : ['0' => 'Tidak ada data'];
+    }
+
+    public function getUnitList($id_unit)
+    {
+        $idpkm = Auth::user()->unit ?? 1;
+
+        $units = UnitDetail::where('id_unit', $idpkm)
+            ->where('id_kategori', $id_unit)
+            ->where('status', 1)
+            ->pluck('nama_unit', 'id_detail')
+            ->toArray();
+
+        return count($units) > 0 ? $units : ['0' => 'Tidak ada data'];
+    }
+
+    public function getUnitListAll()
+    {
+        $idpkm = Auth::user()->unit ?? 1;
+
+        $query = UnitDetail::with('masterUnit')
+            ->where('status', 1)
+            ->orderBy('id_kategori')
+            ->orderBy('nama_unit');
+
+        if ($idpkm != '46') {
+            $query->where('id_unit', $idpkm);
+        }
+
+        $units = $query->get();
+
+        $data = [];
+        foreach ($units as $unit) {
+            $cleanName = str_replace('PUSKESMAS', '', $unit->nama_unit);
+            $data[$unit->id_detail] = '[ <strong>' . $unit->masterUnit->kategori . ' </strong>] ' . $cleanName;
+        }
+
+        return count($data) > 0 ? $data : ['0' => 'Tidak ada data'];
+    }
+
+    public function getWilayah()
+    {
+        $wilayah = Wilayah::orderBy('id_wilayah')
+            ->pluck('wilayah', 'id_wilayah')
+            ->toArray();
+
+        return ['0' => '- Pilih -'] + $wilayah;
+    }
+
+    public function getPuskesmas()
+    {
+        $idpkm = Auth::user()->unit ?? 1;
+
+        $query = UnitProfile::whereNull('kategori')
+            ->orderBy('nama_unit');
+
+        if ($idpkm) {
+            $query->where('unit_id', $idpkm);
+        }
+
+        $puskesmas = $query->pluck('nama_unit', 'unit_id')->toArray();
+
+        return count($puskesmas) > 0 ? $puskesmas : ['0' => 'Tidak ada data'];
+    }
+
+    public function getProvider()
+    {
+        $providers = DB::table('simpus_provider')
+            ->orderBy('kdProvider')
+            ->pluck('nmProvider', 'kdProvider')
+            ->toArray();
+
+        return ['0' => '- Pilih -'] + $providers;
+    }
+
+    public function getPoli()
+    {
+        $poli = DB::table('simpus_poli_fktp')
+            ->where('pelayanan', 'true')
+            ->pluck('nmPoli', 'kdPoli')
+            ->toArray();
+
+        return ['0' => '- Pilih -'] + $poli;
+    }
+
+    /**
+     * API ENDPOINTS untuk AJAX
+     */
+    public function unitList($kategoriUnitId)
+    {
+        $units = $this->getUnitList($kategoriUnitId);
+
+        $options = '<option value="">- Pilih Unit -</option>';
+        foreach ($units as $key => $value) {
+            $selected = request('selected') == $key ? 'selected' : '';
+            $options .= "<option value='{$key}' {$selected}>{$value}</option>";
+        }
+
+        return response($options);
+    }
+
+    public function getDataUnitById($id_detail)
+    {
+        $unit = UnitDetail::find($id_detail);
+        return response()->json($unit);
     }
 
     public function getProvinsiList()
@@ -231,9 +399,9 @@ class LoketController extends Controller
     public function getPoliByJenisKunjungan(Request $request)
     {
         if (($request->jenisKunjungan ?? '') === 'Kunjungan Sakit') {
-            $poliList = Poli::where('kategori', 'sakit')->orWhere('tipe', 'sakit')->get(['kdPoli', 'nmPoli']);
+            $poliList = Poli::where('poliSakit', 'true')->aktif()->get(['kdPoli', 'nmPoli']);
         } else {
-            $poliList = Poli::where('kategori', 'sehat')->orWhere('tipe', 'sehat')->get(['kdPoli', 'nmPoli']);
+            $poliList = Poli::where('poliSakit', 'false')->aktif()->get(['kdPoli', 'nmPoli']);
         }
 
         return response()->json($poliList);
@@ -250,18 +418,15 @@ class LoketController extends Controller
     public function cetak_kartu($id)
     {
         $pasien = Pasien::findOrFail($id);
-        $alamat = DB::table('unit_profiles')->where('unit_id', auth()->user()->unit ?? 1)->first();
-        // Jika kamu ingin render blade untuk PDF; saat ini kita render page Inertia atau blade
+        $alamat = DB::table('unit_profiles')->where('unit_id', Auth::user()?->unit ?? 1)->first();
         return Inertia::render('Loket/CetakKartu', [
             'pasien' => $pasien,
             'alamat' => $alamat,
         ]);
     }
 
-    // barcode: return basic SVG as response (simple)
     public function gen_barcode($NO_MR)
     {
-        // Simple Code39-like SVG (very minimal) - replace with real lib if needed
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><rect width="200" height="50" fill="#fff"/><text x="10" y="30" font-family="monospace">' . e($NO_MR) . '</text></svg>';
         return response($svg, 200)->header('Content-Type', 'image/svg+xml');
     }
@@ -277,21 +442,76 @@ class LoketController extends Controller
     {
         $data = $request->all();
 
-        // Hitung umur/kelompok umur via service
-        $this->service->calculateAgeGroups($data);
+        // KONVERSI FIELD DARI VUE KE STRUKTUR DATABASE
+        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
+        $data['kunjSakit'] = ($data['jenisKunjungan'] ?? '') === 'Kunjungan Sakit' ? 'true' : 'false';
+        $data['jknPbi'] = $data['kategori'] ?? 'NON_BPJS';
 
-        // sanitize unset fields (mengikuti CI3 logic)
+        // KONVERSI kodeTKP -> kdTkp
+        if (isset($data['kodeTKP'])) {
+            $data['kdTkp'] = $data['kodeTKP'];
+            unset($data['kodeTKP']);
+        }
+
+        // Hapus field yang tidak ada di database
+        unset($data['jenisPengunjung'], $data['jenisKunjungan'], $data['kategori']);
+
+        // DEBUG: Log data sebelum calculateAgeGroups
+        Log::info('Data sebelum calculateAgeGroups:', $data);
+
+        // Hitung umur/kelompok umur via service - DENGAN FALLBACK
+        try {
+            $this->service->calculateAgeGroups($data);
+        } catch (\Exception $e) {
+            Log::error('Error calculateAgeGroups: ' . $e->getMessage());
+            // FALLBACK: Set default values jika calculateAgeGroups gagal
+            $data['kelUmur'] = $data['kelUmur'] ?? 1;
+            $data['umur'] = $data['umur'] ?? 30;
+            $data['umur_bulan'] = $data['umur_bulan'] ?? 0;
+            $data['umur_hari'] = $data['umur_hari'] ?? 0;
+        }
+
+        if ($data['umur'] < 0 || $data['umur'] > 150) {
+            Log::warning('Umur tidak valid: ' . $data['umur'] . ', menggunakan default 30');
+            $data['umur'] = 30;
+            $data['kelUmur'] = 8; // Default untuk usia 20-44
+        }
+
+        // memastikan umur_bulan dan umur_hari tidak negatif
+        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+
+        // SANITIZE: Pastikan kelUmur tidak null
+        if (empty($data['kelUmur'])) {
+            $data['kelUmur'] = 1; // Default value
+        }
+
+        // DEBUG: Log data setelah calculateAgeGroups
+        Log::info('Data setelah calculateAgeGroups:', $data);
+
+        // sanitize unset fields
         unset($data['TGL_LHR'], $data['NO_MR'], $data['NIK']);
 
         $data['idLoket'] = \Illuminate\Support\Str::uuid()->toString();
-        $data['puskId'] = auth()->user()->unit ?? 1;
-        $data['createdBy'] = auth()->user()->username ?? 'system';
+        $data['puskId'] = Auth::user()?->unit ?? 1;
+        $data['createdBy'] = Auth::user()?->username ?? 'system';
+
+        // Generate nomor urut
+        $lastNoUrut = DB::table('simpus_loket')
+            ->whereDate('tglKunjungan', $data['tglKunjungan'])
+            ->max('noUrut') ?? 0;
+        $data['noUrut'] = str_pad($lastNoUrut + 1, 4, '0', STR_PAD_LEFT);
 
         try {
             DB::beginTransaction();
-            DB::table('simpus_loket')->insert($data);
 
-            // Insert pelayanan (simpus_pelayanan)
+            // DEBUG: Log data sebelum insert
+            Log::info('Data sebelum insert ke simpus_loket:', $data);
+
+            // Insert ke tabel loket
+            DB::table('simpus_loket')->insert($data);
+            Log::info('✅ Berhasil insert ke simpus_loket');
+            // Insert ke tabel pelayanan
             $layanan = [
                 'loketId' => $data['idLoket'],
                 'idpelayanan' => \Illuminate\Support\Str::uuid()->toString(),
@@ -304,29 +524,68 @@ class LoketController extends Controller
                 'startTime' => now(),
             ];
             DB::table('simpus_pelayanan')->insert($layanan);
+            Log::info('✅ Berhasil insert ke simpus_pelayanan');
 
-            // update pasien kdProvider & PHONE
+            // Update data pasien
             if (!empty($data['pasienId'])) {
                 DB::table('simpus_pasien')->where('ID', $data['pasienId'])->update([
                     'kdProvider' => $data['kdProvider'] ?? null,
                     'PHONE' => $data['PHONE'] ?? null,
                 ]);
+                Log::info('✅ Berhasil update data pasien');
             }
 
             DB::commit();
+            Log::info('✅ SEMUA OPERASI DATABASE BERHASIL');
 
-            return response()->json(['bridging' => ($data['statusKartu'] ?? '') != '' ? ($data['kdProvider'] == ($this->pcareKodePpk() ?? '') ? $data['idLoket'] : 'no') : 'no', 'status' => 'success', 'message' => 'ok']);
+            //Return Inertia response instead of JSON
+            return redirect()->route('loket.index')->with([
+                'success' => 'Pasien berhasil didaftarkan!',
+                'bridging_status' => ($data['statusKartu'] ?? '') != '' ?
+                    ($data['kdProvider'] == ($this->pcareKodePpk() ?? '') ? 'success' : 'no_bridging') : 'no_bpjs'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error simpan loket: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Data yang gagal disimpan:', $data);
+
+            //Return Inertia redirect dengan error
+            return redirect()->back()->with([
+                'error' => 'Gagal mendaftarkan pasien: ' . $e->getMessage(),
+                'input_data' => $request->all() // Untuk prepopulate form jika needed
+            ]);
         }
     }
 
     public function update(Request $request)
     {
         $data = $request->all();
+
+        // Konversi field untuk update - DETERMINASI JENIS PENGUNJUNG
+        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
+
+        if (isset($data['jenisKunjungan'])) {
+            $data['kunjSakit'] = $data['jenisKunjungan'] === 'Kunjungan Sakit' ? 'true' : 'false';
+            unset($data['jenisKunjungan']);
+        }
+
+        if (isset($data['kategori'])) {
+            $data['jknPbi'] = $data['kategori'];
+            unset($data['kategori']);
+        }
+
         $this->service->calculateAgeGroups($data);
+
+        if ($data['umur'] < 0 || $data['umur'] > 150) {
+            Log::warning('Umur tidak valid: ' . $data['umur'] . ', menggunakan default 30');
+            $data['umur'] = 30;
+            $data['kelUmur'] = 8; // Default untuk usia 20-44
+        }
+
+        // Juga pastikan umur_bulan dan umur_hari tidak negatif
+        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
 
         $pel = [
             'tglPelayanan' => $data['tglKunjungan'] ?? null,
@@ -334,7 +593,7 @@ class LoketController extends Controller
             'kdKegiatanPel' => $data['kdKegiatan'] ?? null,
             'kunjSakitPel' => $data['kunjSakit'] ?? 'false',
             'modifiedDate' => now(),
-            'modifiedBy' => auth()->user()->username ?? 'system',
+            'modifiedBy' => Auth::user()?->username ?? 'system',
         ];
 
         try {
@@ -351,7 +610,7 @@ class LoketController extends Controller
             }
 
             $data['modifiedDate'] = now();
-            $data['modifiedBy'] = auth()->user()->username ?? 'system';
+            $data['modifiedBy'] = Auth::user()?->username ?? 'system';
 
             DB::table('simpus_loket')->where('idLoket', $data['idLoket'])->update($data);
 
@@ -367,7 +626,6 @@ class LoketController extends Controller
 
     public function hapus($id)
     {
-        // Log delete info (user agent, ip, dll)
         $agent = request()->header('User-Agent', 'Unidentified User Agent');
         $qitem = DB::table('simpus_loket')->where('idLoket', $id)->first();
 
@@ -376,7 +634,7 @@ class LoketController extends Controller
         }
 
         $del = [
-            'puskId' => auth()->user()->unit ?? 1,
+            'puskId' => Auth::user()?->unit ?? 1,
             'agent' => $agent,
             'platform' => php_uname('s'),
             'ip_address' => request()->ip(),
@@ -384,7 +642,7 @@ class LoketController extends Controller
             'loketId' => $qitem->idLoket,
             'kdPoli' => $qitem->kdPoli,
             'tglKunjungan' => $qitem->tglKunjungan,
-            'deleteBy' => auth()->user()->username ?? 'system',
+            'deleteBy' => Auth::user()?->username ?? 'system',
             'deleteDate' => now(),
         ];
 
@@ -424,7 +682,6 @@ class LoketController extends Controller
 
     public function cek_beda_provider($pasienId, $tglKunjungan)
     {
-        // Ambil kode PPK (placeholder function pcare)
         $PPK = $this->pcareKodePpk();
         $tglcek = Carbon::parse($tglKunjungan)->format('Y-m-d');
 
@@ -437,7 +694,7 @@ class LoketController extends Controller
                 AND a.`puskId` = ?
                 AND a.`pasienId` = ?
             ) prov GROUP BY pasienId
-        ", [$PPK, $tglcek, auth()->user()->unit ?? 1, $pasienId]);
+        ", [$PPK, $tglcek, Auth::user()?->unit ?? 1, $pasienId]);
 
         $jmlbridging = $cek->bridging ?? 0;
 
@@ -450,16 +707,10 @@ class LoketController extends Controller
         }
     }
 
-    // Placeholder: ambil kode PPK (sesuaikan dengan implementasi base_model->pcare)
     protected function pcareKodePpk()
     {
-        // contoh: bisa ambil dari table config atau env
         return env('PCARE_KODE_PPK', 'KODE_PPK_DEFAULT');
     }
-
-    // ======== REPORT methods ====================================================
-    // Konversi report views: lap_reg_kunj_pas, lap_bulanan_data_kunj, dll.
-    // Saya sediakan contoh satu; kamu bisa tambahkan lainnya menggunakan service/rawSelect bila perlu.
 
     public function lap_reg_kunj_pas($is_html, $unit, $unit_details, $tgl_awal, $tgl_akhir, $kel = null, $pusk = null)
     {
@@ -472,5 +723,32 @@ class LoketController extends Controller
             'items' => $items,
             'menu' => 'laporan'
         ]);
+    }
+
+    /**
+     * HELPER FUNCTIONS
+     */
+    private function getFieldTable($tableName)
+    {
+        $columns = DB::getSchemaBuilder()->getColumnListing($tableName);
+        $data = [];
+        foreach ($columns as $column) {
+            $data[$column] = '';
+        }
+        return (object)$data;
+    }
+
+    public function getId()
+    {
+        return Auth::user()->unit ?? 1;
+    }
+
+    public function getKdPpk()
+    {
+        $user_id = Auth::id();
+        return DB::table('users as u')
+            ->join('pcare as p', 'p.pusk_id', '=', 'u.unit')
+            ->where('u.id', $user_id)
+            ->value('p.kode_ppk');
     }
 }

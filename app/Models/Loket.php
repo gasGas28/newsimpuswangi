@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\RuangLayanan\SimpusPelayanan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -35,5 +36,17 @@ class Loket extends Model
     public function poli()
     {
         return $this->belongsTo(Poli::class, 'kdPoli', 'kdPoli');
+    }
+
+    // Relasi ke unit detail
+    public function unitDetail()
+    {
+        return $this->belongsTo(UnitDetail::class, 'unitId', 'id_detail');
+    }
+
+    // Relasi ke pelayanan
+    public function pelayanan()
+    {
+        return $this->hasMany(SimpusPelayanan::class, 'loketId', 'idLoket');
     }
 }
