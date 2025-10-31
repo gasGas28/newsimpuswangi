@@ -48,7 +48,7 @@ const dataLayanan = [
   { nama: 'Tumbuh Kembang', jumlah: 0, link: 'ruang-layanan.gigi', icon: 'bi bi-clipboard-check', bg: '#10b981' },
   { nama: 'Neonatus', jumlah: 0, link: 'ruang-layanan.ugd', icon: 'bi bi-hospital', bg: '#facc15' },
   { nama: 'INC', jumlah: 0, link: 'ruang-layanan.kb', icon: 'bi bi-people-fill', bg: '#3b82f6' },
-  { nama: 'Kematian', jumlah: 0, link: 'ruang-layanan.sanitasi', icon: 'bi bi-droplet-half', bg: '#14b8a6' },
+  { nama: 'Kematian', jumlah: 0, link: 'ruang-layanan.kematian', icon: 'bi bi-droplet-half', bg: '#14b8a6' },
   { nama: 'PNC', jumlah: 0, link: 'ruang-layanan.rawat-inap', icon: 'bi bi-heart-pulse', bg: '#facc15' },
 ]
 
