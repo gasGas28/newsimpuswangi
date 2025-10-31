@@ -55,6 +55,7 @@ class LaboratoriumController extends Controller
     }
 public function index(Request $request)
 {
+   // dd($request->all());
     // --- DataUnit (punyamu, tetap) ---
     $DataUnit = DB::table('data_master_unit_detail as d')
         ->leftJoin('data_master_unit as u', 'u.id_kategori', '=', 'd.id_kategori')

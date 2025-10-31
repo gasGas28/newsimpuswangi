@@ -15,7 +15,7 @@ import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 const {props} = usePage();
 const DataUnit = props.DataUnit;
 const DataPasien = props.DataPasien;
-const backRoute = 'ruang-layanan-umum.pelayanan';
+const backRoute = 'ruang-layanan.pelayanan';
 
 
 console.log('data pasien',DataPasien);

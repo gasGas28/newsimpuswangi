@@ -12,6 +12,7 @@ class SimpusLoket extends Model
     protected $primaryKey = 'idLoket';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
         'idLoket',
@@ -93,4 +94,9 @@ class SimpusLoket extends Model
         return $this->hasMany(SimpusResepObat::class, 'loketId', 'idLoket');
 
     }
+    public function unitprofile()
+    {
+        return $this->belongsTo(UnitProfile::class, 'unitId', 'unit_id');
+    }
+
 }
