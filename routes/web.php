@@ -6,6 +6,7 @@ use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
 use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use App\Http\Controllers\RuangLayanan\PoliKIAController;
+use App\Http\Controllers\RuangLayanan\KematianController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -507,7 +508,11 @@ Route::post('/simpus/laborat/param/simpan-terpilih',
 
     // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
     Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+    
     // Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+    // Kematian Maternal dan Perinatal
+    Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
+    Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
 
 
 
