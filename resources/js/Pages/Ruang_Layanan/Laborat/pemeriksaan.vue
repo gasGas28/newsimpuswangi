@@ -17,89 +17,106 @@
         <div class="card-body">
           <div class="row g-4">
             <!-- ============ KIRI: IDENTITAS + AKSI ============ -->
-            <div class="col-lg-4">
-              <div class="border rounded-4 h-100">
-                <div class="p-3 border-bottom" style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="m-0">Identitas Pasien</h6>
+<div class="col-lg-4">
+  <div class="border rounded-4 h-100">
+    <!-- Header -->
+    <div class="p-3 border-bottom" style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fs-5 fw-semibold">Identitas Pasien</h6>
 
-                    <!-- AKSI kecil ala CI -->
-                    <div class="btn-group">
-                      <button class="btn btn-sm btn-outline-primary" @click="openPermohonanModal" title="Tambah Permohonan">
-                        <i class="bi bi-file-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-success" @click="openMasterModal" :disabled="!order" title="Tambah Pemeriksaan">
-                        <i class="bi bi-clipboard2-plus"></i>
-                      </button>
-                      <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" :disabled="!order" title="Tambah Paket Cepat">
-                          Paket
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket Darah Lengkap</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a></li>
-                        </ul>
-                      </div>
-                      <button class="btn btn-sm btn-outline-dark" @click="printHasil" :disabled="!order" title="Cetak / Print">
-                        <i class="bi bi-printer"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+        <div class="btn-group">
+          <div class="btn-group" role="group">
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket Darah Lengkap</a></li>
+              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
-                <div class="p-3 small">
-                  <div class="fw-semibold">{{ pasien.NAMA_LGKP || '-' }}</div>
-                  <div class="text-muted">NO. MR: {{ pasien.NO_MR || '-' }}</div>
-                  <hr />
-                  <div><span class="text-muted">Tgl Kunjungan:</span> {{ pasien.tglKunjungan || '-' }}</div>
-                  <div><span class="text-muted">NIK:</span> {{ pasien.NIK || '-' }}</div>
-                  <div><span class="text-muted">Jenis Kelamin:</span> {{ pasien.jenis_klmin || '-' }}</div>
-                  <div class="mt-2">
-                    <span class="text-muted">Alamat:</span>
-                    <div>{{ alamatLengkap }}</div>
-                  </div>
-                </div>
+    <!-- Identitas -->
+    <div class="p-3" style="font-size: 1rem;">  <!-- 🔹 teks sedikit diperbesar -->
+      <div class="fw-semibold fs-5">{{ pasien.NAMA_LGKP || '-' }}</div>
+      <div class="text-muted">NO. MR: <span class="fw-medium">{{ pasien.NO_MR || '-' }}</span></div>
+      <hr />
+      <div><span class="text-muted">Tgl Kunjungan:</span> <span class="fw-medium">{{ pasien.tglKunjungan || '-' }}</span></div>
+      <div><span class="text-muted">NIK:</span> <span class="fw-medium">{{ pasien.NIK || '-' }}</span></div>
+      <div><span class="text-muted">Jenis Kelamin:</span> <span class="fw-medium">{{ pasien.jenis_klmin || '-' }}</span></div>
+      <div class="mt-2">
+        <span class="text-muted">Alamat:</span>
+        <div class="fw-medium">{{ alamatLengkap }}</div>
+      </div>
+    </div>
 
-                <!-- Objective -->
-                <div class="p-3 border-top">
-                  <h6 class="mb-2 text-danger">Hasil Pemeriksaan Objective</h6>
-                  <pre class="small text-muted mb-2">loketId: {{ pasien.idLoket || '-' }}</pre>
+    <!-- Objective -->
+<div class="p-3 border-top">
+<h6 class="mb-2 text-dark fw-bold fs-5">Hasil Pemeriksaan Objective</h6>
 
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Keadaan umum</span>
-                    <span>{{ (objective && objective.keadaanUmum) || '-' }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Tinggi Badan</span>
-                    <span>{{ (objective && objective.tinggiBadan) || '-' }} cm</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Berat Badan</span>
-                    <span>{{ (objective && objective.beratBadan) || '-' }} kg</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Tekanan darah</span>
-                    <span>{{ (objective && objective.sistole) || '-' }}/{{ (objective && objective.diastole) || '-' }} mmHg</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Resp. rate</span>
-                    <span>{{ (objective && objective.respRate) || '-' }} bpm</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Heart rate</span>
-                    <span>{{ (objective && objective.heartRate) || '-' }} bpm</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">Suhu</span>
-                    <span>{{ (objective && objective.suhu) || '-' }} °C</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+
+<!-- Fisik -->
+<div class="mb-2 text-danger fw-bold fs-6">Fisik</div> <!-- 🔴 Merah & tebal -->
+<ul class="list-unstyled ps-3 mb-3 fs-6"> <!-- Sedikit lebih besar dari normal -->
+  <li class="d-flex justify-content-between gap-3">
+    <span>Keadaan umum</span>
+    <span>{{ objective?.keadaanUmum || '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Kesadaran</span>
+    <span>{{ objective?.kesadaran || 'Compos mentis' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Tinggi Badan</span>
+    <span>{{ objective?.tinggiBadan ? objective.tinggiBadan + ' cm' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Berat badan</span>
+    <span>{{ objective?.beratBadan ? objective.beratBadan + ' kg' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Lingkar perut</span>
+    <span>{{ objective?.lingkarPerut ? objective.lingkarPerut + ' cm' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Tinggi lutut</span>
+    <span>{{ objective?.tinggiLutut ? objective.tinggiLutut + ' cm' : '-' }}</span>
+  </li>
+</ul>
+
+
+
+<!-- Tekanan darah -->
+<div class="mb-2 text-danger fw-bold fs-6">Tekanan darah</div> <!-- 🔴 Merah & tebal -->
+<ul class="list-unstyled ps-3 mb-0 fs-6"> <!-- Agak besar tapi tidak lebih dari header -->
+  <li class="d-flex justify-content-between gap-3">
+    <span>Sistole</span>
+    <span>{{ objective?.sistole ? objective.sistole + ' mmHg' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Diastole</span>
+    <span>{{ objective?.diastole ? objective.diastole + ' mmHg' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Resp. rate</span>
+    <span>{{ objective?.respRate ? objective.respRate + ' bpm' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Heart rate</span>
+    <span>{{ objective?.heartRate ? objective.heartRate + ' bpm' : '-' }}</span>
+  </li>
+  <li class="d-flex justify-content-between gap-3">
+    <span>Suhu</span>
+    <span>{{ objective?.suhu ? objective.suhu + ' °C' : '-' }}</span>
+  </li>
+</ul>
+</div>
+  </div>
+</div>
+
 
             <!-- ============ KANAN: PERMOHONAN + TABEL ============ -->
             <div class="col-lg-8">
@@ -142,15 +159,20 @@
                         <td class="text-end">
                         <td class="text-end">
                           <div class="btn-group btn-group-sm" role="group" style="white-space:nowrap;">
-                            <button class="btn btn-outline-success" @click="openMasterModal">
+                            <button class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4" @click="openMasterModal">
                               <i class="bi bi-plus-square me-1"></i>Tambah
                             </button>
-                            <button class="btn-success"
-                              @click="printHasil"
-                              :disabled="!order"
-                              title="Cetak / Print lembar hasil">
-                              <i class="bi bi-printer"></i>
-                            </button>
+                                <button
+                                  class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4"
+                                  @click="printHasil"
+                                  :disabled="!order"
+                                  title="Cetak / Print lembar hasil"
+                                  aria-label="Cetak lembar hasil"
+                                >
+                                  <i class="bi bi-printer fs-5"></i>
+                                  <span class="fw-semibold">Cetak</span>
+                                </button>
+
                           </div>
                         </td>
 
@@ -175,6 +197,18 @@
                     <button class="btn btn-sm btn-outline-secondary" @click="reloadPage">
                       <i class="bi bi-arrow-clockwise me-1"></i> Reload
                     </button>
+
+                          <!-- NEW: Hapus semua -->
+<button
+  class="btn btn-danger btn-sm shadow-sm rounded-3 px-3 fw-semibold"
+  @click="hapusSemua"
+  :disabled="!order || rows.length===0"
+  title="Hapus semua item pemeriksaan dalam permohonan ini"
+>
+  <i class="bi bi-trash3 me-2"></i> Hapus Semua
+</button>
+
+
 
                   </div>
                 </div>
@@ -607,6 +641,31 @@ function addPaketHeader(headerObj) {
     preserveScroll: true,
     onError: showErrors,
     onSuccess: reloadPage
+  });
+}
+function hapusSemua() {
+  if (!order.value || !permId.value) return;
+
+  const ok = confirm(`Hapus SEMUA item pemeriksaan pada permohonan #${permId.value}?`);
+  if (!ok) return;
+
+  const payload = { order_id: permId.value };
+
+  router.post(route('ruang-layanan.laborat.hapusSemuaTindakan'), payload, {
+    preserveScroll: true,
+    onError: (errs) => showErrors(errs),
+    onSuccess: () => {
+      reloadPage();
+      try {
+        Swal?.fire({
+          title: 'Selesai',
+          text: 'Semua item pemeriksaan berhasil dihapus.',
+          icon: 'success',
+          timer: 1600,
+          showConfirmButton: false
+        });
+      } catch {}
+    }
   });
 }
 
@@ -1113,6 +1172,40 @@ onMounted(() => {
   .print-sheet { display: none; }
 }
 
+/* Tombol print versi besar & cantik */
+.btn-print {
+  border: 0 !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .2s ease;
+}
+.btn-print:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .75rem 1.5rem rgba(16,185,129,.18);
+  filter: saturate(1.05);
+}
+.btn-print:active {
+  transform: translateY(0);
+  box-shadow: 0 .25rem .75rem rgba(16,185,129,.22);
+}
+.btn-print:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 .2rem rgba(59,130,246,.25), /* biru */
+    0 0 0 .45rem rgba(16,185,129,.18); /* hijau */
+}
+
+/* Gradient-nya selaras dengan tema kamu */
+.gradient-btn {
+  background: linear-gradient(135deg, #3b82f6, #10b981) !important;
+  color: #fff !important;
+}
+.btn-print[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
 /* ====== Gaya print-sheet ====== */
 .print-sheet {
   font-family: "Times New Roman", serif;
@@ -1155,6 +1248,29 @@ onMounted(() => {
 }
 .gradient-btn:hover { transform: translateY(-1px); box-shadow: 0 .5rem 1rem rgba(16,185,129,.15); }
 .table th, .table td { vertical-align: middle; }
+/* Tombol merah besar dan cantik */
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626); /* merah gradien */
+  border: none;
+  color: #fff !important;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1rem rgba(239, 68, 68, 0.25);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+  box-shadow: 0 0.3rem 0.6rem rgba(185, 28, 28, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* --- Simple Modal --- */
 .modal-mask {

@@ -102,17 +102,19 @@
                   <td>-</td>
                   <td>{{ item.nmPoli || '-' }}</td>
                   <td>{{ item.alasan || '-' }}</td>
-                  <td>
+                  <td class="text-center">
                     <span class="badge" :class="item.status === 'Selesai' ? 'bg-success' : 'bg-warning text-dark'">
                       {{ item.status }}
                     </span>
                   </td>
-<Link
-  class="text-decoration-none btn btn-sm btn-danger rounded-3 px-3"
-  :href="route('ruang-layanan.laborat.pemeriksaan', { loketId: item.idLoket })"
->
-  Belum Dilayani
-</Link>
+                  <td class="text-center">
+                    <Link
+                      class="btn btn-success"
+                      :href="route('ruang-layanan.laborat.pemeriksaan', { loketId: item.idLoket })"
+                    >
+                      Detail
+                    </Link>
+                  </td>
 
                 </tr>
 
@@ -247,4 +249,6 @@ function formatAlamat(it) {
 .card-header { border: none; }
 .table th, .table td { vertical-align: middle; }
 .table { --bs-table-bg: transparent; }
+
+
 </style>

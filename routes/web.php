@@ -310,7 +310,22 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
 });
-
+Route::prefix('ruang_layanan/simpus/kunjungan-online')
+    ->name('kunj-online.')
+    ->middleware(['auth']) // kalau mau wajib login
+    ->group(function () {
+        Route::get('/{idPoli?}/{klaster?}', [KunjOnlineController::class, 'index'])->name('index');
+        Route::get('/pelayanan/{id}/{idPoli}/{idPelayanan}', [KunjOnlineController::class, 'pelayanan'])->name('pelayanan');
+        Route::post('/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])->name('setAnamnesa');
+        Route::post('/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])->name('setAnamnesaObjective');
+        Route::post('/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])->name('mulai-pemeriksaan-pasien');
+        Route::post('/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])->name('diagnosa-medis');
+        Route::get('/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])->name('surat-rujukan');
+        Route::get('/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])->name('surat-rujukan.create');
+        Route::post('/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])->name('surat-rujukan.store');
+        Route::get('/{id}/riwayat-kesehatan', [KunjOnlineController::class, 'riwayatKesehatan'])->name('riwayat-kesehatan');
+        Route::get('/{id}/cppt', [KunjOnlineController::class, 'cppt'])->name('cppt');
+    });
 Route::prefix('ruang_layanan')->group(function () {
     // Menampilkan halaman poli
     Route::get('/simpus/poli', [indexController::class, 'listPoli'])->name('ruang-layanan.poli');
@@ -408,47 +423,8 @@ Route::prefix('ruang_layanan')->group(function () {
 
 
     // 🔹 Kunjungan Online
-    // 🔹 Kunjungan Online
-    Route::get('simpus/kunjungan-online', [KunjOnlineController::class, 'index'])
-        ->name('ruang-layanan.kunjungan-online');
+ 
 
-    Route::get('simpus/kunjungan-online/pelayanan/{id}', [KunjOnlineController::class, 'pelayanan'])
-        ->name('ruang-layanan.kunjungan-online.pelayanan');
-
-    Route::post('simpus/kunjungan-online/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])
-        ->name('ruang-layanan-kunjungan-online.setAnamnesa');
-
-    Route::post('simpus/kunjungan-online/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])
-        ->name('ruang-layanan-kunjungan-online.setAnamnesaObjective');
-
-    Route::post('simpus/kunjungan-online/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])
-        ->name('ruang-layanan-kunjungan-online.mulai-pemeriksaan-pasien');
-
-    Route::post('simpus/kunjungan-online/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])
-        ->name('ruang-layanan-kunjungan-online.diagnosa-medis');
-
-    // Halaman daftar surat rujukan (opsional)
-    Route::get('simpus/kunjungan-online/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan');
-
-    // Tampilkan form Surat Rujukan
-    Route::get('simpus/kunjungan-online/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan.create');
-
-    // Simpan Surat Rujukan
-    Route::post('simpus/kunjungan-online/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan.store');
-
-    // Riwayat Kesehatan (Medical Record) Pasien
-    Route::get(
-        'simpus/kunjungan-online/{id}/riwayat-kesehatan',
-        [KunjOnlineController::class, 'riwayatKesehatan']
-    )->name('ruang-layanan.kunjungan-online.riwayat-kesehatan');
-
-
-    // CPPT (Catatan Perkembangan Pasien Terintegrasi)
-    Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class, 'cppt'])
-        ->name('ruang-layanan.kunjungan-online.cppt');
 
 
 
@@ -486,6 +462,12 @@ Route::prefix('ruang_layanan')->group(function () {
     Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
     Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
 });
+
+
+
+
+
+
 
     //Laborat
     // Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
@@ -558,6 +540,13 @@ Route::prefix('ruang_layanan')->group(function () {
         [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
     )->name('ruang-layanan.laborat.param.simpanTerpilih');
 
+Route::post(
+  '/ruang-layanan/laborat/hapus-semua',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'hapusSemuaTindakan']
+)->name('ruang-layanan.laborat.hapusSemuaTindakan');
+
+
+// ================== KUNJUNGAN ONLINE (STANDALONE) ==================
 
 
 // =================== HALAMAN OWNER (Inertia) ===================

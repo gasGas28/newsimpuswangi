@@ -1,7 +1,7 @@
 <template>
   <AppLayouts>
     <FormAnamnesa
-      title="Kunjungan Online33"
+      title="Poli Kunjungan Online"
       :backRoute="backRoute"
       :unitList="unitList"
       :rows="rows"
@@ -10,19 +10,24 @@
 </template>
 
 <script setup>
-import { usePage } from '@inertiajs/vue3'
-import AppLayouts from '@/Components/Layouts/AppLayouts.vue'
-import FormAnamnesa from '@/Components/Layouts/RuangLayanan/DataPasien.vue'
+import { ref } from 'vue'
+import { route } from 'ziggy-js';
+import { usePage } from '@inertiajs/vue3';
+import FormAnamnesa from '../../../Components/Layouts/RuangLayanan/DataPasien.vue';
+import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 
-const { props } = usePage()
+const {props} = usePage();
+const DataUnit = props.DataUnit;
+const DataPasien = props.DataPasien;
+const backRoute = route('kunj-online.index', { idPoli: '999' })
 
-// rows harus berisi field persis seperti yang dipakai DataPasien.vue
-const rows = Array.isArray(props?.DataPasien) ? props.DataPasien : []
 
-// mapping unit aman (relasi bisa null)
-const unitList = (Array.isArray(props?.DataUnit) ? props.DataUnit : [])
-  .map(u => `[ ${u?.data_master_unit?.kategori ?? '-'} ] ${u?.nama_unit ?? '-'}`)
+console.log('data pasien',DataPasien);
+const unitList = DataUnit.map(item => {
+  const kategori = item.data_master_unit.kategori
+  const nama = item.nama_unit
+  return `[${kategori}] ${nama}`   // ← pakai string biasa atau backtick, bukan ${} di string biasa
+})
 
-// nama route DETAIL (dipakai DataPasien.vue untuk route(backRoute, idLoket))
-const backRoute = 'ruang-layanan.kunjungan-online.pelayanan'
+const rows = DataPasien;
 </script>

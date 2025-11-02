@@ -3,7 +3,7 @@
     <div class="card m-4  rounded-4 rounded-bottom-0">
       <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"
         style="background: linear-gradient(135deg, #3b82f6, #10b981);">
-        <h1 class="fs-5 text-white">BP UMUM</h1>
+        <h1 class="fs-5 text-white">BP UMUM2</h1>
         <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
         <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
         </Link>
