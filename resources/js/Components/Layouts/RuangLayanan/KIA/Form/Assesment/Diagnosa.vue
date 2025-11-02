@@ -55,7 +55,7 @@
           </div>
           <div class="col-6 d-flex flex-column">
             <label class="fw-bold">Keterangan Alergi</label>
-            <input type="text" class="form-control bg-warning bg-opacity-75" />
+            <input type="text" class="form-control bg-opacity-75" />
           </div>
         </div>
 

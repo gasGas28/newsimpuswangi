@@ -6,6 +6,7 @@ use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
 use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use App\Http\Controllers\RuangLayanan\PoliKIAController;
+use App\Http\Controllers\RuangLayanan\KematianController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -509,11 +510,53 @@ Route::prefix('ruang_layanan')->group(function () {
         '/simpus/laborat/detail/{idPermohonan}',
         [LaboratoriumController::class, 'detail']
     )->name('ruang-layanan.laborat.detail');
-    // Paket dari parameter_uji
-    Route::get(
-        '/simpus/laborat/param/headers',
-        [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramHeaders']
-    )->name('ruang-layanan.laborat.param.headers');
+// Paket dari parameter_uji
+Route::get('/simpus/laborat/param/headers',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramHeaders']
+)->name('ruang-layanan.laborat.param.headers');
+
+Route::get('/simpus/laborat/param/{header}/subheaders',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.subheaders');
+
+Route::post('/simpus/laborat/param/{header}/simpan',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpan']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.simpan');
+
+Route::post('/simpus/laborat/tindakan/hapus',[LaboratoriumController::class, 'hapusTindakan'])->name('ruang-layanan.laborat.hapusTindakan');
+// LIST semua parameter_uji (bisa search + filter paket) — paginated
+Route::get('/simpus/laborat/param/browse',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramBrowse']
+)->name('ruang-layanan.laborat.param.browse');
+
+// Simpan pilihan manual (by id_parameter[])
+Route::post('/simpus/laborat/param/simpan-terpilih',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
+)->name('ruang-layanan.laborat.param.simpanTerpilih');
+
+    // Kia
+    Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+
+    //ANC
+    Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
+
+    // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+    Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+    
+    // Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+    // Kematian Maternal dan Perinatal
+    Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
+    Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
+
 
     Route::get(
         '/simpus/laborat/param/{header}/subheaders',
