@@ -107,6 +107,7 @@ Route::prefix('admin')->group(function () {
 
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
+    
     Route::get('/', fn() => Inertia::render('Farmasi/Index'));
     Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
     Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
@@ -327,7 +328,9 @@ Route::prefix('ruang_layanan/simpus/kunjungan-online')
         Route::get('/{id}/riwayat-kesehatan', [KunjOnlineController::class, 'riwayatKesehatan'])->name('riwayat-kesehatan');
         Route::get('/{id}/cppt', [KunjOnlineController::class, 'cppt'])->name('cppt');
     });
-Route::prefix('ruang_layanan')->group(function () {
+Route::prefix('ruang_layanan') ->middleware(['auth'])
+->group(function () {    
+
     // Menampilkan halaman poli
     Route::get('/simpus/poli', [indexController::class, 'listPoli'])->name('ruang-layanan.poli');
     Route::get('/simpus/poli/{kluster}', [indexController::class, 'listPoliKluster'])->name('ruang-layanan.poli-kluster');
