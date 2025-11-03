@@ -48,7 +48,7 @@
                 <i class="bi bi-heart-pulse-fill text-success me-2"></i>
                 <h6 class="mb-0 text-muted">Jenis/Poli</h6>
               </div>
-              <p class="mb-0 fw-semibold">Kunjungan Sakit (Umum)</p>
+              <p class="mb-0 fw-semibold">{{ dataPasien.kunjSakit = true ? 'Kunjungan Sakit' : 'Kunjungan Sehat' }} ({{ dataPasien.nmPoli }} <template v-if="dataPasien.poliAwal"> / {{ dataPasien.poliAwal.nmPoli }}</template>)</p>
             </div>
           </div>
 
@@ -87,7 +87,7 @@
 
       <div class="quick-actions mb-2">
         <div class="action-grid">
-          <Link :href="route('ruang-layanan-umum.surat-keterangan', {
+          <Link :href="route('ruang-layanan.surat-keterangan-list', {
             idPoli: props.dataPasien.kdPoli,
             idPelayanan: props.idPelayanan
           })" class="action-card doc-action">
@@ -108,8 +108,8 @@
           </Link>
 
           <Link :href="route('ruang-layanan.riwayat-pasien', {
-            idPoli : props.dataPasien.kdPoli,
-            idPasien : props.dataPasien.ID
+            idPoli: props.dataPasien.kdPoli,
+            idPasien: props.dataPasien.ID
           })" class="action-card history-action">
           <div class="action-icon">
             <i class="bi bi-clock-history"></i>
@@ -117,21 +117,25 @@
           <div class="action-label">Riwayat Pasien</div>
           </Link>
 
-          <Link href="/cppt" class="action-card medical-action">
+          <Link :href="route('ruang-layanan.cppt', {
+            idPoli: props.dataPasien.kdPoli,
+            idPasien: props.dataPasien.ID
+          })" class="action-card medical-action">
           <div class="action-icon">
             <i class="bi bi-file-text"></i>
           </div>
           <div class="action-label">CPPT</div>
           </Link>
 
-          <Link href="/ukk" class="action-card medical-action">
-          <div class="action-icon">
-            <i class="bi bi-clipboard2-heart"></i>
-          </div>
-          <div class="action-label">UKK</div>
-          </Link>
+          <button @click="openModalUkk" class="action-card medical-action" data-bs-toggle="modal"
+            data-bs-target="#exampleModal">
+            <div class="action-icon">
+              <i class="bi bi-clipboard2-heart"></i>
+            </div>
+            <div class="action-label">UKK</div>
+          </button>
 
-          <button v-if="!isMelayani" @click.prevent="mulaiPemeriksaanPasien"
+          <button v-if="!isMelayani && props.dataPasien.kdPoli !== '097'" @click.prevent="mulaiPemeriksaanPasien"
             class="action-card start-action pulse-animation">
             <div class="action-icon">
               <i class="bi bi-person-check"></i>
@@ -144,27 +148,89 @@
     <div v-if="isMelayani" class="mt-4 p-2">
       <slot></slot>
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="submitUkk" action="">
+              <div class="d-flex gap-5">
+                <div>
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Pekerjaan</label>
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                      v-model="formUkk.pekerjaan">
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Tipe Kerja</label>
+                    <select class="form-select" v-model="formUkk.tipe_kerja">
+                      <option value="" selected>--Pilih--</option>
+                      <option value="true">Formal</option>
+                      <option value="false">Informal</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Tempat Kerja</label>
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                      v-model="formUkk.tempat_kerja">
+                  </div>
+                </div>
+                <div>
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Lama Kerja</label>
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                      v-model="formUkk.lama_kerja">
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Jenis UKK</label>
+                    <select class="form-select" v-model="formUkk.jenis_ukk">
+                      <option value="" selected>--Pilih--</option>
+                      <option v-for="value in jenisUkk" :key="value.id_jenis" :value="value.id_jenis">
+                        {{ value.jenis_ukk }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex gap-3 justify-content-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { router, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { Link } from '@inertiajs/vue3'
+import axios from 'axios';
+import * as bootstrap from 'bootstrap'
 
 const props = defineProps({
   isMelayani: Boolean,
   dataPasien: Array,
   dataAnamnesa: Array,
-  idPelayanan: String
+  idPelayanan: String,
+  pelayanan: Object
 });
 
-console.log('idPelayaanann', props.idPelayanan);
+console.log('data pasien', props.pelayanan);
 
-const isMelayani = ref(props.dataAnamnesa !== null)
-
+const isMelayani = ref(props.pelayanan.sudahDilayani !== 0 || props.dataPasien.kdPoli === '097')
 const emit = defineEmits(['ubah-melayani', 'ubah-dataAnamnesa',]);
-
+const jenisUkk = ref(null);
+const ukk = ref(null);
 
 watch(isMelayani, (val) => {
   emit('ubah-melayani', val)
@@ -173,6 +239,31 @@ watch(isMelayani, (val) => {
 watch(() => props.isMelayani, (val) => {
   isMelayani.value = val
 })
+
+function openModalUkk() {
+  fetchUkk(route('ruang-layanan.get-ukk', { idLoket: props.dataPasien.idLoket }))
+}
+
+function fetchUkk(url) {
+  if (!url) return;
+
+  // const relativeUrl = url.startsWith('http')
+  //   ? new URL(url).pathname + new URL(url).search
+  //   : url;
+  axios.get(url)
+    .then(res => {
+      jenisUkk.value = res.data.jenisUkk;
+      ukk.value = res.data.ukk
+      formUkk.pekerjaan = props.dataPasien?.DESCRIP ?? ukk.value?.pekerjaan ?? '';
+      formUkk.tipe_kerja = ukk.value?.tipeKerja ?? '';
+      formUkk.tempat_kerja = ukk.value?.tempatKerja ?? '';
+      formUkk.lama_kerja = ukk.value?.lamaKerja ?? '';
+      formUkk.jenis_ukk = ukk.value?.jenisUKK ?? '';
+      console.log('jenis ukk',res.data)
+      console.log('fetching URL:', url);
+    })
+    .catch(err => console.error(err));
+}
 
 function mulaiPemeriksaanPasien() {
   const now = new Date();
@@ -187,6 +278,27 @@ function mulaiPemeriksaanPasien() {
       isMelayani.value = true;
       emit('ubah-melayani', false);
       alert('sukses memulai melayani pasien')
+    }
+  });
+}
+
+const formUkk = useForm({
+  pekerjaan:  '',
+  tipe_kerja: '',
+  tempat_kerja: '',
+  lama_kerja: '',
+  jenis_ukk: ''
+})
+
+function submitUkk() {
+  formUkk.post(route('ruang-layanan.simpan-ukk', {
+    idLoket: props.dataPasien.idLoket
+  }), {
+    onSuccess: () => {
+      const modalElement = document.getElementById('exampleModal')
+      const modalInstance = bootstrap.Modal.getInstance(modalElement)
+      modalInstance.hide()
+      alert('sukses menyimpan data');
     }
   });
 }

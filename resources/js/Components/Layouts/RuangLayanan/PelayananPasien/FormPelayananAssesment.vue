@@ -94,7 +94,7 @@
             </div>
             <select class="form-control" v-model="formDiagnosaKeperawatan.kode_diagnosa" @change="updateNamaDiagnosa">
               <option value="">-- Pilih --</option>
-              <option v-for="item in props.diagnosaKeperawatan" :key="item.id" :value="item.id">
+              <option v-for="item in props.MasterDiagnosaKeperawatan" :key="item.id" :value="item.id">
                 {{ item.nmDiag }}
               </option>
             </select>
@@ -121,7 +121,7 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.nmDiagnosa }}</td>
                   <td>{{ item.keterangan }}</td>
-                  <td>{{ item.master_diagnosa_kasus.kasus }}</td>
+                  <td>{{ item.master_diagnosa_kasus?.kasus }}</td>
                   <td>{{ item.simpus_poli_f_k_t_p.nmPoli }}</td>
                   <td>
                     <button class="btn btn-sm btn-danger" @click="hapusDiagnosa(item.idDiagnosa)">Hapus</button>
@@ -136,12 +136,18 @@
                 <tr>
                   <th>No</th>
                   <th>Nama Diagnosa Asuhan Keperawatan</th>
-                  <th>Keterangan</th>
-                  <th>Kasus</th>
-                  <th>Poli</th>
                   <th>Action</th>
                 </tr>
               </thead>
+              <tbody>
+                <tr v-for="(item, index) in props.diagnosaKeperawatan">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ item.nmDiagnosa }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger" @click="hapusDiagnosaKeperawatan(item.idDiagnosa)">Hapus</button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -179,7 +185,7 @@
                 <tr v-for="(item, index) in diagnosaMedis.data" :key="index">
                   <td>{{ item.kdDiag }}</td>
                   <td>{{ item.nmDiag }}</td>
-                  <td></td>
+                  <td>{{ item.non_spes== '1' ?  'Non Spesial' : ''}}</td>
                   <td>
                     <button class="btn btn-info btn-sm" @click="pilihDiagnosa(item)">Pilih</button>
                   </td>
@@ -211,6 +217,7 @@ const props = defineProps({
   simpusDataDiagnosaMedis: Array,
   routeDiagnosaMedis: String,
   AlergiPasien: Object,
+  MasterDiagnosaKeperawatan: Object,
   diagnosaKeperawatan: Object,
   idPelayanan: String,
   idLoket: String,
@@ -220,27 +227,25 @@ const keyword = ref('');
 const showModal = ref(false);
 const diagnosaMedis = ref({ data: [], links: [] });
 const emit = defineEmits(['dataAnamnesa-update']);
-console.log('data diagnosa medis :', props.simpusDataDiagnosaMedis);
+console.log('data diagnosa  :', props.simpusDataDiagnosaMedis);
 console.log('alergi', props.AlergiPasien)
 const form = useForm({
   kode_diagnosa: '',
   nama_diagnosa: '',
   kunjungan_khusus: '',
   keterangan_kunjungan: '',
-  pelayananId: 1,
-  loketId: props.dataPasien?.idLoket ?? 1,
   kdPoli: props.dataPasien?.kdPoli ?? '',
-  alergi_makanan: props.AlergiPasien?.alergi_makanan.namaAlergiBpjs ?? '',
-  alergi_obat: props.AlergiPasien?.alergi_obat.namaAlergiBpjs ?? '',
+  alergi_makanan: props.AlergiPasien?.alergi_makanan?.namaAlergiBpjs ?? '',
+  alergi_obat: props.AlergiPasien?.alergi_obat?.namaAlergiBpjs ?? '',
   keterangan_alergi: props.AlergiPasien?.keterangan,
 });
 
 const formDiagnosaKeperawatan = useForm({
   kode_diagnosa: '',
   nama_diagnosa: '',
-  kdPoli : props.idPoli ?? ''
+  kdPoli: props.idPoli ?? ''
 })
-console.log('formnya',formDiagnosaKeperawatan);
+console.log('formnya', formDiagnosaKeperawatan);
 
 
 function openModal() {
@@ -254,7 +259,7 @@ function pilihDiagnosa(item) {
   showModal.value = false;
 }
 function updateNamaDiagnosa() {
-  const selected = props.diagnosaKeperawatan.find(
+  const selected = props.MasterDiagnosaKeperawatan.find(
     (item) => item.id === formDiagnosaKeperawatan.kode_diagnosa
   );
   formDiagnosaKeperawatan.nama_diagnosa = selected ? selected.nmDiag : '';
@@ -262,7 +267,10 @@ function updateNamaDiagnosa() {
 
 
 function submitForm() {
-  form.post(route(props.routeDiagnosaMedis), {
+  form.post(route(props.routeDiagnosaMedis, {
+    idLoket: props.idLoket,
+    idPelayanan: props.idPelayanan
+  }), {
     preserveScroll: true,
     onSuccess: () => {
       alert("Diagnosa Medis tersimpan");
@@ -275,27 +283,29 @@ function submitFormDiagnosaKeperawatan() {
   formDiagnosaKeperawatan.post(route('ruang-layanan.diagnosa-keperawatan', {
     idLoket: props.idLoket,
     idPelayanan: props.idPelayanan
-  }), );
+  }),);
 }
 function searchDiagnosa() {
   fetchPage(route('api.diagnosa-medis', { search: keyword.value }));
 }
 
 function fetchPage(url) {
-  if (!url) return;
+  // if (!url) return;
 
-  const relativeUrl = url.startsWith('http')
-    ? new URL(url).pathname + new URL(url).search
-    : url;
-  axios.get(relativeUrl)
+  // const relativeUrl = url.startsWith('http')
+  //   ? new URL(url).pathname + new URL(url).search
+  //   : url;
+  axios.get(url)
     .then(res => {
       diagnosaMedis.value = res.data;
     })
     .catch(err => console.error(err));
 }
 
-function hapusDiagnosa(item) {
-  form.delete(route('ruang-layanan-gigi.remove-diagnosa-medis', item), {
+function hapusDiagnosa(idDiagnosa) {
+  form.delete(route('ruang-layanan.remove-diagnosa-medis',
+    idDiagnosa 
+ ), {
     data: {
       _method: 'delete',
     },
@@ -305,6 +315,18 @@ function hapusDiagnosa(item) {
       emit('dataAnamnesa-update');
     },
   });
+}
 
+function hapusDiagnosaKeperawatan( idDiagnosa ) {
+  form.delete(route('ruang-layanan.remove-diagnosa-keperawatan',  idDiagnosa ), {
+    data: {
+      _method: 'delete',
+    },
+    preserveScroll: true,
+    onSuccess: () => {
+      alert("Diagnosa keperawatan dihapus");
+      emit('dataAnamnesa-update');
+    },
+  });
 }
 </script>

@@ -19,10 +19,9 @@
       <div class="row mb-3" v-if="statusPulangLabel === 'Rujuk Internal'">
         <label class="col-sm-2 col-form-label fw-bold">Poli Rujuk Internal</label>
         <div class="col-sm-4">
-          <select class="form-select">
-            <option selected>Berobat Jalan</option>
-            <option>Rujuk</option>
-            <option>Pulang Paksa</option>
+          <select class="form-select" v-model="form.poli_rujuk_internal">
+            <option value="" selected>-- Pilih --</option>
+            <option v-for="value in props.poliRujukInternal" :value="value.kdPoli">{{ value.nmPoli }}</option>
           </select>
         </div>
       </div>
@@ -77,9 +76,9 @@
       <div class="row mb-3">
         <label class="col-sm-2 col-form-label fw-bold">Tenaga Medis</label>
         <div class="col-sm-4">
-          <select class="form-select"  v-model="form.tenaga_medis">
+          <select class="form-select" v-model="form.tenaga_medis">
             <option selected>- pilih -</option>
-            <option v-for="item in TenagaMedisAskep" >{{ item.nmDokter }}</option>
+            <option v-for="item in TenagaMedis">{{ item.nmDokter }}</option>
           </select>
         </div>
       </div>
@@ -107,18 +106,55 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="(item, index) in DataRujuk" :key="item.idPelayanan">
+        <tbody v-if="loading">
+          <tr>
+            <td colspan="9" class="text-center">Memuat data...</td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="(item, index) in Pelayanan" :key="item.idPelayanan">
             <td>{{ index + 1 }}</td>
             <td><span class="badge bg-primary bg-opacity-75"> {{ item.simpus_poli.nmPoli }}</span></td>
             <td>{{ item.status_pulang?.nmStatusPulang ?? '' }}</td>
-            <td>-</td>
-            <td>{{ item.tenagaMedis }}</td>
-            <td>-</td>
-            <td>{{ item.tglPelayanan }}</td>
-            <td>{{ item.endTIme }}</td>
-            <td><button class="btn btn-outline-secondary btn-sm" v-if=" item.pelIdSebelum === null||item.kdStatusPulang!=1">Poli awal</button>
-            <span class="btn btn-sm btn-warning" v-if="item.kdStatusPulang === 1">Batal Berobat Jalan</span></td>
+            <td>{{ item.tujuanPoli ?? '' }}</td>
+            <td>{{ item.tenagaMedis ?? '' }}</td>
+            <td>{{ item.createdBy ?? '' }}</td>
+            <td>{{ item.tglPelayanan ?? '' }}</td>
+            <td>{{ item.endTIme ?? '' }}</td>
+            <td>
+              <template v-if="item.kdStatusPulang === '4' || item.kdStatusPulang === '6'">
+                <button class="btn btn-warning btn-xs" @click="batalRujukLanjut(item.loketId, item.idPelayanan)">
+                  Batal Rujuk Lanjut
+                </button>
+              </template>
+              <template v-else>
+                <template v-if="(item.pelIdSebelum == null || item.pelIdSebelum == '0') && item.kdStatusPulang != '3'">
+                  <button class="btn btn-outline btn-sm" disabled>
+                    Poli Awal
+                  </button>
+                </template>
+
+                <template v-else-if="item.kdStatusPulang == '3'">
+                  <button class="btn btn-sm btn-warning" @click="batal_berobat_jalan">
+                    Batal Berobat Jalan
+                  </button>
+                </template>
+                <template v-else>
+                  <template v-if="item.idpelayanan === cekAkhirPelayanan.idpelayanan">
+                    <button @click="hapusRujuk(route('ruang-layanan.hapusRujuk', item.idpelayanan))" type="button"
+                      class="btn btn-danger btn-sm">
+                      Batal Rujuk
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button class="btn btn-outline btn-sm" disabled>
+                      Batalkan
+                    </button>
+                  </template>
+                </template>
+
+              </template>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -127,23 +163,33 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { router, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
+import { computed, onMounted, ref } from 'vue';
 import { route } from 'ziggy-js';
 const props = defineProps({
   statusPulang: Array,
-  DataRujuk : Array,
-  TenagaMedisAskep : Object,
-  idPelayanan : String,
+  DataRujuk: Array,
+  TenagaMedis: Object,
+  idPelayanan: String,
+  idLoket: String,
+  poliRujukInternal: Array
 });
 const emit = defineEmits(['dataRujuk-update'])
 const DataRujuk = props.DataRujuk ?? '';
-const TenagaMedisAskep = props.TenagaMedisAskep ?? '';
-console.log('data rujuk dari form status pasiesn', DataRujuk)
+const TenagaMedis = props.TenagaMedis ?? '';
+const Pelayanan = ref(null);
+const loading = ref(true)
+const cekAkhirPelayanan = ref(null);
+console.log('data poli rujuk internal', props.idPelayanan);
+
+onMounted(() => {
+  fetchPelayanan(route('ruang-layanan.ambilPelayanan', { idLoket: props.idLoket, idPelayanan: props.idPelayanan }));
+});
 const form = useForm({
   status_pulang: '',
   tenaga_medis: '',
-  idPelayanan : props.idPelayanan ?? ''
+  poli_rujuk_internal: ''
 });
 
 const statusPulangLabel = computed(() => {
@@ -153,13 +199,79 @@ const statusPulangLabel = computed(() => {
   return found ? found.nmStatusPulang : ''
 })
 
-function submit_rujukan(){
-  form.post(route('ruang-layanan-umum.simpanRujukan'), {
-  preserveScroll: true,
-      onSuccess: () => {
-        alert("Rujuk tersimpan");
-        emit('dataRujuk-update');
-      },
+function submit_rujukan() {
+  form.post(route('ruang-layanan.simpanRujukan', {
+    idLoket: props.idLoket,
+    idPelayanan: props.idPelayanan
+  }), {
+    preserveScroll: true,
+    onSuccess: () => {
+      alert("Rujuk tersimpan");
+      loading.value = true
+      fetchPelayanan(route('ruang-layanan.ambilPelayanan', { idLoket: props.idLoket, idPelayanan: props.idPelayanan }))
+    },
   });
 }
+
+function fetchPelayanan(url) {
+  console.log(route('ruang-layanan.ambilPelayanan', { idLoket: props.idLoket, idPelayanan: props.idPelayanan }))
+  if (!url) return;
+
+  const relativeUrl = url.startsWith('http')
+    ? new URL(url).pathname + new URL(url).search
+    : url;
+
+  axios.get(relativeUrl)
+    .then(res => {
+      Pelayanan.value = res.data.pelayanan;
+      cekAkhirPelayanan.value = res.data.cekAkhirPelayanan
+      console.log('Hasil fetch pelayanan :', res.data.pelayanan);
+    })
+    .catch(err => console.error(err))
+    .finally(() => {
+      loading.value = false;
+      console.log('selesai', loading.value)
+    });
+}
+
+function hapusRujuk(url) {
+  if (!url) return;
+
+  const relativeUrl = url.startsWith('http')
+    ? new URL(url).pathname + new URL(url).search
+    : url;
+
+  axios.delete(relativeUrl)
+    .then(res => {
+    })
+    .catch(err => console.error(err))
+    .finally(() => {
+      loading.value = true
+      fetchPelayanan(route('ruang-layanan.ambilPelayanan', { idLoket: props.idLoket, idPelayanan: props.idPelayanan }))
+    });
+}
+
+function batal_berobat_jalan() {
+  console.log('idLoket:', props.idLoket, 'idPelayanan:', props.idPelayanan);
+
+  axios.get(
+    route('ruang-layanan.batal-berobat-jalan', {
+      idLoket: props.idLoket,
+      idpelayanan: props.idPelayanan
+    })
+  )
+    .then(res => {
+      console.log('Response:', res.data);
+      alert(res.data.message);
+    })
+    .catch(err => {
+      console.error('Error detail:', err.response?.data || err.message);
+      alert('Terjadi kesalahan');
+    }).finally(() => {
+      loading.value = true
+      fetchPelayanan(route('ruang-layanan.ambilPelayanan', { idLoket: props.idLoket, idPelayanan: props.idPelayanan }))
+    });;
+}
+
+
 </script>

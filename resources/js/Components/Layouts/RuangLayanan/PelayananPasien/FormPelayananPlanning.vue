@@ -68,7 +68,7 @@
                 <th>Bayar</th>
                 <th>Poli</th>
                 <th>Keterangan</th>
-                <th>Ket gigi</th>
+                <th v-if="props.idPoli == '002'">Ket gigi</th>
                 <th>Created by</th>
                 <th>Action</th>
               </tr>
@@ -81,9 +81,9 @@
                 <td>{{ item.peraturan }}</td>
                 <td>{{ item.harga }}</td>
                 <td>{{ item.bayar }}</td>
-                <td>{{ item.kdPoli }}</td>
+                <td>{{ item.simpus_poli.nmPoli }}</td>
                 <td>{{ item.keterangan }}</td>
-                <td>{{ item.ketGigi }}</td>
+                <td  v-if="props.idPoli == '002'">{{ item.ketGigi }}</td>
                 <td>{{ item.createdBy }}</td>
                 <td>
                   <button class="btn btn-sm btn-danger" @click="hapusDataTindakan(item.idTindakan)">Hapus</button>
@@ -216,7 +216,7 @@
                 </tr>
 
                 <!-- LOOP: detail dalam resep -->
-                <tr v-for="detail in resep.simpus_detail_resep_obat" :key="detail.id_resep_detail" class="align-middle">
+                <tr v-for="detail in resep.detail_resep_obat" :key="detail.id_resep_detail" class="align-middle">
                   <td>{{ detail.poli }}</td>
                   <td class="text-start">
                     {{ detail.master_obat?.NAMA || '-' }}
@@ -285,7 +285,7 @@
                   <tr v-for="(item, index) in masterTindakan.data" :key="index">
                     <td>{{ item.kode }}</td>
                     <td>{{ item.nama_tindakan }}</td>
-                    <td>{{ item.nama_tindakan_indonesia }}</td>
+                    <td>{{ item.nama_tindakan_indonesia ?? '-' }}</td>
                     <td>
                       <button class="btn btn-info btn-sm" @click="pilihMasterTindakan(item)">Pilih</button>
                     </td>
@@ -318,7 +318,7 @@
               <div class="w-100 d-flex align-items-center">
                 <h5 class="modal-title mb-0">Pilih Obat</h5>
                 <form class="d-flex ms-auto">
-                  <input type="text" v-model="keyword" id="search-diagnosa" class="form-control form-control-sm me-2"
+                  <input type="text" v-model="keyword"  id="search-diagnosa" class="form-control form-control-sm me-2"
                     placeholder="Cari diagnosa...">
                   <button type="submit" class="btn btn-sm btn-primary">Cari</button>
                 </form>
@@ -559,10 +559,11 @@ const props = defineProps({
   idPelayanan: String,
   routeResepObat: String,
   routeDetailResepObat: String,
-  idLoket: String
+  idLoket: String,
+  idPoli: String
 });
 const emit = defineEmits(['dataAnamnesa-update']);
-console.log('data resep obat :', props.simpusResepObat);
+console.log('data resep:', props.simpusResepObat);
 
 function pilihMasterTindakan(item) {
   form.kode_tindakan = item.kode
@@ -665,7 +666,11 @@ function fetchPageMasterObat(url) {
     .catch(err => console.error(err));
 }
 function submitForm() {
-  form.post(route(props.routePlanningTindakan), {
+  form.post(route(props.routePlanningTindakan, {
+    idPoli: props.idPoli,
+    idLoket: props.idLoket,
+    idPelayanan: props.idPelayanan
+  }), {
     preserveScroll: true,
     onSuccess: () => {
       alert("Plannngin tersimpan");
@@ -713,9 +718,9 @@ function hapusDataTindakan(id) {
     },
   });
 }
-function hapusResepObat(id){
+function hapusResepObat(id) {
   FormResepObat.delete(route('ruang-layanan.hapus-resep-obat', id), {
-     data: {
+    data: {
       _method: 'delete',
     },
     preserveScroll: true,
@@ -726,7 +731,7 @@ function hapusResepObat(id){
   });
 }
 
-function hapusDetailResepObat(id){
+function hapusDetailResepObat(id) {
   FormResepObat.post(route('ruang-layanan.hapus-detail-resep-obat', id), {
     preserveScroll: true,
     onSuccess: () => {

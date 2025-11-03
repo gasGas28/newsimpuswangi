@@ -42,19 +42,19 @@ use Illuminate\Session\TokenMismatchException;
 
 
 
-Route::match(['GET','POST'], '/_csrf-debug', function (Request $r) {
+Route::match(['GET', 'POST'], '/_csrf-debug', function (Request $r) {
     return response()->json([
-        'method'          => $r->method(),
+        'method' => $r->method(),
         'has_cookie_xsrf' => $r->cookies->has('XSRF-TOKEN'),
         'has_cookie_sess' => $r->cookies->has(config('session.cookie')),
-        'token_input'     => $r->input('_token') ? 'YES' : 'NO',
-        'token_header'    => $r->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
-        'token_x_xsrf'    => $r->header('X-XSRF-TOKEN') ? 'YES' : 'NO',
-        'session_driver'  => config('session.driver'),
-        'session_id'      => $r->session()->getId(),
-        'host'            => $r->getHost(),
-        'origin'          => $r->headers->get('Origin'),
-        'referer'         => $r->headers->get('Referer'),
+        'token_input' => $r->input('_token') ? 'YES' : 'NO',
+        'token_header' => $r->header('X-CSRF-TOKEN') ? 'YES' : 'NO',
+        'token_x_xsrf' => $r->header('X-XSRF-TOKEN') ? 'YES' : 'NO',
+        'session_driver' => config('session.driver'),
+        'session_id' => $r->session()->getId(),
+        'host' => $r->getHost(),
+        'origin' => $r->headers->get('Origin'),
+        'referer' => $r->headers->get('Referer'),
     ]);
 })->middleware('web');
 
@@ -111,6 +111,7 @@ Route::prefix('admin')->group(function () {
 
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
+    
     Route::get('/', fn() => Inertia::render('Farmasi/Index'));
     Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
     Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
@@ -315,157 +316,209 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
 });
+Route::prefix('ruang_layanan/simpus/kunjungan-online')
+    ->name('kunj-online.')
+    ->middleware(['auth']) // kalau mau wajib login
+    ->group(function () {
+        Route::get('/{idPoli?}/{klaster?}', [KunjOnlineController::class, 'index'])->name('index');
+        Route::get('/pelayanan/{id}/{idPoli}/{idPelayanan}', [KunjOnlineController::class, 'pelayanan'])->name('pelayanan');
+        Route::post('/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])->name('setAnamnesa');
+        Route::post('/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])->name('setAnamnesaObjective');
+        Route::post('/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])->name('mulai-pemeriksaan-pasien');
+        Route::post('/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])->name('diagnosa-medis');
+        Route::get('/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])->name('surat-rujukan');
+        Route::get('/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])->name('surat-rujukan.create');
+        Route::post('/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])->name('surat-rujukan.store');
+        Route::get('/{id}/riwayat-kesehatan', [KunjOnlineController::class, 'riwayatKesehatan'])->name('riwayat-kesehatan');
+        Route::get('/{id}/cppt', [KunjOnlineController::class, 'cppt'])->name('cppt');
+    });
+Route::prefix('ruang_layanan') ->middleware(['auth'])
+->group(function () {    
 
-Route::prefix('ruang_layanan')->group(function () {
     // Menampilkan halaman poli
-    Route::get('/simpus/poli', [RuangLayananController::class, 'index'])->name('ruang-layanan.poli');
-    // Umum
-    Route::get('/simpus/umum', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.umum');
-    Route::get('/simpus/umum/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan-umum.pelayanan');
-    Route::get('/simpus/umum/surat-keterangan/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suketList'])->name('ruang-layanan-umum.surat-keterangan');
-    Route::get('/simpus/surat-rujuk/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukList'])->name('ruang-layanan.surat-rujuk');
-    Route::get('/simpus/surat-rujuk-form/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form');
-    Route::post('/simpus/simpan-rujukan/{idPoli}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.simpan-rujukan');
-    Route::get('simpus/cetak-rujukan/{idSurat}', [PoliBpUmumController::class, 'cetakRujukan'])->name('ruang-layanan.cetak-rujukan');
-    Route::get('simpus/surat-rujukan-form-edit/{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form-edit');
-    Route::post('simpus/update/surat-rujukan/{idPoli}/{idSurat}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.update-rujukan');
-    Route::post('simpus/hapus-surat-rujukan/{idSurat}', [PoliBpUmumController::class, 'hapusSuratRujukan'])->name('ruang-layanan.hapus-surat-rujukan');
-    Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
-    Route::post('simpus/umum/pelayanan/anamnesa', [PoliBpUmumController::class, 'setAnamnesa'])->name('ruang-layanan-umum.setAnamnesa');
-    Route::post('simpus/umum/pelayanan/anamnesa/objective', [PoliBpUmumController::class, 'setAnamnesaObjective'])->name('ruang-layanan-umum.setAnamnesaObjective');
-    Route::post('simpus/umum/pelayanan/planning-tindakan', [PoliBpUmumController::class, 'setPlanningTindakan'])->name('ruang-layanan-umum.set-PlanningTindakan');
-    Route::post('simpus/umum/pelayanan/mulaiPelayanan', [PoliBpUmumController::class, 'mulaiPemeriksaanPasien'])->name('ruang-layanan-umum.mulai-pemeriksaan-pasien');
-    Route::post('simpus/umum/pelayanan/diagnosa-medis', [PoliBpUmumController::class, 'setDiagnosaMedis'])->name('ruang-layanan-umum.diagnosa-medis');
-    Route::post('simpus/diagnosa/diagnosa-keperawatan-simpan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setDiagnosaKeperawatan'])->name(name: 'ruang-layanan.diagnosa-keperawatan');
-    Route::get('/api/diagnosa-medis', [PoliBpUmumController::class, 'paginasi'])->name('api.diagnosa-medis');
-    Route::get('/master-tindakan', [indexController::class, 'paginasiSimpusTindakan'])->name('ruang-layanan.master-tindakan');
-    //Resep obat (Pengobatan Pasien)
-    Route::post('simpus/pelayanan/resep-obat/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setResepObat'])->name('ruang-layanan.set-resep-obat');
-    Route::post('simpus/pelayanan/detail-resep-obat/{idResep}/{idObat}', [PoliBpUmumController::class, 'setDetailResepObat'])->name('ruang-layanan.set-detail-resep');
-    Route::delete('simpus/hapus-resep-obat/{idResepObat}', [PoliBpUmumController::class, 'hapusResepObat'])->name('ruang-layanan.hapus-resep-obat');
-    Route::post('simpus/hapus-detail-resep-obat/{idDetailResepObat}', [PoliBpUmumController::class, 'hapusDetailResepObat'])->name('ruang-layanan.hapus-detail-resep-obat');
-    Route::post('simpus/umum/pelayanan/simpan-rujuk', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan-umum.simpanRujukan');
-    Route::get('simpus/umum/create-surat-keterangan/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'createSuratKeterangan'])->name('ruang-layanan-umum.create-surat-keterangan');
-    Route::post('simpus/umum/pelayanan/simpan-surat-keterangan/{idPoli}', [PoliBpUmumController::class, 'simpanSuket'])->name('ruang-layanan-umum.simpanSuket');
-    Route::get('simpus/umum/cetak-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'cetakSuket'])->name('ruang-layanan-umum.cetak-suket');
-    Route::post('simpus/umum/hapus-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'hapusSuket'])->name('ruang-layanan-umum.hapus-suket');
-    Route::get('simpus/umum/edit-surat-keterangan//{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'editSuket'])->name('ruang-layanan-umum.edit-suket');
-    Route::post('simpus/umum/update-surat-keterangan', [PoliBpUmumController::class, 'updateSuket'])->name('ruang-layanan-umum.update-suket');
-    Route::get('simpus/umum/laborat/{idPoli}/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'formLaborat'])->name('ruang-layanan.form-laborat');
-    Route::post('simpus/umum/laborat/simpan-permohonan-lab/{idLoket}', [PoliBpUmumController::class, 'simpanPermohonanLab'])->name('ruang-layanan.simpan-permohonan-lab');
-    Route::get('simpus/laborat/list-permohonan/{idLoket}', [indexController::class, 'getPermohonanLaborat'])->name('ruang-layanan.getPermonanLab');
-    //riwayat pasien
-    Route::get('simpus/riwayat-pasien/{idPoli}/{idPasien}', [PoliBpUmumController::class, 'riwayatPasien'])->name('ruang-layanan.riwayat-pasien');
-    //Gigi
-    Route::get('/simpus/gigi', [PoliGigiController::class, 'index'])->name('ruang-layanan.gigi');
-    Route::get('/simpus/gigi/pelayanan/{id}', [PoliGigiController::class, 'pelayanan'])->name('ruang-layanan-gigi.pelayanan');
-    Route::post('simpus/gigi/pelayanan/anamnesa-subjective', [PoliGigiController::class, 'setAnamnesaSubjective'])->name('ruang-layanan-gigi.setAnamnesaSubjective');
-    Route::post('simpus/gigi/pelayanan/anamnesa-objective', [PoliGigiController::class, 'setAnamnesaObjective'])->name('ruang-layanan-gigi.setAnamnesaObjective');
-    Route::post('simpus/gigi/pelayanan/diagnosa-medis', [PoliGigiController::class, 'setDiagnosaMedis'])->name('ruang-layanan-gigi.diagnosa-medis');
-    Route::delete('simpus/gigi/pelayanan/diagnosa-medis/{id}', [PoliGigiController::class, 'removeDiagnosaMedis'])->name('ruang-layanan-gigi.remove-diagnosa-medis');
-    Route::post('simpus/gigi/pelayanan/planning-tindakan', [PoliGigiController::class, 'setPlanningTindakan'])->name('ruang-layanan-gigi.set-PlanningTindakan');
-    Route::delete('simpus/gigi/pelayanan/planning-tindakan/{id}', [PoliGigiController::class, 'removePlanningTindakan'])->name('ruang-layanan-gigi.remove-data-tindakan');
-    Route::post('simpus/gigi/pelayanan/planning-pengobatan', [PoliGigiController::class, 'setPlanningPengobatan'])->name('ruang-layanan-gigi.set-PlanningPengobatan');
-    Route::post('simpus/gigi/pelayanan/planning-pengobatan-detail', [PoliGigiController::class, 'setPlanningPengobatandetail'])->name('ruang-layanan-gigi.set-PlanningPengobatanDetail');
-    Route::get('/master-obat', [indexController::class, 'MasterObat'])->name('ruang-layanan.master-obat');
+    Route::get('/simpus/poli', [indexController::class, 'listPoli'])->name('ruang-layanan.poli');
+    Route::get('/simpus/poli/{kluster}', [indexController::class, 'listPoliKluster'])->name('ruang-layanan.poli-kluster');
 
-    //UGD
-    Route::inertia('/simpus/ugd', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ugd');
-    Route::inertia('/simpus/ugd/pelayanan', 'Ruang_Layanan/UGD/pelayanan')->name('ruang-layanan-ugd.pelayanan');
+// Umum
+Route::get('/simpus/{idPoli?}/{kluster?}', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.index');
+Route::get('/simpus/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'pelayanan'])->name('ruang-layanan.pelayanan');
 
-    //KB
-    Route::inertia('/simpus/kb', 'Ruang_Layanan/KB/pasien_poli')->name('ruang-layanan.kb');
-    Route::inertia('/simpus/kb/pelayanan', 'Ruang_Layanan/KB/pelayanan')->name('ruang-layanan-kb.pelayanan');
+//Surat
+Route::get('/simpus/pelayananDetail/surat-rujuk/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukList'])->name('ruang-layanan.surat-rujuk');
+Route::get('/simpus/pelayananDetail/surat-rujuk-form/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form');
+Route::post('/simpus/pelayananDetail/simpan-rujukan/{idPoli}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.simpan-rujukan');
+Route::get('simpus/pelayananDetail/cetak-rujukan/{idSurat}', [PoliBpUmumController::class, 'cetakRujukan'])->name('ruang-layanan.cetak-rujukan');
+Route::get('simpus/pelayananDetail/surat-rujukan-form-edit/{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'suratRujukForm'])->name('ruang-layanan.surat-rujuk-form-edit');
+Route::post('simpus/pelayananDetail/update-surat-rujukan/{idPoli}/{idSurat}', [PoliBpUmumController::class, 'simpanSuratRujuk'])->name('ruang-layanan.update-rujukan');
+Route::post('simpus/pelayananDetail/hapus-surat-rujukan/{idSurat}', [PoliBpUmumController::class, 'hapusSuratRujukan'])->name('ruang-layanan.hapus-surat-rujukan');
+
+Route::inertia('/simpus/umum/form-surat-keterangan', 'Ruang_Layanan/Umum/form_surat_keterangan')->name('ruang-layanan-umum.form-surat-keterangan');
+
+//Anamnesa
+Route::post('simpus/pelayanan/set-anamnesa-subjective/{idLoket}', [PoliBpUmumController::class, 'setAnamnesaSubjective'])->name('ruang-layanan.setAnamnesaSubjective');
+Route::post('simpus/umum/pelayanan/set-anamnesa-objective/{idAnam}', [PoliBpUmumController::class, 'setAnamnesaObjective'])->name('ruang-layanan.setAnamnesaObjective');
+
+//Tindakan
+Route::post('simpus/pelayanan/tindakan/{idPoli}/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setTindakan'])->name('ruang-layanan.simpan-Tindakan');
+Route::get('/master-tindakan', [indexController::class, 'paginasiSimpusTindakan'])->name('ruang-layanan.master-tindakan');
+Route::post('simpus/umum/pelayanan/mulaiPelayanan', [PoliBpUmumController::class, 'mulaiPemeriksaanPasien'])->name('ruang-layanan-umum.mulai-pemeriksaan-pasien');
+
+//Diagnosa
+Route::post('simpus/pelayanan/diagnosa-medis/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setDiagnosaMedis'])->name('ruang-layanan.set-diagnosa-medis');
+Route::post('simpus/diagnosa/diagnosa-keperawatan-simpan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setDiagnosaKeperawatan'])->name(name: 'ruang-layanan.diagnosa-keperawatan');
+Route::get('/api/diagnosa-medis', [PoliBpUmumController::class, 'paginasi'])->name('api.diagnosa-medis');
+Route::delete('simpus/pelayanan/diagnosa-medis/{idDiagnosa}', [PoliBpUmumController::class, 'removeDiagnosaMedis'])->name('ruang-layanan.remove-diagnosa-medis');
+Route::delete('simpus/pelayanan/diagnosa-keperawatan{idDiagnosa}', [PoliBpUmumController::class, 'removeDiagnosaKeperawatan'])->name('ruang-layanan.remove-diagnosa-keperawatan');
+
+//Gizi
+Route::post('simpus/pelayanan/simpan-gizi/{idLoket}', [PoliBpUmumController::class, 'simpanGizi'])->name('ruang-layanan.simpan-gizi');
+
+//Simpan Sanitasi
+Route::post('simpus/pelayanan/simpan-sanitasi/{idPelayanan}', [PoliBpUmumController::class, 'simpanSanitasi'])->name('ruang-layanan.simpan-sanitasi');
+
+
+//Resep obat (Pengobatan Pasien)
+Route::post('simpus/pelayanan/resep-obat/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'setResepObat'])->name('ruang-layanan.set-resep-obat');
+Route::post('simpus/pelayanan/detail-resep-obat/{idResep}/{idObat}', [PoliBpUmumController::class, 'setDetailResepObat'])->name('ruang-layanan.set-detail-resep');
+Route::delete('simpus/hapus-resep-obat/{idResepObat}', [PoliBpUmumController::class, 'hapusResepObat'])->name('ruang-layanan.hapus-resep-obat');
+Route::post('simpus/hapus-detail-resep-obat/{idDetailResepObat}', [PoliBpUmumController::class, 'hapusDetailResepObat'])->name('ruang-layanan.hapus-detail-resep-obat');
+
+//Simpan rujuk
+Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
+Route::get('simpus/get-pelayanan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'getPelayanan'])->name('ruang-layanan.ambilPelayanan');
+Route::delete('simpus/pelayanan/hapus-rujuk/{idpelayanan}', [PoliBpUmumController::class, 'hapusRujuk'])->name('ruang-layanan.hapusRujuk');
+Route::get('simpus/pelayanan/batal-berobat-jalan/{idLoket}/{idpelayanan}', [PoliBpUmumController::class, 'batalBerobatJalan'])->name('ruang-layanan.batal-berobat-jalan');
+
+//Suket
+Route::get('simpus/pelayananDetail/surat-keterangan-list/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'suketList'])->name('ruang-layanan.surat-keterangan-list');
+Route::get('simpus/pelayananDetail/create-surat-keterangan/{idPoli}/{idPelayanan}', [PoliBpUmumController::class, 'createSuratKeterangan'])->name('ruang-layanan.create-surat-keterangan');
+Route::post('simpus/pelayananDetail/simpan-surat-keterangan/{idPoli}', [PoliBpUmumController::class, 'simpanSuket'])->name('ruang-layanan.simpanSuket');
+Route::get('simpus/pelayananDetail/cetak-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'cetakSuket'])->name('ruang-layanan.cetak-suket');
+Route::post('simpus/pelayananDetail/hapus-surat-keterangan/{idSurat}', [PoliBpUmumController::class, 'hapusSuket'])->name('ruang-layanan.hapus-suket');
+Route::get('simpus/pelayananDetail/edit-surat-keterangan//{idPoli}/{idPelayanan}/{idSurat}', [PoliBpUmumController::class, 'editSuket'])->name('ruang-layanan.edit-suket');
+
+Route::post('simpus/update-surat-keterangan', [PoliBpUmumController::class, 'updateSuket'])->name('ruang-layanan.update-suket');
+Route::get('simpus/laborat/{idPoli}/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'formLaborat'])->name('ruang-layanan.form-laborat');
+
+Route::post('simpus/umum/laborat/simpan-permohonan-lab/{idLoket}', [PoliBpUmumController::class, 'simpanPermohonanLab'])->name('ruang-layanan.simpan-permohonan-lab');
+Route::get('simpus/laborat/list-permohonan/{idLoket}', [indexController::class, 'getPermohonanLaborat'])->name('ruang-layanan.getPermonanLab');
+//riwayat pasien
+Route::get('simpus/riwayat-pasien/{idPoli}/{idPasien}', [PoliBpUmumController::class, 'riwayatPasien'])->name('ruang-layanan.riwayat-pasien');
+//UKK
+Route::get('simpus/pop-up/get-ukk/{idLoket}', [PoliBpUmumController::class, 'getUKK'])->name('ruang-layanan.get-ukk');
+Route::post('simpus/simpan-ukk/{idLoket}', [PoliBpUmumController::class, 'simpanUkk'])->name('ruang-layanan.simpan-ukk');
+//CPPT
+Route::get('simpus/cppt/{idPoli}/{idPasien}', [PoliBpUmumController::class, 'getCppt'])->name('ruang-layanan.cppt');
+
+//Gigi
+Route::get('/simpus/gigi', [PoliGigiController::class, 'index'])->name('ruang-layanan.gigi');
+Route::get('/simpus/gigi/pelayanan/{id}', [PoliGigiController::class, 'pelayanan'])->name('ruang-layanan-gigi.pelayanan');
+Route::post('simpus/gigi/pelayanan/anamnesa-subjective', [PoliGigiController::class, 'setAnamnesaSubjective'])->name('ruang-layanan-gigi.setAnamnesaSubjective');
+Route::post('simpus/gigi/pelayanan/anamnesa-objective', [PoliGigiController::class, 'setAnamnesaObjective'])->name('ruang-layanan-gigi.setAnamnesaObjective');
+//Diagnosa
+Route::post('simpus/gigi/pelayanan/diagnosa-medis', [PoliGigiController::class, 'setDiagnosaMedis'])->name('ruang-layanan-gigi.diagnosa-medis');
+Route::delete('simpus/gigi/pelayanan/diagnosa-medis/{id}', [PoliGigiController::class, 'removeDiagnosaMedis'])->name('ruang-layanan-gigi.remove-diagnosa-medis');
+
+Route::post('simpus/gigi/pelayanan/planning-tindakan', [PoliGigiController::class, 'setPlanningTindakan'])->name('ruang-layanan-gigi.set-PlanningTindakan');
+Route::delete('simpus/gigi/pelayanan/planning-tindakan/{id}', [PoliGigiController::class, 'removePlanningTindakan'])->name('ruang-layanan-gigi.remove-data-tindakan');
+Route::post('simpus/gigi/pelayanan/planning-pengobatan', [PoliGigiController::class, 'setPlanningPengobatan'])->name('ruang-layanan-gigi.set-PlanningPengobatan');
+Route::post('simpus/gigi/pelayanan/planning-pengobatan-detail', [PoliGigiController::class, 'setPlanningPengobatandetail'])->name('ruang-layanan-gigi.set-PlanningPengobatanDetail');
+Route::get('/master-obat', [indexController::class, 'MasterObat'])->name('ruang-layanan.master-obat');
+
+// //UGD
+// Route::inertia('/simpus/ugd', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ugd');
+// Route::inertia('/simpus/ugd/pelayanan', 'Ruang_Layanan/UGD/pelayanan')->name('ruang-layanan-ugd.pelayanan');
+
+// //KB
+// Route::inertia('/simpus/kb', 'Ruang_Layanan/KB/pasien_poli')->name('ruang-layanan.kb');
+// Route::inertia('/simpus/kb/pelayanan', 'Ruang_Layanan/KB/pelayanan')->name('ruang-layanan-kb.pelayanan');
+
+//Ranao 
+Route::inertia('/simpus/ranap', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ranap');
 
 
     // 🔹 Kunjungan Online
-    // 🔹 Kunjungan Online
-    Route::get('simpus/kunjungan-online', [KunjOnlineController::class, 'index'])
-        ->name('ruang-layanan.kunjungan-online');
-
-    Route::get('simpus/kunjungan-online/pelayanan/{id}', [KunjOnlineController::class, 'pelayanan'])
-        ->name('ruang-layanan.kunjungan-online.pelayanan');
-
-    Route::post('simpus/kunjungan-online/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])
-        ->name('ruang-layanan-kunjungan-online.setAnamnesa');
-
-    Route::post('simpus/kunjungan-online/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])
-        ->name('ruang-layanan-kunjungan-online.setAnamnesaObjective');
-
-    Route::post('simpus/kunjungan-online/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])
-        ->name('ruang-layanan-kunjungan-online.mulai-pemeriksaan-pasien');
-
-    Route::post('simpus/kunjungan-online/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])
-        ->name('ruang-layanan-kunjungan-online.diagnosa-medis');
-
-    // Halaman daftar surat rujukan (opsional)
-    Route::get('simpus/kunjungan-online/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan');
-
-    // Tampilkan form Surat Rujukan
-    Route::get('simpus/kunjungan-online/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan.create');
-
-    // Simpan Surat Rujukan
-    Route::post('simpus/kunjungan-online/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])
-        ->name('ruang-layanan.kunjungan-online.surat-rujukan.store');
-
-    // Riwayat Kesehatan (Medical Record) Pasien
-    Route::get(
-        'simpus/kunjungan-online/{id}/riwayat-kesehatan',
-        [KunjOnlineController::class, 'riwayatKesehatan']
-    )->name('ruang-layanan.kunjungan-online.riwayat-kesehatan');
-
-
-    // CPPT (Catatan Perkembangan Pasien Terintegrasi)
-    Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class, 'cppt'])
-        ->name('ruang-layanan.kunjungan-online.cppt');
+ 
 
 
 
 
-    //Sanitasi
-    Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
-    Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
-    //Gizi
-    Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
-    Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
 
-    //Laborat
-    // Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
-    Route::get('/simpus/laborat', [LaboratoriumController::class, 'index'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat');
+//Sanitasi
+Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
+Route::inertia('/simpus/sanitasi/pelayanan', 'Ruang_Layanan/Sanitasi/pelayanan')->name('ruang-layanan.sanitasi.pelayanan');
+//Gizi
+Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
+Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
+
+// Kia
+Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+
+//ANC
+Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
+
+// Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+// Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
 
 
-    Route::get('/simpus/laborat/pemeriksaan/{loketId}', [LaboratoriumController::class, 'pemeriksaan'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.pemeriksaan');
 
-    Route::post('/simpus/laborat/set-waktu-sample', [LaboratoriumController::class, 'setWaktuSample'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.setWaktuSample');
 
-    Route::post('/simpus/laborat/update-nilai', [LaboratoriumController::class, 'updateNilaiLab'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.updateNilaiLab');
+    //Rawat Inap
+    Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
+    Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
+    Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
+    Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+});
 
-    // === endpoint untuk modal master/paket & cetak ===
-    Route::get('/simpus/laborat/paginasi-master-pemeriksaan', [LaboratoriumController::class, 'paginasiMasterPemeriksaan'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.paginasiMasterPemeriksaan');
 
-    Route::post('/simpus/laborat/permohonan/simpan', [LaboratoriumController::class, 'simpanPermohonan'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.simpanPermohonan');
 
-    Route::post('/simpus/laborat/pemeriksaan/simpan', [LaboratoriumController::class, 'pemeriksaanSimpan'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.pemeriksaanSimpan');
 
-    Route::post('/simpus/laborat/pemeriksaan/paket/{paket}', [LaboratoriumController::class, 'paketPemeriksaanSimpan'])
-        ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-        ->name('ruang-layanan.laborat.paketPemeriksaanSimpan');
+
+
+
+//Laborat
+// Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
+// Route::get('/simpus/laborat', [LaboratoriumController::class, 'index'])
+//     ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+//     ->name('ruang-layanan.laborat');
+
+
+Route::get('/simpus/laborat/pemeriksaan/{loketId}', [LaboratoriumController::class, 'pemeriksaan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.pemeriksaan');
+
+Route::post('/simpus/laborat/set-waktu-sample', [LaboratoriumController::class, 'setWaktuSample'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.setWaktuSample');
+
+Route::post('/simpus/laborat/update-nilai', [LaboratoriumController::class, 'updateNilaiLab'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.updateNilaiLab');
+
+// === endpoint untuk modal master/paket & cetak ===
+Route::get('/simpus/laborat/paginasi-master-pemeriksaan', [LaboratoriumController::class, 'paginasiMasterPemeriksaan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.paginasiMasterPemeriksaan');
+
+Route::post('/simpus/laborat/permohonan/simpan', [LaboratoriumController::class, 'simpanPermohonan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.simpanPermohonan');
+
+Route::post('/simpus/laborat/pemeriksaan/simpan', [LaboratoriumController::class, 'pemeriksaanSimpan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.pemeriksaanSimpan');
+
+Route::post('/simpus/laborat/pemeriksaan/paket/{paket}', [LaboratoriumController::class, 'paketPemeriksaanSimpan'])
+    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
+    ->name('ruang-layanan.laborat.paketPemeriksaanSimpan');
 
     Route::get(
         '/simpus/laborat/detail/{idPermohonan}',
@@ -525,14 +578,38 @@ Route::post('/simpus/laborat/param/simpan-terpilih',
     Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
     Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
     Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
+Route::get(
+    '/simpus/laborat/param/{header}/subheaders',
+    [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
+)->whereNumber('header')
+    ->name('ruang-layanan.laborat.param.subheaders');
+
+Route::post(
+    '/simpus/laborat/param/{header}/simpan',
+    [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpan']
+)->whereNumber('header')
+    ->name('ruang-layanan.laborat.param.simpan');
+
+Route::post('/simpus/laborat/tindakan/hapus', [LaboratoriumController::class, 'hapusTindakan'])->name('ruang-layanan.laborat.hapusTindakan');
+// LIST semua parameter_uji (bisa search + filter paket) — paginated
+Route::get(
+    '/simpus/laborat/param/browse',
+    [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramBrowse']
+)->name('ruang-layanan.laborat.param.browse');
+
+// Simpan pilihan manual (by id_parameter[])
+Route::post(
+    '/simpus/laborat/param/simpan-terpilih',
+    [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
+)->name('ruang-layanan.laborat.param.simpanTerpilih');
+
+Route::post(
+  '/ruang-layanan/laborat/hapus-semua',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'hapusSemuaTindakan']
+)->name('ruang-layanan.laborat.hapusSemuaTindakan');
 
 
-    //Rawat Inap
-    Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
-    Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
-    Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
-    Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
-});
+// ================== KUNJUNGAN ONLINE (STANDALONE) ==================
 
 
 // =================== HALAMAN OWNER (Inertia) ===================
@@ -544,13 +621,13 @@ Route::get('/owner', [PanelController::class, 'index'])
 Route::prefix('api/owner')
     ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
     ->group(function () {
-        Route::get('/roles',                    [OwnerController::class, 'roles']);
-        Route::get('/puskesmas',                [OwnerController::class, 'puskesmas']);
-        Route::get('/users',                    [OwnerController::class, 'users']);
-        Route::post('/users',                   [OwnerController::class, 'storeUser']); // tambah user
-        Route::patch('/users/{id}/roles',       [OwnerController::class, 'updateRoles']);
+        Route::get('/roles', [OwnerController::class, 'roles']);
+        Route::get('/puskesmas', [OwnerController::class, 'puskesmas']);
+        Route::get('/users', [OwnerController::class, 'users']);
+        Route::post('/users', [OwnerController::class, 'storeUser']); // tambah user
+        Route::patch('/users/{id}/roles', [OwnerController::class, 'updateRoles']);
         Route::post('/users/{id}/force-logout', [OwnerController::class, 'forceLogout']);
-        Route::get('/online-users',             [OwnerController::class, 'onlineUsers']); // opsional
+        Route::get('/online-users', [OwnerController::class, 'onlineUsers']); // opsional
     });
 Route::post('/auth/password/force-update', [PasswordForceController::class, 'update'])
     ->middleware(['auth'])
@@ -559,13 +636,13 @@ Route::post('/auth/password/force-update', [PasswordForceController::class, 'upd
 Route::prefix('api/owner')
     ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':owner'])
     ->group(function () {
-        Route::get('/roles',                    [OwnerController::class, 'roles']);
-        Route::get('/puskesmas',                [OwnerController::class, 'puskesmas']);
-        Route::get('/users',                    [OwnerController::class, 'users']);
-        Route::post('/users',                   [OwnerController::class, 'storeUser']); // tambah user
-        Route::patch('/users/{id}/roles',       [OwnerController::class, 'updateRoles']);
+        Route::get('/roles', [OwnerController::class, 'roles']);
+        Route::get('/puskesmas', [OwnerController::class, 'puskesmas']);
+        Route::get('/users', [OwnerController::class, 'users']);
+        Route::post('/users', [OwnerController::class, 'storeUser']); // tambah user
+        Route::patch('/users/{id}/roles', [OwnerController::class, 'updateRoles']);
         Route::post('/users/{id}/force-logout', [OwnerController::class, 'forceLogout']);
-        Route::get('/online-users',             [OwnerController::class, 'onlineUsers']); // opsional
+        Route::get('/online-users', [OwnerController::class, 'onlineUsers']); // opsional
     });
 Route::post('/auth/password/force-update', [PasswordForceController::class, 'update'])
     ->middleware(['auth'])

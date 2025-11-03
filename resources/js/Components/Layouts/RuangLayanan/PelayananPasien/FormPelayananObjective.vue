@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="props.dataAnamnesa">
     <div class="bg-warning d-inline-block fw-bold mb-4 ">
       <span>Tombol "Simpan" ada di tab "Tenaga medis"</span>
     </div>
@@ -291,8 +291,16 @@
         <div class="card-body" v-if="currrentSubTabObjective === 'tenaga_medis'">
           <div class="row">
             <div class="col-6">
-              <slot name="status_pasien">
-              </slot>
+              <div v-if="props.idPoli == '002'" >
+                <label for="" class="fw-bold">Status</label>
+                <select class="form-control my-3" v-model="form.statusPasien">
+                  <option value="" selected>-- Pilih --</option>
+                  <option value="1">ANAK SEKOLAH</option>
+                  <option value="2">APRAS</option>
+                  <option value="3">BUMIL</option>
+                  <option value="4">UMUM</option>
+                </select>
+              </div>
               <label for="" class="fw-bold">Tenaga Media Askep</label>
               <select class="form-control my-3" name="" id="tenaga_medis_askep" v-model="form.tenaga_medis_askep">
                 <option value="" selected>-- Pilih --</option>
@@ -304,6 +312,9 @@
         </div>
       </div>
     </form>
+  </div>
+  <div v-else class="alert alert-warning text-center py-3 rounded shadow-sm">
+    <strong> INPUT SUBJECTIVE TERLEBIH DAHULU</strong>
   </div>
 </template>
 
@@ -323,54 +334,56 @@ const props = defineProps({
   routeName: String,
   statusPasien: String,
   tenagaMedisAskep: Object,
+  idLoket: String,
+  idPoli : String
 });
 console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
 
 const form = useForm({
-  idAnamnesa: props.dataAnamnesa.idAnamnesa,
-  tanggal_anamnesa: props.dataAnamnesa.tglAnamnesa,
-  keadaan_umum: props.dataAnamnesa.keadaanUmum,
-  kesadaran: props.dataAnamnesa.kdSadar,
-  imt: props.dataAnamnesa.imt,
-  imtKet: props.dataAnamnesa.imtKet,
-  tinggi_badan: props.dataAnamnesa.tinggiBadan,
-  berat_badan: props.dataAnamnesa.beratBadan,
-  lingkar_perut: props.dataAnamnesa.lingkarPerut,
-  lingkar_lengan: props.dataAnamnesa.lingkarTangan,
-  sistole: props.dataAnamnesa.sistole,
-  diastole: props.dataAnamnesa.diastole,
-  resp_rate: props.dataAnamnesa.respRate,
-  heart_rate: props.dataAnamnesa.heartRate,
-  suhu: props.dataAnamnesa.suhu,
+  idAnamnesa: props.dataAnamnesa?.idAnamnesa ?? '',
+  tanggal_anamnesa: props.dataAnamnesa?.tglAnamnesa ?? '',
+  keadaan_umum: props.dataAnamnesa?.keadaanUmum ?? '',
+  kesadaran: props.dataAnamnesa?.kdSadar ?? '',
+  imt: props.dataAnamnesa?.imt ?? '',
+  imtKet: props.dataAnamnesa?.imtKet ?? '',
+  tinggi_badan: props.dataAnamnesa?.tinggiBadan ?? '',
+  berat_badan: props.dataAnamnesa?.beratBadan ?? '',
+  lingkar_perut: props.dataAnamnesa?.lingkarPerut ?? '',
+  lingkar_lengan: props.dataAnamnesa?.lingkarTangan ?? '',
+  sistole: props.dataAnamnesa?.sistole ?? '',
+  diastole: props.dataAnamnesa?.diastole ?? '',
+  resp_rate: props.dataAnamnesa?.respRate ?? '',
+  heart_rate: props.dataAnamnesa?.heartRate ?? '',
+  suhu: props.dataAnamnesa?.suhu ?? '',
 
-  jantung: props.dataAnamnesa.thoraxJantung ?? 'NORMAL',
-  ket_jantung: props.dataAnamnesa.thoraxJantungKet,
-  pulmo: props.dataAnamnesa.thoraxPulmo ?? 'NORMAL',
-  ket_pulmo: props.dataAnamnesa.thoraxPulmoKet,
-  abdomen_atas: props.dataAnamnesa.abdomanAtas ?? 'NORMAL',
-  ket_abdomen_atas: props.dataAnamnesa.abdomanAtasKet,
-  abdomen_bawah: props.dataAnamnesa.abdomanBawah ?? 'NORMAL',
-  ket_abdomen_bawah: props.dataAnamnesa.abdomanBawahket,
-  extrimitas_atas: props.dataAnamnesa.extrimitasAtas ?? 'NORMAL',
-  ket_extrimitas_atas: props.dataAnamnesa.extrimitasAtasKet,
-  extrimitas_bawah: props.dataAnamnesa.extrimitasBawah ?? 'NORMAL',
-  ket_extrimitas_bawah: props.dataAnamnesa.extrimitasBawahKet,
-  kepala: props.dataAnamnesa.kepala ?? 'NORMAL',
-  ket_kepala: props.dataAnamnesa.kepalaKet,
-  mata: props.dataAnamnesa.mata ?? 'NORMAL',
-  ket_mata: props.dataAnamnesa.mataKet,
-  telinga: props.dataAnamnesa.telinga ?? 'NORMAL',
-  ket_telinga: props.dataAnamnesa.telingatKet,
-  leher: props.dataAnamnesa.leher ?? 'NORMAL',
-  ket_leher: props.dataAnamnesa.leherKet,
-  tenaga_medis_askep: props.dataAnamnesa.tenagaMedisAskep,
+  jantung: props.dataAnamnesa?.thoraxJantung ?? 'NORMAL',
+  ket_jantung: props.dataAnamnesa?.thoraxJantungKet ?? '',
+  pulmo: props.dataAnamnesa?.thoraxPulmo ?? 'NORMAL',
+  ket_pulmo: props.dataAnamnesa?.thoraxPulmoKet ?? '',
+  abdomen_atas: props.dataAnamnesa?.abdomanAtas ?? 'NORMAL',
+  ket_abdomen_atas: props.dataAnamnesa?.abdomanAtasKet ?? '',
+  abdomen_bawah: props.dataAnamnesa?.abdomanBawah ?? 'NORMAL',
+  ket_abdomen_bawah: props.dataAnamnesa?.abdomanBawahket ?? '',
+  extrimitas_atas: props.dataAnamnesa?.extrimitasAtas ?? 'NORMAL',
+  ket_extrimitas_atas: props.dataAnamnesa?.extrimitasAtasKet ?? '',
+  extrimitas_bawah: props.dataAnamnesa?.extrimitasBawah ?? 'NORMAL',
+  ket_extrimitas_bawah: props.dataAnamnesa?.extrimitasBawahKet ?? '',
+  kepala: props.dataAnamnesa?.kepala ?? 'NORMAL',
+  ket_kepala: props.dataAnamnesa?.kepalaKet ?? '',
+  mata: props.dataAnamnesa?.mata ?? 'NORMAL',
+  ket_mata: props.dataAnamnesa?.mataKet ?? '',
+  telinga: props.dataAnamnesa?.telinga ?? 'NORMAL',
+  ket_telinga: props.dataAnamnesa?.telingatKet ?? '',
+  leher: props.dataAnamnesa?.leher ?? 'NORMAL',
+  ket_leher: props.dataAnamnesa?.leherKet ?? '',
+  tenaga_medis_askep: props.dataAnamnesa?.tenagaMedisAskep ?? '',
 
-  perkusi: props.dataAnamnesa.perkusi ?? '',
-  druk: props.dataAnamnesa.druk ?? '',
-  palpasi: props.dataAnamnesa.palpasi ?? '',
-  luxasi: props.dataAnamnesa.luxasi ?? '',
-  vitalitas: props.dataAnamnesa.vitalitas ?? '',
-  statusPasien: props.statusPasien ?? ''
+  perkusi: props.dataAnamnesa?.perkusi ?? '',
+  druk: props.dataAnamnesa?.druk ?? '',
+  palpasi: props.dataAnamnesa?.palpasi ?? '',
+  luxasi: props.dataAnamnesa?.luxasi ?? '',
+  vitalitas: props.dataAnamnesa?.vitalitas ?? '',
+  statusPasien: props.dataAnamnesa?.statusPasien ?? ''
 });
 
 function changeInputKet(field, ketfield) {
@@ -380,7 +393,9 @@ function changeInputKet(field, ketfield) {
 }
 
 function submitForm() {
-  form.post(route(props.routeName), {
+  form.post(route(props.routeName, {
+    idAnam: props.dataAnamnesa?.idAnamnesa ?? ''
+  }), {
     preserveScroll: true,
     onSuccess: () => {
       alert("Anamnesa Objective tersimpan");
