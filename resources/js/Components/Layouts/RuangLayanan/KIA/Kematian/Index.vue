@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mb-2">Pelayanan Antenatal Care / Ibu Hamil</h5>
+    <h5 class="mb-2">Pelayanan Kematian Maternal dan Perinatal</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -40,55 +40,30 @@
 
 <script setup>
   import { ref, computed } from 'vue';
-
-  // import form
-  import FormObstetri from './FormObstetri.vue';
-  import FormSubjektif from './FormSubjektif.vue';
-  import FormObjektif from './FormObjektif.vue';
+  import FormLaporan from './FormLaporan.vue';
   import FormAssessment from '../Form/FormAssessment.vue';
-  import FormPlanning from '../Form/FormPlanning.vue';
-  import FormImunisasi from '../Form/FormImunisasi.vue';
   import FormStatusPasien from '../Form/FormStatusPasien.vue';
   // (bisa tambahkan form lain nanti)
 
   const tabs = [
-    { name: 'obstetri', label: 'Obstetri' },
-    { name: 'subjektif', label: 'Subjektif' },
-    { name: 'objektif', label: 'Objektif' },
+    { name: 'laporan', label: 'Laporan Kematian' },
     { name: 'assessment', label: 'Assessment' },
-    { name: 'imunisasi', label: 'Imunisasi' },
-    { name: 'planning', label: 'Planning' },
     { name: 'status_pasien', label: 'Status Pasien' },
   ];
 
   const props = defineProps({
     DataPasien: Array,
-    diagnosa: Array,
-    tindakan: Array,
-    riwayat: Array,
-    diagnosaKeperawatan: Array,
-    AlergiMakanan: Array,
-    AlergiObat: Array,
-    KunjunganAnc: Array,
-    DataDiagnosa: Array,
+    diagnosa: Array
   });
 
-  const selectedTab = ref('obstetri');
+  const selectedTab = ref('laporan');
 
   const currentForm = computed(() => {
     switch (selectedTab.value) {
-      case 'obstetri':
-        return FormObstetri;
-      case 'subjektif':
-        return FormSubjektif;
-      case 'objektif':
-        return FormObjektif;
+      case 'laporan':
+        return FormLaporan;
       case 'assessment':
         return FormAssessment;
-      case 'imunisasi':
-        return FormImunisasi;
-      case 'planning':
-        return FormPlanning;
       case 'status_pasien':
         return FormStatusPasien;
       default:

@@ -6,6 +6,7 @@ use App\Http\Controllers\RuangLayanan\PoliBpUmumController;
 use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use App\Http\Controllers\RuangLayanan\PoliKIAController;
+use App\Http\Controllers\RuangLayanan\KematianController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -106,6 +107,7 @@ Route::prefix('admin')->group(function () {
 
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
+    
     Route::get('/', fn() => Inertia::render('Farmasi/Index'));
     Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
     Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
@@ -310,14 +312,28 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
 });
-Route::get('/simpus/laborat', [LaboratoriumController::class, 'index'])
-    ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
-    ->name('ruang-layanan.laborat');
+Route::prefix('ruang_layanan/simpus/kunjungan-online')
+    ->name('kunj-online.')
+    ->middleware(['auth']) // kalau mau wajib login
+    ->group(function () {
+        Route::get('/{idPoli?}/{klaster?}', [KunjOnlineController::class, 'index'])->name('index');
+        Route::get('/pelayanan/{id}/{idPoli}/{idPelayanan}', [KunjOnlineController::class, 'pelayanan'])->name('pelayanan');
+        Route::post('/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])->name('setAnamnesa');
+        Route::post('/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])->name('setAnamnesaObjective');
+        Route::post('/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])->name('mulai-pemeriksaan-pasien');
+        Route::post('/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])->name('diagnosa-medis');
+        Route::get('/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])->name('surat-rujukan');
+        Route::get('/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])->name('surat-rujukan.create');
+        Route::post('/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])->name('surat-rujukan.store');
+        Route::get('/{id}/riwayat-kesehatan', [KunjOnlineController::class, 'riwayatKesehatan'])->name('riwayat-kesehatan');
+        Route::get('/{id}/cppt', [KunjOnlineController::class, 'cppt'])->name('cppt');
+    });
+Route::prefix('ruang_layanan') ->middleware(['auth'])
+->group(function () {    
 
-
-// Menampilkan halaman poli
-Route::get('/simpus/poli', [indexController::class, 'listPoli'])->name('ruang-layanan.poli');
-Route::get('/simpus/poli/{kluster}', [indexController::class, 'listPoliKluster'])->name('ruang-layanan.poli-kluster');
+    // Menampilkan halaman poli
+    Route::get('/simpus/poli', [indexController::class, 'listPoli'])->name('ruang-layanan.poli');
+    Route::get('/simpus/poli/{kluster}', [indexController::class, 'listPoliKluster'])->name('ruang-layanan.poli-kluster');
 
 // Umum
 Route::get('/simpus/{idPoli?}/{kluster?}', [PoliBpUmumController::class, 'index'])->name('ruang-layanan.index');
@@ -417,48 +433,9 @@ Route::get('/master-obat', [indexController::class, 'MasterObat'])->name('ruang-
 Route::inertia('/simpus/ranap', 'Ruang_Layanan/UGD/pasien_poli')->name('ruang-layanan.ranap');
 
 
-// 🔹 Kunjungan Online
-// 🔹 Kunjungan Online
-Route::get('simpus/kunjungan-online', [KunjOnlineController::class, 'index'])
-    ->name('ruang-layanan.kunjungan-online');
+    // 🔹 Kunjungan Online
+ 
 
-Route::get('simpus/kunjungan-online/pelayanan/{id}', [KunjOnlineController::class, 'pelayanan'])
-    ->name('ruang-layanan.kunjungan-online.pelayanan');
-
-Route::post('simpus/kunjungan-online/pelayanan/anamnesa', [KunjOnlineController::class, 'setAnamnesa'])
-    ->name('ruang-layanan-kunjungan-online.setAnamnesa');
-
-Route::post('simpus/kunjungan-online/pelayanan/anamnesa/objective', [KunjOnlineController::class, 'setAnamnesaObjective'])
-    ->name('ruang-layanan-kunjungan-online.setAnamnesaObjective');
-
-Route::post('simpus/kunjungan-online/pelayanan/mulaiPelayanan', [KunjOnlineController::class, 'mulaiPemeriksaanPasien'])
-    ->name('ruang-layanan-kunjungan-online.mulai-pemeriksaan-pasien');
-
-Route::post('simpus/kunjungan-online/pelayanan/diagnosa-medis', [KunjOnlineController::class, 'setDiagnosaMedis'])
-    ->name('ruang-layanan-kunjungan-online.diagnosa-medis');
-
-// Halaman daftar surat rujukan (opsional)
-Route::get('simpus/kunjungan-online/surat-rujukan/{id}', [KunjOnlineController::class, 'suratRujukan'])
-    ->name('ruang-layanan.kunjungan-online.surat-rujukan');
-
-// Tampilkan form Surat Rujukan
-Route::get('simpus/kunjungan-online/{id}/surat-rujukan/create', [KunjOnlineController::class, 'createSuratRujukan'])
-    ->name('ruang-layanan.kunjungan-online.surat-rujukan.create');
-
-// Simpan Surat Rujukan
-Route::post('simpus/kunjungan-online/{id}/surat-rujukan', [KunjOnlineController::class, 'storeSuratRujukan'])
-    ->name('ruang-layanan.kunjungan-online.surat-rujukan.store');
-
-// Riwayat Kesehatan (Medical Record) Pasien
-Route::get(
-    'simpus/kunjungan-online/{id}/riwayat-kesehatan',
-    [KunjOnlineController::class, 'riwayatKesehatan']
-)->name('ruang-layanan.kunjungan-online.riwayat-kesehatan');
-
-
-// CPPT (Catatan Perkembangan Pasien Terintegrasi)
-Route::get('simpus/kunjungan-online/{id}/cppt', [KunjOnlineController::class, 'cppt'])
-    ->name('ruang-layanan.kunjungan-online.cppt');
 
 
 
@@ -490,11 +467,17 @@ Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAControll
 
 
 
-//Rawat Inap
-Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
-Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
-Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
-Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+    //Rawat Inap
+    Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
+    Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
+    Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
+    Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+});
+
+
+
+
+
 
 
 //Laborat
@@ -533,15 +516,57 @@ Route::post('/simpus/laborat/pemeriksaan/paket/{paket}', [LaboratoriumController
     ->middleware(['auth', \App\Http\Middleware\Auth\CheckRole::class . ':laborat'])
     ->name('ruang-layanan.laborat.paketPemeriksaanSimpan');
 
-Route::get(
-    '/simpus/laborat/detail/{idPermohonan}',
-    [LaboratoriumController::class, 'detail']
-)->name('ruang-layanan.laborat.detail');
+    Route::get(
+        '/simpus/laborat/detail/{idPermohonan}',
+        [LaboratoriumController::class, 'detail']
+    )->name('ruang-layanan.laborat.detail');
 // Paket dari parameter_uji
-Route::get(
-    '/simpus/laborat/param/headers',
-    [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramHeaders']
+Route::get('/simpus/laborat/param/headers',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramHeaders']
 )->name('ruang-layanan.laborat.param.headers');
+
+Route::get('/simpus/laborat/param/{header}/subheaders',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.subheaders');
+
+Route::post('/simpus/laborat/param/{header}/simpan',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpan']
+)->whereNumber('header')
+ ->name('ruang-layanan.laborat.param.simpan');
+
+Route::post('/simpus/laborat/tindakan/hapus',[LaboratoriumController::class, 'hapusTindakan'])->name('ruang-layanan.laborat.hapusTindakan');
+// LIST semua parameter_uji (bisa search + filter paket) — paginated
+Route::get('/simpus/laborat/param/browse',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramBrowse']
+)->name('ruang-layanan.laborat.param.browse');
+
+// Simpan pilihan manual (by id_parameter[])
+Route::post('/simpus/laborat/param/simpan-terpilih',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
+)->name('ruang-layanan.laborat.param.simpanTerpilih');
+
+    // Kia
+    Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+
+    //ANC
+    Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
+
+    // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+    Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+    
+    // Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+    // Kematian Maternal dan Perinatal
+    Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
+    Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
+
 
 Route::get(
     '/simpus/laborat/param/{header}/subheaders',
@@ -568,6 +593,13 @@ Route::post(
     [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
 )->name('ruang-layanan.laborat.param.simpanTerpilih');
 
+Route::post(
+  '/ruang-layanan/laborat/hapus-semua',
+  [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'hapusSemuaTindakan']
+)->name('ruang-layanan.laborat.hapusSemuaTindakan');
+
+
+// ================== KUNJUNGAN ONLINE (STANDALONE) ==================
 
 
 // =================== HALAMAN OWNER (Inertia) ===================
