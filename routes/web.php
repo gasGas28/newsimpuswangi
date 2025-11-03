@@ -14,10 +14,7 @@ use App\Http\Controllers\RuangLayanan\NeonatusController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\LoketController;
 use Inertia\Inertia;
 use App\Http\Controllers\Laporan\LaporanLoketController;
 use App\Http\Controllers\Pasien\PasienController;
@@ -35,6 +32,8 @@ use App\Http\Controllers\Owner\PanelController;
 use App\Http\Controllers\Auth\PasswordForceController;
 use App\Http\Controllers\Owner\OwnerLogController;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\DB;
+
 
 
 
@@ -64,8 +63,7 @@ Route::match(['GET', 'POST'], '/_csrf-debug', function (Request $r) {
 // Protect home (wajib login)
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
-})->middleware('auth')->name('home');
-;
+})->middleware('auth')->name('home');;
 
 
 // Login
@@ -101,6 +99,10 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('login');
 })->name('logout');
 
+Route::prefix('home')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])
+        ->name('home.home');
+});
 
 // Kia
 Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
@@ -153,12 +155,54 @@ Route::prefix('filter')->controller(FilterController::class)->group(function () 
 });
 
 // Grup Loket
-Route::prefix('pasien')->controller(PasienController::class)->group(function () {
-    // Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-    Route::get('/', fn() => Inertia::render('Loket/AddPasien'))->name('loket.pasien');
-    Route::get('/search', 'index')->name('loket.search');
-    Route::get('/{id}/edit', 'edit')->name('loket.edit');
-    Route::post('/{id}', 'update')->name('pasien.update');
+Route::prefix('loket')->group(function () {
+    Route::get('/', [LoketController::class, 'index'])->name('loket.index');
+    Route::get('/data', [LoketController::class, 'ajaxList'])->name('loket.data');
+    Route::get('/pasien', [LoketController::class, 'create'])->name('loket.pasien');
+    Route::post('/pasien', [LoketController::class, 'store'])->name('loket.pasien.store');
+    Route::get('/search', [LoketController::class, 'search'])->name('loket.search');
+    Route::post('/register', [LoketController::class, 'register'])->name('loket.register');
+
+    // API untuk master data wilayah
+    Route::get('/api/provinsi', [LoketController::class, 'getProvinsiList'])->name('loket.api.provinsi');
+    Route::get('/api/kabupaten', [LoketController::class, 'getKabupatenByProvinsi'])->name('loket.api.kabupaten');
+    Route::get('/api/kecamatan', [LoketController::class, 'getKecamatanList'])->name('loket.api.kecamatan');
+    Route::get('/api/kelurahan', [LoketController::class, 'getKelurahanByKecamatan'])->name('loket.api.kelurahan');
+    Route::get('/api/poli-by-jenis', [LoketController::class, 'getPoliByJenisKunjungan'])->name('loket.api.poli-by-jenis');
+
+    // API untuk master data unit
+    Route::get('/api/kategori-unit', [LoketController::class, 'getKategoriUnit'])->name('loket.api.kategori-unit');
+    Route::get('/api/unit-list/{kategoriUnitId}', [LoketController::class, 'unitList'])->name('loket.api.unit-list');
+    Route::get('/api/unit/{id}', [LoketController::class, 'getDataUnitById'])->name('loket.api.unit');
+    Route::get('/api/wilayah', [LoketController::class, 'getWilayah'])->name('loket.api.wilayah');
+    Route::get('/api/puskesmas', [LoketController::class, 'getPuskesmas'])->name('loket.api.puskesmas');
+    Route::get('/api/provider', [LoketController::class, 'getProvider'])->name('loket.api.provider');
+    Route::get('/api/poli', [LoketController::class, 'getPoli'])->name('loket.api.poli');
+
+    // API untuk pencarian pasien
+    Route::get('/api/pasien/search', [LoketController::class, 'apiSearch'])->name('api.pasien.search');
+    Route::get('/api/check-jenis-pengunjung', [LoketController::class, 'checkJenisPengunjung'])->name('loket.api.check-jenis-pengunjung');
+    Route::get('/api/wilayah-otomatis', [LoketController::class, 'getWilayahOtomatis'])->name('loket.api.wilayah-otomatis');
+    Route::get('/api/pasien/{id}', function ($id) {
+        return \App\Models\Pasien::findOrFail($id);
+    });
+
+    // Route untuk halaman pasien
+    Route::get('/pasien/{id}', [LoketController::class, 'pasien'])->name('loket.pasien.show');
+    Route::get('/cetak_kartu/{id}', [LoketController::class, 'cetak_kartu'])->name('loket.cetak_kartu');
+    Route::get('/gen_barcode/{no_mr}', [LoketController::class, 'gen_barcode'])->name('loket.gen_barcode');
+
+    // Route untuk operasi CRUD
+    Route::post('/simpan', [LoketController::class, 'simpan'])->name('loket.simpan');
+    Route::post('/update', [LoketController::class, 'update'])->name('loket.update');
+    Route::delete('/hapus/{id}', [LoketController::class, 'hapus'])->name('loket.hapus');
+
+    // Route untuk validasi
+    Route::get('/cekrapid/{pasienId}/{tglKunjungan}', [LoketController::class, 'cekrapid'])->name('loket.cekrapid');
+    Route::get('/cek_beda_provider/{pasienId}/{tglKunjungan}', [LoketController::class, 'cek_beda_provider'])->name('loket.cek_beda_provider');
+
+    // Reports (example)
+    Route::get('/lap_reg_kunj_pas/{is_html}/{unit}/{unit_details}/{tgl_awal}/{tgl_akhir}/{kel?}/{pusk?}', [LoketController::class, 'lap_reg_kunj_pas'])->name('loket.report.reg_kunj');
 });
 
 // Grup Templete
@@ -171,17 +215,9 @@ Route::prefix('templete')->group(function () {
 });
 
 // Grup Loket
-Route::prefix('loket')->group(function () {
-    Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
-});
-
-
-
-
-Route::prefix('home')->group(function () {
-    Route::get('/', [HomeController::class, 'index'])
-        ->name('home.home');
-});
+// Route::prefix('loket')->group(function () {
+//     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
+// });
 
 // Grup Laporan
 
@@ -453,18 +489,12 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
 
 
 
-        //Rawat Inap
-        Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
-        Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
-        Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
-        Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
-    });
-
-
-
-
-
-
+    //Rawat Inap
+    Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
+    Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
+    Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
+    Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+});
 
 //Laborat
 // Route::inertia('/simpus/laborat', 'Ruang_Layanan/Laborat/index')->name('ruang-layanan.laborat');
@@ -537,31 +567,20 @@ Route::post(
     [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
 )->name('ruang-layanan.laborat.param.simpanTerpilih');
 
-
-
-    //ANC
-    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
-    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
-    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
-    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
-    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
-    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
-    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
-
-    Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+//     Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
     
-    Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
-    // Kematian Maternal dan Perinatal
-    Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
-    Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
-    Route::get('/simpus/kia/neonatus', [NeonatusController::class, 'index'])->name('ruang-layanan.neonatus');
-    Route::get('/simpus/kia/neonatus/pelayanan/{id}/{idPoli}/{idPelayanan}', [NeonatusController::class, 'pelayanan'])->name('ruang-layanan-neonatus.pelayanan');
-    Route::get('/simpus/kia/pnc', [PNCController::class, 'index'])->name('ruang-layanan.pnc');
-    Route::get('/simpus/kia/pnc/pelayanan/{id}/{idPoli}/{idPelayanan}', [PNCController::class, 'pelayanan'])->name('ruang-layanan-pnc.pelayanan');
-    Route::get('/simpus/kia/inc', [INCController::class, 'index'])->name('ruang-layanan.inc');
-    Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
-    Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
-    Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
+//     Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+//     // Kematian Maternal dan Perinatal
+//     Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
+//     Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
+//     Route::get('/simpus/kia/neonatus', [NeonatusController::class, 'index'])->name('ruang-layanan.neonatus');
+//     Route::get('/simpus/kia/neonatus/pelayanan/{id}/{idPoli}/{idPelayanan}', [NeonatusController::class, 'pelayanan'])->name('ruang-layanan-neonatus.pelayanan');
+//     Route::get('/simpus/kia/pnc', [PNCController::class, 'index'])->name('ruang-layanan.pnc');
+//     Route::get('/simpus/kia/pnc/pelayanan/{id}/{idPoli}/{idPelayanan}', [PNCController::class, 'pelayanan'])->name('ruang-layanan-pnc.pelayanan');
+//     Route::get('/simpus/kia/inc', [INCController::class, 'index'])->name('ruang-layanan.inc');
+//     Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
+//     Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
+//     Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
 Route::get(
     '/simpus/laborat/param/{header}/subheaders',
     [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
