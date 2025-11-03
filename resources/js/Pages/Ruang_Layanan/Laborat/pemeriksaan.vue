@@ -379,17 +379,22 @@
           <div class="modal-body">
 
             <div class="row g-3 align-items-end mb-3 px-3">
-              <div class="col-lg-6">
-                <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label>
-                <!-- HEADER (paket) -->
-                <div class="d-flex flex-wrap gap-2 mb-2">
-                  <button v-for="ph in paketHeaders" :key="'h-' + ph.header" class="btn btn-outline-success btn-sm"
-                    :class="{ 'active': selectedHeader && selectedHeader.header === ph.header }" @click="pickHeader(ph)"
-                    :disabled="!order">
-                    {{ ph.header_name || ('Header ' + ph.header) }}
-                    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
-                  </button>
-                </div>
+<div class="col-lg-6">
+  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
+<!-- HEADER (paket) -->
+<div class="d-flex flex-wrap gap-2 mb-2">
+  <button
+    v-for="ph in paketHeaders"
+    :key="'h-'+ph.header"
+    class="btn btn-outline-success btn-sm"
+    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
+    @click="pickHeader(ph)"
+    :disabled="!order"
+  >
+    {{ ph.header_name || ('Header ' + ph.header) }}
+    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
+  </button>
+</div>
 
                 <!-- SUBHEADER (opsional) -->
                 <div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
@@ -616,10 +621,19 @@ function addPaketHeader(headerObj) {
   };
   router.post(route('ruang-layanan.laborat.param.simpan', { header: headerObj.header }), payload, {
     preserveScroll: true,
-    onError: showErrors,
-    onSuccess: reloadPage
+    onError: (errs) => {
+      showErrors(errs);
+      toast('error', 'Gagal menambahkan semua item');
+    },
+    onSuccess: () => {
+      const nama = headerObj.header_name || ('Header ' + headerObj.header);
+      toast('success', 'Tambah semua berhasil', nama);
+        closeMaster();       // <—— tutup modal di sini
+      reloadPage();
+    }
   });
 }
+
 function hapusSemua() {
   if (!order.value || !permId.value) return;
 
@@ -692,15 +706,22 @@ function addPaketSub(headerObj, sub) {
   form.append('loketId', pasien.value?.idLoket || '');
   form.append('permohonanId', permId.value);
   if (order.value?.idPelayanan) form.append('pelayananId', order.value.idPelayanan);
-  // NOTE: saat ini sub_header = header (model datamu), tetap kirim agar future-proof
   form.append('sub_header', sub.sub_header);
 
   fetch(route('ruang-layanan.laborat.param.simpan', { header: headerObj.header }), {
     method: 'POST',
     body: form,
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
-  }).then(() => reloadPage())
-    .catch(console.error);
+  })
+    .then((r) => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      toast('success', 'Tambah sub berhasil', 'Sub ' + sub.sub_header);
+      reloadPage();
+    })
+    .catch((e) => {
+      console.error(e);
+      toast('error', 'Gagal menambahkan sub');
+    });
 }
 
 
@@ -1017,6 +1038,19 @@ function pickSub(sub) {
   browse.filters.sub_header = sub.sub_header;
   loadParams(1);
 }
+// === Toast helper ===
+function toast(icon, title, text = '') {
+  try {
+    Swal.fire({
+      icon, title, text,
+      timer: 1600,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end',
+      timerProgressBar: true,
+    });
+  } catch {}
+}
 
 
 // SIMPAN pilihan manual (checkbox)
@@ -1034,25 +1068,47 @@ function submitSelected() {
     permohonanId: permId.value,
     pelayananId: order.value?.idPelayanan || '',
     ids: pilih,
-    nilaiLab: valueMap, // kalau kamu mau ikut kirim nilai awal
+    nilaiLab: valueMap,
   };
   router.post(route('ruang-layanan.laborat.param.simpanTerpilih'), payload, {
     preserveScroll: true,
-    onError: showErrors,
-    onSuccess: () => { showMaster.value = false; reloadPage(); }
+    onError: (errs) => {
+      showErrors(errs);
+      toast('error', 'Gagal menambahkan item terpilih');
+    },
+    onSuccess: () => {
+      showMaster.value = false;
+      toast('success', 'Tambah pemeriksaan berhasil', `${pilih.length} item ditambahkan`);
+      reloadPage();
+    }
   });
 }
+function closeMaster() {
+  showMaster.value = false;
+  // opsional: bersihkan pilihan biar fresh saat buka lagi
+  Object.keys(selectedMap).forEach(k => delete selectedMap[k]);
+  Object.keys(valueMap).forEach(k => delete valueMap[k]);
+  selectedHeader.value = null;
+  paketSubs.value = [];
+}
+
 
 
 
 // PASTIKAN hanya SATU versi ini
 function openMasterModal() {
   if (!order.value) return;
+  // reset dulu
+  Object.keys(selectedMap).forEach(k => delete selectedMap[k]);
+  Object.keys(valueMap).forEach(k => delete valueMap[k]);
+  selectedHeader.value = null;
+  paketSubs.value = [];
+
   showMaster.value = true;
   if (!paketHeaders.value.length) loadPaketHeaders();
-  // default: tampilkan semua
   doSearchAll();
 }
+
 async function loadMaster(page = 1) {
   master.loading = true;
   try {
@@ -1102,8 +1158,14 @@ function addPaket(paketKey) {
   };
   router.post(route('ruang-layanan.laborat.paketPemeriksaanSimpan', { paket: paketKey }), payload, {
     preserveScroll: true,
-    onError: (errs) => showErrors(errs),
-    onSuccess: () => { reloadPage(); }
+    onError: (errs) => {
+      showErrors(errs);
+      toast('error', 'Gagal menambahkan paket');
+    },
+    onSuccess: () => {
+      toast('success', 'Tambah paket berhasil');
+      reloadPage();
+    }
   });
 }
 
