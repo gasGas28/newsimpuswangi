@@ -396,7 +396,7 @@
             
             <div class="row g-3 align-items-end mb-3 px-3">
 <div class="col-lg-6">
-  <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label>
+  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
 <!-- HEADER (paket) -->
 <div class="d-flex flex-wrap gap-2 mb-2">
   <button
