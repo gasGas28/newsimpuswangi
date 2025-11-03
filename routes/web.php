@@ -7,6 +7,10 @@ use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use App\Http\Controllers\RuangLayanan\PoliKIAController;
 use App\Http\Controllers\RuangLayanan\KematianController;
+use App\Http\Controllers\RuangLayanan\TumbuhKembangController;
+use App\Http\Controllers\RuangLayanan\PNCController;
+use App\Http\Controllers\RuangLayanan\INCController;
+use App\Http\Controllers\RuangLayanan\NeonatusController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -513,8 +517,14 @@ Route::post('/simpus/laborat/param/simpan-terpilih',
     // Kematian Maternal dan Perinatal
     Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
     Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
-
-
+    Route::get('/simpus/kia/neonatus', [NeonatusController::class, 'index'])->name('ruang-layanan.neonatus');
+    Route::get('/simpus/kia/neonatus/pelayanan/{id}/{idPoli}/{idPelayanan}', [NeonatusController::class, 'pelayanan'])->name('ruang-layanan-neonatus.pelayanan');
+    Route::get('/simpus/kia/pnc', [PNCController::class, 'index'])->name('ruang-layanan.pnc');
+    Route::get('/simpus/kia/pnc/pelayanan/{id}/{idPoli}/{idPelayanan}', [PNCController::class, 'pelayanan'])->name('ruang-layanan-pnc.pelayanan');
+    Route::get('/simpus/kia/inc', [INCController::class, 'index'])->name('ruang-layanan.inc');
+    Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
+    Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
+    Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
 
 
     //Rawat Inap

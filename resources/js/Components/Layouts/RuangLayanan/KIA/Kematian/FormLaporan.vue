@@ -11,6 +11,8 @@
         <div class="action-label">Pelaporan Kematian Bayi</div>
       </a> 
     </div>
+
+    <hr>
     
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
