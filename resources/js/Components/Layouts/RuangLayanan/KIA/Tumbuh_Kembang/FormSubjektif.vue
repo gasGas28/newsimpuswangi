@@ -30,7 +30,7 @@
 
         <div class="col-md-6">
           <label class="form-label">Tinggi Badan</label>
-          <input type="number" class="form-control"/>
+          <input type="number" class="form-control" />
         </div>
 
         <div class="col-md-6">
@@ -41,6 +41,7 @@
           </div>
         </div>
 
+        
         <div class="col-md-6">
           <label class="form-label">Status Imunisasi Tetanus</label>
           <select class="form-select">
@@ -61,7 +62,6 @@
 
 <script setup>
 import { ref } from 'vue'
-
 
 const saveForm = () => {
   console.log('Data Obstetri:', form.value)

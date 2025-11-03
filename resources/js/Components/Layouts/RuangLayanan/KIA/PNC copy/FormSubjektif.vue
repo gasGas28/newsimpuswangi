@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="fw-bold text-primary mb-3">Pemeriksaan Obstetri</h5>
+    <h5 class="fw-bold text-danger mb-3">Pemeriksaan Obstetri</h5>
     <form @submit.prevent="saveForm">
       <div class="row g-3">
         <div class="col-md-4">

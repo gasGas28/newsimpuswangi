@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="Tumbuh Kembang" :backRoute :unitList :rows>
+    <FormAnamnesa title="Kematian Maternal dan Perinatal" :backRoute :unitList :rows>
 
     </FormAnamnesa>
   </AppLayouts>
@@ -15,7 +15,7 @@ import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
 const {props} = usePage();
 const DataUnit = props.DataUnit;
 const DataPasien = props.DataPasien;
-const backRoute = 'ruang-layanan-kematian.pelayanan';
+const backRoute = 'ruang-layanan-pnc.pelayanan';
 
 
 console.log('data pasien',DataPasien);

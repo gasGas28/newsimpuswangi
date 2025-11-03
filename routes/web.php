@@ -7,6 +7,10 @@ use App\Http\Controllers\RuangLayanan\PoliGigiController;
 use App\Http\Controllers\RuangLayananController;
 use App\Http\Controllers\RuangLayanan\PoliKIAController;
 use App\Http\Controllers\RuangLayanan\KematianController;
+use App\Http\Controllers\RuangLayanan\TumbuhKembangController;
+use App\Http\Controllers\RuangLayanan\PNCController;
+use App\Http\Controllers\RuangLayanan\INCController;
+use App\Http\Controllers\RuangLayanan\NeonatusController;
 use App\Http\Controllers\RuangLayanan\AncController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -98,7 +102,33 @@ Route::post('/logout', function (Request $request) {
 })->name('logout');
 
 
+// Kia
+Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+    //ANC
+    Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
 
+    // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
+    Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
+    
+    // Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
+    // Kematian Maternal dan Perinatal
+    Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
+    Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
+    Route::get('/simpus/kia/neonatus', [NeonatusController::class, 'index'])->name('ruang-layanan.neonatus');
+    Route::get('/simpus/kia/neonatus/pelayanan/{id}/{idPoli}/{idPelayanan}', [NeonatusController::class, 'pelayanan'])->name('ruang-layanan-neonatus.pelayanan');
+    Route::get('/simpus/kia/pnc', [PNCController::class, 'index'])->name('ruang-layanan.pnc');
+    Route::get('/simpus/kia/pnc/pelayanan/{id}/{idPoli}/{idPelayanan}', [PNCController::class, 'pelayanan'])->name('ruang-layanan-pnc.pelayanan');
+    Route::get('/simpus/kia/inc', [INCController::class, 'index'])->name('ruang-layanan.inc');
+    Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
+    Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
+    Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
 
 // Grup Admin
 Route::prefix('admin')->group(function () {
@@ -448,6 +478,7 @@ Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-la
 Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
 
 
+
 //ANC
 // Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
 // Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
@@ -560,8 +591,14 @@ Route::post('/simpus/laborat/param/simpan-terpilih',
     // Kematian Maternal dan Perinatal
     Route::get('/simpus/kia/kematian', [KematianController::class, 'index'])->name('ruang-layanan.kematian');
     Route::get('/simpus/kia/kematian/pelayanan/{id}/{idPoli}/{idPelayanan}', [KematianController::class, 'pelayanan'])->name('ruang-layanan-kematian.pelayanan');
-
-
+    Route::get('/simpus/kia/neonatus', [NeonatusController::class, 'index'])->name('ruang-layanan.neonatus');
+    Route::get('/simpus/kia/neonatus/pelayanan/{id}/{idPoli}/{idPelayanan}', [NeonatusController::class, 'pelayanan'])->name('ruang-layanan-neonatus.pelayanan');
+    Route::get('/simpus/kia/pnc', [PNCController::class, 'index'])->name('ruang-layanan.pnc');
+    Route::get('/simpus/kia/pnc/pelayanan/{id}/{idPoli}/{idPelayanan}', [PNCController::class, 'pelayanan'])->name('ruang-layanan-pnc.pelayanan');
+    Route::get('/simpus/kia/inc', [INCController::class, 'index'])->name('ruang-layanan.inc');
+    Route::get('/simpus/kia/inc/pelayanan/{id}/{idPoli}/{idPelayanan}', [INCController::class, 'pelayanan'])->name('ruang-layanan-inc.pelayanan');
+    Route::get('/simpus/kia/tumbuhkembang', [TumbuhKembangController::class, 'index'])->name('ruang-layanan.tkembang');
+    Route::get('/simpus/kia/tumbuhkembang/pelayanan/{id}/{idPoli}/{idPelayanan}', [TumbuhKembangController::class, 'pelayanan'])->name('ruang-layanan-tkembang.pelayanan');
 Route::get(
     '/simpus/laborat/param/{header}/subheaders',
     [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSubheaders']
