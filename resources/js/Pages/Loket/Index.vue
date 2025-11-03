@@ -260,26 +260,33 @@
                     <label class="form-label form-label-sm fw-bold">Wilayah *</label>
                   </div>
                   <div class="col-8">
-                    <select
-                      class="form-select form-select-sm bg-warning"
-                      v-model="form.wilayah"
-                      :disabled="loading.wilayah"
-                    >
-                      <option value="">- Pilih -</option>
-                      <option v-for="(name, id) in wilayahList" :key="id" :value="id">
+                    <select class="form-select form-select-sm bg-warning" v-model="form.wilayah">
+                      <option value="">- Pilih Wilayah -</option>
+                      <option
+                        v-for="(name, id) in wilayahList"
+                        :key="id"
+                        :value="id"
+                        v-if="id !== '0'"
+                      >
                         {{ name }}
                       </option>
                     </select>
-                    <div v-if="loading.wilayah" class="text-muted small mt-1">
-                      <i class="bi bi-arrow-repeat spinner"></i> Loading wilayah...
-                    </div>
-                    <small class="text-muted"
-                      >*) Pemilihan wilayah, sesuaikan dengan alamat pasien !!</small
+
+                    <!-- Info wilayah otomatis -->
+                    <small
+                      v-if="autoDetectedWilayah && form.wilayah === autoDetectedWilayah"
+                      class="text-info d-block mt-1"
                     >
+                      <i class="bi bi-check-circle"></i> Terdeteksi otomatis
+                    </small>
+                    <small v-else-if="form.wilayah" class="text-success d-block mt-1">
+                      <i class="bi bi-pencil"></i> Dipilih manual
+                    </small>
                   </div>
                 </div>
               </div>
 
+              <!-- JENIS PENGUNJUNG DENGAN FITUR OTOMATIS -->
               <div class="mb-2">
                 <div class="row">
                   <div class="col-4">
@@ -287,9 +294,17 @@
                   </div>
                   <div class="col-8">
                     <select class="form-select form-select-sm bg-warning" v-model="jenisPengunjung">
-                      <option value="Pengunjung Lama">Pengunjung Lama</option>
                       <option value="Pengunjung Baru">Pengunjung Baru</option>
+                      <option value="Pengunjung Lama">Pengunjung Lama</option>
                     </select>
+
+                    <!-- Info status otomatis - HANYA TAMPIL JIKA PENGUNJUNG LAMA -->
+                    <small
+                      v-if="jenisPengunjungAuto === 'Pengunjung Lama'"
+                      class="text-warning d-block mt-1"
+                    >
+                      <small>💡 Pasien sudah pernah daftar di {{ currentMonthYear }}</small>
+                    </small>
                   </div>
                 </div>
               </div>
@@ -540,65 +555,9 @@
   const masterKecamatan = ref({});
   const masterKelurahan = ref({});
 
-  // Fungsi untuk load master data wilayah
-  const loadMasterWilayah = async () => {
-    try {
-      // Load kecamatan untuk Banyuwangi (NO_PROP=35, NO_KAB=10)
-      const responseKecamatan = await fetch(
-        route('loket.api.kecamatan') + '?propinsi=35&kabupaten=10'
-      );
-      if (responseKecamatan.ok) {
-        const dataKecamatan = await responseKecamatan.json();
-        // Convert array to object for easy lookup
-        masterKecamatan.value = {};
-        dataKecamatan.forEach((kec) => {
-          masterKecamatan.value[kec.NO_KEC] = kec.NAMA_KEC;
-        });
-      }
-
-      // Load kelurahan akan dilakukan on-demand saat ada data pasien
-    } catch (error) {
-      console.error('Error loading master wilayah:', error);
-    }
-  };
-
-  // Mapping kecamatan & kelurahan kode ke nama
-  const formatKecamatanKelurahan = computed(() => {
-    const pasien = selectedPasien.value;
-
-    // Cek jika data sudah dalam bentuk object (sudah ada nama)
-    if (
-      pasien.kecamatan &&
-      pasien.kecamatan.NAMA_KEC &&
-      pasien.kelurahan &&
-      pasien.kelurahan.NAMA_KEL
-    ) {
-      return `${pasien.kecamatan.NAMA_KEC} - ${pasien.kelurahan.NAMA_KEL}`;
-    }
-
-    // Jika masih kode, lakukan mapping
-    const kodeKecamatan = pasien.NO_KEC;
-    const kodeKelurahan = pasien.NO_KEL;
-
-    const namaKecamatan = masterKecamatan.value[kodeKecamatan] || kodeKecamatan;
-
-    // Untuk kelurahan, kita perlu load berdasarkan kecamatan
-    let namaKelurahan = kodeKelurahan;
-
-    if (kodeKecamatan && kodeKelurahan && masterKelurahan.value[kodeKecamatan]) {
-      namaKelurahan = masterKelurahan.value[kodeKecamatan][kodeKelurahan] || kodeKelurahan;
-    }
-
-    if (namaKecamatan && namaKelurahan) {
-      return `${namaKecamatan} - ${namaKelurahan}`;
-    } else if (namaKecamatan) {
-      return namaKecamatan;
-    } else if (namaKelurahan) {
-      return namaKelurahan;
-    } else {
-      return '';
-    }
-  });
+  // Data tambahan untuk fitur otomatis
+  const autoDetectedStatus = ref('');
+  const autoDetectedWilayah = ref('');
 
   // Loading states
   const loading = ref({
@@ -643,7 +602,7 @@
     unitId: '',
     PHONE: '',
     wilayah: '',
-    kunjBaru: 'false',
+    kunjBaru: 'true',
     jknPbi: 'NON_BPJS',
     kunjSakit: 'true',
     kdPoli: '',
@@ -662,8 +621,31 @@
   });
 
   // Computed properties untuk mapping UI ke database
+  const jenisPengunjungAuto = computed(() => {
+    if (!selectedPasien.value.ID || !form.tglKunjungan) {
+      return 'Pengunjung Baru';
+    }
+
+    return autoDetectedStatus.value || 'Pengunjung Baru';
+  });
+
+  const currentMonthYear = computed(() => {
+    if (!form.tglKunjungan) return '';
+    const date = new Date(form.tglKunjungan);
+    return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  });
+
+  // Computed untuk mendapatkan nama wilayah berdasarkan ID
+  const namaWilayah = computed(() => {
+    if (!form.wilayah) return '- Pilih -';
+    return wilayahList.value[form.wilayah] || '- Pilih -';
+  });
+
+  // Computed untuk jenisPengunjung
   const jenisPengunjung = computed({
-    get: () => (form.kunjBaru === 'true' ? 'Pengunjung Baru' : 'Pengunjung Lama'),
+    get: () => {
+      return form.kunjBaru === 'true' ? 'Pengunjung Baru' : 'Pengunjung Lama';
+    },
     set: (value) => {
       form.kunjBaru = value === 'Pengunjung Baru' ? 'true' : 'false';
     },
@@ -683,25 +665,23 @@
     },
   });
 
-  // ✅ COMPUTED UNTUK KODE TKP DENGAN DEFAULT
+  // COMPUTED UNTUK KODE TKP DENGAN DEFAULT
   const kodeTKP = computed({
     get: () => {
-      // Mapping dari kdTkp (database) ke kodeTKP (UI)
       const mappings = {
         10: 'RJTP (RAWAT JALAN)',
         20: 'RJTL (RAWAT JALAN LANJUTAN)',
         50: 'Promotif',
       };
-      return mappings[form.kdTkp] || 'RJTP (RAWAT JALAN)'; // ✅ DEFAULT
+      return mappings[form.kdTkp] || 'RJTP (RAWAT JALAN)';
     },
     set: (value) => {
-      // Mapping dari kodeTKP (UI) ke kdTkp (database)
       const mappings = {
         'RJTP (RAWAT JALAN)': '10',
         'RJTL (RAWAT JALAN LANJUTAN)': '20',
         Promotif: '50',
       };
-      form.kdTkp = mappings[value] || '10'; // ✅ DEFAULT
+      form.kdTkp = mappings[value] || '10';
     },
   });
 
@@ -716,6 +696,88 @@
   const formValid = computed(() => {
     return selectedPasien.value.ID && form.kategoriUnitId && form.unitId && form.wilayah;
   });
+
+  // ========== METHOD OTOMATIS ==========
+
+  // Method untuk cek status otomatis dari backend
+  const checkAutoStatus = async () => {
+    if (!selectedPasien.value.ID || !form.tglKunjungan) {
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        pasienId: selectedPasien.value.ID,
+        tglKunjungan: form.tglKunjungan,
+      });
+
+      const response = await fetch(
+        route('loket.api.check-jenis-pengunjung') + '?' + params.toString()
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        autoDetectedStatus.value = data.status;
+
+        // Set nilai otomatis berdasarkan deteksi sistem
+        form.kunjBaru = data.status === 'Pengunjung Baru' ? 'true' : 'false';
+      }
+    } catch (error) {
+      console.error('Error cek status pengunjung:', error);
+      autoDetectedStatus.value = 'Pengunjung Baru';
+      form.kunjBaru = 'true';
+    }
+  };
+
+  // checkAutoWilayah dengan error handling yang proper
+  const checkAutoWilayah = async () => {
+    if (!selectedPasien.value.ID) {
+      return;
+    }
+
+    console.log('Memeriksa wilayah otomatis untuk pasien:', selectedPasien.value.ID);
+
+    try {
+      const params = new URLSearchParams({
+        pasienId: selectedPasien.value.ID,
+      });
+
+      const response = await fetch(route('loket.api.wilayah-otomatis') + '?' + params.toString());
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // VALIDASI RESPONSE
+      if (data.error) {
+        throw new Error(data.message || `Error: ${data.error}`);
+      }
+
+      if (!data.wilayah) {
+        throw new Error('Server tidak mengembalikan data wilayah');
+      }
+
+      // SET DATA JIKA SEMUA VALID
+      autoDetectedWilayah.value = data.wilayah;
+
+      if (!form.wilayah) {
+        form.wilayah = data.wilayah;
+        console.log('Wilayah otomatis berhasil:', data.wilayah);
+      } else {
+        console.log('Wilayah terdeteksi:', data.wilayah, '(tetap menggunakan pilihan manual)');
+      }
+    } catch (error) {
+      console.error('Error deteksi wilayah otomatis:', error.message);
+
+      // TAMPILKAN PESAN ERROR YANG JELAS
+      const errorMessage =
+        `Gagal mendeteksi wilayah otomatis ${error.message} Silakan pilih wilayah secara manual dari dropdown.`.trim();
+
+      alert(errorMessage);
+    }
+  };
 
   // Fungsi untuk memuat daftar unit berdasarkan kategori
   const loadUnitList = async () => {
@@ -809,6 +871,66 @@
     }
   };
 
+  // Fungsi untuk load master data wilayah
+  const loadMasterWilayah = async () => {
+    try {
+      // Load kecamatan untuk Banyuwangi (NO_PROP=35, NO_KAB=10)
+      const responseKecamatan = await fetch(
+        route('loket.api.kecamatan') + '?propinsi=35&kabupaten=10'
+      );
+      if (responseKecamatan.ok) {
+        const dataKecamatan = await responseKecamatan.json();
+        // Convert array to object for easy lookup
+        masterKecamatan.value = {};
+        dataKecamatan.forEach((kec) => {
+          masterKecamatan.value[kec.NO_KEC] = kec.NAMA_KEC;
+        });
+      }
+
+      // Load kelurahan akan dilakukan on-demand saat ada data pasien
+    } catch (error) {
+      console.error('Error loading master wilayah:', error);
+    }
+  };
+
+  // Mapping kecamatan & kelurahan kode ke nama
+  const formatKecamatanKelurahan = computed(() => {
+    const pasien = selectedPasien.value;
+
+    // Cek jika data sudah dalam bentuk object (sudah ada nama)
+    if (
+      pasien.kecamatan &&
+      pasien.kecamatan.NAMA_KEC &&
+      pasien.kelurahan &&
+      pasien.kelurahan.NAMA_KEL
+    ) {
+      return `${pasien.kecamatan.NAMA_KEC} - ${pasien.kelurahan.NAMA_KEL}`;
+    }
+
+    // Jika masih kode, lakukan mapping
+    const kodeKecamatan = pasien.NO_KEC;
+    const kodeKelurahan = pasien.NO_KEL;
+
+    const namaKecamatan = masterKecamatan.value[kodeKecamatan] || kodeKecamatan;
+
+    // Untuk kelurahan, kita perlu load berdasarkan kecamatan
+    let namaKelurahan = kodeKelurahan;
+
+    if (kodeKecamatan && kodeKelurahan && masterKelurahan.value[kodeKecamatan]) {
+      namaKelurahan = masterKelurahan.value[kodeKecamatan][kodeKelurahan] || kodeKelurahan;
+    }
+
+    if (namaKecamatan && namaKelurahan) {
+      return `${namaKecamatan} - ${namaKelurahan}`;
+    } else if (namaKecamatan) {
+      return namaKecamatan;
+    } else if (namaKelurahan) {
+      return namaKelurahan;
+    } else {
+      return '';
+    }
+  });
+
   // Fungsi pencarian pasien
   const searchPasien = async (type) => {
     try {
@@ -870,6 +992,10 @@
       form.kdProvider = kategori.value === 'BPJS' ? 'BPJS' : '';
       form.statusKartu = kategori.value === 'BPJS' ? 'Aktif' : '';
       form.noKartu = kategori.value === 'BPJS' ? data.noKartu || '' : '';
+
+      // Cek status otomatis setelah data pasien tersedia
+      await checkAutoStatus();
+      await checkAutoWilayah();
     } catch (error) {
       alert(error.message);
       console.error('Error:', error);
@@ -930,9 +1056,6 @@
       alert('Harap lengkapi semua field yang wajib diisi (Kategori Unit, Unit, dan Wilayah)');
       return;
     }
-
-    // Debug: tampilkan data yang akan dikirim
-    console.log('Data yang dikirim:', form.data());
 
     form.post(route('loket.simpan'), {
       preserveScroll: true,
@@ -995,12 +1118,12 @@
     // Set default values
     form.tglKunjungan = new Date().toISOString().split('T')[0];
     form.kunjSakit = 'true';
-    form.kunjBaru = 'false';
+    form.kunjBaru = 'true';
     form.jknPbi = 'NON_BPJS';
     form.kategoriUnitId = '';
     form.unitId = '';
     form.wilayah = '';
-    form.kdTkp = '10'; // ✅ DEFAULT: RJTP (RAWAT JALAN)
+    form.kdTkp = '10';
     form.kdPoli = '';
     form.PHONE = '';
     form.TGL_LHR = '';
@@ -1008,7 +1131,9 @@
     form.umur = 30;
 
     // Reset computed values
-    jenisPengunjung.value = 'Pengunjung Lama';
+    autoDetectedStatus.value = '';
+    autoDetectedWilayah.value = '';
+    jenisPengunjung.value = 'Pengunjung Baru';
     jenisKunjungan.value = 'Kunjungan Sakit';
     kategori.value = 'NON_BPJS';
     kodeTKP.value = 'RJTP (RAWAT JALAN)';
@@ -1049,6 +1174,8 @@
     router.visit(route('loket.search'));
   };
 
+  // ========== WATCH FUNCTIONS ==========
+
   // Watch perubahan pada computed properties
   watch(jenisPengunjung, (newValue) => {
     form.kunjBaru = newValue === 'Pengunjung Baru' ? 'true' : 'false';
@@ -1072,6 +1199,27 @@
     }
   });
 
+  // Watch untuk perubahan pasien
+  watch(
+    () => selectedPasien.value.ID,
+    (newId, oldId) => {
+      if (newId && newId !== oldId) {
+        checkAutoStatus();
+        checkAutoWilayah();
+      }
+    }
+  );
+
+  // Watch untuk tanggal kunjungan (hanya pengunjung)
+  watch(
+    () => form.tglKunjungan,
+    (newDate, oldDate) => {
+      if (newDate && newDate !== oldDate && selectedPasien.value.ID) {
+        checkAutoStatus();
+      }
+    }
+  );
+
   // Inisialisasi data saat komponen dimuat
   onMounted(() => {
     filteredPoliList.value = props.poliList;
@@ -1079,10 +1227,10 @@
     loadMasterWilayah();
 
     // Set initial values untuk computed properties
-    jenisPengunjung.value = 'Pengunjung Lama';
+    jenisPengunjung.value = 'Pengunjung Baru';
     jenisKunjungan.value = 'Kunjungan Sakit';
     kategori.value = 'NON_BPJS';
-    kodeTKP.value = 'RJTP (RAWAT JALAN)'; // ✅ DEFAULT saat pertama load
+    kodeTKP.value = 'RJTP (RAWAT JALAN)';
   });
 </script>
 

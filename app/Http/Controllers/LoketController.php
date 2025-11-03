@@ -174,8 +174,8 @@ class LoketController extends Controller
         $data['createdBy'] = Auth::user()?->username ?? 'test_user';
 
         // KONVERSI MENGGUNAKAN LOGIKA OTOMATIS
-        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
         $data['kunjSakit'] = ($data['jenisKunjungan'] ?? '') === 'Kunjungan Sakit' ? 'true' : 'false';
+        $data['kunjBaru'] = ($data['jenisPengunjung'] ?? '') === 'Pengunjung Baru' ? 'true' : 'false';
 
         $defaultValues = [
             'kelUmur' => 1,
@@ -205,38 +205,192 @@ class LoketController extends Controller
     }
 
     /**
-     * METHOD BARU: Menentukan jenis pengunjung otomatis
-     * - Pengunjung Baru: Jika pertama kali daftar dalam bulan berjalan
-     * - Pengunjung Lama: Jika sudah pernah daftar dalam bulan yang sama
+     * Menentukan jenis pengunjung otomatis Pengunjung Baru: Jika pertama kali daftar dalam bulan berjalan, Pengunjung Lama: Jika sudah pernah daftar dalam bulan yang sama
      */
-    private function tentukanJenisPengunjung($data)
+    private function tentukanJenisPengunjung($pasienId, $tglKunjungan)
     {
-        $pasienId = $data['pasienId'] ?? null;
-        $tglKunjungan = $data['tglKunjungan'] ?? date('Y-m-d');
-
         if (!$pasienId) {
-            // Jika pasien baru (belum ada ID), otomatis Pengunjung Baru
-            return 'true';
+            return 'Pengunjung Baru'; // Default untuk pasien baru
         }
 
         try {
-            // Cek apakah pasien sudah pernah berkunjung di bulan dan tahun yang sama
-            $riwayatBulanIni = DB::table('simpus_loket')
+            // Parse tanggal kunjungan
+            $tanggalKunjungan = \Carbon\Carbon::parse($tglKunjungan);
+
+            // Cek apakah pasien sudah pernah daftar di bulan dan tahun yang sama
+            $existingVisit = DB::table('simpus_loket')
                 ->where('pasienId', $pasienId)
-                ->whereYear('tglKunjungan', date('Y', strtotime($tglKunjungan)))
-                ->whereMonth('tglKunjungan', date('m', strtotime($tglKunjungan)))
-                ->count();
+                ->whereYear('tglKunjungan', $tanggalKunjungan->year)
+                ->whereMonth('tglKunjungan', $tanggalKunjungan->month)
+                ->exists();
 
-            Log::info("Cek riwayat pengunjung - PasienID: {$pasienId}, Tanggal: {$tglKunjungan}, Riwayat: {$riwayatBulanIni}");
-
-            // Jika belum ada riwayat di bulan ini -> Pengunjung Baru (true)
-            // Jika sudah ada riwayat di bulan ini -> Pengunjung Lama (false)
-            return $riwayatBulanIni > 0 ? 'false' : 'true';
+            return $existingVisit ? 'Pengunjung Lama' : 'Pengunjung Baru';
         } catch (\Exception $e) {
             Log::error('Error menentukan jenis pengunjung: ' . $e->getMessage());
-            // Default ke Pengunjung Baru jika terjadi error
-            return 'true';
+            return 'Pengunjung Baru'; // Fallback ke Pengunjung Baru jika error
         }
+    }
+
+    /**
+     * API untuk pengecekan status pengunjung otomatis
+     */
+    public function checkJenisPengunjung(Request $request)
+    {
+        $pasienId = $request->get('pasienId');
+        $tglKunjungan = $request->get('tglKunjungan');
+
+        if (!$pasienId || !$tglKunjungan) {
+            return response()->json(['status' => 'Pengunjung Baru']);
+        }
+
+        $jenisPengunjung = $this->tentukanJenisPengunjung($pasienId, $tglKunjungan);
+
+        return response()->json([
+            'status' => $jenisPengunjung,
+            'pasienId' => $pasienId,
+            'tglKunjungan' => $tglKunjungan,
+            'message' => 'Deteksi otomatis berdasarkan riwayat kunjungan'
+        ]);
+    }
+
+    /**
+     * Method untuk menentukan wilayah otomatis - DEPRECATED, gunakan tentukanWilayahDenganUnit
+     */
+    private function tentukanWilayahOtomatis($pasienId, $userId)
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->unit) {
+            Log::warning("User atau unit tidak valid - UserID: {$userId}");
+            return '';
+        }
+
+        return $this->tentukanWilayahDenganUnit($pasienId, $user->unit);
+    }
+
+
+    /**
+     * Logic perhitungan wilayah berdasarkan perbandingan lokasi
+     */
+    private function hitungWilayahBerdasarLokasi(
+        $pasienProp,
+        $pasienKab,
+        $pasienKec,
+        $pasienKel,
+        $unitProp,
+        $unitKab,
+        $unitKec,
+        $unitKel
+    ) {
+        // Konversi ke string untuk konsistensi
+        $pasienProp = (string) $pasienProp;
+        $pasienKab = (string) $pasienKab;
+        $pasienKec = (string) $pasienKec;
+        $pasienKel = (string) $pasienKel;
+        $unitProp = (string) $unitProp;
+        $unitKab = (string) $unitKab;
+        $unitKec = (string) $unitKec;
+        $unitKel = (string) $unitKel;
+
+        // 1. LUAR KABUPATEN - Jika propinsi atau kabupaten berbeda
+        if ($pasienProp !== $unitProp || $pasienKab !== $unitKab) {
+            return '3';
+        }
+
+        // 2. LUAR WILAYAH - Jika kecamatan berbeda (tapi masih kabupaten yang sama)
+        if ($pasienKec !== $unitKec) {
+            return '2';
+        }
+
+        // 3. DALAM WILAYAH - Jika kecamatan sama (dan kelurahan bisa sama atau berbeda)
+        return '1';
+    }
+
+    /**
+     * Tentukan wilayah berdasarkan unit user
+     */
+    private function tentukanWilayahDenganUnit($pasienId, $userUnit)
+    {
+        if (!$pasienId || !$userUnit) {
+            return '';
+        }
+
+        try {
+            // Ambil data pasien
+            $pasien = DB::table('simpus_pasien')->where('ID', $pasienId)->first();
+            if (!$pasien) {
+                Log::warning("Pasien tidak ditemukan: {$pasienId}");
+                return '';
+            }
+
+            // Ambil unit profile berdasarkan userUnit
+            $unitProfile = DB::table('unit_profiles')->where('unit_id', $userUnit)->first();
+            if (!$unitProfile) {
+                Log::warning("Unit profile tidak ditemukan untuk unit: {$userUnit}");
+                return '';
+            }
+
+            // Gunakan logic yang sama
+            $idWilayah = $this->hitungWilayahBerdasarLokasi(
+                $pasien->NO_PROP ?? null,
+                $pasien->NO_KAB ?? null,
+                $pasien->NO_KEC ?? null,
+                $pasien->NO_KEL ?? null,
+                $unitProfile->no_prop ?? null,
+                $unitProfile->no_kab ?? null,
+                $unitProfile->no_kec ?? null,
+                $unitProfile->no_kel ?? null
+            );
+
+            Log::info("Wilayah determined - Pasien: {$pasienId}, Kec: {$pasien->NO_KEC}, Wilayah: {$idWilayah}");
+
+            return $idWilayah;
+        } catch (\Exception $e) {
+            Log::error('Error menentukan wilayah dengan unit: ' . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * API untuk mendapatkan wilayah otomatis
+     */
+    public function getWilayahOtomatis(Request $request)
+    {
+        $pasienId = $request->get('pasienId');
+
+        // user harus login
+        if (!Auth::check()) {
+            Log::warning("Attempt to access wilayah otomatis without authentication");
+            return response()->json([
+                'wilayah' => '',
+                'pasienId' => $pasienId,
+                'error' => 'unauthorized',
+                'message' => 'Silakan login untuk mengakses fitur ini'
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        // VALIDASI user memiliki unit
+        if (!$user->unit) {
+            Log::error("User {$user->id} tidak memiliki unit assignment");
+            return response()->json([
+                'wilayah' => '',
+                'pasienId' => $pasienId,
+                'error' => 'no_unit',
+                'message' => 'User tidak memiliki unit yang valid'
+            ], 400);
+        }
+
+        $wilayah = $this->tentukanWilayahDenganUnit($pasienId, $user->unit);
+
+        Log::info("API Wilayah - Pasien: {$pasienId}, Unit: {$user->unit}, Hasil: {$wilayah}");
+
+        return response()->json([
+            'wilayah' => $wilayah,
+            'pasienId' => $pasienId,
+            'userUnit' => $user->unit
+        ]);
     }
 
     /**
@@ -442,8 +596,22 @@ class LoketController extends Controller
     {
         $data = $request->all();
 
+        // Set default otomatis HANYA jika tidak ada pilihan manual
+        if (!isset($data['jenisPengunjung']) && isset($data['pasienId']) && isset($data['tglKunjungan'])) {
+            $jenisPengunjung = $this->tentukanJenisPengunjung($data['pasienId'], $data['tglKunjungan']);
+            $data['jenisPengunjung'] = $jenisPengunjung;
+        }
+
+        // Set default otomatis untuk Wilayah
+        if (!isset($data['wilayah']) && isset($data['pasienId'])) {
+            $wilayahOtomatis = $this->tentukanWilayahOtomatis($data['pasienId'], Auth::id());
+            if ($wilayahOtomatis) {
+                $data['wilayah'] = $wilayahOtomatis;
+            }
+        }
+
         // KONVERSI FIELD DARI VUE KE STRUKTUR DATABASE
-        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
+        $data['kunjBaru'] = ($data['jenisPengunjung'] ?? 'Pengunjung Baru') === 'Pengunjung Baru' ? 'true' : 'false';
         $data['kunjSakit'] = ($data['jenisKunjungan'] ?? '') === 'Kunjungan Sakit' ? 'true' : 'false';
         $data['jknPbi'] = $data['kategori'] ?? 'NON_BPJS';
 
@@ -562,9 +730,14 @@ class LoketController extends Controller
     {
         $data = $request->all();
 
-        // Konversi field untuk update - DETERMINASI JENIS PENGUNJUNG
-        $data['kunjBaru'] = $this->tentukanJenisPengunjung($data);
+        // Tentukan jenisPengunjung otomatis
+        if (isset($data['pasienId']) && isset($data['tglKunjungan'])) {
+            $jenisPengunjung = $this->tentukanJenisPengunjung($data['pasienId'], $data['tglKunjungan']);
+            $data['jenisPengunjung'] = $jenisPengunjung;
+            $data['kunjBaru'] = $jenisPengunjung === 'Pengunjung Baru' ? 'true' : 'false';
+        }
 
+        // Konversi field untuk update
         if (isset($data['jenisKunjungan'])) {
             $data['kunjSakit'] = $data['jenisKunjungan'] === 'Kunjungan Sakit' ? 'true' : 'false';
             unset($data['jenisKunjungan']);

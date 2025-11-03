@@ -148,6 +148,8 @@ Route::prefix('loket')->group(function () {
 
     // API untuk pencarian pasien
     Route::get('/api/pasien/search', [LoketController::class, 'apiSearch'])->name('api.pasien.search');
+    Route::get('/api/check-jenis-pengunjung', [LoketController::class, 'checkJenisPengunjung'])->name('loket.api.check-jenis-pengunjung');
+    Route::get('/api/wilayah-otomatis', [LoketController::class, 'getWilayahOtomatis'])->name('loket.api.wilayah-otomatis');
     Route::get('/api/pasien/{id}', function ($id) {
         return \App\Models\Pasien::findOrFail($id);
     });
