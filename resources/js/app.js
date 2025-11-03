@@ -29,7 +29,7 @@ if (token) {
 window.axios = axios;
 // =================== AUTO LOGOUT + TIMER DISPLAY ===================
 document.addEventListener("DOMContentLoaded", () => {
-  const maxIdle = 60 * 1000; // 60 detik
+  const maxIdle = 600 * 1000; // 60 detik
   const warningBefore = 10 * 1000; // popup muncul 10 detik sebelum logout
   const events = ["mousemove", "keypress", "click", "scroll", "touchstart"];
   let timeLeft = maxIdle / 1000;
