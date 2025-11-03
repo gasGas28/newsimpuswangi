@@ -78,7 +78,7 @@
         <div class="col-sm-4">
           <select class="form-select" v-model="form.tenaga_medis">
             <option selected>- pilih -</option>
-            <option v-for="item in TenagaMedisAskep">{{ item.nmDokter }}</option>
+            <option v-for="item in TenagaMedis">{{ item.nmDokter }}</option>
           </select>
         </div>
       </div>
@@ -120,7 +120,7 @@
             <td>{{ item.tenagaMedis ?? '' }}</td>
             <td>{{ item.createdBy ?? '' }}</td>
             <td>{{ item.tglPelayanan ?? '' }}</td>
-            <td>{{ item.kdStatusPulang ?? '' }}</td>
+            <td>{{ item.endTIme ?? '' }}</td>
             <td>
               <template v-if="item.kdStatusPulang === '4' || item.kdStatusPulang === '6'">
                 <button class="btn btn-warning btn-xs" @click="batalRujukLanjut(item.loketId, item.idPelayanan)">
@@ -170,14 +170,14 @@ import { route } from 'ziggy-js';
 const props = defineProps({
   statusPulang: Array,
   DataRujuk: Array,
-  TenagaMedisAskep: Object,
+  TenagaMedis: Object,
   idPelayanan: String,
   idLoket: String,
   poliRujukInternal: Array
 });
 const emit = defineEmits(['dataRujuk-update'])
 const DataRujuk = props.DataRujuk ?? '';
-const TenagaMedisAskep = props.TenagaMedisAskep ?? '';
+const TenagaMedis = props.TenagaMedis ?? '';
 const Pelayanan = ref(null);
 const loading = ref(true)
 const cekAkhirPelayanan = ref(null);
@@ -225,7 +225,7 @@ function fetchPelayanan(url) {
     .then(res => {
       Pelayanan.value = res.data.pelayanan;
       cekAkhirPelayanan.value = res.data.cekAkhirPelayanan
-      console.log('Hasil fetch pelayanan :', 'hao');
+      console.log('Hasil fetch pelayanan :', res.data.pelayanan);
     })
     .catch(err => console.error(err))
     .finally(() => {

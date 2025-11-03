@@ -16,7 +16,7 @@
       </button>
 
       <div class="ms-auto">
-        <button class="btn btn-danger btn-sm fw-semibold">Akhiri ANC</button>
+        <button class="btn btn-success btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
       </div>
     </div>
 
@@ -45,10 +45,10 @@
   import FormObstetri from './FormObstetri.vue';
   import FormSubjektif from './FormSubjektif.vue';
   import FormObjektif from './FormObjektif.vue';
-  import FormAssessment from './FormAssessment.vue';
-  import FormImunisasi from './FormImunisasi.vue';
-  import FormPlanning from './FormPlanning.vue';
-  import FormStatusPasien from './FormStatusPasien.vue';
+  import FormAssessment from '../Form/FormAssessment.vue';
+  import FormPlanning from '../Form/FormPlanning.vue';
+  import FormImunisasi from '../Form/FormImunisasi.vue';
+  import FormStatusPasien from '../Form/FormStatusPasien.vue';
   // (bisa tambahkan form lain nanti)
 
   const tabs = [

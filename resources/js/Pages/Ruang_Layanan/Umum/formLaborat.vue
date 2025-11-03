@@ -249,7 +249,7 @@
                                                 class="text-center">
                                                 <td>{{ index + 1 }}</td>
                                                 <td>{{ item.tglDibuat }}</td>
-                                                <td>{{ item.tenaga_medis.nmDokter }}</td>
+                                                <td>{{ item.tenaga_medis?.nmDokter }}</td>
                                                 <td>-</td>
                                                 <td>{{ item.nmPoli ?? '-' }}</td>
                                                 <td>{{ item.alasanDirujuk }}</td>

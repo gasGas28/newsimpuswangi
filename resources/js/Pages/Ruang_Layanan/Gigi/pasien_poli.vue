@@ -1,9 +1,9 @@
 <template>
-    <AppLayouts>
-      <FormAnamnesa title="Gigi" :backRoute :unitList :rows>
+  <AppLayouts>
+    <FormAnamnesa title="GIGI" :backRoute :unitList :rows>
 
-      </FormAnamnesa>
-    </AppLayouts>
+    </FormAnamnesa>
+  </AppLayouts>
 </template>
 <script setup>
 import { ref } from 'vue'
@@ -15,13 +15,18 @@ import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 const {props} = usePage();
 const DataUnit = props.DataUnit;
 const DataPasien = props.DataPasien;
-const backRoute = 'ruang-layanan-gigi.pelayanan';
+const kluster = props.kluster;
+const idPoli = props.kdPoli;
+const backRoute = 'ruang-layanan.pelayanan';
 
-console.log('data pasien gigi',DataPasien);
+console.log('data unit',DataUnit);
 const unitList = DataUnit.map(item => {
   const kategori = item.data_master_unit.kategori
   const nama = item.nama_unit
-  return `[ ${kategori} ] ${nama}`
+  return {
+    id : item.id_detail,
+    data : `[ ${kategori} ] ${nama}`
+  }
 })
 const rows = DataPasien;
 </script>
