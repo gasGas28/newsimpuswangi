@@ -128,6 +128,7 @@ class PoliBpUmumController extends Controller
             'kluster' => $kluster,
             'kdPoli' => $idPoli
         ];
+        //dd($idPoli);
         if ($idPoli == '008') {
             return Inertia::render('Ruang_Layanan/KB/pasien_poli', $data);
         } elseif ($idPoli == '001') {

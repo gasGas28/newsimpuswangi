@@ -29,6 +29,7 @@
           </Link>
         </div>
       </div>
+      
     </div>
   </AppLayouts>
 </template>
