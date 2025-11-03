@@ -11,6 +11,7 @@ use App\Models\Filter\SetupDesa;
 use App\Models\Filter\SetupKecamatan;
 use App\Models\Filter\SimpusKunjungan;
 use App\Models\Filter\Loket;
+use App\Models\Filter\SimpusDiagnosa;
 use App\Models\Filter\SimpusLoket;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -41,6 +42,12 @@ class FilterController extends Controller
             'obat',
             'kunjungan'
         ])->get();
+
+        // $diagnosa = SimpusDiagnosa::all();
+        // $kecamatan = SimpusDiagnosa::where('id', 1)
+        //     ->get();
+
+        // dd($diagnosa);
 
         // dd($data);
         // dd($data->first()->toArray());

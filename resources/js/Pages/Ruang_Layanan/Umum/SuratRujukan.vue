@@ -7,7 +7,7 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3'
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue'
-import SuratRujukan from '../../../Components/Layouts/RuangLayanan/SuratRujukan.vue'
+import SuratRujukan from '../../../Components/Layouts/RuangLayanan/SuratRujukan/SuratRujukan.vue'
 
 const { props } = usePage()
 const idPoli = props.idPoli

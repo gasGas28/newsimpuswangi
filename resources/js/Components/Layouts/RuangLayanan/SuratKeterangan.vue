@@ -2,16 +2,15 @@
   <div class="card rounded-4 border-0 shadow-sm m-4">
     <!-- Header -->
     <div class="card-header d-flex justify-content-between align-items-center rounded-4 rounded-bottom-0 py-3"
-      style="background: linear-gradient(135deg, #10b981, #059669);">
-      <h2 class="fs-6 mb-0 text-white">Daftar Surat Rujukan</h2>
+    style="background: linear-gradient(135deg, #3b82f6, #10b981);">
+      <h2 class="fs-6 mb-0 text-white fw-bold">Daftar Surat Keterangan</h2>
 
       <div class="d-flex align-items-center gap-2">
         <Link :href="route(createRoute, {
           idPoli: props.idPoli,
           idPelayanan: props.idPelayanan
-        })" class="btn btn-light btn-sm border-0 fw-semibold d-flex align-items-center gap-2"
-          style="background: rgba(255,255,255,.2); color: #fff;">
-        <i class="bi bi-plus-lg"></i> TAMBAH DATA
+        })"  class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+        <i class="bi bi-plus-lg "></i> TAMBAH DATA
         </Link>
 
         <Link v-if="backRoute" :href="backRoute" class="btn btn-info btn-sm fw-semibold d-flex align-items-center gap-2"

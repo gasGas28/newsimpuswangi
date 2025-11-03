@@ -97,23 +97,29 @@
                     {{ item.nama_kab }}
                     {{ item.nama_prop }}</td>
                   <td></td>
-                  <td>
-
-                    <span class="badge bg-primary bg-opacity-75">
-                      {{ item.nmPoli }}
-                    </span>
+                  <td class="align-middle text-center">
+                    <div class="rounded-3 p-3"
+                      style="background: linear-gradient(135deg, #f9fafb, #eef2ff); border: 1px solid #e5e7eb;">
+                      <div class="fw-bold text-primary mb-2" style="font-size: 0.95rem;">
+                        <i class="bi bi-building me-1"></i>{{ item.nmPoli }}
+                      </div>
+                      <span class="badge border-0 px-4 py-2 text-white shadow-sm bg-success">
+                        {{ item.kunjSakitPel === 'true' ? 'SAKIT' : 'SEHAT' }}
+                      </span>
+                    </div>
                   </td>
 
+
                   <td class="text-center">
-                    <Link :href="route(backRoute, [item.idLoket,item.kdPoli, item.idpelayanan])" class="btn">
-                    <span class="btn btn-sm btn-danger" v-if="item.sudahDilayani == 0">
+                    <Link :href="route(backRoute, [item.idLoket, item.kdPoli, item.idpelayanan])" class="btn">
+                    <span class="btn btn-sm btn-success" v-if="item.sudahDilayani == 1">
+                      <i class="fas fa-check-circle "></i> Selesai Dilayani
+                    </span>
+                    <span class="btn btn-sm btn-danger" v-else-if="item.sudahDilayani == 0">
                       <i class="fas fa-times-circle "></i> Belum Dilayani
                     </span>
-                    <span class="btn btn-sm btn-warning"  v-if="item.sudahDilayani == 2">
+                    <span class="btn btn-sm btn-warning" v-else>
                       <i class="fas fa-spinner fa-spin "></i> Proses Dilayani
-                    </span>
-                    <span class="btn btn-sm btn-success"  v-if="item.sudahDilayani == 1">
-                      <i class="fas fa-check-circle "></i> Selesai Dilayani
                     </span>
                     </Link>
                   </td>

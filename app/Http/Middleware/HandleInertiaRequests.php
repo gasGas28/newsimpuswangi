@@ -47,10 +47,10 @@ class HandleInertiaRequests extends Middleware
                         'firstName' => $u->first_name,
                         'lastName'  => $u->last_name,
                         'roles'     => $roles,
-                        'abilities' => $abilities,                         // ⬅️ dipakai di Vue v-if
+                        'abilities' => $abilities,                        
                         'puskesmas' => $pusk ?: null,
                         'mustChangePassword'   => $mustChange,
-                        'passwordLastChanged'  => $changed->format('d-m-Y H:i'), // opsional, enak dibaca
+                        'passwordLastChanged'  => $changed->format('d-m-Y H:i'), 
                     ];
                 },
             ],

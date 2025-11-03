@@ -55,6 +55,7 @@ class LaboratoriumController extends Controller
     }
 public function index(Request $request)
 {
+   // dd($request->all());
     // --- DataUnit (punyamu, tetap) ---
     $DataUnit = DB::table('data_master_unit_detail as d')
         ->leftJoin('data_master_unit as u', 'u.id_kategori', '=', 'd.id_kategori')
@@ -358,30 +359,46 @@ public function index(Request $request)
         /** 5) DETAIL PEMERIKSAAN (simpus_tindakan) */
         $DataPemeriksaan = collect();
         if ($DataPermohonan && $DataPermohonan->order_id) {
-            $DataPemeriksaan = DB::table('simpus_tindakan as t')
-    // JOIN ke master by kode (pakai TRIM biar aman dari spasi)
-    ->leftJoin('simpus_master_pemeriksaan_lab as m', function ($join) {
-        $join->on(DB::raw('TRIM(m.kode)'), '=', DB::raw('TRIM(t.kdTindakan)'));
-    })
-    ->whereRaw('TRIM(t.loketId) = ?', [$resolvedLoketId])
-    ->whereRaw('TRIM(t.permohonanId) = ?', [trim($DataPermohonan->order_id)])
+// BEGIN: fix duplikat karena kode_parameter ganda
+$puSub = DB::table('parameter_uji')
     ->selectRaw("
+        TRIM(kode_parameter)          AS kode,
+        MAX(satuan)                    AS satuan,
+        MAX(nilai_normal)              AS nilai_normal,
+        MAX(nilai_kritis)              AS nilai_kritis
+    ")
+    ->whereNotNull('kode_parameter')
+    ->groupBy(DB::raw('TRIM(kode_parameter)'));
+
+$DataPemeriksaan = DB::table('simpus_tindakan as t')
+    // master lama (umumnya unik per kode)
+    ->leftJoin('simpus_master_pemeriksaan_lab as m', function ($j) {
+        $j->on(DB::raw('TRIM(m.kode)'), '=', DB::raw('TRIM(t.kdTindakan)'));
+    })
+    // parameter_uji yang sudah di-de-dupe per kode
+    ->leftJoinSub($puSub, 'pu', function ($j) {
+        $j->on('pu.kode', '=', DB::raw('TRIM(t.kdTindakan)'));
+    })
+    ->whereRaw('TRIM(t.loketId)=?', [$resolvedLoketId])
+    ->whereRaw('TRIM(t.permohonanId)=?', [trim($DataPermohonan->order_id)])
+    ->selectRaw("
+        DISTINCT t.idTindakan,
         t.idTindakan                                        as detail_id,
         t.kdTindakan                                       as kode,
         COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan) as nama_pemeriksaan,
         t.nilaiLab                                         as nilai_lab,
 
-        -- dari master:
-        m.satuan                                           as satuan,
-        m.nilaiNormal                                      as nilai_normal,
-        m.nilaiKritis                                      as nilai_kritis,
+        COALESCE(m.satuan, pu.satuan)            as satuan,
+        COALESCE(m.nilaiNormal, pu.nilai_normal) as nilai_normal,
+        COALESCE(m.nilaiKritis, pu.nilai_kritis) as nilai_kritis,
         CONCAT(
-            'Nilai Normal : ', COALESCE(m.nilaiNormal,'-'),
-            '\nNilai Kritis : ', COALESCE(m.nilaiKritis,'-')
-        )                                                  as nilai_normal_kritis
+            'Nilai Normal : ', COALESCE(m.nilaiNormal, pu.nilai_normal, '-'),
+            '\nNilai Kritis : ', COALESCE(m.nilaiKritis, pu.nilai_kritis, '-')
+        ) as nilai_normal_kritis
     ")
     ->orderBy('t.idTindakan')
     ->get();
+// END: fix
         }
     $TenagaMedis = DB::table('master_dokter')
     ->select(
@@ -813,4 +830,244 @@ public function hapusTindakan(Request $request)
             'links' => $links,
         ]);
     }
+
+    // + di LaboratoriumController
+public function paramHeaders(Request $request)
+{
+    // Ambil nama paket dari baris paket (header>0, paket='TRUE'), lalu hitung isi dari header=0 sub_header=header
+    $rows = DB::table('parameter_uji as h')
+        ->leftJoin('parameter_uji as d', function($j){
+            $j->on('d.header', '=', DB::raw(0))
+              ->on('d.sub_header', '=', 'h.header');
+        })
+        ->select([
+            'h.header',
+            DB::raw("MAX(CASE WHEN h.paket='TRUE' THEN h.nama_parameter END) AS header_name"),
+            DB::raw('COUNT(d.id_parameter) AS jumlah')
+        ])
+        ->where('h.header', '>', 0)
+        ->groupBy('h.header')
+        ->orderBy('h.header')
+        ->get();
+
+    return response()->json($rows);
+}
+
+public function paramSubheaders(Request $request, int $header)
+{
+    $rows = DB::table('parameter_uji')
+        ->where('header', 0)
+        ->where('sub_header', $header)
+        ->select([
+            DB::raw('sub_header'),
+            DB::raw('COUNT(*) AS jumlah')
+        ])
+        ->groupBy('sub_header')
+        ->orderBy('sub_header')
+        ->get();
+
+    return response()->json($rows);
+}
+
+/** Insert banyak tindakan dari parameter_uji (paket) → simpus_tindakan */
+private function insertParamBatch(string $loketId, string $permohonanId, $pelayananId, array $items): int
+{
+    $now             = now();
+    $cols            = Schema::getColumnListing('simpus_tindakan');
+    $hasIdPelayanan  = in_array('idPelayanan', $cols);
+    $hasCreatedDate  = in_array('createdDate', $cols);
+    $hasModifiedDate = in_array('modifiedDate', $cols);
+
+    $insertRows = [];
+
+    foreach ($items as $p) {
+        $kode = trim($p->kode_parameter ?? '');
+        if ($kode === '') continue;
+
+        // Hindari duplikat per (permohonanId + kdTindakan)
+        $exists = DB::table('simpus_tindakan')
+            ->whereRaw('TRIM(loketId)=?', [$loketId])
+            ->whereRaw('TRIM(permohonanId)=?', [trim($permohonanId)])
+            ->where('kdTindakan', $kode)
+            ->exists();
+
+        if ($exists) continue;
+
+        $row = [
+            'loketId'       => $loketId,
+            'permohonanId'  => $permohonanId,
+            'kdTindakan'    => $kode,
+            'nmTindakan'    => $p->nama_parameter,
+            'nmTindakanInd' => $p->nama_parameter, // kalau mau sama
+            'nilaiLab'      => null,
+        ];
+
+        if ($hasIdPelayanan && !empty($pelayananId)) $row['idPelayanan'] = $pelayananId;
+        if ($hasCreatedDate)  $row['createdDate']   = $now;
+        if ($hasModifiedDate) $row['modifiedDate']  = $now;
+
+        $insertRows[] = $row;
+    }
+
+    if (count($insertRows)) {
+        DB::table('simpus_tindakan')->insert($insertRows);
+    }
+
+    return count($insertRows);
+}
+
+
+public function paketParamItems(Request $request, int $header)
+{
+    $sub = $request->query('sub_header'); // optional
+    $q = DB::table('parameter_uji')
+        ->when(Schema::hasColumn('parameter_uji','paket'), fn($q) => $q->where('paket','TRUE'))
+        ->where('header', $header);
+
+    if (!is_null($sub) && $sub !== '') {
+        $q->where('sub_header', (int)$sub);
+    }
+
+    $items = $q->select([
+            'id_parameter',
+            DB::raw('TRIM(kode_parameter) as kode'),
+            DB::raw('nama_parameter as nama'),
+            'satuan',
+            DB::raw("CONCAT('Nilai Normal : ', COALESCE(nilai_normal,'-'),
+                            '\nNilai Kritis : ', COALESCE(nilai_kritis,'-')) as nilai_normal_kritis"),
+            'nilai_normal','nilai_kritis','header','sub_header'
+        ])
+        ->orderBy('sub_header')
+        ->orderBy('id_parameter')
+        ->get();
+
+    return response()->json($items);
+}
+public function paramSimpan(Request $request, int $header)
+{
+    $validated = $request->validate([
+        'loketId'      => 'required|string',
+        'permohonanId' => 'required|string',   // STRING!
+        'pelayananId'  => 'nullable',
+        'sub_header'   => 'nullable|integer',  // kalau diisi, hanya sub tsb
+    ]);
+
+    $loketId   = $this->resolveLoketId($validated['loketId']);
+    $orderId   = trim($validated['permohonanId']);
+    $pelayanan = $validated['pelayananId'] ?? null;
+
+    $exists = DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
+        ->exists();
+    if (!$exists) {
+        return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
+    }
+
+    // Ambil isi anak dari parameter_uji: header=0 dan sub_header = header terpilih (atau sub_header spesifik jika dikirim)
+    $q = DB::table('parameter_uji')
+        ->where('header', 0)
+        ->where('sub_header', $header);
+
+    if (!empty($validated['sub_header'])) {
+        // kalau suatu saat kamu punya sub_header bercabang, ini filter tambahan
+        $q->where('sub_header', (int) $validated['sub_header']);
+    }
+
+    // Ambil kolom yang dibutuhkan untuk insert
+    $items = $q->select([
+            'id_parameter',
+            'kode_parameter',
+            'nama_parameter',
+            'nilai_normal',
+            'nilai_kritis',
+            'satuan'
+        ])
+        ->orderBy('id_parameter')
+        ->get();
+
+    DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
+        $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
+    });
+
+    return back();
+}
+
+public function paramBrowse(Request $r)
+{
+    $search     = trim($r->query('search', ''));
+    $headerQ    = $r->query('header');      // optional
+    $subHeaderQ = $r->query('sub_header');  // optional
+    $perPage    = max(5, (int)$r->query('per_page', 25));
+
+    $q = DB::table('parameter_uji');
+
+    // Filter paket: model datamu = isi paket disimpan pada header=0, sub_header=<nomor header>
+    if ($headerQ !== null && $subHeaderQ === null) {
+        // “isi” paket = header=0 & sub_header=headerQ
+        $q->where('header', 0)->where('sub_header', (int)$headerQ);
+    }
+    if ($subHeaderQ !== null) {
+        $q->where('sub_header', (int)$subHeaderQ);
+    }
+
+    if ($search !== '') {
+        $like = '%'.str_replace(['%','_'], ['\%','\_'], $search).'%';
+        $q->where(function($w) use ($like){
+            $w->where('kode_parameter', 'like', $like)
+              ->orWhere('nama_parameter', 'like', $like)
+              ->orWhere('tipe_hasil_pemeriksaan', 'like', $like);
+        });
+    }
+
+    $data = $q->select([
+            'id_parameter',
+            'kode_parameter as kode',
+            'nama_parameter as nama',
+            'satuan',
+            DB::raw("TRIM(CONCAT(
+                'Nilai Normal : ', COALESCE(NULLIF(nilai_normal,''),'Negatif'), '\n',
+                'Nilai Kritis : ', COALESCE(NULLIF(nilai_kritis,''),'')
+            )) AS nilai_normal_kritis")
+        ])
+        ->orderBy('id_parameter')
+        ->paginate($perPage);
+
+    return response()->json($data);
+}
+
+public function paramSimpanTerpilih(Request $request)
+{
+    $val = $request->validate([
+        'loketId'      => 'required|string',
+        'permohonanId' => 'required|string',
+        'pelayananId'  => 'nullable',
+        'ids'          => 'required|array|min:1',
+        'ids.*'        => 'integer',
+        'nilaiLab'     => 'nullable|array',
+    ]);
+
+    $loketId   = $this->resolveLoketId($val['loketId']);
+    $orderId   = trim($val['permohonanId']);
+    $pelayanan = $val['pelayananId'] ?? null;
+
+    $exists = DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
+        ->exists();
+    if (!$exists) return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
+
+    $items = DB::table('parameter_uji')
+        ->whereIn('id_parameter', $val['ids'])
+        ->select(['id_parameter','kode_parameter','nama_parameter','satuan','nilai_normal','nilai_kritis'])
+        ->get();
+
+    // insert batch → simpus_tindakan (reuse helper yang sudah kamu tambahkan sebelumnya)
+    DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
+        $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
+    });
+
+    return back();
+}
+
+
+
 }

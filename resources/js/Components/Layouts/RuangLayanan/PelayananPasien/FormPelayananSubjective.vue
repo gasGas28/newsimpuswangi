@@ -80,7 +80,8 @@
           <div class="row mb-3 align-items-start">
             <label class="col-sm-4 col-form-label fw-bold ">Keterangan Alergi</label>
             <div class="col-sm-8">
-              <textarea class="form-control bg-warning bg-opacity-75" rows="2" v-model="form.keterangan_alergi"></textarea>
+              <textarea class="form-control bg-warning bg-opacity-75" rows="2"
+                v-model="form.keterangan_alergi"></textarea>
             </div>
           </div>
 
@@ -124,40 +125,45 @@ const props = defineProps({
   dataAnamnesa: Object,
   idLoket: String,
   masterAlergi: Array,
-  routeName : String,
-  idPasien:String,
+  routeName: String,
+  idPasien: String,
   AlergiPasien: Object
 });
 const emit = defineEmits(['dataAnamnesa-update'])
-const alergiMakanan =
-  props.masterAlergi.filter(item => item.category == 1)
-  console.log('alergi dari subjective')
+const alergiMakanan = props.masterAlergi.filter(item => item.category == 1)
 
+const now = new Date();
+const offset = now.getTimezoneOffset();
+const localTime = new Date(now.getTime() - offset * 60 * 1000);
+const datetimeLocal = localTime.toISOString().slice(0, 16);
+console.log(now)
 
 const alergiObat =
   props.masterAlergi.filter(item => item.category == 2)
 
-console.log('data anamnesa ny dari formsubjetivea', props.dataAnamnesa);
+console.log('data alergi pasein', props.AlergiPasien);
 console.log('data alergi', props);
 const form = useForm({
   idLoket: props.idLoket ?? '',
-  tgl_anamnesa: props.dataAnamnesa?.tglAnamnesa ?? '',
+  tgl_anamnesa: props.dataAnamnesa?.tglAnamnesa ?? datetimeLocal,
   keluhan_utama: props.dataAnamnesa?.keluhan ?? '',
   keluhan_tambahan: props.dataAnamnesa?.keluhanTambahan ?? '',
   riwayat_penyakit_sekarang: props.dataAnamnesa?.riwayatPenyakitSekarang ?? '',
   riwayat_penyakit_dahulu: props.dataAnamnesa?.riwayatPenyakitDahulu ?? '',
   riwayat_penyakit_keluarga: props.dataAnamnesa?.riwayatPenyakitKeluarga ?? '',
-  alergi_makanan: props.AlergiPasien?.alergi_makanan.kodeSatuSehat ?? '',
-  alergi_obat: props.AlergiPasien?.alergi_obat.kodeSatuSehat ?? '',
+  alergi_makanan: props.AlergiPasien?.alergi_makanan?.kodeSatuSehat ?? '',
+  alergi_obat: props.AlergiPasien?.alergi_obat?.kodeSatuSehat ?? '',
   keterangan_alergi: props.AlergiPasien?.keterangan,
   tindakan: props.dataAnamnesa?.terapiYangPernahDijalani ?? '',
   obat_digunakan: props.dataAnamnesa?.obatSeringDigunakan ?? '',
   obat_dikonsumsi: props.dataAnamnesa?.obatSeringDikonsumsi ?? '',
-  idPasien:props.idPasien
+  idPasien: props.idPasien
 });
 
 function submitForm() {
-  form.post(route(props.routeName),
+  form.post(route(props.routeName, {
+    idLoket : props.idLoket
+  }),
     {
       preserveScroll: true,
       onSuccess: () => {

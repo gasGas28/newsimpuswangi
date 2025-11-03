@@ -99,8 +99,9 @@
                                 <label class="form-label small text-muted mb-1">Jenis Surat</label>
                                 <select class="form-select" v-model="form.id_jns_surat">
                                     <option value="" selected>--Pilih--</option>
-                                    <option :value="item.ID_JNS_SURAT" v-for="item in props.jenisSurat">{{ item.SURAT
-                                    }}</option>
+                                    <option :key="item.ID_JNS_SURAT" :value="item.ID_JNS_SURAT"
+                                        v-for="item in props.jenisSurat">{{ item.SURAT
+                                        }}</option>
 
                                 </select>
                             </div>
@@ -151,7 +152,7 @@
                 </div>
                 <!-- Data Pemeriksaan -->
                 <div class="bg-white rounded-4 shadow-sm p-4 mt-4"
-                    v-if="form.id_jns_surat !== 5 && form.id_jns_surat !== 6 && form.id_jns_surat !== '' ">
+                    v-if="form.id_jns_surat !== 5 && form.id_jns_surat !== 6">
                     <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
                         <i class="bi bi-heart-pulse text-primary"></i> Data Pemeriksaan
                     </h6>
@@ -245,7 +246,7 @@
 
                             <div class="mb-2">
                                 <label class="form-label small text-muted mb-1">Keterangan Lain</label>
-                                <textarea class="form-control" v-model="form.ket_lain"></textarea>
+                                <textarea class="form-control" v-model="form.keterangan"></textarea>
                             </div>
 
                             <div class="mb-2">
@@ -287,42 +288,36 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const props = defineProps({
-    dataPasien: { type: Object, required: true },     // { idLoket, NO_MR, NAMA_LGKP, ... }
-    backRoute: { type: String, required: true },     // url untuk tombol kembali
-    saveRoute: { type: String, required: true },     // route POST simpan rujukan
-    rumahSakitOptions: { type: Array, default: () => [] }, // [{kdppk, nama_unit}]
-    poliOptions: { type: Array, default: () => [] }, // [{kdPoli, nmPoli}]
-    dokterOptions: { type: Array, default: () => [] }, // [{kode, nama}],
-    jenisSurat: Array,
+    suket: Object,
     dataAnamnesa: Object,
+    idPoli: String,
+    idPelayanan: String,
+    jenisSurat: Object,
     tenagaMedisAskep: Array,
-    idPelayanan : String,
-    idPoli :String
 })
 
-console.log('Data anamnesa Su', props.dataAnamnesa)
+console.log('idPElayanananan', props.idPelayanan)
 const form = useForm({
-    id_jns_surat: '',
+    idSurat: props.suket.id_surat,
+    id_jns_surat: props.suket.id_jns_surat ?? '',
     id_pelayanan: props.idPelayanan ?? '',
-    no_surat: '',
-    keperluan:props.dataAnamnesa.keluhan ?? '',
-    keterangan: '',
-    hasil_pemeriksaan: props.dataAnamnesa?.hasil_pemeriksaan ?? '',
-    mata_ka_ki: props.dataAnamnesa?.mata_ka_ki ?? '',
-    telinga_ka_ki: props.dataAnamnesa?.telinga_ka_ki ?? '',
-    test_buta_warna: props.dataAnamnesa?.test_buta_warna ?? '',
-    tgl_ijin_awal: '',
-    tgl_ijin_akhir: '',
-    tgl_kematian: '',
-    jam_kematian: '',
-    ket_kematian: '',
-    tenagaMedis: props.dataAnamnesa?.tenagaMedis ?? '',
-    idAnamnesa : props.dataAnamnesa.idAnamnesa,
+    no_surat: props.suket.no_surat ?? '',
+    keperluan: props.suket.keperluan ?? '',
+    hasil_pemeriksaan: props.suket.hasil_pemeriksaan ?? '',
+    mata_ka_ki: props.suket?.mata_ka_ki ?? '',
+    telinga_ka_ki: props.suket?.telinga_ka_ki ?? '',
+    test_buta_warna: props.suket?.test_buta_warna ?? '',
+    tgl_ijin_awal: props.suket.tgl_ijin_awal ?? '',
+    tgl_ijin_akhir: props.suket.tgl_ijin_akhir ?? '',
+    tgl_kematian: props.suket.tgl_kematian ?? '',
+    jam_kematian: props.suket.jam_kematian ?? '',
+    ket_kematian: props.suket.ket_kematian ?? '',
+    tenagaMedis: props.suket.tenagaMedis ?? '',
+    idAnamnesa: props.dataAnamnesa.idAnamnesa ?? '',
 
     beratBadan: props.dataAnamnesa?.beratBadan ?? '',
     tinggiBadan: props.dataAnamnesa?.tinggiBadan ?? '',
@@ -331,31 +326,21 @@ const form = useForm({
     suhu: props.dataAnamnesa?.suhu ?? '',
     sistole: props.dataAnamnesa?.sistole ?? '',
     diastole: props.dataAnamnesa?.diastole ?? '',
-    ket_lain: props.dataAnamnesa?.ket_lain ?? '',
+    keterangan: props.suket.keterangan ?? '',
     tempat_lahir: props.dataAnamnesa?.tempat_lahir ?? '',
     tgl_lahir: props.dataAnamnesa?.tgl_lahir ?? '',
     agama: props.dataAnamnesa?.agama ?? '',
     pekerjaan: props.dataAnamnesa?.pekerjaan ?? '',
 })
-
-const formProcessing = ref(false)
-const errors = computed(() => form.errors || {})
-const hasErrors = computed(() => Object.keys(errors.value).length > 0)
-
 function submit() {
-    formProcessing.value = true
-    form.post(route('ruang-layanan-umum.simpanSuket', {
-        idPoli: props.idPoli
-    }), {
-        preserveScroll: true,
-        onFinish: () => { formProcessing.value = false },
+    form.post(route('ruang-layanan.update-suket'), {
         onSuccess: () => {
-          router.visit(route('ruang-layanan-umum.surat-keterangan', {
-            idPoli: props.idPoli,
-            idPelayanan: props.idPelayanan
-          }))
+            router.visit(route('ruang-layanan.surat-keterangan-list', {
+                idPoli: props.idPoli,
+                idPelayanan: props.idPelayanan
+            }))
         },
-        
+
     })
 }
 </script>
