@@ -68,7 +68,7 @@
                 <th>Bayar</th>
                 <th>Poli</th>
                 <th>Keterangan</th>
-                <th>Ket gigi</th>
+                <th v-if="props.idPoli == '002'">Ket gigi</th>
                 <th>Created by</th>
                 <th>Action</th>
               </tr>
@@ -83,7 +83,7 @@
                 <td>{{ item.bayar }}</td>
                 <td>{{ item.simpus_poli.nmPoli }}</td>
                 <td>{{ item.keterangan }}</td>
-                <td>{{ item.ketGigi }}</td>
+                <td  v-if="props.idPoli == '002'">{{ item.ketGigi }}</td>
                 <td>{{ item.createdBy }}</td>
                 <td>
                   <button class="btn btn-sm btn-danger" @click="hapusDataTindakan(item.idTindakan)">Hapus</button>

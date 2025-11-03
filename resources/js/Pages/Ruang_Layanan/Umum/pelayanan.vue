@@ -33,7 +33,7 @@
                 route-resep-obat="ruang-layanan.set-resep-obat"
                 routePlanningTindakan="ruang-layanan.simpan-Tindakan" route-detail-resep-obat="ruang-layanan.set-detail-resep">
               </FormPelayananPlanning>
-              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'"  @dataRujuk-update="refreshDataAnamnesa" :idLoket="DataPasien.idLoket":idPelayanan="idPelayanan" :statusPulang="statusPulang" :DataRujuk="DataRujuk" :TenagaMedisAskep="TenagaMedisAskep" :poliRujukInternal="poliRujukInternal">
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'"  @dataRujuk-update="refreshDataAnamnesa" :idLoket="DataPasien.idLoket":idPelayanan="idPelayanan" :statusPulang="statusPulang" :DataRujuk="DataRujuk" :TenagaMedis="TenagaMedis" :poliRujukInternal="poliRujukInternal">
               </FormPelayananStatusPasien>
             </div>
           </div>
@@ -73,6 +73,7 @@ const AlergiPasien = computed(() => page.props.AlergiPasien);
 const statusPulang = computed(() => page.props.StatusPulang);
 const idPelayanan = computed(() => page.props.idPelayanan);
 const TenagaMedisAskep = computed(() => page.props.TenagaMedisAskep);
+const TenagaMedis = computed(() => page.props.TenagaMedis);
 const MasterDiagnosaKeperawatan = computed(() => page.props.MasterDiagnosaKeperawatan);
 const DataRujuk = computed(() => page.props.DataRujuk);
 const idPoli =  computed(() => page.props.idPoli);

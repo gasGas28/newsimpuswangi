@@ -23,7 +23,7 @@
         </div>
 
         <div class="card-body ">
-          <form class="row gx-3 gy-2 align-items-end">
+          <form @submit.prevent="filterData" class="row gx-3 gy-2 align-items-end">
             <!-- Tanggal Kunjungan -->
             <div class="col-md-5">
               <label class="form-label fw-semibold">Tanggal Kunjungan</label>
@@ -35,7 +35,7 @@
               <label class="form-label fw-semibold">Kategori Unit</label>
               <select class="form-select" v-model="selectedUnit">
                 <option value="">Pilih Unit</option>
-                <option v-for="(unit, index) in unitList" :key="index" :value="unit">{{ unit }}</option>
+                <option v-for="(unit, index) in unitList" :key="unit.id" :value="unit.id">{{ unit.data }}</option>
               </select>
             </div>
 
@@ -82,8 +82,13 @@
                   <th class="text-center">AKSI</th>
                 </tr>
               </thead>
-              <tbody class="align-middle">
-                <tr v-for="(item, index) in rows" :key="index" class="text-center">
+              <tbody v-if="loading">
+                <tr>
+                  <td colspan="9" class="text-center">Memuat data...</td>
+                </tr>
+              </tbody>
+              <tbody class="align-middle" v-else>
+                <tr v-for="(item, index) in ListDataPasien" :key="index" class="text-center">
                   <td class="text-center">{{ index + 1 }}</td>
                   <td>{{ item.tglKunjungan }}</td>
                   <td class="text-center">{{ item.NO_MR }}</td>
@@ -108,8 +113,6 @@
                       </span>
                     </div>
                   </td>
-
-
                   <td class="text-center">
                     <Link :href="route(backRoute, [item.idLoket, item.kdPoli, item.idpelayanan])" class="btn">
                     <span class="btn btn-sm btn-success" v-if="item.sudahDilayani == 1">
@@ -124,7 +127,7 @@
                     </Link>
                   </td>
                 </tr>
-                <tr v-if="rows.length === 0">
+                <tr v-if="DataPasien.length === 0">
                   <td colspan="7" class="text-center py-4 text-muted">Tidak ada data ditemukan</td>
                 </tr>
               </tbody>
@@ -136,29 +139,60 @@
   </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
-import { ref, onMounted } from 'vue'
+import { Link, useForm } from '@inertiajs/vue3'
+import axios from 'axios';
+import { ref, onMounted, computed, watch } from 'vue'
 import { route } from 'ziggy-js';
 
 const props = defineProps({
   title: String,
   backRoute: String,
   unitList: Array,
-  rows: Array
+  rows: Array,
+  kluster: String,
+  kdPoli: String
 });
-console.log('data pasien/unit list', props.rows);
-
+console.log('data pasien/unit list', props.unitList);
 
 const emit = defineEmits(['filter', 'update-dataPelayanan'])
 
 const tanggal_kunjungan = ref('')
 const selectedUnit = ref('')
-
+const DataPasien = ref([])
+const loading = ref(false);
 onMounted(() => {
   const today = new Date().toISOString().split('T')[0]
   tanggal_kunjungan.value = today
+  DataPasien.value = props.rows
+  loading.value = false
 });
 
+function filterData() {
+  loading.value = true
+  axios.get(route('ruang-layanan.index', [props.kdPoli, props.kluster]), {
+    params: {
+      tglKunjungan: tanggal_kunjungan.value,
+      unit: selectedUnit.value
+    }
+  })
+    .then(res => {
+      console.log('Data hasil filter:', res.data.DataPasien)
+      DataPasien.value = res.data.DataPasien
+      loading.value = false
+      console.log('panjang datapasien', res.data.tgl)
+      console.log('panjang datapasien', res.data.unit)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+}
+const ListDataPasien = computed(() => {
+  return DataPasien.value
+})
+// console.log(DataPasien.value.length, 'panjang')
 
+watch(ListDataPasien, (newVal) => {
+  console.log('DataPasien berubah:', newVal)
+})
 </script>
 <style></style>

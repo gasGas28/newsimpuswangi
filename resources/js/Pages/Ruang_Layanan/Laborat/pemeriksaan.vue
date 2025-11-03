@@ -4,13 +4,12 @@
     <div class="app-shell">
       <div class="card m-4 rounded-4 rounded-bottom-0 shadow-sm">
         <!-- Header -->
-        <div
-          class="card-header d-flex justify-content-between align-items-center p-3 rounded-4 rounded-bottom-0"
-          style="background: linear-gradient(135deg, #3b82f6, #10b981);"
-        >
+        <div class="card-header d-flex justify-content-between align-items-center p-3 rounded-4 rounded-bottom-0"
+          style="background: linear-gradient(135deg, #3b82f6, #10b981);">
           <h1 class="m-0 fs-5 text-white">Laboratorium — Pemeriksaan Pasien</h1>
-          <Link :href="route('ruang-layanan.laborat')" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
-            <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
+          <Link :href="route('ruang-layanan.laborat')"
+            class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+          <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
           </Link>
         </div>
 
@@ -25,26 +24,35 @@
 
                     <!-- AKSI kecil ala CI -->
                     <div class="btn-group">
-                      <button class="btn btn-sm btn-outline-primary" @click="openPermohonanModal" title="Tambah Permohonan">
+                      <button class="btn btn-sm btn-outline-primary" @click="openPermohonanModal"
+                        title="Tambah Permohonan">
                         <i class="bi bi-file-plus"></i>
                       </button>
-                      <button class="btn btn-sm btn-outline-success" @click="openMasterModal" :disabled="!order" title="Tambah Pemeriksaan">
+                      <button class="btn btn-sm btn-outline-success" @click="openMasterModal" :disabled="!order"
+                        title="Tambah Pemeriksaan">
                         <i class="bi bi-clipboard2-plus"></i>
                       </button>
                       <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" :disabled="!order" title="Tambah Paket Cepat">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                          data-bs-toggle="dropdown" :disabled="!order" title="Tambah Paket Cepat">
                           Paket
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a>
+                          </li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a>
+                          </li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a>
+                          </li>
                           <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket Darah Lengkap</a></li>
-                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket
+                              Darah Lengkap</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a>
+                          </li>
                         </ul>
                       </div>
-                      <button class="btn btn-sm btn-outline-dark" @click="printHasil" :disabled="!order" title="Cetak / Print">
+                      <button class="btn btn-sm btn-outline-dark" @click="printHasil" :disabled="!order"
+                        title="Cetak / Print">
                         <i class="bi bi-printer"></i>
                       </button>
                     </div>
@@ -83,7 +91,8 @@
                   </div>
                   <div class="d-flex justify-content-between">
                     <span class="text-muted">Tekanan darah</span>
-                    <span>{{ (objective && objective.sistole) || '-' }}/{{ (objective && objective.diastole) || '-' }} mmHg</span>
+                    <span>{{ (objective && objective.sistole) || '-' }}/{{ (objective && objective.diastole) || '-' }}
+                      mmHg</span>
                   </div>
                   <div class="d-flex justify-content-between">
                     <span class="text-muted">Resp. rate</span>
@@ -106,12 +115,13 @@
               <!-- Data Permohonan -->
               <div class="border rounded-4 mb-4">
                 <div class="p-3 border-bottom d-flex justify-content-between align-items-center"
-                     style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
+                  style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
                   <h6 class="m-0">
                     Data Permohonan
                     <span v-if="permId" class="text-muted small">(#{{ permId }})</span>
                   </h6>
-                  <span class="badge" :class="order && order.status === 'Selesai' ? 'bg-success' : 'bg-warning text-dark'">
+                  <span class="badge"
+                    :class="order && order.status === 'Selesai' ? 'bg-success' : 'bg-warning text-dark'">
                     {{ (order && order.status) || 'Belum dilayani' }}
                   </span>
                 </div>
@@ -145,9 +155,7 @@
                             <button class="btn btn-outline-success" @click="openMasterModal">
                               <i class="bi bi-plus-square me-1"></i>Tambah
                             </button>
-                            <button class="btn-success"
-                              @click="printHasil"
-                              :disabled="!order"
+                            <button class="btn-success" @click="printHasil" :disabled="!order"
                               title="Cetak / Print lembar hasil">
                               <i class="bi bi-printer"></i>
                             </button>
@@ -181,7 +189,7 @@
 
                 <div class="p-3">
                   <div class="row g-3 mb-3">
- 
+
                   </div>
 
                   <div class="table-responsive">
@@ -202,27 +210,21 @@
                           <td class="text-center">{{ row.kode }}</td>
                           <td>{{ row.nama_pemeriksaan }}</td>
                           <td class="small">
-                          <div class="text-muted white-pre-line">{{ row.nilai_normal_kritis || '-' }}</div>
+                            <div class="text-muted white-pre-line">{{ row.nilai_normal_kritis || '-' }}</div>
                           </td>
                           <td>
                             <div class="input-group">
-                              <input
-                                type="text"
-                                class="form-control"
-                                v-model="hasil[row.detail_id]"
-                                :placeholder="row.satuan ? `(${row.satuan})` : ''"
-                              />
+                              <input type="text" class="form-control" v-model="hasil[row.detail_id]"
+                                :placeholder="row.satuan ? `(${row.satuan})` : ''" />
                               <span class="input-group-text">{{ row.satuan || '-' }}</span>
                             </div>
                           </td>
                           <td class="text-center">
 
-                                <button class="btn btn-outline-danger"
-                                        @click="hapusRow(row)"
-                                        :disabled="!order"
-                                        title="Hapus item ini">
-                                        <i class="bi bi-trash"></i>
-                                </button>
+                            <button class="btn btn-outline-danger" @click="hapusRow(row)" :disabled="!order"
+                              title="Hapus item ini">
+                              <i class="bi bi-trash"></i>
+                            </button>
                           </td>
                         </tr>
                         <tr v-if="rows.length === 0">
@@ -232,33 +234,31 @@
                     </table>
 
                   </div>
-                                     <div class="col-md-4">
-                      <label class="form-label small">Sample diambil jam</label>
-                      <input type="datetime-local" class="form-control" v-model="formWaktu.sample_diambil_at" />
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small">Sample selesai jam</label>
-                      <input type="datetime-local" class="form-control" v-model="formWaktu.sample_selesai_at" />
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label small">Tenaga Medis Pemeriksa</label>
-                      <select class="form-select" v-model="formWaktu.tenaga_medis_pemeriksa">
-                        <option value="" disabled>Pilih...</option>
-                        <option v-for="tm in tenagaMedis" :key="tm.id" :value="tm.nama">
-                          {{ tm.nama }} <span v-if="tm.profesi">— {{ tm.profesi }}</span>
-                        </option>
-                      </select>
-                    </div>
-                    <div class="col-12">
-                      <button class="btn btn-primary gradient-btn" @click="submitWaktu" :disabled="!order">
-                        Simpan Waktu & Pemeriksa
-                      </button>
-                    </div>
-                  <br/>
+                  <div class="col-md-4">
+                    <label class="form-label small">Sample diambil jam</label>
+                    <input type="datetime-local" class="form-control" v-model="formWaktu.sample_diambil_at" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small">Sample selesai jam</label>
+                    <input type="datetime-local" class="form-control" v-model="formWaktu.sample_selesai_at" />
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small">Tenaga Medis Pemeriksa</label>
+                    <select class="form-select" v-model="formWaktu.tenaga_medis_pemeriksa">
+                      <option value="" disabled>Pilih...</option>
+                      <option v-for="tm in tenagaMedis" :key="tm.id" :value="tm.nama">
+                        {{ tm.nama }} <span v-if="tm.profesi">— {{ tm.profesi }}</span>
+                      </option>
+                    </select>
+                  </div>
+                  <div class="col-12">
+                    <button class="btn btn-primary gradient-btn" @click="submitWaktu" :disabled="!order">
+                      Simpan Waktu & Pemeriksa
+                    </button>
+                  </div>
+                  <br />
                   <div class="text-end">
-                    <button class="btn btn-sm btn-success"
-                            @click="submitNilai"
-                            :disabled="!order">
+                    <button class="btn btn-sm btn-success" @click="submitNilai" :disabled="!order">
                       <i class="bi bi-check2-square me-1"></i> UPDATE NILAI LAB
                     </button>
                   </div>
@@ -272,11 +272,11 @@
       </div>
 
       <!-- ===== MODAL: TAMBAH PERMOHONAN ===== -->
-      <div v-if="showPermohonan" class="modal-mask" @click.self="showPermohonan=false">
+      <div v-if="showPermohonan" class="modal-mask" @click.self="showPermohonan = false">
         <div class="modal-card">
           <div class="modal-header">
             <h6 class="m-0">Tambah Permohonan Laborat</h6>
-            <button class="btn-close" @click="showPermohonan=false"></button>
+            <button class="btn-close" @click="showPermohonan = false"></button>
           </div>
           <div class="modal-body">
             <div class="alert alert-warning py-2" v-if="!permForm.idPasien">
@@ -318,129 +318,108 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-light" @click="showPermohonan=false">Batal</button>
+            <button class="btn btn-light" @click="showPermohonan = false">Batal</button>
             <button class="btn btn-primary" @click="submitPermohonan">Simpan</button>
           </div>
         </div>
       </div>
 
-      <div v-if="showMaster" class="modal-mask" @click.self="showMaster=false">
+      <div v-if="showMaster" class="modal-mask" @click.self="showMaster = false">
         <div class="modal-card modal-xl">
           <div class="modal-header">
             <h6 class="m-0">Daftar Jenis Pemeriksaan</h6>
-          <button class="btn-close" @click="showMaster=false"></button>
+            <button class="btn-close" @click="showMaster = false"></button>
           </div>
 
-          
-<div class="col-lg-6 px-4 mb-3">
-  <label class="form-label fw-semibold text-secondary mb-1">
-    <i class="bi bi-funnel me-1 text-primary"></i>
-    Cari Jenis Pemeriksaan
-  </label>
 
-  <div class="input-group shadow-sm rounded-3">
-    <span class="input-group-text bg-primary text-white border-0 px-3">
-      <i class="bi bi-search"></i>
-    </span>
-    <input
-      type="text"
-      class="form-control border-0 ps-1"
-      v-model="master.search"
-      placeholder="Ketik nama atau kode pemeriksaan..."
-      @keyup.enter="doSearchAll"
-    >
-    <button
-      class="btn btn-primary px-3 fw-semibold"
-      @click="doSearchAll"
-      style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"
-    >
-      Cari / Tampilkan Semua
-    </button>
-  </div>
-</div>
+          <div class="col-lg-6 px-4 mb-3">
+            <label class="form-label fw-semibold text-secondary mb-1">
+              <i class="bi bi-funnel me-1 text-primary"></i>
+              Cari Jenis Pemeriksaan
+            </label>
+
+            <div class="input-group shadow-sm rounded-3">
+              <span class="input-group-text bg-primary text-white border-0 px-3">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" class="form-control border-0 ps-1" v-model="master.search"
+                placeholder="Ketik nama atau kode pemeriksaan..." @keyup.enter="doSearchAll">
+              <button class="btn btn-primary px-3 fw-semibold" @click="doSearchAll"
+                style="border-top-right-radius: 0.5rem; border-bottom-right-radius: 0.5rem;">
+                Cari / Tampilkan Semua
+              </button>
+            </div>
+          </div>
           <div class="modal-body">
-            
+
             <div class="row g-3 align-items-end mb-3 px-3">
-<div class="col-lg-6">
-  <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label>
-<!-- HEADER (paket) -->
-<div class="d-flex flex-wrap gap-2 mb-2">
-  <button
-    v-for="ph in paketHeaders"
-    :key="'h-'+ph.header"
-    class="btn btn-outline-success btn-sm"
-    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
-    @click="pickHeader(ph)"
-    :disabled="!order"
-  >
-    {{ ph.header_name || ('Header ' + ph.header) }}
-    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
-  </button>
-</div>
+              <div class="col-lg-6">
+                <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label>
+                <!-- HEADER (paket) -->
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                  <button v-for="ph in paketHeaders" :key="'h-' + ph.header" class="btn btn-outline-success btn-sm"
+                    :class="{ 'active': selectedHeader && selectedHeader.header === ph.header }" @click="pickHeader(ph)"
+                    :disabled="!order">
+                    {{ ph.header_name || ('Header ' + ph.header) }}
+                    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
+                  </button>
+                </div>
 
-<!-- SUBHEADER (opsional) -->
-<div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
-  <button
-    class="btn btn-outline-primary btn-sm"
-    @click="addPaketHeader(selectedHeader)"
-    :disabled="!order"
-    title="Tambahkan semua item di header ini"
-  >
-    + Tambah SEMUA ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
-  </button>
+                <!-- SUBHEADER (opsional) -->
+                <div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-outline-primary btn-sm" @click="addPaketHeader(selectedHeader)"
+                    :disabled="!order" title="Tambahkan semua item di header ini">
+                    + Tambah SEMUA ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
+                  </button>
 
-  
 
-  <button
-    v-for="sh in paketSubs"
-    :key="'s-'+sh.sub_header"
-    class="btn btn-outline-secondary btn-sm"
-    @click="addPaketSub(selectedHeader, sh)"
-    :disabled="!order"
-  >
-    Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
-  </button>
-</div>
-</div>
+
+                  <button v-for="sh in paketSubs" :key="'s-' + sh.sub_header" class="btn btn-outline-secondary btn-sm"
+                    @click="addPaketSub(selectedHeader, sh)" :disabled="!order">
+                    Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="table-responsive border rounded">
-<table class="table table-striped align-middle mb-0">
-  <thead class="table-dark">
-    <tr>
-      <th style="width:120px;">Kode</th>
-      <th>Jenis Pemeriksaan</th>
-      <th style="width:120px;">Satuan</th>
-      <th style="width:260px;">Nilai normal / kritis</th>
-      <th style="width:180px;">Hasil Lab</th>
-      <th style="width:60px;" class="text-center">Aksi</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-if="browse.loading">
-      <td colspan="6" class="text-center py-4">Memuat...</td>
-    </tr>
-    <tr v-for="(it, idx) in master.items" :key="'m-'+it.id">
-      <td class="text-muted">{{ it.kode || '-' }}</td>
-      <td class="fw-semibold">
-        {{ it.nama || '-' }}
-      </td>
-      <td>{{ it.satuan || '-' }}</td>
-      <td class="small"><div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div></td>
-      <td>
-        <input class="form-control form-control-sm"
-               v-model="valueMap[it.id]" placeholder="isian opsional" />
-      </td>
-      <td class="text-center">
-        <input type="checkbox" class="form-check-input"
-               v-model="selectedMap[it.id]" />
-      </td>
-    </tr>
-    <tr v-if="!browse.loading && master.items.length === 0">
-      <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
-    </tr>
-  </tbody>
-</table>
+              <table class="table table-striped align-middle mb-0">
+                <thead class="table-dark">
+                  <tr>
+                    <th style="width:120px;">Kode</th>
+                    <th>Jenis Pemeriksaan</th>
+                    <th style="width:120px;">Satuan</th>
+                    <th style="width:260px;">Nilai normal / kritis</th>
+                    <th style="width:180px;">Hasil Lab</th>
+                    <th style="width:60px;" class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="browse.loading">
+                    <td colspan="6" class="text-center py-4">Memuat...</td>
+                  </tr>
+                  <tr v-for="(it, idx) in master.items" :key="'m-' + it.id">
+                    <td class="text-muted">{{ it.kode || '-' }}</td>
+                    <td class="fw-semibold">
+                      {{ it.nama || '-' }}
+                    </td>
+                    <td>{{ it.satuan || '-' }}</td>
+                    <td class="small">
+                      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
+                    </td>
+                    <td>
+                      <input class="form-control form-control-sm" v-model="valueMap[it.id]"
+                        placeholder="isian opsional" />
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
+                    </td>
+                  </tr>
+                  <tr v-if="!browse.loading && master.items.length === 0">
+                    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <!-- pagination simple -->
@@ -449,14 +428,9 @@
                 Total: {{ master.meta.total || 0 }}
               </div>
               <div class="btn-group">
-                <button
-                  v-for="(ln, i) in master.links"
-                  :key="i"
-                  class="btn btn-sm"
-                  :class="['btn-outline-secondary', ln.active ? 'active' : '']"
-                  :disabled="!ln.url"
-                  @click="gotoLink(ln.url)"
-                >
+                <button v-for="(ln, i) in master.links" :key="i" class="btn btn-sm"
+                  :class="['btn-outline-secondary', ln.active ? 'active' : '']" :disabled="!ln.url"
+                  @click="gotoLink(ln.url)">
                   {{ ln.label }}
                 </button>
               </div>
@@ -464,7 +438,7 @@
           </div>
 
           <div class="modal-footer">
-            <button class="btn btn-light" @click="showMaster=false">Close</button>
+            <button class="btn btn-light" @click="showMaster = false">Close</button>
             <button class="btn btn-success" :disabled="!order" @click="submitSelected">
               <i class="bi bi-check2-square me-1"></i> SIMPAN
             </button>
@@ -492,24 +466,34 @@
       <!-- Identitas -->
       <table class="ps-info">
         <tr>
-          <td>Nama</td><td>: {{ pasien.NAMA_LGKP || '-' }}</td>
-          <td>No reg lab</td><td>: {{ order.no_reg_lab || order.order_id || '-' }}</td>
+          <td>Nama</td>
+          <td>: {{ pasien.NAMA_LGKP || '-' }}</td>
+          <td>No reg lab</td>
+          <td>: {{ order.no_reg_lab || order.order_id || '-' }}</td>
         </tr>
         <tr>
-          <td>Tgl Lahir</td><td>: {{ pasien.TGL_LHR || '-' }}</td>
-          <td>Tgl periksa</td><td>: {{ order.tgl_dibuat || '-' }}</td>
+          <td>Tgl Lahir</td>
+          <td>: {{ pasien.TGL_LHR || '-' }}</td>
+          <td>Tgl periksa</td>
+          <td>: {{ order.tgl_dibuat || '-' }}</td>
         </tr>
         <tr>
-<td>Jenis kelamin</td><td>: {{ jenisKelaminLabel }}</td>
-          <td>Spec diambil jam</td><td>: {{ order.sample_diambil_at || '-' }}</td>
+          <td>Jenis kelamin</td>
+          <td>: {{ jenisKelaminLabel }}</td>
+          <td>Spec diambil jam</td>
+          <td>: {{ order.sample_diambil_at || '-' }}</td>
         </tr>
         <tr>
-          <td>Alamat</td><td>: {{ alamatLengkap }}</td>
-          <td>Spec selesai jam</td><td>: {{ order.sample_selesai_at || '-' }}</td>
+          <td>Alamat</td>
+          <td>: {{ alamatLengkap }}</td>
+          <td>Spec selesai jam</td>
+          <td>: {{ order.sample_selesai_at || '-' }}</td>
         </tr>
         <tr>
-          <td>No RM</td><td>: {{ pasien.NO_MR || '-' }}</td>
-          <td>Unit pengirim</td><td>: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
+          <td>No RM</td>
+          <td>: {{ pasien.NO_MR || '-' }}</td>
+          <td>Unit pengirim</td>
+          <td>: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
         </tr>
         <!-- Tambahan: Tenaga Medis Pemeriksa -->
         <tr>
@@ -531,14 +515,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(r,i) in rows" :key="r.detail_id">
-            <td class="t-center">{{ i+1 }}</td>
+          <tr v-for="(r, i) in rows" :key="r.detail_id">
+            <td class="t-center">{{ i + 1 }}</td>
             <td class="t-center">{{ r.kode }}</td>
             <td>{{ r.nama_pemeriksaan }}</td>
             <td class="t-small">{{ r.nilai_normal_kritis }}</td>
             <td>{{ (hasil && hasil[r.detail_id]) || r.nilai_lab || '' }} <span class="muted">{{ r.satuan }}</span></td>
           </tr>
-          <tr v-if="rows.length===0">
+          <tr v-if="rows.length === 0">
             <td colspan="5" class="t-center">Belum ada data</td>
           </tr>
         </tbody>
@@ -555,7 +539,8 @@
       </div>
 
       <div class="ps-footnote">
-        <div class="small muted">* Hasil pemeriksaan mohon dibawa saat konsultasi. Lembar ini dicetak otomatis dari sistem.</div>
+        <div class="small muted">* Hasil pemeriksaan mohon dibawa saat konsultasi. Lembar ini dicetak otomatis dari
+          sistem.</div>
       </div>
     </div>
     <!-- ===================== /PRINT SHEET ===================== -->
@@ -572,10 +557,10 @@ const page = usePage();
 const pageProps = computed(() => (isRef(page?.props) ? (page.props.value || {}) : (page?.props || {})));
 
 // Props dari Inertia
-const pasien      = computed(() => pageProps.value.DataPasien || {});
-const order       = computed(() => pageProps.value.DataPermohonan || null);
-const rows        = computed(() => pageProps.value.DataPemeriksaan || []);
-const objective   = computed(() => pageProps.value.DataObjective || null);
+const pasien = computed(() => pageProps.value.DataPasien || {});
+const order = computed(() => pageProps.value.DataPermohonan || null);
+const rows = computed(() => pageProps.value.DataPemeriksaan || []);
+const objective = computed(() => pageProps.value.DataObjective || null);
 const tenagaMedis = computed(() => pageProps.value.TenagaMedis || []);
 const paketHeaders = ref([]);
 const paketSubs = ref([]);
@@ -586,7 +571,7 @@ const selectedSub = ref(null);
 async function loadPaketHeaders() {
   try {
     const url = route('ruang-layanan.laborat.param.headers');
-    const res = await fetch(url, { headers: { 'Accept':'application/json' }});
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     paketHeaders.value = await res.json(); // [{header, header_name, jumlah}]
   } catch (e) {
     console.error(e);
@@ -613,13 +598,13 @@ function addPaketHeader(headerObj) {
 
 
 
-async function loadParamItems(header, sub=null) {
+async function loadParamItems(header, sub = null) {
   try {
     const base = route('ruang-layanan.laborat.param.items', { header });
     const url = new URL(base, window.location.origin);
     if (sub !== null && sub !== undefined) url.searchParams.set('sub_header', String(sub));
 
-    const res = await fetch(url.toString(), { headers:{'Accept':'application/json'} });
+    const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
     const items = await res.json();
 
     // mapping ke bentuk master.items biar tabelnya tetap jalan
@@ -634,7 +619,7 @@ async function loadParamItems(header, sub=null) {
     }));
     master.meta = { total: master.items.length };
     master.links = [];
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     master.items = [];
     master.meta = { total: 0 };
@@ -663,7 +648,7 @@ function addPaketSub(headerObj, sub) {
   fetch(route('ruang-layanan.laborat.param.simpan', { header: headerObj.header }), {
     method: 'POST',
     body: form,
-    headers: { 'X-Requested-With':'XMLHttpRequest' }
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
   }).then(() => reloadPage())
     .catch(console.error);
 }
@@ -730,21 +715,21 @@ function hapusRow(row) {
       // refresh daftar & nilai lokal
       reloadPage();
       // popup sederhana
-try {
-  Swal.fire({
-    title: 'Berhasil!',
-    text: 'Item berhasil dihapus.',
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1800,
-    timerProgressBar: true,
-    position: 'center',
-    background: '#f0fdf4',
-    color: '#14532d',
-  });
-} catch (e) {
-  console.error(e);
-}
+      try {
+        Swal.fire({
+          title: 'Berhasil!',
+          text: 'Item berhasil dihapus.',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 1800,
+          timerProgressBar: true,
+          position: 'center',
+          background: '#f0fdf4',
+          color: '#14532d',
+        });
+      } catch (e) {
+        console.error(e);
+      }
 
 
     }
@@ -867,8 +852,8 @@ watch(order, (o) => {
 
 function defaultNow() {
   const d = new Date();
-  const pad = (n)=> String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 function openPermohonanModal() {
   permForm.idLoket = pasien.value?.idLoket || '';
@@ -885,7 +870,7 @@ function submitPermohonan() {
     kdPoli: permForm.kdPoli || '',
     tenagaMedisPengirim: permForm.tenagaMedisPengirim || '',
     alasanDirujuk: permForm.alasanDirujuk || '',
-    tglDibuat: permForm.tglDibuat ? permForm.tglDibuat.replace('T',' ') + ':00' : '',
+    tglDibuat: permForm.tglDibuat ? permForm.tglDibuat.replace('T', ' ') + ':00' : '',
   };
   if (!payload.idLoket || !payload.idPasien) {
     alert('ID Loket dan ID Pasien wajib diisi.');
@@ -923,12 +908,12 @@ async function loadParams(page = 1) {
   try {
     const url = new URL(route('ruang-layanan.laborat.param.browse'), window.location.origin);
     if (master.search) url.searchParams.set('search', master.search);
-    if (browse.filters.header != null)     url.searchParams.set('header', String(browse.filters.header));
+    if (browse.filters.header != null) url.searchParams.set('header', String(browse.filters.header));
     if (browse.filters.sub_header != null) url.searchParams.set('sub_header', String(browse.filters.sub_header));
     url.searchParams.set('page', String(page));
     url.searchParams.set('per_page', '25');
 
-    const res  = await fetch(url.toString(), { headers: { 'Accept':'application/json' }});
+    const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
 
     master.items = (data?.data || []).map((x) => ({
@@ -938,7 +923,7 @@ async function loadParams(page = 1) {
       satuan: x.satuan,
       nilaiNormalKritis: x.nilai_normal_kritis,
     }));
-    master.meta  = data?.meta || {};
+    master.meta = data?.meta || {};
     master.links = data?.links || [];
   } catch (e) {
     console.error(e);
@@ -973,7 +958,7 @@ async function pickHeader(hdr) {
   // (tetap load daftar sub kalau suatu saat kamu butuh tombol sub)
   try {
     const url = route('ruang-layanan.laborat.param.subheaders', { header: hdr.header });
-    const res = await fetch(url, { headers: { 'Accept':'application/json' }});
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     paketSubs.value = await res.json();
   } catch { paketSubs.value = []; }
 }
@@ -1024,7 +1009,7 @@ async function loadMaster(page = 1) {
     const url = new URL(route('ruang-layanan.laborat.paginasiMasterPemeriksaan'), window.location.origin);
     if (master.search) url.searchParams.set('search', master.search);
     url.searchParams.set('page', String(page));
-    const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' }});
+    const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
     master.items = (data?.data || []).map((x) => ({
       id: x.id || x.idPemeriksaan || x.id_pemeriksaan || x.pemeriksaanId,
@@ -1035,7 +1020,7 @@ async function loadMaster(page = 1) {
       satuan: x.satuan,
       nilaiNormalKritis: x.nilai_normal_kritis || x.nilaiNormalKritis,
     }));
-    master.meta  = data?.meta || {};
+    master.meta = data?.meta || {};
     master.links = data?.links || [];
   } catch (e) {
     console.error(e);
@@ -1082,68 +1067,167 @@ onMounted(() => {
 
 <!-- ========== GLOBAL PRINT CSS (JANGAN scoped) ========== -->
 <style>
-@page { size: A4; margin: 14mm 12mm; }
+@page {
+  size: A4;
+  margin: 14mm 12mm;
+}
+
 /* HANYA untuk mode print — tampilkan cuma .print-sheet */
 @media print {
+
   /* Sembunyikan SEMUA konten halaman */
-  body * { visibility: hidden !important; }
+  body * {
+    visibility: hidden !important;
+  }
 
   /* Tampilkan hanya lembar cetak + isinya */
-  .print-sheet, .print-sheet * {
+  .print-sheet,
+  .print-sheet * {
     visibility: visible !important;
   }
 
   /* Posisikan lembar cetak memenuhi halaman */
   .print-sheet {
     position: fixed;
-    left: 0; top: 0;
+    left: 0;
+    top: 0;
     width: 100%;
     margin: 0;
     z-index: 9999;
   }
 
   /* Jaga-jaga: matikan layout/header/footers app kalau ada */
-  .app-shell, header, .navbar, .sidebar, .card-header, footer {
+  .app-shell,
+  header,
+  .navbar,
+  .sidebar,
+  .card-header,
+  footer {
     display: none !important;
   }
 }
 
 /* Default: sembunyikan print-sheet saat layar biasa */
 @media screen {
-  .print-sheet { display: none; }
+  .print-sheet {
+    display: none;
+  }
 }
 
 /* ====== Gaya print-sheet ====== */
 .print-sheet {
   font-family: "Times New Roman", serif;
-  color:#000;
+  color: #000;
   width: 190mm;
   margin: 0 auto;
   font-size: 12pt;
 }
-.ps-head { display:flex; align-items:center; gap:14px; border-bottom:2px solid #000; padding-bottom:8px; }
-.ps-logo { width:58px; height:58px; object-fit:contain; }
-.ps-title { flex:1; text-align:center; font-weight:bold; font-size:14pt; line-height:1.25; }
-.ps-sub { font-size:10pt; font-weight:normal; }
-.ps-report-title { text-align:center; margin:12px 0 8px; text-decoration: underline; }
 
-.ps-info { width:100%; border-collapse: collapse; margin-top: 6px; }
-.ps-info td { padding: 2px 4px; vertical-align: top; }
+.ps-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+}
 
-.ps-section { margin-top:12px; font-weight:bold; background:#f3f4f6; border:1px solid #000; border-bottom:0; padding:4px 6px; }
-.ps-table { width:100%; border-collapse: collapse; }
-.ps-table th, .ps-table td { border:1px solid #000; padding:6px; }
-.ps-table th { text-align:center; font-weight:bold; }
-.t-center { text-align:center; }
-.t-small { font-size: 10pt; }
-.muted { color:#555; }
+.ps-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
 
-.ps-sign { display:flex; justify-content:space-between; margin-top:30px; }
-.ps-sign .col { width:48%; text-align:center; }
+.ps-title {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14pt;
+  line-height: 1.25;
+}
 
-.ps-footnote { margin-top:14px; font-size:10pt; color:#444; }
-.w-1 { width:36px; }
-.w-2 { width:90px; }
+.ps-sub {
+  font-size: 10pt;
+  font-weight: normal;
+}
+
+.ps-report-title {
+  text-align: center;
+  margin: 12px 0 8px;
+  text-decoration: underline;
+}
+
+.ps-info {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.ps-info td {
+  padding: 2px 4px;
+  vertical-align: top;
+}
+
+.ps-section {
+  margin-top: 12px;
+  font-weight: bold;
+  background: #f3f4f6;
+  border: 1px solid #000;
+  border-bottom: 0;
+  padding: 4px 6px;
+}
+
+.ps-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ps-table th,
+.ps-table td {
+  border: 1px solid #000;
+  padding: 6px;
+}
+
+.ps-table th {
+  text-align: center;
+  font-weight: bold;
+}
+
+.t-center {
+  text-align: center;
+}
+
+.t-small {
+  font-size: 10pt;
+}
+
+.muted {
+  color: #555;
+}
+
+.ps-sign {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.ps-sign .col {
+  width: 48%;
+  text-align: center;
+}
+
+.ps-footnote {
+  margin-top: 14px;
+  font-size: 10pt;
+  color: #444;
+}
+
+.w-1 {
+  width: 36px;
+}
+
+.w-2 {
+  width: 90px;
+}
 </style>
 
 <!-- ========== STYLE BIASA (scoped) ========== -->
@@ -1153,36 +1237,68 @@ onMounted(() => {
   border: none !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.gradient-btn:hover { transform: translateY(-1px); box-shadow: 0 .5rem 1rem rgba(16,185,129,.15); }
-.table th, .table td { vertical-align: middle; }
+
+.gradient-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .5rem 1rem rgba(16, 185, 129, .15);
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
 
 /* --- Simple Modal --- */
 .modal-mask {
-  position: fixed; z-index: 1050; inset: 0;
-  background: rgba(0,0,0,.45);
-  display: grid; place-items: center;
+  position: fixed;
+  z-index: 1050;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: grid;
+  place-items: center;
   padding: 1rem;
 }
+
 .modal-card {
-  width: 100%; max-width: 720px;
-  background: #fff; border-radius: 1rem;
-  box-shadow: 0 1rem 2rem rgba(0,0,0,.2);
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, .2);
   overflow: hidden;
 }
-.modal-card.modal-xl { max-width: 1100px; } /* yang daftar master */
-.modal-header, .modal-footer {
+
+.modal-card.modal-xl {
+  max-width: 1100px;
+}
+
+/* yang daftar master */
+.modal-header,
+.modal-footer {
   padding: .75rem 1rem;
   background: #f8fafc;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.modal-body { padding: 1rem; }
-.btn-close { border: 0; background: transparent; }
+
+.modal-body {
+  padding: 1rem;
+}
+
+.btn-close {
+  border: 0;
+  background: transparent;
+}
 
 /* --- Simple Modal (update) --- */
 .modal-mask {
-  position: fixed; z-index: 1050; inset: 0;
-  background: rgba(0,0,0,.45);
-  display: grid; place-items: center;
+  position: fixed;
+  z-index: 1050;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: grid;
+  place-items: center;
   padding: 1rem;
   /* biar aman kalau konten tinggi */
   overflow: auto;
@@ -1191,25 +1307,33 @@ onMounted(() => {
 .modal-card {
   /* lebar responsif */
   width: min(96vw, 720px);
-  background: #fff; border-radius: 1rem;
-  box-shadow: 0 1rem 2rem rgba(0,0,0,.2);
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, .2);
   overflow: hidden;
 
   /* KUNCI: jadikan flex column & batasi tinggi */
-  display: flex; flex-direction: column;
-  max-height: 90vh;        /* cegah full-screen */
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  /* cegah full-screen */
 }
 
 .modal-card.modal-xl {
-  width: min(96vw, 1100px); /* modal master lebih lebar */
-  max-height: 90vh;         /* tetap dibatasi tinggi */
+  width: min(96vw, 1100px);
+  /* modal master lebih lebar */
+  max-height: 90vh;
+  /* tetap dibatasi tinggi */
 }
 
 /* header/footer tetap ukuran kontennya saja */
-.modal-header, .modal-footer {
+.modal-header,
+.modal-footer {
   padding: .75rem 1rem;
   background: #f8fafc;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   flex: 0 0 auto;
 }
 
@@ -1217,15 +1341,18 @@ onMounted(() => {
 .modal-body {
   padding: 1rem;
   flex: 1 1 auto;
-  min-height: 0;      /* penting supaya flex child boleh overflow */
-  overflow: auto;     /* scroll di dalam modal */
+  min-height: 0;
+  /* penting supaya flex child boleh overflow */
+  overflow: auto;
+  /* scroll di dalam modal */
 }
 
 /* opsional: sedikit tweak mobile */
 @media (max-width: 576px) {
-  .modal-card, .modal-card.modal-xl {
+
+  .modal-card,
+  .modal-card.modal-xl {
     border-radius: .75rem;
   }
 }
-
 </style>
