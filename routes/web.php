@@ -35,6 +35,8 @@ use App\Http\Controllers\Owner\PanelController;
 use App\Http\Controllers\Auth\PasswordForceController;
 use App\Http\Controllers\Owner\OwnerLogController;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\DB;
+
 
 
 

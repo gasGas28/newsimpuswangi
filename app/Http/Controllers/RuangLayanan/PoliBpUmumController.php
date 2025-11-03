@@ -112,7 +112,7 @@ class PoliBpUmumController extends Controller
             'l.umur',
             'l.unitId'
         )->get();
-        // dd($DataPasien);
+        dd($DataPasien);
         if ($request->wantsJson()) {
             return response()->json([
                 'DataPasien' => $DataPasien,
