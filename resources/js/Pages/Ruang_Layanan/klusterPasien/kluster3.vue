@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="row g-4">
-        <div class="col-6 col-md-4 col-lg-3" v-for="poli in listPoliWithStyle" :key="listPoli.id">
+        <div class="col-md-4" v-for="poli in dataLayanan" :key="listPoli.id">
           <Link :href="route('ruang-layanan.index' , {idPoli : poli.kdPoli, kluster : '3'})" class="text-decoration-none">
           <div class="card shadow ">
             <div class="card-body ">
@@ -19,10 +19,10 @@
                 :style="{ width: '60px', height: '60px', backgroundColor: poli.bg }">
                 <i :class="poli.icon" class="text-white fs-2"></i>
               </div>
-              <h5 class="card-title mb-2">{{ poli.nmPoli }}</h5>
+              <h5 class="card-title mb-2">{{ poli.nama }}</h5>
               <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Total Pasien</small>
-                <strong class="fs-4">10</strong>
+                <strong class="fs-4">{{ poli.jumlah }}</strong>
               </div>
             </div>
           </div>
@@ -39,6 +39,8 @@ import { route } from 'ziggy-js';
 const { props } = usePage();
 
 const listPoli = props.listPoli
+const totalPasienUmum = props.totalPasienUmum
+const totalPasienKB = props.totalPasienKB
 console.log(listPoli)
 
 const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -48,16 +50,12 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
   year: 'numeric'
 })
 
-const poliStyles = {
-  'Umum': { bg: '#3b82f6', icon: 'bi bi-person-fill' },
-  'KB': { bg: '#f97316', icon: 'bi bi-gender-female' },
-}
+const dataLayanan = [
+  { nama: 'Umum', jumlah: totalPasienUmum, kdPoli:'001', link: 'ruang-layanan.index', icon: 'bi bi-person-fill', bg: '#3b82f6' },
+  { nama: 'KB', jumlah: totalPasienKB, kdPoli:'008', link: 'ruang-layanan.index', icon: 'bi bi-people-fill', bg: '#3b82f6' },
+  { nama: 'POLI LANSIA',kdPoli:'001', jumlah: 0, link: 'ruang-layanan.index', icon: 'bi bi-gender-female', bg: '#14b8a6' },
+]
 
-  const listPoliWithStyle = listPoli.map(poli => ({
-    ...poli,
-      bg: poliStyles[poli.nmPoli]?.bg || '#9ca3af', 
-      icon :  poliStyles[poli.nmPoli]?.icon || 'bi bi-hospital',
-  }))
 </script>
 
 <style></style>

@@ -291,8 +291,16 @@
         <div class="card-body" v-if="currrentSubTabObjective === 'tenaga_medis'">
           <div class="row">
             <div class="col-6">
-              <slot name="status_pasien">
-              </slot>
+              <div v-if="props.idPoli == '002'" >
+                <label for="" class="fw-bold">Status</label>
+                <select class="form-control my-3" v-model="form.statusPasien">
+                  <option value="" selected>-- Pilih --</option>
+                  <option value="1">ANAK SEKOLAH</option>
+                  <option value="2">APRAS</option>
+                  <option value="3">BUMIL</option>
+                  <option value="4">UMUM</option>
+                </select>
+              </div>
               <label for="" class="fw-bold">Tenaga Media Askep</label>
               <select class="form-control my-3" name="" id="tenaga_medis_askep" v-model="form.tenaga_medis_askep">
                 <option value="" selected>-- Pilih --</option>
@@ -305,9 +313,9 @@
       </div>
     </form>
   </div>
-<div v-else class="alert alert-warning text-center py-3 rounded shadow-sm">
-  <strong> INPUT SUBJECTIVE TERLEBIH DAHULU</strong>
-</div>
+  <div v-else class="alert alert-warning text-center py-3 rounded shadow-sm">
+    <strong> INPUT SUBJECTIVE TERLEBIH DAHULU</strong>
+  </div>
 </template>
 
 <script setup>
@@ -326,7 +334,8 @@ const props = defineProps({
   routeName: String,
   statusPasien: String,
   tenagaMedisAskep: Object,
-  idLoket : String
+  idLoket: String,
+  idPoli : String
 });
 console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
 
@@ -374,7 +383,7 @@ const form = useForm({
   palpasi: props.dataAnamnesa?.palpasi ?? '',
   luxasi: props.dataAnamnesa?.luxasi ?? '',
   vitalitas: props.dataAnamnesa?.vitalitas ?? '',
-  statusPasien: props.statusPasien ?? ''
+  statusPasien: props.dataAnamnesa?.statusPasien ?? ''
 });
 
 function changeInputKet(field, ketfield) {
@@ -385,7 +394,7 @@ function changeInputKet(field, ketfield) {
 
 function submitForm() {
   form.post(route(props.routeName, {
-    idAnam :  props.dataAnamnesa?.idAnamnesa ?? ''
+    idAnam: props.dataAnamnesa?.idAnamnesa ?? ''
   }), {
     preserveScroll: true,
     onSuccess: () => {

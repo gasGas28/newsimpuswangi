@@ -290,12 +290,12 @@ function searchDiagnosa() {
 }
 
 function fetchPage(url) {
-  if (!url) return;
+  // if (!url) return;
 
-  const relativeUrl = url.startsWith('http')
-    ? new URL(url).pathname + new URL(url).search
-    : url;
-  axios.get(relativeUrl)
+  // const relativeUrl = url.startsWith('http')
+  //   ? new URL(url).pathname + new URL(url).search
+  //   : url;
+  axios.get(url)
     .then(res => {
       diagnosaMedis.value = res.data;
     })

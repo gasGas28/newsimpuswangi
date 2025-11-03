@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\RuangLayanan;
 
 use App\Http\Controllers\Controller;
+use App\Models\RuangLayanan\SimpusLoket;
 use App\Models\RuangLayanan\SimpusMasterObat;
+use App\Models\RuangLayanan\SimpusPelayanan;
 use App\Models\RuangLayanan\SimpusPermohonanLab;
 use App\Models\RuangLayanan\SimpusPoliFKTP;
 use DB;
@@ -27,36 +29,52 @@ class indexController extends Controller
 
         if ($kluster == '2') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
-            // dd($listPoli);
+            $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '<=', 17);
+            })->where('tglPelayanan', now()->toDateString())->count();
+            //dd($totalPasienUmum);
+            //dd($listPoli);
             return Inertia::render(
                 'Ruang_Layanan/klusterPasien/kluster2',
                 [
-                    'listPoli' => $listPoli
+                    'listPoli' => $listPoli,
+                    'totalPasienUmum' => $totalPasienUmum
                 ]
             );
 
         } elseif ($kluster == '3') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008'])->get();
+            $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17);
+            })->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienKB = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '008')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17);
+            })->where('tglPelayanan', now()->toDateString())->count();
             // dd($listPoli);
+            //dd($totalPasienKB);
             return Inertia::render(
                 'Ruang_Layanan/klusterPasien/kluster3',
                 [
-                    'listPoli' => $listPoli
+                    'listPoli' => $listPoli,
+                    'totalPasienUmum' => $totalPasienUmum,
+                    'totalPasienKB' => $totalPasienKB
                 ]
             );
 
         } else {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['002', '005', '098',])->get();
+            $totalPasienGigi = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '002')->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienUGD = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '005')->where('tglPelayanan', now()->toDateString())->count();
             // dd($listPoli);
             return Inertia::render(
-                'Ruang_Layanan/klusterPasien/kluster3',
+                'Ruang_Layanan/klusterPasien/lintaskluster',
                 [
-                    'listPoli' => $listPoli
+                    'listPoli' => $listPoli,
+                    'totalPasienGigi' => $totalPasienGigi,
+                    'totalPasienUGD' => $totalPasienUGD
                 ]
             );
-
         }
-
     }
 
     public function paginasiSimpusDiagnosa(Request $request)

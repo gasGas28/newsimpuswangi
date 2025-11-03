@@ -51,6 +51,108 @@ class LaboratoriumController extends Controller
 
         return $in;
     }
+/** Pastikan parent di simpus_loket ada untuk FK */
+/** Pastikan parent di simpus_loket ada (versi robust, tanpa asumsi kolom) */
+/** Pastikan parent di simpus_loket ada (robust, isi kolom NOT NULL tanpa default) */
+private function ensureLoketParentExists(string $loketId, string $permohonanId): void
+{
+    $loketId = trim($loketId);
+
+    if (DB::table('simpus_loket')->whereRaw('TRIM(idLoket)=?', [$loketId])->exists()) return;
+
+    // ---- Ambil data permohonan (kolom yang ada saja) ----
+    $plCols = Schema::getColumnListing('simpus_permohonan_lab');
+    $sel    = [];
+    foreach (['loketId','pasienId','tglDibuat'] as $c) if (in_array($c, $plCols)) $sel[] = $c;
+
+    $p = DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [trim($permohonanId)])
+        ->first($sel);
+
+    // Kalau permohonan menyimpan loketId berbeda, pakai yang itu
+    if ($p && property_exists($p, 'loketId') && trim((string)$p->loketId) !== '' && trim((string)$p->loketId) !== $loketId) {
+        $loketId = trim((string)$p->loketId);
+        if (DB::table('simpus_loket')->whereRaw('TRIM(idLoket)=?', [$loketId])->exists()) return;
+    }
+
+    // ---- Susun payload dasar sesuai kolom yang ada ----
+    $loketCols = Schema::getColumnListing('simpus_loket');
+    $row = ['idLoket' => $loketId];
+
+    if (in_array('pasienId', $loketCols)) $row['pasienId'] = $p->pasienId ?? null;
+    if (in_array('kdPoli', $loketCols))  $row['kdPoli']    = 999; // fallback aman
+    if (in_array('tglKunjungan', $loketCols)) {
+        $row['tglKunjungan'] = ($p && isset($p->tglDibuat) && $p->tglDibuat)
+            ? \Carbon\Carbon::parse($p->tglDibuat)->toDateString()
+            : now()->toDateString();
+    }
+    if (in_array('createdDate', $loketCols))  $row['createdDate']  = now();
+    if (in_array('modifiedDate', $loketCols)) $row['modifiedDate'] = now();
+
+    // ---- Lengkapi kolom NOT NULL tanpa default (termasuk kdKegiatan) ----
+    $row = $this->applyLoketRequiredDefaults($row);
+
+    DB::table('simpus_loket')->insert($row);
+}
+
+/**
+ * Isi kolom-kolom NOT NULL tanpa default di simpus_loket yang belum terisi pada $row.
+ * - Untuk kdKegiatan: coba ambil nilai contoh dari baris lain (paling akhir). Jika tidak ada, pakai 0.
+ * - Untuk kolom numerik: 0. Tanggal: today/now. String: ''.
+ */
+private function applyLoketRequiredDefaults(array $row): array
+{
+    $meta = DB::table('information_schema.COLUMNS')
+        ->select('COLUMN_NAME','IS_NULLABLE','DATA_TYPE','COLUMN_DEFAULT','EXTRA')
+        ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+        ->where('TABLE_NAME', 'simpus_loket')
+        ->get();
+
+    // helper ambil contoh nilai suatu kolom dari baris existing (biar cocok FK/enum kalau ada)
+    $getSample = function(string $col) {
+        return DB::table('simpus_loket')->orderByDesc('createdDate')->value($col)
+            ?? DB::table('simpus_loket')->value($col);
+    };
+
+    foreach ($meta as $c) {
+        $name = $c->COLUMN_NAME;
+
+        // skip kalau sudah diisi / bisa NULL / ada default / auto_increment
+        if (array_key_exists($name, $row)) continue;
+        if ($c->IS_NULLABLE === 'YES') continue;
+        if ($c->COLUMN_DEFAULT !== null) continue;
+        if (str_contains((string)$c->EXTRA, 'auto_increment')) continue;
+
+        // penanganan khusus beberapa kolom yang sering muncul
+        if ($name === 'kdKegiatan') {
+            $sample = $getSample('kdKegiatan');
+            $row[$name] = $sample ?? 0;
+            continue;
+        }
+        if ($name === 'status') {
+            $row[$name] = 0;
+            continue;
+        }
+
+        // fallback generik berdasar tipe data
+        $type = strtolower($c->DATA_TYPE);
+        if (in_array($type, ['int','tinyint','smallint','mediumint','bigint','decimal','numeric','float','double'])) {
+            $row[$name] = 0;
+        } elseif (in_array($type, ['date'])) {
+            $row[$name] = now()->toDateString();
+        } elseif (in_array($type, ['datetime','timestamp'])) {
+            $row[$name] = now();
+        } else {
+            // char/varchar/text/enum/set dll → coba sample dulu biar aman, kalau kosong baru ''
+            $sample = $getSample($name);
+            $row[$name] = $sample ?? '';
+        }
+    }
+
+    return $row;
+}
+
+
 
     /** Ambil nama poli dari loket (opsional helper) */
     private function getPoliNameByLoket(string $loketId): ?string
@@ -963,49 +1065,48 @@ class LaboratoriumController extends Controller
     }
 
     /** Simpan semua isi paket (berdasar header) ke simpus_tindakan */
-    public function paramSimpan(Request $request, int $header)
-    {
-        $validated = $request->validate([
-            'loketId'      => 'required|string',
-            'permohonanId' => 'required|string',
-            'pelayananId'  => 'nullable',
-            'sub_header'   => 'nullable|integer',
-        ]);
+public function paramSimpan(Request $request, int $header)
+{
+    $validated = $request->validate([
+        'loketId'      => 'required|string',   // hanya untuk UI
+        'permohonanId' => 'required|string',
+        'pelayananId'  => 'nullable',
+        'sub_header'   => 'nullable|integer',
+    ]);
 
-        $loketId   = $this->resolveLoketId($validated['loketId']);
-        $orderId   = $this->norm($validated['permohonanId']);
-        $pelayanan = $validated['pelayananId'] ?? null;
+    $orderId = trim($validated['permohonanId']);
 
-        $exists = DB::table('simpus_permohonan_lab')
-            ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
-            ->exists();
-        if (!$exists) return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
+    $loketId = trim((string) DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
+        ->value('loketId'));
 
-        $q = DB::table($this->paramTable)
-            ->where('header', 0)
-            ->where('sub_header', $header);
+    if ($loketId === '') return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
 
-        if (!empty($validated['sub_header'])) {
-            $q->where('sub_header', (int) $validated['sub_header']);
-        }
+    $this->ensureLoketParentExists($loketId, $orderId);
 
-        $items = $q->select([
-                'id_parameter',
-                'kode_parameter',
-                'nama_parameter',
-                'nilai_normal',
-                'nilai_kritis',
-                'satuan'
-            ])
-            ->orderBy('id_parameter')
-            ->get();
+    $pelayanan = $validated['pelayananId'] ?? null;
 
-        DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
-            $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
-        });
+    $q = DB::table($this->paramTable)
+        ->where('header', 0)
+        ->where('sub_header', $header);
 
-        return back();
+    if (!empty($validated['sub_header'])) {
+        $q->where('sub_header', (int) $validated['sub_header']);
     }
+
+    $items = $q->select([
+            'id_parameter','kode_parameter','nama_parameter','nilai_normal','nilai_kritis','satuan'
+        ])
+        ->orderBy('id_parameter')
+        ->get();
+
+    DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
+        $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
+    });
+
+    return back();
+}
+
 
     /** Browse parameter_uji (pencarian bebas / per header) */
     public function paramBrowse(Request $r)
@@ -1050,35 +1151,39 @@ class LaboratoriumController extends Controller
     }
 
     /** Simpan item terpilih (berdasar id_parameter[]) ke simpus_tindakan */
-    public function paramSimpanTerpilih(Request $request)
-    {
-        $val = $request->validate([
-            'loketId'      => 'required|string',
-            'permohonanId' => 'required|string',
-            'pelayananId'  => 'nullable',
-            'ids'          => 'required|array|min:1',
-            'ids.*'        => 'integer',
-            'nilaiLab'     => 'nullable|array',
-        ]);
+public function paramSimpanTerpilih(Request $request)
+{
+    $val = $request->validate([
+        'loketId'      => 'required|string',   // hanya untuk UI
+        'permohonanId' => 'required|string',
+        'pelayananId'  => 'nullable',
+        'ids'          => 'required|array|min:1',
+        'ids.*'        => 'integer',
+        'nilaiLab'     => 'nullable|array',
+    ]);
 
-        $loketId   = $this->resolveLoketId($val['loketId']);
-        $orderId   = trim($val['permohonanId']);
-        $pelayanan = $val['pelayananId'] ?? null;
+    $orderId = trim($val['permohonanId']);
 
-        $exists = DB::table('simpus_permohonan_lab')
-            ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
-            ->exists();
-        if (!$exists) return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
+    $loketId = trim((string) DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [$orderId])
+        ->value('loketId'));
 
-        $items = DB::table($this->paramTable)
-            ->whereIn('id_parameter', $val['ids'])
-            ->select(['id_parameter','kode_parameter','nama_parameter','satuan','nilai_normal','nilai_kritis'])
-            ->get();
+    if ($loketId === '') return back()->withErrors(['permohonanId' => 'Permohonan ID tidak valid.']);
 
-        DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
-            $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
-        });
+    $this->ensureLoketParentExists($loketId, $orderId);
 
-        return back();
-    }
+    $pelayanan = $val['pelayananId'] ?? null;
+
+    $items = DB::table($this->paramTable)
+        ->whereIn('id_parameter', $val['ids'])
+        ->select(['id_parameter','kode_parameter','nama_parameter','satuan','nilai_normal','nilai_kritis'])
+        ->get();
+
+    DB::transaction(function () use ($loketId, $orderId, $pelayanan, $items) {
+        $this->insertParamBatch($loketId, $orderId, $pelayanan, $items->all());
+    });
+
+    return back();
+}
+
 }

@@ -48,7 +48,7 @@
                 <i class="bi bi-heart-pulse-fill text-success me-2"></i>
                 <h6 class="mb-0 text-muted">Jenis/Poli</h6>
               </div>
-              <p class="mb-0 fw-semibold">Kunjungan Sakit (Umum)</p>
+              <p class="mb-0 fw-semibold">{{ dataPasien.kunjSakit = true ? 'Kunjungan Sakit' : 'Kunjungan Sehat' }} ({{ dataPasien.nmPoli }} <template v-if="dataPasien.poliAwal"> / {{ dataPasien.poliAwal.nmPoli }}</template>)</p>
             </div>
           </div>
 
@@ -135,7 +135,7 @@
             <div class="action-label">UKK</div>
           </button>
 
-          <button v-if="!isMelayani" @click.prevent="mulaiPemeriksaanPasien"
+          <button v-if="!isMelayani && props.dataPasien.kdPoli !== '097'" @click.prevent="mulaiPemeriksaanPasien"
             class="action-card start-action pulse-animation">
             <div class="action-icon">
               <i class="bi bi-person-check"></i>
@@ -225,9 +225,9 @@ const props = defineProps({
   pelayanan: Object
 });
 
-console.log('data pasien', props.dataPasien);
+console.log('data pasien', props.pelayanan);
 
-const isMelayani = ref(props.pelayanan.sudahDilayani !== 0)
+const isMelayani = ref(props.pelayanan.sudahDilayani !== 0 || props.dataPasien.kdPoli === '097')
 const emit = defineEmits(['ubah-melayani', 'ubah-dataAnamnesa',]);
 const jenisUkk = ref(null);
 const ukk = ref(null);
@@ -247,10 +247,10 @@ function openModalUkk() {
 function fetchUkk(url) {
   if (!url) return;
 
-  const relativeUrl = url.startsWith('http')
-    ? new URL(url).pathname + new URL(url).search
-    : url;
-  axios.get(relativeUrl)
+  // const relativeUrl = url.startsWith('http')
+  //   ? new URL(url).pathname + new URL(url).search
+  //   : url;
+  axios.get(url)
     .then(res => {
       jenisUkk.value = res.data.jenisUkk;
       ukk.value = res.data.ukk
@@ -259,7 +259,8 @@ function fetchUkk(url) {
       formUkk.tempat_kerja = ukk.value?.tempatKerja ?? '';
       formUkk.lama_kerja = ukk.value?.lamaKerja ?? '';
       formUkk.jenis_ukk = ukk.value?.jenisUKK ?? '';
-      console.log(res.data.ukk)
+      console.log('jenis ukk',res.data)
+      console.log('fetching URL:', url);
     })
     .catch(err => console.error(err));
 }
