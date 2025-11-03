@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Auth\Group; // <— tambahkan ini
+use App\Models\Auth\Group;
+use App\Models\UnitProfile;
 
 class User extends Authenticatable
 {
@@ -11,12 +12,17 @@ class User extends Authenticatable
     protected $primaryKey = 'id';
     public $timestamps = false;
 
-    protected $hidden = ['password','remember_code','salt','activation_code','forgotten_password_code'];
+    protected $hidden = ['password', 'remember_code', 'salt', 'activation_code', 'forgotten_password_code'];
 
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'users_groups', 'user_id', 'group_id')
-                    ->withPivot('nama_group');
+            ->withPivot('nama_group');
+    }
+
+    public function unitProfile()
+    {
+        return $this->belongsTo(UnitProfile::class, 'unit', 'unit_id');
     }
 
     // helper: array role lowercase, ex: ['owner','admin']

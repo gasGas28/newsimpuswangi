@@ -4,7 +4,7 @@
       <div class="card">
         <div class="card-header bg-info text-white fw-bold">Form Pencarian Pasien</div>
         <div class="card-body">
-          <form @submit.prevent="searchPasien">
+          <form @submit.prevent="submitSearch">
             <div class="row">
               <!-- Kolom Kiri -->
               <div class="col-md-6">
@@ -108,8 +108,9 @@
                           :disabled="!form[field.key].enabled"
                         >
                           <option value="">- Pilih -</option>
-                          <option value="Kecamatan A">Kecamatan A</option>
-                          <option value="Kecamatan B">Kecamatan B</option>
+                          <option v-for="kec in kecamatanList" :value="kec.NO_KEC">
+                            {{ kec.NAMA_KEC }}
+                          </option>
                         </select>
                       </template>
                     </div>
@@ -120,12 +121,53 @@
 
             <hr />
             <div class="d-flex justify-content-between">
-              <button class="btn btn-primary btn-sm" type="submit">🔍 CARI PASIEN</button>
+              <button class="btn btn-primary btn-sm" type="submit">
+                <i class="bi bi-search me-1"></i> CARI PASIEN
+              </button>
               <Link :href="route('loket.pasien')" class="btn btn-success btn-sm">
-                ➕ TAMBAH PASIEN BARU
+                <i class="bi bi-plus-lg me-1"></i> TAMBAH PASIEN BARU
               </Link>
             </div>
           </form>
+
+          <!-- Results Table -->
+          <div class="mt-4" v-if="results.length > 0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>NO. MR</th>
+                    <th>NIK</th>
+                    <th>NAMA</th>
+                    <th>JENIS KELAMIN</th>
+                    <th>ALAMAT</th>
+                    <th>KECAMATAN</th>
+                    <th>KELURAHAN</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="pasien in results" :key="pasien.ID">
+                    <td>{{ pasien.NO_MR }}</td>
+                    <td>{{ pasien.NIK }}</td>
+                    <td>{{ pasien.NAMA_LGKP }}</td>
+                    <td>{{ pasien.JENIS_KLMIN === 1 ? 'Laki-laki' : 'Perempuan' }}</td>
+                    <td>{{ pasien.ALAMAT }}</td>
+                    <td>{{ pasien.kecamatan?.NAMA_KEC }}</td>
+                    <td>{{ pasien.kelurahan?.NAMA_KEL }}</td>
+                    <td>
+                      <Link
+                        :href="route('loket.index', { pasienId: pasien.ID })"
+                        class="btn btn-sm btn-primary"
+                      >
+                        Daftarkan
+                      </Link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -134,17 +176,32 @@
 
 <script setup>
   import AppLayouts from '@/Components/Layouts/AppLayouts.vue';
-  import { Link } from '@inertiajs/vue3';
-  import { reactive } from 'vue';
+  import { Link, router } from '@inertiajs/vue3';
+  import { reactive, defineProps } from 'vue';
+
+  const props = defineProps({
+    results: {
+      type: Array,
+      default: () => [],
+    },
+    searchParams: {
+      type: Object,
+      default: () => ({}),
+    },
+    kecamatanList: {
+      type: Array,
+      required: true,
+    },
+  });
 
   const form = reactive({
-    nama: { enabled: false, value: '' },
-    nik: { enabled: false, value: '' },
-    no_mr: { enabled: false, value: '' },
-    no_bpjs: { enabled: false, value: '' },
-    jenis_kelamin: { enabled: false, value: '' },
-    kecamatan: { enabled: false, value: '' },
-    alamat: { enabled: false, value: '' },
+    nama: { enabled: false, value: props.searchParams.nama || '' },
+    nik: { enabled: false, value: props.searchParams.nik || '' },
+    no_mr: { enabled: false, value: props.searchParams.no_mr || '' },
+    no_bpjs: { enabled: false, value: props.searchParams.no_bpjs || '' },
+    jenis_kelamin: { enabled: false, value: props.searchParams.jenis_kelamin || '' },
+    kecamatan: { enabled: false, value: props.searchParams.kecamatan || '' },
+    alamat: { enabled: false, value: props.searchParams.alamat || '' },
   });
 
   const kolom1 = [
@@ -161,8 +218,15 @@
     { key: 'alamat', label: 'ALAMAT', type: 'text' },
   ];
 
-  function searchPasien() {
-    const filtered = Object.fromEntries(Object.entries(form).filter(([_, f]) => f.enabled));
-    console.log('Data yang dikirim:', filtered);
+  function submitSearch() {
+    const searchData = {};
+
+    Object.entries(form).forEach(([key, field]) => {
+      if (field.enabled && field.value) {
+        searchData[key] = field.value;
+      }
+    });
+
+    router.get(route('loket.search'), searchData);
   }
 </script>

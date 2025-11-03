@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models\RuangLayanan;
+namespace App\Models;
 
+use App\Models\UnitDetail;
 use Illuminate\Database\Eloquent\Model;
 
 class UnitProfile extends Model
@@ -46,4 +47,15 @@ class UnitProfile extends Model
         'response_organization',
         'last_update',
     ];
+
+    public function unitDetails()
+    {
+        return $this->hasMany(UnitDetail::class, 'id_unit', 'unit_id');
+    }
+
+    // Scope tanpa kategori
+    public function scopeTanpaKategori($query)
+    {
+        return $query->whereNull('kategori');
+    }
 }

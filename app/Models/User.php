@@ -13,16 +13,24 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected $primaryKey = 'id';
-    public $timestamps = false; // tabelmu tidak punya created_at/updated_at
+    public $timestamps = false;
 
     // sesuaikan kalau perlu
     protected $fillable = [
-        'username','email','password','first_name','last_name',
+        'username',
+        'email',
+        'password',
+        'first_name',
+        'last_name',
     ];
 
     // kolom sensitif/non-pakai
     protected $hidden = [
-        'password','remember_code','salt','activation_code','forgotten_password_code',
+        'password',
+        'remember_code',
+        'salt',
+        'activation_code',
+        'forgotten_password_code',
     ];
 
     /**
@@ -31,7 +39,7 @@ class User extends Authenticatable
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'users_groups', 'user_id', 'group_id')
-                    ->withPivot('nama_group');
+            ->withPivot('nama_group');
     }
 
     /**

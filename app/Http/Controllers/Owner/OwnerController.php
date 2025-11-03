@@ -168,7 +168,7 @@ if ($puskId !== null && $puskId !== '') {
             }
         } else {
             // fallback halus utk current user
-            if (auth()->id() === (int)$r->id) {
+            if (Auth::id() === (int)$r->id) {
                 $sessRow = DB::table('sessions')->where('id', $request->session()->getId())->first();
                 if ($sessRow) {
                     $isLoggedIn = true;
