@@ -40,7 +40,7 @@ class SimpusPelayanan extends Model
         'endTIme',
         'responPutEncounter',
     ];
-    public function Loket()
+    public function SimpusLoket()
     {
         return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
     }
