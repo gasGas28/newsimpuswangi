@@ -25,12 +25,12 @@ class indexController extends Controller
 
     public function listPoliKluster($kluster)
     {
-
-
         if ($kluster == '2') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
                 $query->where('umur', '<=', 17);
+            })->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienKIA = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '003')->whereHas('SimpusLoket', function ($query) {
             })->where('tglPelayanan', now()->toDateString())->count();
             //dd($totalPasienUmum);
             //dd($listPoli);
@@ -38,7 +38,8 @@ class indexController extends Controller
                 'Ruang_Layanan/klusterPasien/kluster2',
                 [
                     'listPoli' => $listPoli,
-                    'totalPasienUmum' => $totalPasienUmum
+                    'totalPasienUmum' => $totalPasienUmum,
+                    'totalPasienKIA' => $totalPasienKIA,
                 ]
             );
 

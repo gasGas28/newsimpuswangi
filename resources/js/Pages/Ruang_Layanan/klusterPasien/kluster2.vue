@@ -40,6 +40,7 @@ const { props } = usePage();
 
 const listPoli = props.listPoli
 const totalPasienUmum = props.totalPasienUmum
+const totalPasienkia = props.totalPasienKIA
 console.log(listPoli)
 
 const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -51,7 +52,7 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
 
 const dataLayanan = [
   { nama: 'Umum', jumlah: totalPasienUmum, kdPoli:'001', link: 'ruang-layanan.umum', icon: 'bi bi-person-fill', bg: '#3b82f6' },
-  { nama: 'KIA', jumlah: 0, kdPoli:'003', link: 'ruang-layanan.kia', icon: 'bi bi-people-fill', bg: '#3b82f6' },
+  { nama: 'KIA', jumlah: totalPasienkia, kdPoli:'003', link: 'ruang-layanan.kia', icon: 'bi bi-people-fill', bg: '#3b82f6' },
 ]
 
 </script>

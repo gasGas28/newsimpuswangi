@@ -31,7 +31,7 @@ import { ref } from 'vue'
 import FormBayiLahirHidup from './FormBayiLahirHidup.vue'
 import FormBayiLahirMati from './FormBayiLairMati.vue'
 
-const activeForm = ref(null)
+const activeForm = ref('bayi-lahir-hidup')
 
 const toggleForm = (formType) => {
   activeForm.value = activeForm.value === formType ? null : formType
