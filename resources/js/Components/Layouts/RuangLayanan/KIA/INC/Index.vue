@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mb-2">Pelayanan Neonatus</h5>
+    <h5 class="mb-2">Pelayanan Intranatal Care / Pelayanan Ibu Bersalin</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -42,14 +42,12 @@
   import { ref, computed } from 'vue';
 
   // import form
-  import FormSubjektif from './FormSubjektif.vue';
   import FormObjektif from './FormObjektif.vue';
   import FormPlanning from '../Form/FormPlanning.vue';
   import FormImunisasi from '../Form/FormImunisasi.vue';
   import FormStatusPasien from '../Form/FormStatusPasien.vue';
 
   const tabs = [
-    { name: 'subjektif', label: 'Subjektif' },
     { name: 'objektif', label: 'Objektif' },
     { name: 'imunisasi', label: 'Imunisasi' },
     { name: 'planning', label: 'Planning' },
@@ -68,12 +66,10 @@
     DataDiagnosa: Array,
   });
 
-  const selectedTab = ref('subjektif');
+  const selectedTab = ref('objektif');
 
   const currentForm = computed(() => {
     switch (selectedTab.value) {
-      case 'subjektif':
-        return FormSubjektif;
       case 'objektif':
         return FormObjektif;
       case 'imunisasi':
