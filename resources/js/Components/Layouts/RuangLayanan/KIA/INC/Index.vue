@@ -46,9 +46,11 @@
   import FormPlanning from '../Form/FormPlanning.vue';
   import FormImunisasi from '../Form/FormImunisasi.vue';
   import FormStatusPasien from '../Form/FormStatusPasien.vue';
+import FormAssessment from '../Form/FormAssessment.vue';
 
   const tabs = [
     { name: 'objektif', label: 'Objektif' },
+    { name: 'assessment', label: 'Assesment' },
     { name: 'imunisasi', label: 'Imunisasi' },
     { name: 'planning', label: 'Planning' },
     { name: 'status_pasien', label: 'Status Pasien' },
@@ -72,6 +74,8 @@
     switch (selectedTab.value) {
       case 'objektif':
         return FormObjektif;
+      case 'assessment':
+        return FormAssessment;
       case 'imunisasi':
         return FormImunisasi;
       case 'planning':
