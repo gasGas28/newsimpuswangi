@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mb-2">Pelayanan Antenatal Care / Ibu Hamil</h5>
+    <h5 class="mb-2">Pelayanan Tumbuh Kembang</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -42,8 +42,8 @@
   import { ref, computed } from 'vue';
 
   // import form
-  import FormSubjektif from './FormSubjektif.vue';
-  import FormObjektif from './FormObjektif.vue';
+  import FormSubjektif from './Subjektif.vue';
+  import FormObjektif from './Objektif.vue';
   import FormAssessment from '../Form/FormAssessment.vue';
   import FormPlanning from '../Form/FormPlanning.vue';
   import FormImunisasi from '../Form/FormImunisasi.vue';

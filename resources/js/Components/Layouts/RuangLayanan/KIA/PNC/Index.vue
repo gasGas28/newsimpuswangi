@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mb-2">Pelayanan Antenatal Care / Ibu Hamil</h5>
+    <h5 class="mb-2">Pelayanan Postnatal Care / Pelayanan Ibu Nifas</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
