@@ -94,9 +94,10 @@ Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return redirect()->route('login');
-})->name('logout');
 
+    // Paksa full redirect (hard navigation) agar state client direset
+    return Inertia::location(route('login'));
+})->name('logout');
 
 
 
@@ -586,6 +587,9 @@ Route::post(
     '/simpus/laborat/param/simpan-terpilih',
     [\App\Http\Controllers\RuangLayanan\LaboratoriumController::class, 'paramSimpanTerpilih']
 )->name('ruang-layanan.laborat.param.simpanTerpilih');
+// GET: daftar kategori + jumlah item per kategori
+Route::get('/ruang_layanan/laborat/param/categories', [LaboratoriumController::class, 'paramCategories'])
+    ->name('ruang-layanan.laborat.param.categories');
 
 Route::post(
   '/ruang-layanan/laborat/hapus-semua',

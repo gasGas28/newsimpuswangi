@@ -376,25 +376,59 @@
               </button>
             </div>
           </div>
+
+<!-- ============== FILTER: Kategori ============== -->
+<div class="px-4 mb-3">
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <span class="text-secondary small fw-semibold me-1">
+      <i class="bi bi-collection me-1"></i> Kategori:
+    </span>
+
+    <!-- Tombol "Semua" -->
+    <button
+      class="btn btn-sm"
+      :class="selectedKategori === null ? 'btn-primary' : 'btn-outline-primary'"
+      @click="selectedKategori = null; loadParams(1);"
+    >
+      Semua
+    </button>
+
+    <!-- Daftar kategori dari master_kategori -->
+    <button
+      v-for="kat in kategoriList"
+      :key="'kat-'+kat.id_kategori"
+      class="btn btn-sm"
+      :class="selectedKategori === kat.id_kategori ? 'btn-primary' : 'btn-outline-primary'"
+      @click="selectedKategori = kat.id_kategori; loadParams(1);"
+      :title="`Jumlah parameter: ${kat.jumlah}`"
+    >
+      {{ kat.nama_kategori }}
+      <span class="badge text-bg-light ms-1">{{ kat.jumlah }}</span>
+    </button>
+  </div>
+</div>
+
+
+
           <div class="modal-body">
 
             <div class="row g-3 align-items-end mb-3 px-3">
-<div class="col-lg-6">
-  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
-<!-- HEADER (paket) -->
-<div class="d-flex flex-wrap gap-2 mb-2">
-  <button
-    v-for="ph in paketHeaders"
-    :key="'h-'+ph.header"
-    class="btn btn-outline-success btn-sm"
-    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
-    @click="pickHeader(ph)"
-    :disabled="!order"
-  >
-    {{ ph.header_name || ('Header ' + ph.header) }}
-    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
-  </button>
-</div>
+                <div class="col-lg-6">
+                  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
+                <!-- HEADER (paket) -->
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                  <button
+                    v-for="ph in paketHeaders"
+                    :key="'h-'+ph.header"
+                    class="btn btn-outline-success btn-sm"
+                    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
+                    @click="pickHeader(ph)"
+                    :disabled="!order"
+                  >
+                    {{ ph.header_name || ('Header ' + ph.header) }}
+                    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
+                  </button>
+                </div>
 
                 <!-- SUBHEADER (opsional) -->
                 <div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
@@ -405,10 +439,16 @@
 
 
 
-                  <button v-for="sh in paketSubs" :key="'s-' + sh.sub_header" class="btn btn-outline-secondary btn-sm"
-                    @click="addPaketSub(selectedHeader, sh)" :disabled="!order">
-                    Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
-                  </button>
+                        <button
+                          v-for="sh in paketSubs"
+                          v-if="false"
+                          :key="'s-' + sh.sub_header"
+                          class="btn btn-outline-secondary btn-sm"
+                          @click="addPaketSub(selectedHeader, sh)"
+                          :disabled="!order">
+                          Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
+                        </button>
+
                 </div>
               </div>
             </div>
@@ -425,31 +465,44 @@
                     <th style="width:60px;" class="text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr v-if="browse.loading">
-                    <td colspan="6" class="text-center py-4">Memuat...</td>
-                  </tr>
-                  <tr v-for="(it, idx) in master.items" :key="'m-' + it.id">
-                    <td class="text-muted">{{ it.kode || '-' }}</td>
-                    <td class="fw-semibold">
-                      {{ it.nama || '-' }}
-                    </td>
-                    <td>{{ it.satuan || '-' }}</td>
-                    <td class="small">
-                      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
-                    </td>
-                    <td>
-                      <input class="form-control form-control-sm" v-model="valueMap[it.id]"
-                        placeholder="isian opsional" />
-                    </td>
-                    <td class="text-center">
-                      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
-                    </td>
-                  </tr>
-                  <tr v-if="!browse.loading && master.items.length === 0">
-                    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
-                  </tr>
-                </tbody>
+<tbody v-if="browse.loading">
+  <tr>
+    <td colspan="6" class="text-center py-4">Memuat...</td>
+  </tr>
+</tbody>
+
+<tbody v-else-if="!groupedItems.length">
+  <tr>
+    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
+  </tr>
+</tbody>
+
+<!-- Kelompok per kategori -->
+<tbody v-else v-for="(g, gi) in groupedItems" :key="'grp-'+gi">
+  <!-- Judul kategori -->
+  <tr class="table-secondary">
+    <td colspan="6" class="fw-bold text-uppercase">
+      {{ g.kategori }}
+    </td>
+  </tr>
+
+  <!-- Baris item dalam kategori -->
+  <tr v-for="(it, idx) in g.items" :key="'m-'+it.id">
+    <td class="text-muted" style="width:120px;">{{ it.kode || '-' }}</td>
+    <td class="fw-semibold">{{ it.nama || '-' }}</td>
+    <td style="width:120px;">{{ it.satuan || '-' }}</td>
+    <td class="small" style="width:260px;">
+      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
+    </td>
+    <td style="width:180px;">
+      <input class="form-control form-control-sm" v-model="valueMap[it.id]" placeholder="isian opsional" />
+    </td>
+    <td class="text-center" style="width:60px;">
+      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
+    </td>
+  </tr>
+</tbody>
+
               </table>
             </div>
 
@@ -628,10 +681,25 @@ function addPaketHeader(headerObj) {
     onSuccess: () => {
       const nama = headerObj.header_name || ('Header ' + headerObj.header);
       toast('success', 'Tambah semua berhasil', nama);
+                   console.log('headaer',headerObj.header)
         closeMaster();       // <—— tutup modal di sini
       reloadPage();
     }
   });
+}
+const kategoriList = ref([]);       // [{id_kategori, nama_kategori, jumlah}]
+const selectedKategori = ref(null); // id_kategori atau null
+
+async function loadKategori() {
+  try {
+    const res = await fetch(route('ruang-layanan.laborat.param.categories'), {
+      headers: { 'Accept': 'application/json' }
+    });
+    kategoriList.value = await res.json();
+  } catch (e) {
+    console.error(e);
+    kategoriList.value = [];
+  }
 }
 
 function hapusSemua() {
@@ -981,19 +1049,28 @@ async function loadParams(page = 1) {
     if (master.search) url.searchParams.set('search', master.search);
     if (browse.filters.header != null) url.searchParams.set('header', String(browse.filters.header));
     if (browse.filters.sub_header != null) url.searchParams.set('sub_header', String(browse.filters.sub_header));
+
+    // <<< TAMBAHAN: filter kategori
+    if (selectedKategori.value != null) {
+      url.searchParams.set('kategori', String(selectedKategori.value));
+    }
+
     url.searchParams.set('page', String(page));
     url.searchParams.set('per_page', '25');
 
     const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
 
-    master.items = (data?.data || []).map((x) => ({
-      id: x.id_parameter,
-      kode: x.kode,
-      nama: x.nama,
-      satuan: x.satuan,
-      nilaiNormalKritis: x.nilai_normal_kritis,
-    }));
+master.items = (data?.data || []).map((x) => ({
+  id: x.id_parameter,
+  kode: x.kode,
+  nama: x.nama,
+  satuan: x.satuan,
+  nilaiNormalKritis: x.nilai_normal_kritis,
+  // ⬇️ ambil kategori dari apa pun nama field-nya
+  kategori: x.kategori_nama ?? x.nama_kategori ?? x.kategori ?? 'Tanpa kategori',
+}));
+
     master.meta = data?.meta || {};
     master.links = data?.links || [];
   } catch (e) {
@@ -1003,6 +1080,17 @@ async function loadParams(page = 1) {
     browse.loading = false;
   }
 }
+const groupedItems = computed(() => {
+  const groups = new Map();
+  for (const it of master.items) {
+    const key = it.kategori || 'Tanpa kategori';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(it);
+  }
+  // urutkan kategori (opsional)
+  return Array.from(groups, ([kategori, items]) => ({ kategori, items }));
+});
+
 
 // klik paging
 function gotoLink(url) {
@@ -1015,8 +1103,10 @@ function gotoLink(url) {
 function doSearchAll() {
   browse.filters.header = null;
   browse.filters.sub_header = null;
+  selectedKategori.value = null; // <<< reset kategori
   loadParams(1);
 }
+
 
 // ----- Paket (header/sub) -----
 async function pickHeader(hdr) {
@@ -1098,16 +1188,18 @@ function closeMaster() {
 // PASTIKAN hanya SATU versi ini
 function openMasterModal() {
   if (!order.value) return;
-  // reset dulu
   Object.keys(selectedMap).forEach(k => delete selectedMap[k]);
   Object.keys(valueMap).forEach(k => delete valueMap[k]);
   selectedHeader.value = null;
   paketSubs.value = [];
+  selectedKategori.value = null;      // reset pilihan kategori
 
   showMaster.value = true;
   if (!paketHeaders.value.length) loadPaketHeaders();
+  loadKategori();                      // <<< panggil load kategori
   doSearchAll();
 }
+
 
 async function loadMaster(page = 1) {
   master.loading = true;

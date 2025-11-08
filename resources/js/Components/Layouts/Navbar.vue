@@ -132,16 +132,14 @@
             <li>
               <hr class="dropdown-divider mx-3 my-1" />
             </li>
-                  <li>
-                    <Link
-                      :href="route('logout')" 
-                      method="post"
-                      as="button"
-                      class="dropdown-item d-flex align-items-center text-danger w-100 text-start"
-                    >
-                      <i class="bi bi-box-arrow-right me-2"></i> Logout
-                    </Link>
-                  </li>
+<li>
+  <button @click="doLogout"
+    class="dropdown-item d-flex align-items-center text-danger w-100 text-start">
+    <i class="bi bi-box-arrow-right me-2"></i> Logout
+  </button>
+
+</li>
+
           </ul>
         </div>
       </div>
@@ -188,6 +186,7 @@
 import { Link, usePage } from '@inertiajs/vue3'   // ⬅️ tambahkan usePage
 import { route } from 'ziggy-js'
 import { computed } from 'vue'// ⬅️ tambahkan usePage
+import { router } from '@inertiajs/vue3'
 const page = usePage()
 // roles: array dari server (Inertia share). Normalisasi ke lowercase.
 const roles = computed(() =>
@@ -211,6 +210,11 @@ const ALLOW = {
    farmasi: ['owner','admin'],
   filter: ['owner','admin'],
   // yang tidak disebut di requirement kamu, kita sembunyikan (farmasi, filter)
+}
+const doLogout = () => {
+  router.post(route('logout'), {}, {
+    onSuccess: () => router.visit(route('login'), { replace: true }),
+  })
 }
 
 // helper cek izin

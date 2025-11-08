@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 // Arahkan axios ke backend Laravel
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.baseURL = '/';
 
 // Kirim cookie session/XSRF
 axios.defaults.withCredentials = true;

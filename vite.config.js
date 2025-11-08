@@ -21,4 +21,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, './resources/js'),
     },
   },
+
+server: {
+  host: true,
+  port: 5173,
+  strictPort: true,
+  hmr: {
+    host: 'dev-hmr.safiradmin.com', // <— ganti
+    protocol: 'wss',
+    clientPort: 443, // <— BUKAN 'port'
+    // jangan set 'port' di sini
+  },
+}
+
+
 });

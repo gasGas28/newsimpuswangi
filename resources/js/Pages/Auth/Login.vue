@@ -4,7 +4,7 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
+axios.defaults.baseURL = '/';
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
@@ -136,6 +136,8 @@ const submit = async () => {
     await axios.get('/sanctum/csrf-cookie');   // set cookie
     const dbg = await axios.post('/_csrf-debug', {}); // harus 200, bukan 419
     console.log(dbg.data);
+    await axios.get('/sanctum/csrf-cookie'); // set cookie XSRF-TOKEN + laravel_session
+    await axios.post('/_csrf-debug', { ping: 'pong' }); // axios otomatis kirim X-XSRF-TOKEN
 
     // baru kirim login (pakai nama res yg lama)
     const res = await axios.post('/login', {

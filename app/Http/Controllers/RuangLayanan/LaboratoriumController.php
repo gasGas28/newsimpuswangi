@@ -289,15 +289,84 @@ private function applyLoketRequiredDefaults(array $row): array
     /** =========================
      *  PEMERIKSAAN (DETAIL)
      *  ========================= */
-    public function pemeriksaan($loketId)
-    {
-        $paramLoketId    = trim($loketId);
-        $resolvedLoketId = $this->resolveLoketId($paramLoketId);
+public function pemeriksaan($loketId)
+{
+    $paramLoketId    = trim($loketId);
+    $resolvedLoketId = $this->resolveLoketId($paramLoketId);
 
-        // 1) Identitas: LOKET → PASIEN → POLI
-        $DataPasien = DB::table('simpus_loket as l')
-            ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
-            ->leftJoin('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
+    // 1) Identitas: LOKET → PASIEN → POLI
+    $DataPasien = DB::table('simpus_loket as l')
+        ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
+        ->leftJoin('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
+        ->leftJoin('setup_kel as kel', function ($join) {
+            $join->on('kel.NO_KEL', '=', 'p.NO_KEL')
+                 ->on('kel.NO_KEC', '=', 'p.NO_KEC')
+                 ->on('kel.NO_KAB', '=', 'p.NO_KAB')
+                 ->on('kel.NO_PROP', '=', 'p.NO_PROP');
+        })
+        ->leftJoin('setup_kec as kec', function ($join) {
+            $join->on('kec.NO_KEC', '=', 'p.NO_KEC')
+                 ->on('kec.NO_KAB', '=', 'p.NO_KAB')
+                 ->on('kec.NO_PROP', '=', 'p.NO_PROP');
+        })
+        ->leftJoin('setup_kab as kab', function ($join) {
+            $join->on('kab.NO_KAB', '=', 'p.NO_KAB')
+                 ->on('kab.NO_PROP', '=', 'p.NO_PROP');
+        })
+        ->leftJoin('setup_prop as prop', 'prop.NO_PROP', '=', 'p.NO_PROP')
+        ->whereRaw('TRIM(l.idLoket) = ?', [$resolvedLoketId])
+        ->select(
+            'l.idLoket',
+            'l.tglKunjungan',
+            'l.umur', 'l.umur_bulan', 'l.umur_hari',
+            DB::raw('p.NO_MR as NO_MR'),
+            DB::raw('p.NAMA_LGKP as NAMA_LGKP'),
+            DB::raw('p.NIK as NIK'),
+            DB::raw('p.JENIS_KLMIN as jenis_klmin'),
+            DB::raw('p.ALAMAT as alamat'),
+            DB::raw('p.NO_RT as no_rt'),
+            DB::raw('p.NO_RW as no_rw'),
+            DB::raw('kel.nama_kel as nama_kel'),
+            DB::raw('kec.nama_kec as nama_kec'),
+            DB::raw('kab.nama_kab as nama_kab'),
+            DB::raw('prop.nama_prop as nama_prop'),
+            'poli.nmPoli',
+            DB::raw("CASE 
+                WHEN p.TGL_LHR IN ('0000-00-00','0000-00-00 00:00:00','') THEN NULL
+                ELSE p.TGL_LHR 
+            END as TGL_LHR")
+        )
+        ->first();
+
+    // 2) PERMOHONAN TERBARU
+    $DataPermohonan = DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(loketId) = ?', [$resolvedLoketId])
+        ->orderByDesc('tglDibuat')
+        ->select(
+            DB::raw('idPermohonan as order_id'),
+            DB::raw('idPermohonan as idPermohonan'),
+            'loketId',
+            DB::raw('pasienId as pasien_id'),
+            DB::raw('tglDibuat as tgl_dibuat'),
+            DB::raw('tenagaMedisPengirim as tenaga_medis_perujuk'),
+            DB::raw('tenagaMedisPenerima as tenaga_medis_pemeriksa'),
+            DB::raw('nmPoli as poli'),
+            DB::raw('alasanDirujuk as alasan'),
+            DB::raw('hasilLabLuarFaskes as hasil_lab_luar_faskes'),
+            DB::raw("CASE 
+                        WHEN statusLayanan = '1' THEN 'Selesai'
+                        WHEN statusLayanan = '2' THEN 'Proses'
+                        ELSE 'Belum dilayani'
+                     END as status"),
+            DB::raw('statusLayanan as status_layanan'),
+            DB::raw('sampleDiambil as sample_diambil_at'),
+            DB::raw('sampleSelesai as sample_selesai_at')
+        )
+        ->first();
+
+    // 3) Fallback identitas dari permohonan (kalau LOKET tidak ada)
+    if (!$DataPasien && $DataPermohonan && $DataPermohonan->pasien_id) {
+        $p = DB::table('simpus_pasien as p')
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('kel.NO_KEL', '=', 'p.NO_KEL')
                      ->on('kel.NO_KEC', '=', 'p.NO_KEC')
@@ -314,11 +383,12 @@ private function applyLoketRequiredDefaults(array $row): array
                      ->on('kab.NO_PROP', '=', 'p.NO_PROP');
             })
             ->leftJoin('setup_prop as prop', 'prop.NO_PROP', '=', 'p.NO_PROP')
-            ->whereRaw('TRIM(l.idLoket) = ?', [$resolvedLoketId])
+            ->where('p.ID', $DataPermohonan->pasien_id)
             ->select(
-                'l.idLoket',
-                'l.tglKunjungan',
-                'l.umur', 'l.umur_bulan', 'l.umur_hari',
+                DB::raw("'{$resolvedLoketId}' as idLoket"),
+                DB::raw('NULL as umur'),
+                DB::raw('NULL as umur_bulan'),
+                DB::raw('NULL as umur_hari'),
                 DB::raw('p.NO_MR as NO_MR'),
                 DB::raw('p.NAMA_LGKP as NAMA_LGKP'),
                 DB::raw('p.NIK as NIK'),
@@ -330,186 +400,110 @@ private function applyLoketRequiredDefaults(array $row): array
                 DB::raw('kec.nama_kec as nama_kec'),
                 DB::raw('kab.nama_kab as nama_kab'),
                 DB::raw('prop.nama_prop as nama_prop'),
-                'poli.nmPoli',
-                DB::raw("CASE 
-                    WHEN p.TGL_LHR IN ('0000-00-00','0000-00-00 00:00:00','') THEN NULL
-                    ELSE p.TGL_LHR 
-                END as TGL_LHR")
+                DB::raw('NULL as nmPoli'),
+                DB::raw('CAST(NULL AS DATE) as tglKunjungan')
             )
             ->first();
 
-        // 2) PERMOHONAN TERBARU
-        $DataPermohonan = DB::table('simpus_permohonan_lab')
-            ->whereRaw('TRIM(loketId) = ?', [$resolvedLoketId])
-            ->orderByDesc('tglDibuat')
-            ->select(
-                DB::raw('idPermohonan as order_id'),
-                DB::raw('idPermohonan as idPermohonan'),
-                'loketId',
-                DB::raw('pasienId as pasien_id'),
-                DB::raw('tglDibuat as tgl_dibuat'),
-                DB::raw('tenagaMedisPengirim as tenaga_medis_perujuk'),
-                DB::raw('tenagaMedisPenerima as tenaga_medis_pemeriksa'),
-                DB::raw('nmPoli as poli'),
-                DB::raw('alasanDirujuk as alasan'),
-                DB::raw('hasilLabLuarFaskes as hasil_lab_luar_faskes'),
-                DB::raw("CASE 
-                            WHEN statusLayanan = '1' THEN 'Selesai'
-                            WHEN statusLayanan = '2' THEN 'Proses'
-                            ELSE 'Belum dilayani'
-                         END as status"),
-                DB::raw('statusLayanan as status_layanan'),
-                DB::raw('sampleDiambil as sample_diambil_at'),
-                DB::raw('sampleSelesai as sample_selesai_at')
-            )
-            ->first();
-
-        // 3) Fallback identitas dari permohonan (kalau LOKET tidak ada)
-        if (!$DataPasien && $DataPermohonan && $DataPermohonan->pasien_id) {
-            $p = DB::table('simpus_pasien as p')
-                ->leftJoin('setup_kel as kel', function ($join) {
-                    $join->on('kel.NO_KEL', '=', 'p.NO_KEL')
-                         ->on('kel.NO_KEC', '=', 'p.NO_KEC')
-                         ->on('kel.NO_KAB', '=', 'p.NO_KAB')
-                         ->on('kel.NO_PROP', '=', 'p.NO_PROP');
-                })
-                ->leftJoin('setup_kec as kec', function ($join) {
-                    $join->on('kec.NO_KEC', '=', 'p.NO_KEC')
-                         ->on('kec.NO_KAB', '=', 'p.NO_KAB')
-                         ->on('kec.NO_PROP', '=', 'p.NO_PROP');
-                })
-                ->leftJoin('setup_kab as kab', function ($join) {
-                    $join->on('kab.NO_KAB', '=', 'p.NO_KAB')
-                         ->on('kab.NO_PROP', '=', 'p.NO_PROP');
-                })
-                ->leftJoin('setup_prop as prop', 'prop.NO_PROP', '=', 'p.NO_PROP')
-                ->where('p.ID', $DataPermohonan->pasien_id)
-                ->select(
-                    DB::raw("'{$resolvedLoketId}' as idLoket"),
-                    DB::raw('NULL as umur'),
-                    DB::raw('NULL as umur_bulan'),
-                    DB::raw('NULL as umur_hari'),
-                    DB::raw('p.NO_MR as NO_MR'),
-                    DB::raw('p.NAMA_LGKP as NAMA_LGKP'),
-                    DB::raw('p.NIK as NIK'),
-                    DB::raw('p.JENIS_KLMIN as jenis_klmin'),
-                    DB::raw('p.ALAMAT as alamat'),
-                    DB::raw('p.NO_RT as no_rt'),
-                    DB::raw('p.NO_RW as no_rw'),
-                    DB::raw('kel.nama_kel as nama_kel'),
-                    DB::raw('kec.nama_kec as nama_kec'),
-                    DB::raw('kab.nama_kab as nama_kab'),
-                    DB::raw('prop.nama_prop as nama_prop'),
-                    DB::raw('NULL as nmPoli'),
-                    DB::raw('CAST(NULL AS DATE) as tglKunjungan')
-                )
-                ->first();
-
-            if ($p) {
-                $p->tglKunjungan = $DataPermohonan->tgl_dibuat
-                    ? Carbon::parse($DataPermohonan->tgl_dibuat)->toDateString()
-                    : null;
-            }
-            $DataPasien = $p;
+        if ($p) {
+            $p->tglKunjungan = $DataPermohonan->tgl_dibuat
+                ? Carbon::parse($DataPermohonan->tgl_dibuat)->toDateString()
+                : null;
         }
-
-        // 4) OBJECTIVE: ambil by loketId, fallback by pasien terdekat waktu
-        $DataObjective = DB::table('simpus_anamnesa as a')
-            ->whereRaw('TRIM(a.loketId) = ?', [$resolvedLoketId])
-            ->orderByDesc('a.createdDate')
-            ->select(
-                'a.keadaanUmum','a.kdSadar','a.tinggiBadan','a.beratBadan',
-                'a.lingkarPerut','a.lingkarTangan',
-                'a.sistole','a.diastole','a.respRate','a.heartRate','a.suhu',
-                'a.createdDate','a.loketId'
-            )
-            ->first();
-
-        if (!$DataObjective) {
-            $pasienId = DB::table('simpus_loket')->whereRaw('TRIM(idLoket)=?', [$resolvedLoketId])->value('pasienId');
-            if (!$pasienId && $DataPermohonan) {
-                $pasienId = $DataPermohonan->pasien_id ?: DB::table('simpus_loket')
-                    ->whereRaw('TRIM(idLoket)=?', [$DataPermohonan->loketId])
-                    ->value('pasienId');
-            }
-
-            if ($pasienId) {
-                $ref    = $DataPasien?->tglKunjungan ?: $DataPermohonan?->tgl_dibuat;
-                $target = $ref ? Carbon::parse($ref)->endOfDay() : Carbon::now();
-
-                $DataObjective = DB::table('simpus_anamnesa as a')
-                    ->join('simpus_loket as l2', 'l2.idLoket', '=', 'a.loketId')
-                    ->where('l2.pasienId', $pasienId)
-                    ->select(
-                        'a.keadaanUmum','a.kdSadar','a.tinggiBadan','a.beratBadan',
-                        'a.lingkarPerut','a.lingkarTangan',
-                        'a.sistole','a.diastole','a.respRate','a.heartRate','a.suhu',
-                        'a.createdDate','a.loketId'
-                    )
-                    ->orderByRaw('CASE WHEN a.loketId = ? THEN 0 ELSE 1 END', [$resolvedLoketId])
-                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, a.createdDate, ?)) ASC', [$target])
-                    ->orderByDesc('a.createdDate')
-                    ->first();
-            }
-        }
-
-        // 5) DETAIL PEMERIKSAAN (simpus_tindakan) — gabungkan m.kode & parameter_uji
-        $DataPemeriksaan = collect();
-
-        if ($DataPermohonan && $DataPermohonan->order_id) {
-            // subquery parameter_uji: dedupe per kode
-            $puSub = DB::table($this->paramTable . ' as pu0')
-                ->selectRaw("
-                    TRIM(pu0.kode_parameter)               AS kode,
-                    MAX(pu0.satuan)                         AS satuan,
-                    MAX(NULLIF(pu0.nilai_normal,''))        AS nilai_normal,
-                    MAX(NULLIF(pu0.nilai_kritis,''))        AS nilai_kritis
-                ")
-                ->whereNotNull('pu0.kode_parameter')
-                ->groupBy(DB::raw('TRIM(pu0.kode_parameter)'));
-
-            $DataPemeriksaan = DB::table('simpus_tindakan as t')
-                ->leftJoin('simpus_master_pemeriksaan_lab as m', function ($j) {
-                    $j->on(DB::raw('TRIM(m.kode)'), '=', DB::raw('TRIM(t.kdTindakan)'));
-                })
-                ->leftJoinSub($puSub, 'pu', function ($j) {
-                    $j->on('pu.kode', '=', DB::raw('TRIM(t.kdTindakan)'));
-                })
-                ->whereRaw('TRIM(t.loketId) = ?', [$this->norm($resolvedLoketId)])
-                ->whereRaw('TRIM(t.permohonanId) = ?', [$this->norm($DataPermohonan->order_id)])
-                ->selectRaw("
-                    DISTINCT
-                    t.idTindakan,
-                    t.idTindakan                                        AS detail_id,
-                    t.kdTindakan                                        AS kode,
-                    COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
-                    t.nilaiLab                                          AS nilai_lab,
-
-                    COALESCE(m.satuan, pu.satuan)                       AS satuan,
-                    COALESCE(NULLIF(m.nilaiNormal,''), pu.nilai_normal) AS nilai_normal,
-                    COALESCE(NULLIF(m.nilaiKritis,''), pu.nilai_kritis) AS nilai_kritis,
-                    CONCAT(
-                        'Nilai Normal : ', COALESCE(NULLIF(m.nilaiNormal,''), pu.nilai_normal, '-'),
-                        '\nNilai Kritis : ', COALESCE(NULLIF(m.nilaiKritis,''), pu.nilai_kritis, '-')
-                    ) AS nilai_normal_kritis
-                ")
-                ->orderBy('t.idTindakan')
-                ->get();
-        }
-
-        $TenagaMedis = DB::table('master_dokter')
-            ->select('kdDokter as id', 'nmDokter as nama', DB::raw('NULL as profesi'))
-            ->orderBy('nmDokter')
-            ->get();
-
-        return Inertia::render('Ruang_Layanan/Laborat/pemeriksaan', [
-            'DataPasien'      => $DataPasien,
-            'DataPermohonan'  => $DataPermohonan,
-            'DataPemeriksaan' => $DataPemeriksaan,
-            'DataObjective'   => $DataObjective,
-            'TenagaMedis'     => $TenagaMedis,
-        ]);
+        $DataPasien = $p;
     }
+
+    // 4) OBJECTIVE: ambil by loketId, fallback by pasien terdekat waktu
+    $DataObjective = DB::table('simpus_anamnesa as a')
+        ->whereRaw('TRIM(a.loketId) = ?', [$resolvedLoketId])
+        ->orderByDesc('a.createdDate')
+        ->select(
+            'a.keadaanUmum','a.kdSadar','a.tinggiBadan','a.beratBadan',
+            'a.lingkarPerut','a.lingkarTangan',
+            'a.sistole','a.diastole','a.respRate','a.heartRate','a.suhu',
+            'a.createdDate','a.loketId'
+        )
+        ->first();
+
+    if (!$DataObjective) {
+        $pasienId = DB::table('simpus_loket')->whereRaw('TRIM(idLoket)=?', [$resolvedLoketId])->value('pasienId');
+        if (!$pasienId && $DataPermohonan) {
+            $pasienId = $DataPermohonan->pasien_id ?: DB::table('simpus_loket')
+                ->whereRaw('TRIM(idLoket)=?', [$DataPermohonan->loketId])
+                ->value('pasienId');
+        }
+
+        if ($pasienId) {
+            $ref    = $DataPasien?->tglKunjungan ?: $DataPermohonan?->tgl_dibuat;
+            $target = $ref ? Carbon::parse($ref)->endOfDay() : Carbon::now();
+
+            $DataObjective = DB::table('simpus_anamnesa as a')
+                ->join('simpus_loket as l2', 'l2.idLoket', '=', 'a.loketId')
+                ->where('l2.pasienId', $pasienId)
+                ->select(
+                    'a.keadaanUmum','a.kdSadar','a.tinggiBadan','a.beratBadan',
+                    'a.lingkarPerut','a.lingkarTangan',
+                    'a.sistole','a.diastole','a.respRate','a.heartRate','a.suhu',
+                    'a.createdDate','a.loketId'
+                )
+                ->orderByRaw('CASE WHEN a.loketId = ? THEN 0 ELSE 1 END', [$resolvedLoketId])
+                ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, a.createdDate, ?)) ASC', [$target])
+                ->orderByDesc('a.createdDate')
+                ->first();
+        }
+    }
+
+    // 5) DETAIL PEMERIKSAAN — AMBIL META DARI parameter_uji SAJA (tanpa join ke master)
+    $DataPemeriksaan = collect();
+    if ($DataPermohonan && $DataPermohonan->order_id) {
+        // subquery parameter_uji → unik per kode (pakai TRIM)
+        $puSub = DB::table($this->paramTable . ' as pu0')
+            ->selectRaw("
+                TRIM(pu0.kode_parameter)               AS kode,
+                MAX(pu0.satuan)                         AS satuan,
+                MAX(NULLIF(pu0.nilai_normal,''))        AS nilai_normal,
+                MAX(NULLIF(pu0.nilai_kritis,''))        AS nilai_kritis
+            ")
+            ->whereNotNull('pu0.kode_parameter')
+            ->groupBy(DB::raw('TRIM(pu0.kode_parameter)'));
+
+        $DataPemeriksaan = DB::table('simpus_tindakan as t')
+            ->leftJoinSub($puSub, 'pu', function ($j) {
+                $j->on('pu.kode', '=', DB::raw('TRIM(t.kdTindakan)'));
+            })
+            ->whereRaw('TRIM(t.loketId) = ?', [$this->norm($resolvedLoketId)])
+            ->whereRaw('TRIM(t.permohonanId) = ?', [$this->norm($DataPermohonan->order_id)])
+            ->selectRaw("
+                t.idTindakan                                        AS detail_id,
+                t.kdTindakan                                        AS kode,
+                COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
+                t.nilaiLab                                          AS nilai_lab,
+                pu.satuan                                           AS satuan,
+                pu.nilai_normal                                     AS nilai_normal,
+                pu.nilai_kritis                                     AS nilai_kritis,
+                CONCAT(
+                    'Nilai Normal : ', COALESCE(pu.nilai_normal, '-'),
+                    '\nNilai Kritis : ', COALESCE(pu.nilai_kritis, '-')
+                ) AS nilai_normal_kritis
+            ")
+            ->orderBy('t.idTindakan')
+            ->get();
+    }
+
+    $TenagaMedis = DB::table('master_dokter')
+        ->select('kdDokter as id', 'nmDokter as nama', DB::raw('NULL as profesi'))
+        ->orderBy('nmDokter')
+        ->get();
+
+    return Inertia::render('Ruang_Layanan/Laborat/pemeriksaan', [
+        'DataPasien'      => $DataPasien,
+        'DataPermohonan'  => $DataPermohonan,
+        'DataPemeriksaan' => $DataPemeriksaan,
+        'DataObjective'   => $DataObjective,
+        'TenagaMedis'     => $TenagaMedis,
+    ]);
+}
+
 
     /** =========================
      *  HEADER PERMOHONAN: Waktu & Status
@@ -659,49 +653,78 @@ private function applyLoketRequiredDefaults(array $row): array
     /** =========================
      *  Helper Insert Batch (master pemeriksaan lama)
      *  ========================= */
-    private function insertTindakanBatch(string $loketId, string $permohonanId, $pelayananId, array $masters, array $nilaiMap = []): int
-    {
-        $now            = now();
-        $cols           = Schema::getColumnListing('simpus_tindakan');
-        $hasIdPelayanan = in_array('idPelayanan', $cols);
-        $hasCreatedDate = in_array('createdDate', $cols);
-        $hasModifiedDate= in_array('modifiedDate', $cols);
+// ====== GANTI: insertTindakanBatch ======
+/**
+ * Insert batch dari master_pemeriksaan lama → simpus_tindakan.
+ * - Cegah duplikat per (loketId, permohonanId, kdTindakan_norm).
+ * - kdTindakan selalu disimpan dalam bentuk sudah dinormalisasi.
+ */
+private function insertTindakanBatch(string $loketId, string $permohonanId, $pelayananId, array $masters, array $nilaiMap = []): int
+{
+    $now            = now();
+    $cols           = Schema::getColumnListing('simpus_tindakan');
+    $hasIdPelayanan = in_array('idPelayanan', $cols);
+    $hasCreatedDate = in_array('createdDate', $cols);
+    $hasModifiedDate= in_array('modifiedDate', $cols);
 
-        $insertRows = [];
+    $insertRows = [];
 
-        foreach ($masters as $m) {
-            $kode = $m->kode;
+    foreach ($masters as $m) {
 
-            $exists = DB::table('simpus_tindakan')
-                ->whereRaw('TRIM(loketId)=?', [$loketId])
-                ->whereRaw('TRIM(permohonanId)=?', [trim($permohonanId)])
-                ->where('kdTindakan', $kode)
-                ->exists();
+        // ----------------------------- //
+        // Bagian normalisasi dan cek exist
+        // ----------------------------- //
+        $kode = $this->normCode((string)$m->kode);
+        if ($kode === '') continue;
 
-            if ($exists) continue;
+        // gunakan versi anti-collation error ini
+        $loketIdN = $this->norm($loketId);
+        $permIdN  = $this->norm($permohonanId);
+        $kodeN    = $this->normCode($kode);
 
-            $row = [
-                'loketId'       => $loketId,
-                'permohonanId'  => $permohonanId,
-                'kdTindakan'    => $kode,
-                'nmTindakan'    => $m->nmPemeriksaan,
-                'nmTindakanInd' => $m->nmPemeriksaanInd,
-                'nilaiLab'      => $nilaiMap[$m->idPemeriksaan] ?? null,
-            ];
+        $exists = DB::table('simpus_tindakan')
+            ->whereRaw(
+                $this->sqlNorm('loketId') . " COLLATE utf8mb4_unicode_ci = CONVERT(? USING utf8mb4) COLLATE utf8mb4_unicode_ci",
+                [$loketIdN]
+            )
+            ->whereRaw(
+                $this->sqlNorm('permohonanId') . " COLLATE utf8mb4_unicode_ci = CONVERT(? USING utf8mb4) COLLATE utf8mb4_unicode_ci",
+                [$permIdN]
+            )
+            ->whereRaw(
+                $this->sqlNorm('kdTindakan') . " COLLATE utf8mb4_unicode_ci = CONVERT(? USING utf8mb4) COLLATE utf8mb4_unicode_ci",
+                [$kodeN]
+            )
+            ->exists();
 
-            if ($hasIdPelayanan && !empty($pelayananId)) $row['idPelayanan'] = $pelayananId;
-            if ($hasCreatedDate)  $row['createdDate']   = $now;
-            if ($hasModifiedDate) $row['modifiedDate']  = $now;
+        if ($exists) continue; // sudah ada → skip
+        // ----------------------------- //
 
-            $insertRows[] = $row;
-        }
+        // buat row baru
+        $row = [
+            'loketId'       => $loketId,
+            'permohonanId'  => $permohonanId,
+            'kdTindakan'    => $kodeN,
+            'nmTindakan'    => $m->nmPemeriksaan,
+            'nmTindakanInd' => $m->nmPemeriksaanInd,
+            'nilaiLab'      => $nilaiMap[$m->idPemeriksaan] ?? null,
+        ];
 
-        if (count($insertRows)) {
-            DB::table('simpus_tindakan')->insert($insertRows);
-        }
+        if ($hasIdPelayanan && !empty($pelayananId)) $row['idPelayanan'] = $pelayananId;
+        if ($hasCreatedDate)  $row['createdDate']   = $now;
+        if ($hasModifiedDate) $row['modifiedDate']  = $now;
 
-        return count($insertRows);
+        $insertRows[] = $row;
     }
+
+    if ($insertRows) {
+DB::table('simpus_tindakan')->insertOrIgnore($insertRows);
+    }
+
+    return count($insertRows);
+}
+
+
 
     /** =========================
      *  Tambah Detail dari master_pemeriksaan (lama)
@@ -796,38 +819,51 @@ private function applyLoketRequiredDefaults(array $row): array
     /** =========================
      *  DETAIL sederhana untuk Print (JSON)
      *  ========================= */
-    public function detail($idPermohonan)
-    {
-        $order = DB::table('simpus_permohonan_lab')
-            ->whereRaw('TRIM(idPermohonan)=?', [trim($idPermohonan)])
-            ->first();
+public function detail($idPermohonan)
+{
+    $order = DB::table('simpus_permohonan_lab')
+        ->whereRaw('TRIM(idPermohonan)=?', [trim($idPermohonan)])
+        ->first();
 
-        if (!$order) {
-            return response()->json(['error' => 'Permohonan tidak ditemukan'], 404);
-        }
-
-        $rows = DB::table('simpus_tindakan as t')
-            ->leftJoin('simpus_master_pemeriksaan_lab as m', 'm.kode', '=', 't.kdTindakan')
-            ->whereRaw('TRIM(t.permohonanId)=?', [trim($idPermohonan)])
-            ->selectRaw("
-                t.idTindakan as detail_id,
-                t.kdTindakan as kode,
-                COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan) as nama_pemeriksaan,
-                t.nilaiLab as nilai_lab,
-                m.satuan as satuan,
-                CONCAT(
-                    'Nilai Normal : ', COALESCE(m.nilaiNormal,'-'),
-                    '\nNilai Kritis : ', COALESCE(m.nilaiKritis,'-')
-                ) as nilai_normal_kritis
-            ")
-            ->orderBy('t.idTindakan')
-            ->get();
-
-        return response()->json([
-            'permohonan'  => $order,
-            'pemeriksaan' => $rows,
-        ]);
+    if (!$order) {
+        return response()->json(['error' => 'Permohonan tidak ditemukan'], 404);
     }
+
+    // subquery parameter_uji → unik per kode
+    $puSub = DB::table($this->paramTable . ' as pu0')
+        ->selectRaw("
+            TRIM(pu0.kode_parameter)               AS kode,
+            MAX(pu0.satuan)                         AS satuan,
+            MAX(NULLIF(pu0.nilai_normal,''))        AS nilai_normal,
+            MAX(NULLIF(pu0.nilai_kritis,''))        AS nilai_kritis
+        ")
+        ->whereNotNull('pu0.kode_parameter')
+        ->groupBy(DB::raw('TRIM(pu0.kode_parameter)'));
+
+    $rows = DB::table('simpus_tindakan as t')
+        ->leftJoinSub($puSub, 'pu', function ($j) {
+            $j->on('pu.kode', '=', DB::raw('TRIM(t.kdTindakan)'));
+        })
+        ->whereRaw('TRIM(t.permohonanId)=?', [trim($idPermohonan)])
+        ->selectRaw("
+            t.idTindakan                                        AS detail_id,
+            t.kdTindakan                                        AS kode,
+            COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
+            t.nilaiLab                                          AS nilai_lab,
+            pu.satuan                                           AS satuan,
+            CONCAT(
+                'Nilai Normal : ', COALESCE(pu.nilai_normal,'-'),
+                '\nNilai Kritis : ', COALESCE(pu.nilai_kritis,'-')
+            ) AS nilai_normal_kritis
+        ")
+        ->orderBy('t.idTindakan')
+        ->get();
+
+    return response()->json([
+        'permohonan'  => $order,
+        'pemeriksaan' => $rows,
+    ]);
+}
 
     /** =========================
      *  MASTER (lama): Header & Subheader
@@ -991,47 +1027,89 @@ private function applyLoketRequiredDefaults(array $row): array
     }
 
     /** Helper insert batch dari PARAMETER_UJI → simpus_tindakan */
-    private function insertParamBatch(string $loketId, string $permohonanId, $pelayananId, array $items): int
-    {
-        $now             = now();
-        $cols            = Schema::getColumnListing('simpus_tindakan');
-        $hasIdPelayanan  = in_array('idPelayanan', $cols);
-        $hasCreatedDate  = in_array('createdDate', $cols);
-        $hasModifiedDate = in_array('modifiedDate', $cols);
+// ====== GANTI: insertParamBatch ======
+/**
+ * Insert batch dari parameter_uji → simpus_tindakan.
+ * - Cegah duplikat per (loketId, permohonanId, kdTindakan_norm).
+ * - kdTindakan selalu disimpan dalam bentuk sudah dinormalisasi.
+ */
+private function insertParamBatch(
+    string $loketId,
+    string $permohonanId,
+    $pelayananId,
+    array $items
+): int {
+    $now             = now();
+    $cols            = Schema::getColumnListing('simpus_tindakan');
+    $hasIdPelayanan  = in_array('idPelayanan', $cols);
+    $hasCreatedDate  = in_array('createdDate', $cols);
+    $hasModifiedDate = in_array('modifiedDate', $cols);
 
-        $insertRows = [];
+    $loketIdN = $this->norm($loketId);
+    $permIdN  = $this->norm($permohonanId);
 
-        foreach ($items as $p) {
-            $kode = $this->norm($p->kode_parameter ?? '');
-            if ($kode === '') continue;
+    $insertRows = [];
 
-            $exists = DB::table('simpus_tindakan')
-                ->whereRaw('TRIM(loketId)=?', [$loketId])
-                ->whereRaw('TRIM(permohonanId)=?', [trim($permohonanId)])
-                ->whereRaw('TRIM(kdTindakan)=?', [$kode])
-                ->exists();
+    foreach ($items as $p) {
+        // 1) Normalisasi kode
+        $kode = $this->normCode((string)($p->kode_parameter ?? ''));
+        if ($kode === '') continue;
 
-            if ($exists) continue;
+        // 2) Cek sudah ada?
+        $exists = DB::table('simpus_tindakan')
+            ->whereRaw($this->sqlNorm('loketId')      . ' = ?', [$loketIdN])
+            ->whereRaw($this->sqlNorm('permohonanId') . ' = ?', [$permIdN])
+            ->whereRaw($this->sqlNorm('kdTindakan')   . ' = ?', [$kode])
+            ->exists();
 
-            $row = [
-                'loketId'       => $loketId,
-                'permohonanId'  => $permohonanId,
-                'kdTindakan'    => $kode,
-                'nmTindakan'    => $p->nama_parameter,
-                'nmTindakanInd' => $p->nama_parameter,
-                'nilaiLab'      => null,
-            ];
+        if ($exists) continue;
 
-            if ($hasIdPelayanan && !empty($pelayananId)) $row['idPelayanan'] = $pelayananId;
-            if ($hasCreatedDate)  $row['createdDate']   = $now;
-            if ($hasModifiedDate) $row['modifiedDate']  = $now;
+        // 3) Susun row baru
+        $row = [
+            'loketId'       => $loketIdN,
+            'permohonanId'  => $permIdN,
+            'kdTindakan'    => $kode, // normalized
+            'nmTindakan'    => $p->nama_parameter ?? null,
+            'nmTindakanInd' => $p->nama_parameter ?? null,
+            'nilaiLab'      => null,
+        ];
 
-            $insertRows[] = $row;
-        }
+        if ($hasIdPelayanan && !empty($pelayananId)) $row['idPelayanan'] = $pelayananId;
+        if ($hasCreatedDate)  $row['createdDate']   = $now;
+        if ($hasModifiedDate) $row['modifiedDate']  = $now;
 
-        if ($insertRows) DB::table('simpus_tindakan')->insert($insertRows);
-        return count($insertRows);
+        $insertRows[] = $row;
     }
+
+    if ($insertRows) {
+DB::table('simpus_tindakan')->insertOrIgnore($insertRows);
+    }
+
+    return count($insertRows);
+}
+
+/** Normalisasi KODE di PHP: trim, samakan semua dash, hapus spasi, upper */
+private function normCode(string $s): string
+{
+    $s = trim($s);
+    // Normalisasi dash & spasi KESEMUANYA di PHP, bukan SQL:
+    $s = strtr($s, [
+        '–' => '-', '—' => '-', '‒' => '-', '−' => '-', // dash varian ke '-'
+    ]);
+    // kalau mau, hilangkan spasi dalam kode:
+    // $s = preg_replace('/\s+/', '', $s);
+    return mb_strtoupper($s, 'UTF-8');
+}
+
+/** Ekspresi SQL untuk normalisasi kolom kode di DB (samakan dash + buang spasi + upper) */
+/** SQL normalizer: CONVERT ke utf8mb4 + TRIM + UPPER */
+private function sqlNorm(string $col): string
+{
+    // CONVERT(... USING utf8mb4) memastikan collation seragam
+    return "UPPER(TRIM(CONVERT($col USING utf8mb4)))";
+}
+
+
 
     /** Ambil isi paket (anak) dari PARAMETER_UJI untuk header tertentu */
     public function paketParamItems(Request $request, int $header)
@@ -1109,46 +1187,61 @@ public function paramSimpan(Request $request, int $header)
 
 
     /** Browse parameter_uji (pencarian bebas / per header) */
-    public function paramBrowse(Request $r)
-    {
-        $search     = trim($r->query('search', ''));
-        $headerQ    = $r->query('header');
-        $subHeaderQ = $r->query('sub_header');
-        $perPage    = max(5, (int)$r->query('per_page', 25));
+public function paramBrowse(Request $r)
+{
+    $search      = trim($r->query('search', ''));
+    $headerQ     = $r->query('header');
+    $subHeaderQ  = $r->query('sub_header');
+    $kategoriQ   = $r->query('kategori');   // filter kategori by id_kategori (opsional)
+    $perPage     = max(5, (int)$r->query('per_page', 25));
 
-        $q = DB::table($this->paramTable);
+    $q = DB::table('parameter_uji as pu')
+        ->leftJoin('master_kategori as k', 'k.id_kategori', '=', 'pu.id_kategori');
 
-        if ($headerQ !== null && $subHeaderQ === null) {
-            $q->where('header', 0)->where('sub_header', (int)$headerQ);
-        }
-        if ($subHeaderQ !== null) {
-            $q->where('sub_header', (int)$subHeaderQ);
-        }
-
-        if ($search !== '') {
-            $like = '%'.str_replace(['%','_'], ['\%','\_'], $search).'%';
-            $q->where(function($w) use ($like){
-                $w->where('kode_parameter', 'like', $like)
-                  ->orWhere('nama_parameter', 'like', $like)
-                  ->orWhere('tipe_hasil_pemeriksaan', 'like', $like);
-            });
-        }
-
-        $data = $q->select([
-                'id_parameter',
-                DB::raw('TRIM(kode_parameter) as kode'),
-                DB::raw('nama_parameter as nama'),
-                'satuan',
-                DB::raw("TRIM(CONCAT(
-                    'Nilai Normal : ', COALESCE(NULLIF(nilai_normal,''),'Negatif'), '\n',
-                    'Nilai Kritis : ', COALESCE(NULLIF(nilai_kritis,''),'')
-                )) AS nilai_normal_kritis")
-            ])
-            ->orderBy('id_parameter')
-            ->paginate($perPage);
-
-        return response()->json($data);
+    // Filter paket header/sub yang sudah ada
+    if ($headerQ !== null && $subHeaderQ === null) {
+        $q->where('pu.header', 0)->where('pu.sub_header', (int)$headerQ);
     }
+    if ($subHeaderQ !== null) {
+        $q->where('pu.sub_header', (int)$subHeaderQ);
+    }
+
+    // Filter kategori (opsional)
+    if ($kategoriQ !== null && $kategoriQ !== '') {
+        $q->where('pu.id_kategori', (int)$kategoriQ);
+    }
+
+    // Pencarian bebas
+    if ($search !== '') {
+        $like = '%'.str_replace(['%','_'], ['\%','\_'], $search).'%';
+        $q->where(function($w) use ($like){
+            $w->where('pu.kode_parameter', 'like', $like)
+              ->orWhere('pu.nama_parameter', 'like', $like)
+              ->orWhere('pu.tipe_hasil_pemeriksaan', 'like', $like);
+        });
+    }
+
+    $data = $q->select([
+            'pu.id_parameter',
+            DB::raw('TRIM(pu.kode_parameter) as kode'),
+            DB::raw('pu.nama_parameter as nama'),
+            'pu.satuan',
+            'pu.id_kategori',
+            // ← ini kuncinya: kasih nama kategori buat ditampilkan & di-group di FE
+            DB::raw("COALESCE(k.nama_kategori, 'Tanpa kategori') AS kategori_nama"),
+            DB::raw("TRIM(CONCAT(
+                'Nilai Normal : ', COALESCE(NULLIF(pu.nilai_normal,''),'Negatif'), '\n',
+                'Nilai Kritis : ', COALESCE(NULLIF(pu.nilai_kritis,''),'')
+            )) AS nilai_normal_kritis"),
+        ])
+        // Urut: yang punya kategori dulu, lalu alfabet kategori, lalu nama pemeriksaan
+        ->orderByRaw('(k.nama_kategori IS NULL)')
+        ->orderBy('k.nama_kategori')
+        ->orderBy('pu.nama_parameter')
+        ->paginate($perPage);
+
+    return response()->json($data);
+}
 
     /** Simpan item terpilih (berdasar id_parameter[]) ke simpus_tindakan */
 public function paramSimpanTerpilih(Request $request)
@@ -1185,5 +1278,45 @@ public function paramSimpanTerpilih(Request $request)
 
     return back();
 }
+
+    public function simpanPermohonanLab(Request $request, $idLoket)
+    {
+        // dd($request->all());
+
+        // $loket = SimpusLoket::where('');
+        $namaPoli = SimpusPoliFKTP::where('kdPoli', $request->idPoli)->first();
+        SimpusPermohonanLab::create([
+            'idPermohonan' => Str::random(20),
+            'pasienId' => $request->idPasien,
+            'loketId' => $idLoket,
+            'pelayananId' => $request->idPelayanan,
+            'nmPoli' => $namaPoli->nmPoli,
+            'tglDibuat' => now(),
+            'tenagaMedisPengirim' => $request->tenaga_medis,
+            'alasanDirujuk' => $request->alasan,
+            'hasilLabLuarFaskes' => $request->hasil_lab_luar_faskes,
+            'statusLayanan' => '0',
+            'createdDate' => now(),
+        ]);
+
+        return redirect()->back();
+    }
+
+    public function paramCategories(Request $request)
+{
+    $rows = DB::table('master_kategori as k')
+        ->leftJoin('parameter_uji as pu', 'pu.id_kategori', '=', 'k.id_kategori')
+        ->select(
+            'k.id_kategori',
+            'k.nama_kategori',
+            DB::raw('COUNT(pu.id_parameter) as jumlah')
+        )
+        ->groupBy('k.id_kategori','k.nama_kategori')
+        ->orderBy('k.nama_kategori')
+        ->get();
+
+    return response()->json($rows);
+}
+
 
 }
