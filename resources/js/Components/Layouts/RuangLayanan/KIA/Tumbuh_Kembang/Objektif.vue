@@ -46,7 +46,7 @@ import DataStimulasi from './FormObjektif/DataStimulasi.vue';
     diagnosa: Array,
   });
 
-  const activeForm = ref('dataAntropometri');
+  const activeForm = ref(null);
 
   // Fungsi toggle form
   const toggleForm = (form) => {

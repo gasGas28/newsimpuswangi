@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h5 class="mb-2">Pelayanan Intranatal Care / Pelayanan Ibu Bersalin</h5>
+   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-semibold mb-1">Pelayanan Intranatal Care / Pelayanan Ibu Bersalin</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -43,10 +43,10 @@
 
   // import form
   import FormObjektif from './FormObjektif.vue';
-  import FormPlanning from '../Form/FormPlanning.vue';
-  import FormImunisasi from '../Form/FormImunisasi.vue';
-  import FormStatusPasien from '../Form/FormStatusPasien.vue';
-import FormAssessment from '../Form/FormAssessment.vue';
+  import FormPlanning from '../FormPlanning.vue';
+  import FormImunisasi from '../FormImunisasi.vue';
+  import FormStatusPasien from '../FormStatusPasien.vue';
+import FormAssessment from '../FormAssessment.vue';
 
   const tabs = [
     { name: 'objektif', label: 'Objektif' },

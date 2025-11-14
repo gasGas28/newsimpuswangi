@@ -33,8 +33,12 @@
   </AppLayouts>
 </template>
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
+
+const { props } = usePage();
+const totalPasienkia = props.totalPasienKIA
+
 
 const currentDate = new Date().toLocaleDateString('id-ID', {
   weekday: 'long',
@@ -44,12 +48,12 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
 })
 
 const dataLayanan = [
-  { nama: 'ANC', jumlah: 1000, link: 'ruang-layanan.anc', icon: 'bi bi-person-fill', bg: '#3b82f6' },
-  { nama: 'Tumbuh Kembang', jumlah: 0, link: 'ruang-layanan.tkembang', icon: 'bi bi-clipboard-check', bg: '#10b981' },
-  { nama: 'Neonatus', jumlah: 0, link: 'ruang-layanan.neonatus', icon: 'bi bi-hospital', bg: '#facc15' },
-  { nama: 'INC', jumlah: 0, link: 'ruang-layanan.inc', icon: 'bi bi-people-fill', bg: '#3b82f6' },
-  { nama: 'Kematian', jumlah: 0, link: 'ruang-layanan.kematian', icon: 'bi bi-droplet-half', bg: '#14b8a6' },
-  { nama: 'PNC', jumlah: 0, link: 'ruang-layanan.pnc', icon: 'bi bi-heart-pulse', bg: '#facc15' },
+  { nama: 'ANC', jumlah: totalPasienkia, link: 'ruang-layanan.anc', icon: 'bi bi-person-fill', bg: '#3b82f6' },
+  { nama: 'Tumbuh Kembang', jumlah: totalPasienkia, link: 'ruang-layanan.tkembang', icon: 'bi bi-clipboard-check', bg: '#10b981' },
+  { nama: 'Neonatus', jumlah: totalPasienkia, link: 'ruang-layanan.neonatus', icon: 'bi bi-hospital', bg: '#facc15' },
+  { nama: 'INC', jumlah: totalPasienkia, link: 'ruang-layanan.inc', icon: 'bi bi-people-fill', bg: '#3b82f6' },
+  { nama: 'Kematian', jumlah: totalPasienkia, link: 'ruang-layanan.kematian', icon: 'bi bi-droplet-half', bg: '#14b8a6' },
+  { nama: 'PNC', jumlah: totalPasienkia, link: 'ruang-layanan.pnc', icon: 'bi bi-heart-pulse', bg: '#facc15' },
 ]
 
 </script>

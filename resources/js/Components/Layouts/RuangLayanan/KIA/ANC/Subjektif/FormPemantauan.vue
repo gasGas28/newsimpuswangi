@@ -210,11 +210,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Deskripsi</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="Tuliskan Deskripsi"
-                ></textarea>
+                <textarea class="form-control" rows="4" placeholder="Tuliskan Deskripsi"></textarea>
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Apakah Disabilitas</label>
@@ -225,11 +221,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Deskripsi</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="Tuliskan Deskripsi"
-                ></textarea>
+                <textarea class="form-control" rows="4" placeholder="Tuliskan Deskripsi"></textarea>
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Apakah Mengikuti Kelas Hamil</label>
@@ -240,11 +232,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Deskripsi</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="Tuliskan Deskripsi"
-                ></textarea>
+                <textarea class="form-control" rows="4" placeholder="Tuliskan Deskripsi"></textarea>
               </div>
               <div class="mb-2">
                 <button type="submit" class="btn btn-success px-4 shadow-sm mt-4">
@@ -258,224 +246,33 @@
     </div>
 
     <!-- MODAL PILIH DIAGNOSA -->
-    <div v-if="showModal" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5)">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header d-flex justify-content-between align-items-center">
-            <h5>Pilih Diagnosa</h5>
-            <button class="btn-close" @click="showModal = false"></button>
-          </div>
-
-          <div class="modal-body">
-            <!-- Input Pencarian -->
-            <input
-              type="text"
-              v-model="keyword"
-              class="form-control mb-3"
-              placeholder="Cari diagnosa..."
-            />
-
-            <!-- Tabel Diagnosa -->
-            <table class="table table-bordered table-sm">
-              <thead>
-                <tr>
-                  <th>KODE</th>
-                  <th>NAMA</th>
-                  <th>ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in paginatedDiagnosa" :key="item.id">
-                  <td>{{ item.kdDiag }}</td>
-                  <td>{{ item.nmDiag }}</td>
-                  <td>
-                    <button class="btn btn-info btn-sm" @click="pilihDiagnosa(item)">Pilih</button>
-                  </td>
-                </tr>
-                <tr v-if="paginatedDiagnosa.length === 0">
-                  <td colspan="3" class="text-center text-muted">Tidak ada data</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Pagination Info -->
-            <div class="d-flex justify-content-between align-items-center mt-2">
-              <p class="text-muted small mb-0">
-                Menampilkan {{ startItem }} - {{ endItem }} dari {{ filteredDiagnosa.length }} data
-              </p>
-              <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                  <button class="page-link" @click="prevPage">&laquo;</button>
-                </li>
-                <li
-                  v-for="(page, index) in visiblePages"
-                  :key="index"
-                  class="page-item"
-                  :class="{ active: page === currentPage, disabled: page === '...' }"
-                >
-                  <button v-if="page !== '...'" class="page-link" @click="goToPage(page)">
-                    {{ page }}
-                  </button>
-                  <span v-else class="page-link">...</span>
-                </li>
-                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                  <button class="page-link" @click="nextPage">&raquo;</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DiagnosaModal
+      :show="showModal"
+      :diagnosa="diagnosa"
+      @close="showModal = false"
+      @select="pilihDiagnosa"
+    />
 
     <!-- Modal Pilih Riwayat Pribadi -->
-    <div v-if="showModal1" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5)">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header d-flex justify-content-between align-items-center">
-            <h5>Pilih Riwayat Pribadi</h5>
-            <button class="btn-close" @click="showModal1 = false"></button>
-          </div>
+    <DiagnosaModal
+          :show="showModal1"
+          :diagnosa="diagnosa"
+          @close="showModal1 = false"
+          @select="pilihRiwayat"
+        />
 
-          <div class="modal-body">
-            <!-- Input Pencarian -->
-            <input
-              type="text"
-              v-model="keyword"
-              class="form-control mb-3"
-              placeholder="Cari diagnosa..."
-            />
-
-            <!-- Tabel Diagnosa -->
-            <table class="table table-bordered table-sm">
-              <thead>
-                <tr>
-                  <th>KODE</th>
-                  <th>NAMA</th>
-                  <th>ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in paginatedRiwayat" :key="item.id">
-                  <td>{{ item.code }}</td>
-                  <td>{{ item.value_set }}</td>
-                  <td>
-                    <button class="btn btn-info btn-sm" @click="pilihRiwayat(item)">Pilih</button>
-                  </td>
-                </tr>
-                <tr v-if="paginatedRiwayat.length === 0">
-                  <td colspan="3" class="text-center text-muted">Tidak ada data</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Pagination Info -->
-            <div class="d-flex justify-content-between align-items-center mt-2">
-              <p class="text-muted small mb-0">
-                Menampilkan {{ StartItem }} - {{ EndItem }} dari {{ filteredRiwayat.length }} data
-              </p>
-              <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                  <button class="page-link" @click="PrevPage">&laquo;</button>
-                </li>
-                <li
-                  v-for="(page, index) in VisiblePages"
-                  :key="index"
-                  class="page-item"
-                  :class="{ active: page === currentPage, disabled: page === '...' }"
-                >
-                  <button v-if="page !== '...'" class="page-link" @click="goPage(page)">
-                    {{ page }}
-                  </button>
-                  <span v-else class="page-link">...</span>
-                </li>
-                <li class="page-item" :class="{ disabled: currentPage === totalPage }">
-                  <button class="page-link" @click="NextPage">&raquo;</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-        <div v-if="showModal2" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5)">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header d-flex justify-content-between align-items-center">
-            <h5>Pilih Riwayat Keluarga</h5>
-            <button class="btn-close" @click="showModal2 = false"></button>
-          </div>
-
-          <div class="modal-body">
-            <!-- Input Pencarian -->
-            <input
-              type="text"
-              v-model="keyword"
-              class="form-control mb-3"
-              placeholder="Cari diagnosa..."
-            />
-
-            <!-- Tabel Diagnosa -->
-            <table class="table table-bordered table-sm">
-              <thead>
-                <tr>
-                  <th>KODE</th>
-                  <th>NAMA</th>
-                  <th>ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in paginatedRiwayat" :key="item.id">
-                  <td>{{ item.code }}</td>
-                  <td>{{ item.value_set }}</td>
-                  <td>
-                    <button class="btn btn-info btn-sm" @click="pilihRiwayatKel(item)">
-                      Pilih
-                    </button>
-                  </td>
-                </tr>
-                <tr v-if="paginatedRiwayat.length === 0">
-                  <td colspan="3" class="text-center text-muted">Tidak ada data</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Pagination Info -->
-            <div class="d-flex justify-content-between align-items-center mt-2">
-              <p class="text-muted small mb-0">
-                Menampilkan {{ StartItem }} - {{ EndItem }} dari {{ filteredRiwayat.length }} data
-              </p>
-              <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                  <button class="page-link" @click="PrevPage">&laquo;</button>
-                </li>
-                <li
-                  v-for="(page, index) in VisiblePages"
-                  :key="index"
-                  class="page-item"
-                  :class="{ active: page === currentPage, disabled: page === '...' }"
-                >
-                  <button v-if="page !== '...'" class="page-link" @click="goPage(page)">
-                    {{ page }}
-                  </button>
-                  <span v-else class="page-link">...</span>
-                </li>
-                <li class="page-item" :class="{ disabled: currentPage === totalPage }">
-                  <button class="page-link" @click="NextPage">&raquo;</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <DiagnosaModal
+          :show="showModal2"
+          :diagnosa="diagnosa"
+          @close="showModal2 = false"
+          @select="pilihRiwayatKel"
+        />
   </div>
 </template>
 
 <script setup>
   import { ref, computed } from 'vue';
+  import DiagnosaModal from '../../DiagnosaModal.vue';
 
   // State utama
   const showModal = ref(false);
@@ -496,68 +293,7 @@
     riwayat: Array,
   });
 
-  // Pagination setup
-  const currentPage = ref(1);
-  const perPage = 10;
-
-  // Filter pencarian
-  const filteredDiagnosa = computed(() => {
-    if (!keyword.value) return props.diagnosa;
-    const lower = keyword.value.toLowerCase();
-    return props.diagnosa.filter(
-      (d) => d.kdDiag.toLowerCase().includes(lower) || d.nmDiag.toLowerCase().includes(lower)
-    );
-  });
-
-  // Hitung total halaman
-  const totalPages = computed(() => Math.ceil(filteredDiagnosa.value.length / perPage));
-
-  // Data diagnosa per halaman
-  const paginatedDiagnosa = computed(() => {
-    const start = (currentPage.value - 1) * perPage;
-    const end = start + perPage;
-    return filteredDiagnosa.value.slice(start, end);
-  });
-
-  // Navigasi halaman
-  const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages.value) currentPage.value = page;
-  };
-  const prevPage = () => {
-    if (currentPage.value > 1) currentPage.value--;
-  };
-  const nextPage = () => {
-    if (currentPage.value < totalPages.value) currentPage.value++;
-  };
-
-  // Pagination dinamis (visible pages)
-  const visiblePages = computed(() => {
-    const total = totalPages.value;
-    const current = currentPage.value;
-    const maxVisible = 5;
-    const pages = [];
-    if (total <= maxVisible) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      if (current <= 3) {
-        pages.push(1, 2, 3, 4, '...', total);
-      } else if (current >= total - 2) {
-        pages.push(1, '...', total - 3, total - 2, total - 1, total);
-      } else {
-        pages.push(1, '...', current - 1, current, current + 1, '...', total);
-      }
-    }
-    return pages;
-  });
-
-  // Info item awal-akhir
-  const startItem = computed(() =>
-    filteredDiagnosa.value.length === 0 ? 0 : (currentPage.value - 1) * perPage + 1
-  );
-  const endItem = computed(() =>
-    Math.min(currentPage.value * perPage, filteredDiagnosa.value.length)
-  );
-
+ 
   // Pilih diagnosa dari modal
   const pilihDiagnosa = (item) => {
     form.value.kode_complikasi = item.kdDiag;
@@ -570,64 +306,6 @@
     form.value.kode_complikasi = '';
     form.value.nama_complikasi = '';
   };
-
-  // Filter pencarian
-  const filteredRiwayat = computed(() => {
-    if (!keyword.value) return props.riwayat;
-    const lower = keyword.value.toLowerCase();
-    return props.riwayat.filter(
-      (d) => d.code.toLowerCase().includes(lower) || d.value_set.toLowerCase().includes(lower)
-    );
-  });
-
-  // Hitung total halaman
-  const totalPage = computed(() => Math.ceil(filteredRiwayat.value.length / perPage));
-
-  // Data diagnosa per halaman
-  const paginatedRiwayat = computed(() => {
-    const start = (currentPage.value - 1) * perPage;
-    const end = start + perPage;
-    return filteredRiwayat.value.slice(start, end);
-  });
-
-  // Navigasi halaman
-  const goPage = (page) => {
-    if (page >= 1 && page <= totalPage.value) currentPage.value = page;
-  };
-  const PrevPage = () => {
-    if (currentPage.value > 1) currentPage.value--;
-  };
-  const NextPage = () => {
-    if (currentPage.value < totalPage.value) currentPage.value++;
-  };
-
-  // Pagination dinamis (visible pages)
-  const VisiblePages = computed(() => {
-    const total = totalPage.value;
-    const current = currentPage.value;
-    const maxVisible = 5;
-    const pages = [];
-    if (total <= maxVisible) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      if (current <= 3) {
-        pages.push(1, 2, 3, 4, '...', total);
-      } else if (current >= total - 2) {
-        pages.push(1, '...', total - 3, total - 2, total - 1, total);
-      } else {
-        pages.push(1, '...', current - 1, current, current + 1, '...', total);
-      }
-    }
-    return pages;
-  });
-
-  // Info item awal-akhir
-  const StartItem = computed(() =>
-    filteredRiwayat.value.length === 0 ? 0 : (currentPage.value - 1) * perPage + 1
-  );
-  const EndItem = computed(() =>
-    Math.min(currentPage.value * perPage, filteredRiwayat.value.length)
-  );
 
   // Pilih diagnosa dari modal
   const pilihRiwayat = (item) => {

@@ -148,7 +148,7 @@
 
 <script setup>
   import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
-  import FormAnc from '../../../../Components/Layouts/RuangLayanan/KIA/ANC/ANCTab.vue';
+  import FormAnc from '../../../../Components/Layouts/RuangLayanan/KIA/ANC/Index.vue';
 
   import { ref } from 'vue';
   defineOptions({ layout: AppLayouts });
