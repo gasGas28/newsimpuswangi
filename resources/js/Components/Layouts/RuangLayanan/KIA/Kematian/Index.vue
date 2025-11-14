@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h5 class="mb-2">Pelayanan Kematian Maternal dan Perinatal</h5>
+   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-semibold mb-1">Kematian Maternal dan Perinatal</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -41,8 +41,8 @@
 <script setup>
   import { ref, computed } from 'vue';
   import FormLaporan from './FormLaporan.vue';
-  import FormAssessment from '../Form/FormAssessment.vue';
-  import FormStatusPasien from '../Form/FormStatusPasien.vue';
+  import FormAssessment from '../FormAssessment.vue';
+  import FormStatusPasien from '../FormStatusPasien.vue';
   // (bisa tambahkan form lain nanti)
 
   const tabs = [

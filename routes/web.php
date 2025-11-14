@@ -105,9 +105,10 @@ Route::prefix('home')->group(function () {
 });
 
 // Kia
-Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+// Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
+Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
     //ANC
-    Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+    // Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
     Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
     Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
     Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
@@ -160,7 +161,9 @@ Route::prefix('loket')->group(function () {
     Route::get('/data', [LoketController::class, 'ajaxList'])->name('loket.data');
     Route::get('/pasien', [LoketController::class, 'create'])->name('loket.pasien');
     Route::post('/pasien', [LoketController::class, 'store'])->name('loket.pasien.store');
-    Route::get('/search', [LoketController::class, 'search'])->name('loket.search');
+    Route::get('/search', [PasienController::class, 'index'])->name('loket.search');
+    Route::get('/edit/{id}', [PasienController::class, 'edit'])->name('loket.edit');
+    Route::post('/update/{id}', [PasienController::class, 'update'])->name('pasien.update');
     Route::post('/register', [LoketController::class, 'register'])->name('loket.register');
 
     // API untuk master data wilayah

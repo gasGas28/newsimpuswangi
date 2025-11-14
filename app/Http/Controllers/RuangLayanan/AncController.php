@@ -284,14 +284,9 @@ class AncController extends Controller
     }
     public function hapusDataDiagnosa($id)
     {
-        $diagnosa = SimpusDataDiagnosa::find($id);
+        SimpusDataDiagnosa::findOrFail($id)->delete();
 
-        if (!$diagnosa) {
-            return back()->withErrors(['msg' => 'Data tidak ditemukan']);
-        }
-
-        $diagnosa->delete();
-
-        return back()->with('success', 'Data berhasil dihapus');
+    return redirect()->back();
     }
+   
 }

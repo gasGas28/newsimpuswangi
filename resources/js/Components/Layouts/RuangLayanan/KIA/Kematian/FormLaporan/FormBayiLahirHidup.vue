@@ -73,7 +73,9 @@
                       placeholder="Nama Diagnosa"
                       disabled
                     />
-                    <button type="button" class="btn btn-info">Cari</button>
+                    <button type="button" @click="showModalDugaan = true" class="btn btn-info">
+                      Cari
+                    </button>
                     <button type="button" class="btn btn-danger">Del</button>
                   </div>
                 </div>
@@ -101,7 +103,7 @@
                       placeholder="Nama Diagnosa"
                       disabled
                     />
-                    <button type="button" class="btn btn-info">Cari</button>
+                    <button type="button" @click="showModalKondisi = true" class="btn btn-info">Cari</button>
                     <button type="button" class="btn btn-danger">Del</button>
                   </div>
                 </div>
@@ -255,7 +257,7 @@
                       placeholder="Nama Diagnosa"
                       disabled
                     />
-                    <button type="button" class="btn btn-info">Cari</button>
+                    <button type="button" @click="showModalIbu = true" class="btn btn-info">Cari</button>
                     <button type="button" class="btn btn-danger">Del</button>
                   </div>
                 </div>
@@ -295,8 +297,8 @@
               <div class="mb-3">
                 <label class="form-label fw-bold">Jenis Persalinan</label>
                 <select class="form-select">
-                    <option value="1">Persalinan Pervaginam</option>
-                    <option value="2">Persalinan Perabdominam</option>
+                  <option value="1">Persalinan Pervaginam</option>
+                  <option value="2">Persalinan Perabdominam</option>
                 </select>
               </div>
               <div class="mb-2 d-flex justify-content-start">
@@ -309,11 +311,79 @@
         </div>
       </form>
     </div>
+    <DiagnosaModal
+      :show="showModalDugaan"
+      :diagnosa="diagnosa"
+      @close="showModalDugaan = false"
+      @select="pilihDiagnosa"
+    />
+
+    <!-- Modal Pilih Riwayat Pribadi -->
+    <DiagnosaModal
+      :show="showModalKondisi"
+      :diagnosa="diagnosa"
+      @close="showModalKondisi= false"
+      @select="pilihRiwayat"
+    />
+
+    <DiagnosaModal
+      :show="showModalIbu"
+      :diagnosa="diagnosa"
+      @close="showModalIbu = false"
+      @select="pilihRiwayatKel"
+    />
   </div>
 </template>
 
 <script setup>
   import { ref } from 'vue';
+  import DiagnosaModal from '../../DiagnosaModal.vue';
+
+  const showModalDugaan = ref(false);
+  const showModalIbu = ref(false);
+  const showModalKondisi = ref(false);
+
+  const props = defineProps({
+    diagnosa: Array,
+  });
+
+  // Pilih diagnosa dari modal
+  const pilihDiagnosa = (item) => {
+    form.value.kode_complikasi = item.kdDiag;
+    form.value.nama_complikasi = item.nmDiag;
+    showModal.value = false;
+  };
+
+  // Reset form
+  const hapusForm = () => {
+    form.value.kode_complikasi = '';
+    form.value.nama_complikasi = '';
+  };
+
+  // Pilih diagnosa dari modal
+  const pilihRiwayat = (item) => {
+    form.value.kode_riwayat = item.code;
+    form.value.nama_riwayat = item.value_set;
+    showModal1.value = false;
+  };
+
+  // Reset form
+  const hapusRiwayat = () => {
+    form.value.kode_riwayat = '';
+    form.value.nama_riwayat = '';
+  };
+
+  const pilihRiwayatKel = (item) => {
+    form.value.kode_riwayat_kel = item.code;
+    form.value.nama_riwayat_kel = item.value_set;
+    showModal2.value = false;
+  };
+
+  // Reset form
+  const hapusRiwayatKel = () => {
+    form.value.kode_riwayat_kel = '';
+    form.value.nama_riwayat_kel = '';
+  };
 
   const form = ref({
     nama_bayi: '',

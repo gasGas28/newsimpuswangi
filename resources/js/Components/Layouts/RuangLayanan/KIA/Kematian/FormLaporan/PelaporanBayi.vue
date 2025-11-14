@@ -15,7 +15,7 @@
 
     <!-- Form dinamis -->
     <div v-if="activeForm === 'bayi-lahir-hidup'">
-      <FormBayiLahirHidup @close="activeForm = null" />
+      <FormBayiLahirHidup @close="activeForm = null" :diagnosa="props.diagnosa" />
     </div>
 
     <div v-if="activeForm === 'bayi-lahir-mati'">
@@ -25,41 +25,45 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+  import { ref } from 'vue';
 
-// Import komponen form dari file lain
-import FormBayiLahirHidup from './FormBayiLahirHidup.vue'
-import FormBayiLahirMati from './FormBayiLairMati.vue'
+  // Import komponen form dari file lain
+  import FormBayiLahirHidup from './FormBayiLahirHidup.vue';
+  import FormBayiLahirMati from './FormBayiLairMati.vue';
 
-const activeForm = ref('bayi-lahir-hidup')
+  const activeForm = ref('bayi-lahir-hidup');
 
-const toggleForm = (formType) => {
-  activeForm.value = activeForm.value === formType ? null : formType
-}
+  const props = defineProps({
+    diagnosa: Array,
+  });
+
+  const toggleForm = (formType) => {
+    activeForm.value = activeForm.value === formType ? null : formType;
+  };
 </script>
 
 <style scoped>
-.action-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: #f9fafb;
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-.action-card:hover {
-  background: #e9f2ff;
-  color: #0d6efd;
-}
-.action-icon {
-  font-size: 1.25rem;
-  color: inherit;
-}
-.action-label {
-  font-weight: 500;
-}
+  .action-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .action-card:hover {
+    background: #e9f2ff;
+    color: #0d6efd;
+  }
+  .action-icon {
+    font-size: 1.25rem;
+    color: inherit;
+  }
+  .action-label {
+    font-weight: 500;
+  }
 </style>

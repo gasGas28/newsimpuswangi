@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h5 class="mb-2">Pelayanan Antenatal Care / Ibu Hamil</h5>
+  <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-bold text-primary mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -45,10 +45,10 @@
   import FormObstetri from './FormObstetri.vue';
   import FormSubjektif from './FormSubjektif.vue';
   import FormObjektif from './FormObjektif.vue';
-  import FormAssessment from '../Form/FormAssessment.vue';
-  import FormPlanning from '../Form/FormPlanning.vue';
-  import FormImunisasi from '../Form/FormImunisasi.vue';
-  import FormStatusPasien from '../Form/FormStatusPasien.vue';
+  import FormAssessment from '../FormAssessment.vue';
+  import FormPlanning from '../FormPlanning.vue';
+  import FormImunisasi from '../FormImunisasi.vue';
+  import FormStatusPasien from '../FormStatusPasien.vue';
   // (bisa tambahkan form lain nanti)
 
   const tabs = [
