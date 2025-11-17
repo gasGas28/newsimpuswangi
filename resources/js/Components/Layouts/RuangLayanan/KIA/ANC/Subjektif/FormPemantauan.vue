@@ -1,5 +1,9 @@
 <template>
-  <h5 class="fw-semibold text-danger">Pemantauan dan Pendampingan</h5>
+  <div class="card mb-3 border-0 shadow-sm">
+    <div class="card-body">
+      <h5 class="fw-semibold text-danger">Pemantauan dan Pendampingan</h5>
+    </div>
+  </div>
   <div class="card shadow-sm border-0">
     <div class="card-body">
       <!-- FORM UTAMA -->
@@ -255,18 +259,18 @@
 
     <!-- Modal Pilih Riwayat Pribadi -->
     <DiagnosaModal
-          :show="showModal1"
-          :diagnosa="diagnosa"
-          @close="showModal1 = false"
-          @select="pilihRiwayat"
-        />
+      :show="showModal1"
+      :diagnosa="diagnosa"
+      @close="showModal1 = false"
+      @select="pilihRiwayat"
+    />
 
     <DiagnosaModal
-          :show="showModal2"
-          :diagnosa="diagnosa"
-          @close="showModal2 = false"
-          @select="pilihRiwayatKel"
-        />
+      :show="showModal2"
+      :diagnosa="diagnosa"
+      @close="showModal2 = false"
+      @select="pilihRiwayatKel"
+    />
   </div>
 </template>
 
@@ -293,7 +297,6 @@
     riwayat: Array,
   });
 
- 
   // Pilih diagnosa dari modal
   const pilihDiagnosa = (item) => {
     form.value.kode_complikasi = item.kdDiag;
