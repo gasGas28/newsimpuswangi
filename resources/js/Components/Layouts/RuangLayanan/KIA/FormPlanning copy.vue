@@ -4,29 +4,19 @@
 
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
-      <a
-        href="#"
-        class="action-card medical-action"
-        :class="{ 'active-card': activeFormPlanning === 'tindakan' }"
-        @click.prevent="toggleForm('tindakan')"
-      >
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('tindakan')">
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
         <div class="action-label">Tindakan</div>
       </a>
 
-      <a
-        href="#"
-        class="action-card medical-action"
-        :class="{ 'active-card': activeFormPlanning === 'pengobatan' }"
-        @click.prevent="toggleForm('pengobatan')"
-      >
+      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('pengobatan')">
         <div class="action-icon"><i class="bi bi-activity"></i></div>
         <div class="action-label">Pengobatan</div>
       </a>
     </div>
-    <!-- Form Aktif -->
+    <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
-      <div v-if="activeFormPlanning === 'tindakan'" class="p-2">
+      <div v-if="activeForm === 'tindakan'" class="p-2">
         <h5 class="fw-semibold text-danger">Tindakan</h5>
         <div class="card border-0 shadow-sm rounded-4 p-3">
           <!-- Kode Tindakan -->
@@ -137,7 +127,7 @@
           @select="pilihTindakan"
         />
       </div>
-      <div v-if="activeFormPlanning === 'pengobatan'" class="p-2">
+      <div v-if="activeForm === 'pengobatan'" class="p-2">
         <h5 class="fw-semibold text-danger">Pengobatan</h5>
         <div class="card border-0 shadow-sm rounded-4 p-3">
           <!-- Form Input -->
@@ -249,15 +239,10 @@
   import { ref, computed, watch } from 'vue';
   import TindakanModal from './TindakanModal.vue';
 
-  // state aktif (diagnosa / skrining)
-  const activeFormPlanning = ref(localStorage.getItem('activeFormPlanning') || 'tindakan');
-
-  // Simpan kembali jika user ganti tab
-  watch(activeFormPlanning, (val) => {
-    localStorage.setItem('activeFormPlanning', val);
-  });
+  // Cek Form Aktif
+  const activeForm = ref('tindakan');
   const toggleForm = (form) => {
-    activeFormPlanning.value = form;
+    activeForm.value = activeForm.value === form ? null : form;
   };
 
   const props = defineProps({
@@ -365,12 +350,7 @@
 
   .action-card:hover {
     background: #e9f2ff;
-    color: #10b981;
-  }
-
-  .active-card {
-    background: #10b981;
-    color: #fff;
+    color: #0d6efd;
   }
 
   .action-icon {

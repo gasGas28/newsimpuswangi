@@ -20,6 +20,7 @@ class INCController extends Controller
             ->where('no_kec', 18)
             ->orderBy('id_kategori')
             ->get();
+            
 
         $DataPasien = DB::table('simpus_pelayanan as pel')
             ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
@@ -62,7 +63,7 @@ class INCController extends Controller
                 'l.kdPoli'
             )
             ->get();
-        //dd($DataPasien);
+        dd($DataPasien);
 
         return Inertia::render('Ruang_Layanan/KIA/INC/Index', [
             'DataUnit' => $DataUnit,

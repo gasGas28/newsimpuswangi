@@ -53,6 +53,9 @@ class PoliBpUmumController extends Controller
             ->orderBy('id_kategori')
             ->get();
 
+        // dd($DataUnit);
+
+
         $DataPasien = DB::table('simpus_pelayanan as pel')
             ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
@@ -122,6 +125,8 @@ class PoliBpUmumController extends Controller
                 'unit' => $request->unit
             ]);
         }
+        dd($DataPasien);
+
         $data = [
             'DataUnit' => $DataUnit,
             'DataPasien' => $DataPasien,
@@ -138,7 +143,6 @@ class PoliBpUmumController extends Controller
             return Inertia::render('Ruang_Layanan/Gizi/pasien_poli', $data);
         } elseif ($idPoli == '097') {
             return Inertia::render('Ruang_Layanan/Sanitasi/pasien_poli', $data);
-
         } else {
             return Inertia::render('Ruang_Layanan/UGD/pasien_poli', $data);
         }
@@ -377,7 +381,6 @@ class PoliBpUmumController extends Controller
             ->where('idAnamnesa', $idAnam)
             ->update($dataUpdate);
         return redirect()->back();
-
     }
 
     public function mulaiPemeriksaanPasien(Request $request)
@@ -402,7 +405,7 @@ class PoliBpUmumController extends Controller
     public function setDiagnosaMedis(Request $request, $idLoket, $idPelayanan)
     {
         //dd($idLoket);
-        SimpusDataDiagnosa::create([
+        $diagnosa = SimpusDataDiagnosa::create([
             'kdDiagnosa' => $request->kode_diagnosa,
             'nmDiagnosa' => $request->nama_diagnosa,
             'diagnosaKasus' => $request->kunjungan_khusus,
@@ -411,7 +414,7 @@ class PoliBpUmumController extends Controller
             'loketId' => $idLoket,
             'pelayananId' => $idPelayanan,
         ]);
-        return redirect()->back();
+        return back()->with('newDiagnosa', $diagnosa);
     }
 
     public function setDiagnosaKeperawatan(Request $request, $idLoket, $idPelayanan)
@@ -444,7 +447,6 @@ class PoliBpUmumController extends Controller
     {
         SimpusDataDiagnosa::where('idDiagnosa', $idDiagnosa)->delete();
         return redirect()->back();
-
     }
 
     public function setTindakan(Request $request)
@@ -595,7 +597,6 @@ class PoliBpUmumController extends Controller
     {
         SimpusDetailResepObat::where('id_resep_detail', $idDetailResepObat)->delete();
         return redirect()->back();
-
     }
 
     public function simpanRujukan(Request $request, $idLoket, $idPelayanan)
@@ -624,9 +625,7 @@ class PoliBpUmumController extends Controller
                 'tujuanPoli' => $request->poli_rujuk_internal,
                 'endTime' => now()
             ]);
-
         } elseif ($request->status_pulang == 6) {
-
         } else {
             SimpusPelayanan::where('idPelayanan', $idPelayanan)->update([
                 'sudahDilayani' => 1,
@@ -647,7 +646,6 @@ class PoliBpUmumController extends Controller
             'idPoli' => $idPoli,
             'idPelayanan' => $idPelayanan
         ]);
-
     }
 
     public function createSuratKeterangan($idPoli, $idPelayanan)
@@ -780,7 +778,6 @@ class PoliBpUmumController extends Controller
             'suket' => $suket,
             'tenagaMedisAskep' => $TenagaMedisAskep
         ]);
-
     }
 
     public function updateSuket(Request $request)
@@ -897,7 +894,6 @@ class PoliBpUmumController extends Controller
             'provider' => $provider,
             'poliFktl' => $poliFktl
         ]);
-
     }
 
     public function simpanSuratRujuk(Request $request, $idPoli, $idSurat = null)
@@ -918,7 +914,6 @@ class PoliBpUmumController extends Controller
                 'created_by' => 1,
                 'modified_date' => now()
             ]);
-
         } else {
             // dd($unit);
             SuratRujuk::create([
@@ -938,7 +933,6 @@ class PoliBpUmumController extends Controller
         }
 
         return redirect()->back();
-
     }
 
     public function cetakRujukan($idSurat)
@@ -1004,7 +998,6 @@ class PoliBpUmumController extends Controller
         return Inertia::render('Ruang_Layanan/Umum/cppt', [
             'riwayatPasien' => $riwayatPasien
         ]);
-
     }
 
     public function getPelayanan($idLoket, $idPelayanan)
@@ -1135,25 +1128,22 @@ class PoliBpUmumController extends Controller
             'createdBy' => Auth::user()->username
         ]);
         return redirect()->back();
-
-
     }
     public function simpanSanitasi(Request $request, $idPelayanan)
     {
         //dd($request->all());
         $sanitasi =  DB::table('simpus_sanitasi')->where('pelayananId', $idPelayanan)->exists();
-        if(!$sanitasi){
+        if (!$sanitasi) {
             DB::table('simpus_sanitasi')->insert([
-            'pelayananId' => $idPelayanan,
-            'interfeksi' => $request->input('interfeksi'),
-            'keluargaBinaan' => $request->input('keluarga_binaan'),
-            'keluargaRisti' => $request->input('keluarga_risti'),
-            'tindakanSaran' => $request->input('tindakan_saran'),
-            'hasilWawancara' => $request->input('hasil_wawancara'),
-            'createdBy' => Auth::user()->username,
-            'createdDate' => now(),
-        ]);
-
+                'pelayananId' => $idPelayanan,
+                'interfeksi' => $request->input('interfeksi'),
+                'keluargaBinaan' => $request->input('keluarga_binaan'),
+                'keluargaRisti' => $request->input('keluarga_risti'),
+                'tindakanSaran' => $request->input('tindakan_saran'),
+                'hasilWawancara' => $request->input('hasil_wawancara'),
+                'createdBy' => Auth::user()->username,
+                'createdDate' => now(),
+            ]);
         }
         DB::table('simpus_sanitasi')->update([
             'pelayananId' => $idPelayanan,
@@ -1165,12 +1155,11 @@ class PoliBpUmumController extends Controller
             'modifiedBy' => Auth::user()->username,
             'modifiedDate' => now(),
         ]);
-        
+
         SimpusPelayanan::where('idPelayanan', $idPelayanan)->update([
             'sudahDilayani' => 1
         ]);
         return redirect()->back();
-
     }
 
 

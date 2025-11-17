@@ -11,6 +11,7 @@ use App\Models\RuangLayanan\MasterAlergi;
 use App\Models\RuangLayanan\MasterObstetri;
 use App\Models\RuangLayanan\MasterRiwayat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\RuangLayanan\SimpusDataDiagnosa;
 use App\Models\RuangLayanan\SimpusDiagnosa;
@@ -77,32 +78,41 @@ class AncController extends Controller
     // }
     public function index()
     {
+        $userAuth = Auth::user();
         $DataUnit = DataMasterUnitDetail::with('DataMasterUnit')
-            ->where('no_kec', 18)
+            ->where('id_unit', $userAuth->unit)
             ->orderBy('id_kategori')
             ->get();
+
+        // dd($DataUnit);
 
         $DataPasien = DB::table('simpus_pelayanan as pel')
             ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
-            ->join('setup_kel as kel', function ($join) {
+
+            ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
                     ->on('p.NO_KEC', '=', 'kel.NO_KEC')
                     ->on('p.NO_KAB', '=', 'kel.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kel.NO_PROP');
             })
-            ->join('setup_kec as kec', function ($join) {
+
+            ->leftJoin('setup_kec as kec', function ($join) {
                 $join->on('p.NO_KEC', '=', 'kec.NO_KEC')
                     ->on('p.NO_KAB', '=', 'kec.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kec.NO_PROP');
             })
-            ->join('setup_kab as kab', function ($join) {
+
+            ->leftJoin('setup_kab as kab', function ($join) {
                 $join->on('p.NO_KAB', '=', 'kab.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kab.NO_PROP');
             })
-            ->join('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
-            ->where('l.kdPoli', 003)
+
+            ->leftJoin('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
+
+            ->where('l.kdPoli', '003')
+
             ->select(
                 'pel.idpelayanan',
                 'pel.tglPelayanan',
@@ -123,7 +133,11 @@ class AncController extends Controller
                 'l.kdPoli'
             )
             ->get();
-        //dd($DataPasien);
+
+
+
+
+        // dd($DataPasien);
 
         return Inertia::render('Ruang_Layanan/KIA/ANC/Index', [
             'DataUnit' => $DataUnit,
@@ -136,24 +150,24 @@ class AncController extends Controller
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
-            ->join('setup_kel as kel', function ($join) {
+            ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
                     ->on('p.NO_KEC', '=', 'kel.NO_KEC')
                     ->on('p.NO_KAB', '=', 'kel.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kel.NO_PROP');
             })
-            ->join('setup_kec as kec', function ($join) {
+            ->leftJoin('setup_kec as kec', function ($join) {
                 $join->on('p.NO_KEC', '=', 'kec.NO_KEC')
                     ->on('p.NO_KAB', '=', 'kec.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kec.NO_PROP');
             })
-            ->join('setup_kab as kab', function ($join) {
+            ->leftJoin('setup_kab as kab', function ($join) {
                 $join->on('p.NO_KAB', '=', 'kab.NO_KAB')
                     ->on('p.NO_PROP', '=', 'kab.NO_PROP');
             })
-            ->join('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
-            ->where('l.kdPoli', operator: 003)
-            ->where('idLoket', $id)
+            ->leftJoin('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
+            ->where('l.kdPoli', $idPoli)
+            ->where('l.idLoket', $id)
             ->select(
                 'p.ID',
                 'p.NO_MR',
@@ -171,12 +185,16 @@ class AncController extends Controller
                 'p.jenis_klmin',
                 'l.umur',
                 'l.umur_bulan',
-                'umur_hari',
+                'l.umur_hari',
                 'l.tglKunjungan',
                 'l.idLoket',
                 'pel.idPelayanan'
             )
             ->get();
+
+        // dd($DataPasien);
+        // ← WAJIB, AGAR TIDAK UNDEFINED
+
         $diagnosa = SimpusDiagnosaaa::whereNotNull('F3')->get();
         $diagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();
         $tindakan = tindakan::where('kdPoli', 003)->get();
@@ -258,7 +276,7 @@ class AncController extends Controller
 
     public function setDataDiagnosa(Request $request)
     {
-        SimpusDataDiagnosa::create([
+        $diagnosaBaru = SimpusDataDiagnosa::create([
             'kdDiagnosa' => $request->kode_diagnosa,
             'nmDiagnosa' => $request->nama_diagnosa,
             'diagnosaKasus' => $request->kunjungan_khusus,
@@ -267,9 +285,13 @@ class AncController extends Controller
             'loketId' => $request->loketId,
             'pelayananId' => $request->pelayananId,
         ]);
-        // dd($data);
-        return redirect()->back();
+
+        return response()->json([
+            'success' => true,
+            'data' => $diagnosaBaru
+        ]);
     }
+
     public function setDataDiagnosaKep(Request $request)
     {
         $data = SimpusDataDiagnosa::create([
@@ -284,9 +306,20 @@ class AncController extends Controller
     }
     public function hapusDataDiagnosa($id)
     {
-        SimpusDataDiagnosa::findOrFail($id)->delete();
+        $data = SimpusDataDiagnosa::find($id);
 
-    return redirect()->back();
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
+
+        $data->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data berhasil dihapus'
+        ]);
     }
-   
 }
