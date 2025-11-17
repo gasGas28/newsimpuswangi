@@ -124,10 +124,8 @@
               <label class="form-label fw-semibold">Pemeriksaan Penunjang</label>
               <Link
                 :href="
-                  route('ruang-layanan.form-laborat', {
-                    idPoli: props.DataPasien[0].kdPoli,
-                    idLoket: props.DataPasien[0].idLoket,
-                    idPelayanan: props.DataPasien[0].idPelayanan,
+                  route('ruang-layanan.laborat.pemeriksaan', {
+                    loketId: props.DataPasien[0].idLoket,
                   })
                 "
                 class="btn btn-info"

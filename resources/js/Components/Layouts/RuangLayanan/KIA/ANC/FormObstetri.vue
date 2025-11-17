@@ -1,8 +1,6 @@
 <template>
-  <div class="card mb-3 border-0 shadow-sm">
-    <div class="card-body">
-      <h5 class="fw-semibold text-danger">Pemeriksaan Obstetri</h5>
-    </div>
+  <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-semibold text-success mb-1">Pemeriksaan Obstetri</h5>
   </div>
   <form @submit.prevent="saveForm">
     <div class="row mb-4 g-4">

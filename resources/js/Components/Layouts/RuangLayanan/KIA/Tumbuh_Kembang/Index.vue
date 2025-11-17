@@ -16,7 +16,7 @@
       </button>
 
       <div class="ms-auto">
-        <button class="btn btn-success btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
+        <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
       </div>
     </div>
 
@@ -99,29 +99,28 @@
     border: none;
     padding: 8px 14px;
     font-weight: 600;
-    color: #e9f2ff;
+    color: #ffffff;
     border-radius: 6px;
     transition: 0.2s;
   }
 
-  /* .btn-tab:hover {
-  background: #e9f2ff;
-  color: #10b981;
-} */
-
-  .btn-tab.active {
-    background: #10b981;
-    color: #fff;
+  .btn-sehat {
+    background: #ffffff;
+    color: #10b981;
   }
 
+  .btn-tab.active {
+    background: #ffffff;
+    color: #10b981;
+  }
+
+  /* Card */
   .card {
     border-radius: 10px;
   }
 
-  .btn-outline-danger {
-    border-radius: 6px;
-  }
+  /* Gradient header background */
   .bg-bottom {
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background: #10b981;
   }
 </style>

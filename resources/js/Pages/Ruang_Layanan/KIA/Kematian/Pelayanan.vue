@@ -134,6 +134,12 @@
       <FormKematian
         :DataPasien="props.DataPasien"
         :diagnosa="props.diagnosa"
+        :AlergiMakanan="props.AlergiMakanan"
+        :AlergiObat="props.AlergiObat"
+        :diagnosa-keperawatan="props.diagnosaKeperawatan"
+        :tindakan="props.tindakan"
+        :riwayat="props.riwayat"
+        :DataDiagnosa="props.DataDiagnosa"
       />
     </div>
   </div>
@@ -141,7 +147,7 @@
 
 <script setup>
   import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
-  import FormKematian from '../../../../Components/Layouts/RuangLayanan/KIA/Kematian/Index.vue'
+  import FormKematian from '../../../../Components/Layouts/RuangLayanan/KIA/Kematian/Index.vue';
   import { ref } from 'vue';
   defineOptions({ layout: AppLayouts });
 
@@ -150,6 +156,11 @@
   const props = defineProps({
     DataPasien: Array,
     diagnosa: Array,
+    tindakan: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataDiagnosa: Array,
   });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;
