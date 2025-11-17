@@ -1,5 +1,5 @@
 <template>
-   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+  <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
     <h5 class="fw-semibold mb-1">Kematian Maternal dan Perinatal</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
@@ -16,7 +16,7 @@
       </button>
 
       <div class="ms-auto">
-        <button class="btn btn-success btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
+        <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
       </div>
     </div>
 
@@ -53,7 +53,14 @@
 
   const props = defineProps({
     DataPasien: Array,
-    diagnosa: Array
+    diagnosa: Array,
+    tindakan: Array,
+    riwayat: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    KunjunganAnc: Array,
+    DataDiagnosa: Array,
   });
 
   const selectedTab = ref('laporan');
@@ -73,35 +80,34 @@
 </script>
 
 <style scoped>
-  .btn-tab {
+ .btn-tab {
     background: transparent;
     margin: 2px;
     border: none;
     padding: 8px 14px;
     font-weight: 600;
-    color: #e9f2ff;
+    color: #ffffff;
     border-radius: 6px;
     transition: 0.2s;
   }
 
-  /* .btn-tab:hover {
-  background: #e9f2ff;
-  color: #10b981;
-} */
-
-  .btn-tab.active {
-    background: #10b981;
-    color: #fff;
+  .btn-sehat {
+    background: #ffffff;
+    color: #10b981;
   }
 
+  .btn-tab.active {
+    background: #ffffff;
+    color: #10b981;
+  }
+
+  /* Card */
   .card {
     border-radius: 10px;
   }
 
-  .btn-outline-danger {
-    border-radius: 6px;
-  }
+  /* Gradient header background */
   .bg-bottom {
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background: #10b981;
   }
 </style>

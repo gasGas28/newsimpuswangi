@@ -2,7 +2,7 @@
   <div>
     <!-- Header -->
     <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-      <h5 class="fw-semibold text-primary mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
+      <h5 class="fw-semibold text-success mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
     </div>
 
     <div class="card border-0 shadow-sm rounded-0">
