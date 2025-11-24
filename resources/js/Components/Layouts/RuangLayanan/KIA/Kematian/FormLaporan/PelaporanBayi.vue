@@ -45,7 +45,6 @@
     diagnosa: Array,
   });
 
-  // state aktif (diagnosa / skrining)
   const activeFormKematianBayi = ref(
     localStorage.getItem('activeFormKematianBayi') || 'bayi-lahir-hidup'
   );

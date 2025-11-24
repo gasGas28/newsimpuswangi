@@ -1,6 +1,6 @@
 <template>
    <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-    <h5 class="fw-semibold text-primary mb-1">Pelayanan Tumbuh Kembang</h5>
+    <h5 class="fw-semibold text-danger mb-1">Pelayanan Tumbuh Kembang</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -15,9 +15,9 @@
         {{ tab.label }}
       </button>
 
-      <div class="ms-auto">
-        <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
-      </div>
+        <button class="btn btn-sehat btn-sm fw-semibold ml-auto" @click="selectedTab = 'kirim_satu_sehat'">
+          Kirim Satu Sehat
+        </button>
     </div>
 
     <!-- Dynamic Form -->
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
 
   // import form
   import FormSubjektif from './Subjektif.vue';
@@ -48,6 +48,7 @@
   import FormPlanning from '../FormPlanning.vue';
   import FormImunisasi from '../FormImunisasi.vue';
   import FormStatusPasien from '../FormStatusPasien.vue';
+  import FormResumePasien from './FormResumePasien.vue';
 
   const tabs = [
     { name: 'subjektif', label: 'Subjektif' },
@@ -70,29 +71,32 @@
     DataDiagnosa: Array,
   });
 
-  const selectedTab = ref('subjektif');
+  // Ambil tab terakhir dari localStorage
+  const selectedTab = ref(localStorage.getItem('selectedTab') || 'subjektif');
 
+  // Simpan ke localStorage saat berubah
+  watch(selectedTab, (val) => {
+    localStorage.setItem('selectedTab', val);
+  });
+
+  // Tentukan form yang aktif
   const currentForm = computed(() => {
-    switch (selectedTab.value) {
-      case 'subjektif':
-        return FormSubjektif;
-      case 'objektif':
-        return FormObjektif;
-      case 'assessment':
-        return FormAssessment;
-      case 'imunisasi':
-        return FormImunisasi;
-      case 'planning':
-        return FormPlanning;
-      case 'status_pasien':
-        return FormStatusPasien;
-      default:
-        return null;
-    }
+    const map = {
+      subjektif: FormSubjektif,
+      objektif: FormObjektif,
+      assessment: FormAssessment,
+      imunisasi: FormImunisasi,
+      planning: FormPlanning,
+      status_pasien: FormStatusPasien,
+      kirim_satu_sehat: FormResumePasien,
+    };
+
+    return map[selectedTab.value] || FormObstetri;
   });
 </script>
 
 <style scoped>
+  /* Tab Buttons */
   .btn-tab {
     background: transparent;
     margin: 2px;
@@ -102,6 +106,10 @@
     color: #ffffff;
     border-radius: 6px;
     transition: 0.2s;
+  }
+
+  .ml-auto {
+    margin-left: auto;
   }
 
   .btn-sehat {

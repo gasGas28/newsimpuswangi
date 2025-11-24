@@ -1,5 +1,5 @@
 <template>
-  <h6 class="mb-3 fw-semibold text-danger">
+  <h6 class="mb-3 fw-semibold text-success">
     Pengiriman Data SDIDTK (Stimulasi, Deteksi, dan Intervensi Dini Tumbuh Kembang)
   </h6>
   <form @submit.prevent="saveForm">

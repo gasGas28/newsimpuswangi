@@ -1,6 +1,6 @@
 <template>
   <div class="col-md-6 bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-    <h5 class="fw-semibold text-danger mb-0">Pengiriman Data Asi</h5>
+    <h5 class="fw-semibold text-success mb-0">Pengiriman Data Asi</h5>
   </div>
   <div class="col-md-6">
     <div class="card shadow-sm border-0 p-3">

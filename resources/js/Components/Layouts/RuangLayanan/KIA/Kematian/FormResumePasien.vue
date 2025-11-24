@@ -22,7 +22,6 @@
       :class="{ 'active-card': activeResumeKematian === 'laporanKematian' }"
       @click.prevent="toggleForm('laporanKematian')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Laporan Kematian</div>
     </a>
 
@@ -32,10 +31,10 @@
       :class="{ 'active-card': activeResumeKematian === 'assessment' }"
       @click.prevent="toggleForm('assessment')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Assessment</div>
     </a>
   </div>
+  <hr>
   <div class="mt-3">
     <div v-if="activeResumeKematian === 'laporanKematian'" class="p-2">
       <div class="row g-4">
@@ -187,7 +186,7 @@
     padding: 10px 14px;
     border-radius: 8px;
     background: #fbfbfc;
-    color: #141414;
+    color: #10b981;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
   }
@@ -200,11 +199,6 @@
   .active-card {
     background: #10b981;
     color: #fff;
-  }
-
-  .action-icon {
-    font-size: 1.25rem;
-    color: inherit;
   }
 
   .action-label {

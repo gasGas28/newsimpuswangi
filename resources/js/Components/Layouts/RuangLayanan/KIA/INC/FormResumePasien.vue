@@ -22,7 +22,6 @@
       :class="{ 'active-card': activeResumeInc === 'objektif' }"
       @click.prevent="toggleForm('objektif')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Objektif</div>
     </a>
 
@@ -41,7 +40,6 @@
       :class="{ 'active-card': activeResumeInc === 'imunisasi' }"
       @click.prevent="toggleForm('imunisasi')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Imunisasi</div>
     </a>
 
@@ -51,7 +49,6 @@
       :class="{ 'active-card': activeResumeInc === 'planning' }"
       @click.prevent="toggleForm('planning')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Planning</div>
     </a>
     <a
@@ -60,10 +57,10 @@
       :class="{ 'active-card': activeResumeInc === 'status_pasien' }"
       @click.prevent="toggleForm('status_pasien')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Status Pasien</div>
     </a>
   </div>
+  <hr>
   <div class="mt-3">
     <div v-if="activeResumeInc === 'objektif'" class="p-2">
       <div class="col-md-6">
@@ -628,7 +625,7 @@
     padding: 10px 14px;
     border-radius: 8px;
     background: #fbfbfc;
-    color: #141414;
+    color: #10b981;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
   }
@@ -641,11 +638,6 @@
   .active-card {
     background: #10b981;
     color: #fff;
-  }
-
-  .action-icon {
-    font-size: 1.25rem;
-    color: inherit;
   }
 
   .action-label {

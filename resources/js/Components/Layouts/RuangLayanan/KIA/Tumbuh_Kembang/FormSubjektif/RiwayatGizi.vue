@@ -1,5 +1,5 @@
 <template>
-  <h6 class="mb-3 fw-semibold text-danger">Riwayat Terkait Gizi</h6>
+  <h6 class="mb-3 fw-semibold text-success">Riwayat Terkait Gizi</h6>
   <form @submit.prevent="saveForm">
     <div class="row g-4">
       <div class="col-md-6">

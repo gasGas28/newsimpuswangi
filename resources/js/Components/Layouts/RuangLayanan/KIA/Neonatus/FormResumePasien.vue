@@ -2,7 +2,7 @@
   <div class="row mb-2">
     <div class="col-md-6">
       <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-        <h5 class="fw-semibold text-success mb-1">Resumen Medis Postnatal Care</h5>
+        <h5 class="fw-semibold text-success mb-1">Resumen Medis Neonatus</h5>
       </div>
     </div>
     <div class="col-md-6">
@@ -19,26 +19,24 @@
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'subjektif' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'subjektif' }"
       @click.prevent="toggleForm('subjektif')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Subjektif</div>
     </a>
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'objektif' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'objektif' }"
       @click.prevent="toggleForm('objektif')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Objektif</div>
     </a>
 
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'assessment' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'assessment' }"
       @click.prevent="toggleForm('assessment')"
     >
       <div class="action-label">Assessment</div>
@@ -46,7 +44,7 @@
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'imunisasi' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'imunisasi' }"
       @click.prevent="toggleForm('imunisasi')"
     >
       <div class="action-label">Imunisasi</div>
@@ -55,7 +53,7 @@
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'planning' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'planning' }"
       @click.prevent="toggleForm('planning')"
     >
       <div class="action-label">Planning</div>
@@ -63,149 +61,195 @@
     <a
       href="#"
       class="action-card medical-action"
-      :class="{ 'active-card': activeResumePnc === 'status_pasien' }"
+      :class="{ 'active-card': activeResumeNeonatus === 'status_pasien' }"
       @click.prevent="toggleForm('status_pasien')"
     >
       <div class="action-label">Status Pasien</div>
     </a>
   </div>
-  <hr>
+  <hr />
   <div class="mt-3">
-    <div v-if="activeResumePnc === 'subjektif'" class="p-2">
-      <h5 class="fw-semibold mb-2">Riwayat Persalinan</h5>
-      <hr class="mb-3" />
+    <div v-if="activeResumeNeonatus === 'subjektif'" class="p-2">
+      <h5 class="fw-semibold">Pemeriksaan Data Bayi</h5>
+      <hr />
       <div class="col-md-6">
-        <div class="mb-3">
-          <table class="table table-hover table-striped table-sm">
-            <thead>
-              <tr>
-                <th>Atribut</th>
-                <th>Nilai</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Tanggal Persalinan</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Penolong Persalinan</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Lokasi Persalinan</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Gravida</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Partus</td>
-                <td>-</td>
-              </tr>
-              <tr>
-                <td>Abortus</td>
-                <td>-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="row mt-4">
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Pemeriksaan</th>
+              <th>Hasil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tanggal Lahir</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Jam Lahir</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Kabupaten / Kota Kelahiran</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Jenis Kelamin</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Anak Ke</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Usia Gestasi</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mt-4">
           <div class="col-auto">
             <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="activeResumePnc === 'objektif'" class="p-2">
-      <h5 class="fw-semibold mb-2">Pelayanan Nifas</h5>
-      <hr class="mb-3" />
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="mb-3">
-            <table class="table table-hover table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>Atribut</th>
-                  <th>Nilai</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Pemeriksaan Nifas ke</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Tekanan Darah (mmHg)</td>
-                  <td>
-                    <p class="mb-1">Sistolik:</p>
-                    <p class="mb-1">Diastolik:</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Suhu</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Pernapasan</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Pendarahan Pervaginal</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Jumlah Pendarahan</td>
-                  <td>-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="mb-3">
-            <table class="table table-hover table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>Atribut</th>
-                  <th>Nilai</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Kondisi Payudara</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Kontraksi Uteri</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Warna Lokhia</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Produksi ASI</td>
-                  <td>-</td>
-                </tr>
-                <tr>
-                  <td>Kondisi Perawatan Bayi Baru Lahir</td>
-                  <td>-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="row mt-4">
-            <div class="col-auto">
-              <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
-            </div>
-          </div>
+
+    <div v-if="activeResumeNeonatus === 'objektif'" class="p-2">
+      <div class="mb-3">
+        <h5 class="fw-semibold">Data Apgar 1 Menit</h5>
+        <hr />
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Penampilan</th>
+              <th>Nadi</th>
+              <th>Refleks</th>
+              <th>Aktivitas</th>
+              <th>Pernapasan</th>
+              <th>Total skor</th>
+              <th>Klasifikasi</th>
+              <th>Rentang Skor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Menit 1</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Data Apgar 5 Menit</h5>
+        <hr />
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Penampilan</th>
+              <th>Nadi</th>
+              <th>Refleks</th>
+              <th>Aktivitas</th>
+              <th>Pernapasan</th>
+              <th>Total skor</th>
+              <th>Klasifikasi</th>
+              <th>Rentang Skor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Menit 5</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Data Apgar 10 Menit</h5>
+        <hr />
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Penampilan</th>
+              <th>Nadi</th>
+              <th>Refleks</th>
+              <th>Aktivitas</th>
+              <th>Pernapasan</th>
+              <th>Total skor</th>
+              <th>Klasifikasi</th>
+              <th>Rentang Skor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Menit 10</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan KN 0</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan KN 1</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan KN 2</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan KN 3</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan Fisik Head to Toe</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mb-3">
+        <h5 class="fw-semibold">Pemeriksaan Berat Badan dan Pemberian ASI</h5>
+        <hr />
+        <p>Belum Dilakukan Pemeriksaan</p>
+      </div>
+      <div class="mt-4">
+        <div class="col-auto">
+          <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
         </div>
       </div>
     </div>
 
-    <div v-if="activeResumePnc === 'assessment'" class="p-2">
+    <div v-if="activeResumeNeonatus === 'assessment'" class="p-2">
       <div class="row g-4">
         <div class="col-md-6">
           <div class="mb-3">
@@ -268,7 +312,7 @@
         </div>
       </div>
     </div>
-    <div v-if="activeResumePnc === 'imunisasi'" class="p-2">
+    <div v-if="activeResumeNeonatus === 'imunisasi'" class="p-2">
       <table class="table table-hover table-striped table-sm">
         <thead>
           <tr>
@@ -295,7 +339,7 @@
         </div>
       </div>
     </div>
-    <div v-if="activeResumePnc === 'planning'" class="p-2">
+    <div v-if="activeResumeNeonatus === 'planning'" class="p-2">
       <table class="table table-hover table-striped table-sm">
         <thead>
           <tr>
@@ -327,7 +371,7 @@
         </div>
       </div>
     </div>
-    <div v-if="activeResumePnc === 'status_pasien'" class="p-2">
+    <div v-if="activeResumeNeonatus === 'status_pasien'" class="p-2">
       <table class="table table-hover table-striped table-sm">
         <thead>
           <tr>
@@ -365,14 +409,14 @@
   const props = defineProps({
     DataPasien: Array,
   });
-  const activeResumePnc = ref(localStorage.getItem('activeResumePnc') || 'subjektif');
+  const activeResumeNeonatus = ref(localStorage.getItem('') || 'objektif');
 
   // Simpan kembali jika user ganti tab
-  watch(activeResumePnc, (val) => {
-    localStorage.setItem('activeResumePnc', val);
+  watch(activeResumeNeonatus, (val) => {
+    localStorage.setItem('activeResumeNeonatus', val);
   });
   const toggleForm = (form) => {
-    activeResumePnc.value = form;
+    activeResumeNeonatus.value = form;
   };
 </script>
 <style scoped>
@@ -397,7 +441,6 @@
     background: #10b981;
     color: #fff;
   }
-
 
   .action-label {
     font-weight: 500;

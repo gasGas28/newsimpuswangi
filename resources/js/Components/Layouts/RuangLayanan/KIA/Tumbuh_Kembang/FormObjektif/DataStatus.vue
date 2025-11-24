@@ -1,5 +1,5 @@
 <template>
-  <h6 class="mb-3 fw-semibold text-danger">
+  <h6 class="mb-3 fw-semibold text-success">
     Pengiriman Data Status Pertumbuhan dan Perkembangan, serta Data Lainnya
   </h6>
   <div class="col-md-6">
