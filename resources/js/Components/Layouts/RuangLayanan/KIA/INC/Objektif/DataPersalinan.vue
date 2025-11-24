@@ -1,6 +1,6 @@
 <template>
   <div class="col-md-6">
-    <div class="card shadow-sm border-1 p-3">
+    <div class="card shadow-sm border-0 p-3">
       <div class="card-body">
         <h6 class="mb-3 fw-semibold">Data Kunjungan Persalinan</h6>
         <form @submit.prevent="saveForm">

@@ -1,7 +1,7 @@
 <template>
   <div class="card shadow-sm border-0 p-4 form-card">
     <div class="card-body">
-      <h5 class="mb-3 text-danger">Riwayat Kematian Bayi Lahir Hidup</h5>
+      <h5 class="mb-3 text-success">Riwayat Kematian Bayi Lahir Hidup</h5>
       <hr />
       <form @submit.prevent="submitForm">
         <div class="row g-4">
@@ -136,7 +136,7 @@
           </div>
         </div>
 
-        <h5 class="mb-3 mt-4 text-danger">Riwayat Kematian Bayi Lahir Hidup</h5>
+        <h5 class="mb-3 mt-4 text-success">Riwayat Kematian Bayi Lahir Hidup</h5>
         <hr />
         <div class="row g-4">
           <div class="col-md-6">
@@ -214,7 +214,7 @@
             </div>
           </div>
         </div>
-        <h5 class="mb-3 mt-4 text-danger fw-semiold">Riwayat Persalinan</h5>
+        <h5 class="mb-3 mt-4 text-success fw-semiold">Riwayat Persalinan</h5>
         <hr />
         <div class="row g-4">
           <div class="col-md-6">

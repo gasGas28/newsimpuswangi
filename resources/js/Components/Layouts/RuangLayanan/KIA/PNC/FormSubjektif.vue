@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="col-md-6 bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-      <h5 class="fw-semibold text-danger mb-0">Form Data Persalinan dan Status Obstetri</h5>
+      <h5 class="fw-semibold text-success mb-0">Form Data Persalinan dan Status Obstetri</h5>
     </div>
     <div class="col-md-6">
-      <div class="card border-1 p-3 shadow-sm">
+      <div class="card border-0 p-3 shadow-sm">
         <div class="card-body">
             <h6 class="mb-3">Data Riwayat Persalinan yang Lalu</h6>
             <div class="mb-3">
