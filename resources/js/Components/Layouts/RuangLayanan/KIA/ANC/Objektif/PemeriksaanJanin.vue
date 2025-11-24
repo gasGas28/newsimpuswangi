@@ -1,5 +1,5 @@
 <template>
-  <h5 class="fw-semibold text-danger">Pemeriksaan Janin</h5>
+  <h5 class="fw-semibold text-success">Pemeriksaan Janin</h5>
 
   <div class="card shadow-sm border-0">
     <div class="card-body">
@@ -8,7 +8,7 @@
           <div class="col-md-6">
             <div class="mb-3">
               <label class="form-label fw-semibold">Denyut Jantung Janin</label>
-              <div class="input-group w-50">
+              <div class="input-group">
                 <input type="number" class="form-control" placeholder="{beats}/min" />
                 <span class="input-group-text">{beats}/min</span>
               </div>
@@ -24,9 +24,11 @@
               <label class="form-label fw-semibold">Deskripsi</label>
               <textarea class="form-control" rows="3" placeholder="Tulis Deskripsi..."></textarea>
             </div>
+          </div>
+          <div class="col-md-6">
             <div class="mb-3">
               <label class="form-label fw-semibold">Taksiran Berat Janin</label>
-              <div class="input-group w-50">
+              <div class="input-group">
                 <input type="number" class="form-control" placeholder="Taksiran Berat" />
                 <span class="input-group-text">G</span>
               </div>
@@ -47,12 +49,12 @@
               <label class="form-label fw-semibold">Abdominal Circumference (AC)</label>
               <input type="text" class="form-control" placeholder="Abdomina Circumference" />
             </div>
+            <div class="text-start">
+              <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
+            </div>
           </div>
         </div>
         <!-- Tombol Simpan -->
-        <div class="mt-2 text-start">
-          <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
-        </div>
       </form>
     </div>
   </div>

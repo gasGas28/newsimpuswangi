@@ -2,7 +2,7 @@
   <div>
     <!-- Header -->
     <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-      <h5 class="fw-semibold text-success mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
+      <h5 class="fw-semibold text-danger mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
     </div>
 
     <div class="card border-0 shadow-sm rounded-0">
@@ -17,10 +17,9 @@
         >
           {{ tab.label }}
         </button>
-
-        <div class="ms-auto">
-          <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
-        </div>
+        <button class="btn btn-sehat btn-sm fw-semibold ml-auto" @click="selectedTab = 'kirim_satu_sehat'">
+          Kirim Satu Sehat
+        </button>
       </div>
 
       <!-- Dynamic Form -->
@@ -43,6 +42,7 @@
 </template>
 <script setup>
   import { ref, computed, watch } from 'vue';
+  import { Link } from '@inertiajs/vue3';
 
   // Import form components
   import FormObstetri from './FormObstetri.vue';
@@ -52,6 +52,7 @@
   import FormPlanning from '../FormPlanning.vue';
   import FormImunisasi from '../FormImunisasi.vue';
   import FormStatusPasien from '../FormStatusPasien.vue';
+  import FormResumePasien from './FormResumePasien.vue';
 
   // Props
   const props = defineProps({
@@ -95,6 +96,7 @@
       imunisasi: FormImunisasi,
       planning: FormPlanning,
       status_pasien: FormStatusPasien,
+      kirim_satu_sehat: FormResumePasien,
     };
 
     return map[selectedTab.value] || FormObstetri;
@@ -111,6 +113,10 @@
     color: #ffffff;
     border-radius: 6px;
     transition: 0.2s;
+  }
+
+  .ml-auto {
+    margin-left: auto;
   }
 
   .btn-sehat {

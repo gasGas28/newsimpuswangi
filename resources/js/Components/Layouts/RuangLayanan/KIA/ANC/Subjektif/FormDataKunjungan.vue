@@ -3,7 +3,7 @@
     <div class="card shadow-sm border-0">
       <div class="card-body">
         <form @submit.prevent="saveForm">
-          <h5 class="mb-4 fw-semibold text-danger">Data Kunjungan</h5>
+          <h5 class="mb-4 fw-semibold text-success">Data Kunjungan</h5>
           <div class="row g-3">
             <div class="mb-2">
               <label class="form-label">Tanggal Kunjungan</label>

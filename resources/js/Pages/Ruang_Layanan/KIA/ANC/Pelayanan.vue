@@ -156,8 +156,7 @@
 <script setup>
   import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
   import FormAnc from '../../../../Components/Layouts/RuangLayanan/KIA/ANC/Index.vue';
-  import { Link } from '@inertiajs/vue3'
-
+  import { Link } from '@inertiajs/vue3';
 
   import { ref } from 'vue';
   defineOptions({ layout: AppLayouts });
@@ -174,6 +173,9 @@
     AlergiMakanan: Array,
     AlergiObat: Array,
     DataDiagnosa: Array,
+    simpusResepObat: Array,
+    routeResepObat: String,
+    routeDetailResepObat: String,
   });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;

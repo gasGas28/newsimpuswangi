@@ -1,7 +1,7 @@
 <template>
   <div class="card mb-3 border-0 shadow-sm">
     <div class="card-body">
-      <h5 class="fw-semibold text-danger">Pemantauan dan Pendampingan</h5>
+      <h5 class="fw-semibold text-success">Pemantauan dan Pendampingan</h5>
     </div>
   </div>
   <div class="card shadow-sm border-0">
