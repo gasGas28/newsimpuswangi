@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="Kematian Maternal dan Perinatal" :backRoute :unitList :rows>
+    <FormAnamnesa title="Pelayanan Intranatal Care / Pelayanan Ibu Bersalin" :backRoute :unitList :rows>
 
     </FormAnamnesa>
   </AppLayouts>

@@ -1,10 +1,9 @@
 <template>
   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-    <h5 class="fw-semibold text-danger mb-0">Pengiriman Data Lokasi Kematian</h5>
+    <h5 class="fw-semibold text-success mb-0">Pengiriman Data Lokasi Kematian</h5>
   </div>
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body">
+
       <!-- FORM UTAMA -->
       <form @submit.prevent="saveForm">
         <div class="row g-4">
@@ -176,7 +175,6 @@
           </div>
         </div>
       </form>
-    </div>
 
      <DiagnosaModal
       :show="showModal"
@@ -184,7 +182,6 @@
       @close="showModal = false"
       @select="pilihDiagnosa"
     />
-  </div>
 </template>
 
 <script setup>

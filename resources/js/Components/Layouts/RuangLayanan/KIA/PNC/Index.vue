@@ -1,6 +1,6 @@
 <template>
-   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-    <h5 class="fw-semibold mb-1">Pelayanan Postnatal Care / Pelayanan Ibu Nifas</h5>
+  <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-semibold text-danger mb-1">Pelayanan Postnatal Care / Pelayanan Ibu Nifas</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -15,9 +15,12 @@
         {{ tab.label }}
       </button>
 
-      <div class="ms-auto">
-        <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
-      </div>
+      <button
+        class="btn btn-sehat btn-sm fw-semibold ml-auto"
+        @click="selectedTab = 'kirim_satu_sehat'"
+      >
+        Kirim Satu Sehat
+      </button>
     </div>
 
     <!-- Dynamic Form -->
@@ -48,6 +51,7 @@
   import FormPlanning from '../FormPlanning.vue';
   import FormImunisasi from '../FormImunisasi.vue';
   import FormStatusPasien from '../FormStatusPasien.vue';
+  import FormResumePasien from './FormResumePasien.vue';
 
   const tabs = [
     { name: 'subjektif', label: 'Subjektif' },
@@ -72,28 +76,24 @@
 
   const selectedTab = ref('subjektif');
 
+  // Tentukan form yang aktif
   const currentForm = computed(() => {
-    switch (selectedTab.value) {
-      case 'subjektif':
-        return FormSubjektif;
-      case 'objektif':
-        return FormObjektif;
-      case 'assessment':
-        return FormAssessment;
-      case 'imunisasi':
-        return FormImunisasi;
-      case 'planning':
-        return FormPlanning;
-      case 'status_pasien':
-        return FormStatusPasien;
-      default:
-        return null;
-    }
+    const map = {
+      subjektif: FormSubjektif,
+      objektif: FormObjektif,
+      assessment: FormAssessment,
+      imunisasi: FormImunisasi,
+      planning: FormPlanning,
+      status_pasien: FormStatusPasien,
+      kirim_satu_sehat: FormResumePasien,
+    };
+
+    return map[selectedTab.value] || FormSubjektif;
   });
 </script>
 
 <style scoped>
- .btn-tab {
+  .btn-tab {
     background: transparent;
     margin: 2px;
     border: none;
@@ -122,5 +122,8 @@
   /* Gradient header background */
   .bg-bottom {
     background: #10b981;
+  }
+  .ml-auto {
+    margin-left: auto;
   }
 </style>

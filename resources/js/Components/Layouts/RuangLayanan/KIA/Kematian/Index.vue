@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-    <h5 class="fw-semibold mb-1">Kematian Maternal dan Perinatal</h5>
+    <h5 class="fw-semibold text-danger mb-1">Kematian Maternal dan Perinatal</h5>
   </div>
   <div class="card border-0 shadow-sm rounded-3">
     <!-- Tabs -->
@@ -15,9 +15,12 @@
         {{ tab.label }}
       </button>
 
-      <div class="ms-auto">
-        <button class="btn btn-sehat btn-sm fw-semibold">Kirim Data Ke Satu Sehat</button>
-      </div>
+      <button
+        class="btn btn-sehat btn-sm fw-semibold ml-auto"
+        @click="selectedTab = 'kirim_satu_sehat'"
+      >
+        Kirim Satu Sehat
+      </button>
     </div>
 
     <!-- Dynamic Form -->
@@ -39,10 +42,11 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import FormLaporan from './FormLaporan.vue';
   import FormAssessment from '../FormAssessment.vue';
   import FormStatusPasien from '../FormStatusPasien.vue';
+  import FormResumePasien from './FormResumePasien.vue';
   // (bisa tambahkan form lain nanti)
 
   const tabs = [
@@ -65,22 +69,21 @@
 
   const selectedTab = ref('laporan');
 
+  // Tentukan form yang aktif
   const currentForm = computed(() => {
-    switch (selectedTab.value) {
-      case 'laporan':
-        return FormLaporan;
-      case 'assessment':
-        return FormAssessment;
-      case 'status_pasien':
-        return FormStatusPasien;
-      default:
-        return null;
-    }
+    const map = {
+      laporan: FormLaporan,
+      assessment: FormAssessment,
+      status_pasien: FormStatusPasien,
+      kirim_satu_sehat: FormResumePasien,
+    };
+
+    return map[selectedTab.value] || FormLaporan;
   });
 </script>
 
 <style scoped>
- .btn-tab {
+  .btn-tab {
     background: transparent;
     margin: 2px;
     border: none;
@@ -109,5 +112,8 @@
   /* Gradient header background */
   .bg-bottom {
     background: #10b981;
+  }
+  .ml-auto {
+    margin-left: auto;
   }
 </style>
