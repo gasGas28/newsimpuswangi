@@ -1,6 +1,6 @@
 <template>
-  <h5 class="fw-semibold text-danger">Pemeriksaan USG</h5>
-  <h5 class="text-danger">Ingat untuk form dengan blok kuning wajib tidak diisi!!</h5>
+  <h5 class="fw-semibold text-success">Pemeriksaan USG</h5>
+  <h5 class="text-danger">Ingat untuk form dengan blok abu wajib tidak diisi!!</h5>
   <div class="card shadow-sm border-0">
     <div class="card-body">
       <form @submit.prevent="saveForm">
@@ -17,32 +17,36 @@
                 </select>
               </div>
               <h5 class="fw-bold mt-2">Pemeriksaan USG</h5>
-              <div class="mb-1">
-                <label class="form-label fw-semibold">Gestasional Sac (Gs) Diameter</label>
-                <div class="input-group w-50">
-                  <input type="number" class="form-control" placeholder="GS Diamater" />
-                  <span class="input-group-text">CM</span>
+              <div class="row mb-1">
+                <div class="col-6">
+                  <label class="form-label fw-semibold">Gestasional Sac (Gs) Diameter</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="GS Diamater" />
+                    <span class="input-group-text">CM</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-semibold">Crown Rump Length (CRL)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Crown Rump Length" />
+                    <span class="input-group-text">CM</span>
+                  </div>
                 </div>
               </div>
-              <div class="mb-1">
-                <label class="form-label fw-semibold">Crown Rump Length (CRL)</label>
-                <div class="input-group w-50">
-                  <input type="number" class="form-control" placeholder="Crown Rump Length" />
-                  <span class="input-group-text">CM</span>
+              <div class="row mb-3">
+                <div class="col-6">
+                  <label class="form-label fw-semibold">Denyut Jantung Janin (DJJ)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Denyut Jantung Janin" />
+                    <span class="input-group-text">/min</span>
+                  </div>
                 </div>
-              </div>
-              <div class="mb-1">
-                <label class="form-label fw-semibold">Denyut Jantung Janin (DJJ)</label>
-                <div class="input-group w-50">
-                  <input type="number" class="form-control" placeholder="Denyut Jantung Janin" />
-                  <span class="input-group-text">/min</span>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Usia Kehamilan (USG)</label>
-                <div class="input-group w-50">
-                  <input type="number" class="form-control" placeholder="Usia Kehamilan" />
-                  <span class="input-group-text">Week</span>
+                <div class="col-6">
+                  <label class="form-label fw-semibold">Usia Kehamilan (USG)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Usia Kehamilan" />
+                    <span class="input-group-text">Week</span>
+                  </div>
                 </div>
               </div>
               <div class="mb-3">
@@ -63,37 +67,42 @@
             </div>
           </div>
           <div class="col-md-6">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Biparietal Diameter (BPD)</label>
-              <div class="input-group w-50">
-                <input type="number" disabled class="form-control" />
-                <span class="input-group-text">CM</span>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold">Biparietal Diameter (BPD)</label>
+                <div class="input-group">
+                  <input type="number" disabled class="form-control" />
+                  <span class="input-group-text">CM</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold">Head Circumference (HC)</label>
+                <div class="input-group">
+                  <input type="number" disabled class="form-control" />
+                  <span class="input-group-text">CM</span>
+                </div>
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Head Circumference (HC)</label>
-              <div class="input-group w-50">
-                <input type="number" disabled class="form-control" />
-                <span class="input-group-text">CM</span>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-semibold">Abdominal Circumference (AC)</label>
+                <div class="input-group">
+                  <input type="number" disabled class="form-control" />
+                  <span class="input-group-text">CM</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold">Femur Length (FL)</label>
+                <div class="input-group">
+                  <input type="number" disabled class="form-control" />
+                  <span class="input-group-text">CM</span>
+                </div>
               </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Abdominal Circumference (AC)</label>
-              <div class="input-group w-50">
-                <input type="number" disabled class="form-control" />
-                <span class="input-group-text">CM</span>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Femur Length (FL)</label>
-              <div class="input-group w-50">
-                <input type="number" disabled class="form-control" />
-                <span class="input-group-text">CM</span>
-              </div>
-            </div>
+
             <div class="mb-3">
               <label class="form-label fw-semibold">Berat Janin (USG)</label>
-              <div class="input-group w-50">
+              <div class="input-group">
                 <input type="number" disabled class="form-control" />
                 <span class="input-group-text">G</span>
               </div>
@@ -114,12 +123,12 @@
                 placeholder="Masukkan Deskripsi"
               ></textarea>
             </div>
+            <div class="text-start">
+              <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
+            </div>
           </div>
         </div>
         <!-- Tombol Simpan -->
-        <div class="mt-4 text-end">
-          <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
-        </div>
       </form>
     </div>
   </div>

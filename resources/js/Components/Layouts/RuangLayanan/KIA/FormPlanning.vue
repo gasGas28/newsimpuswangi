@@ -24,7 +24,7 @@
         <div class="action-label">Pengobatan</div>
       </a>
     </div>
-    <!-- Form Aktif -->
+    <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
       <div v-if="activeFormPlanning === 'tindakan'" class="p-2">
         <h5 class="fw-semibold text-danger">Tindakan</h5>
@@ -249,19 +249,26 @@
   import { ref, computed, watch } from 'vue';
   import TindakanModal from './TindakanModal.vue';
 
-  // state aktif (diagnosa / skrining)
   const activeFormPlanning = ref(localStorage.getItem('activeFormPlanning') || 'tindakan');
 
   // Simpan kembali jika user ganti tab
   watch(activeFormPlanning, (val) => {
-    localStorage.setItem('activeFormPlanning', val);
+    localStorage.setItem('activeFromPlanning', val);
   });
   const toggleForm = (form) => {
     activeFormPlanning.value = form;
   };
 
   const props = defineProps({
+    DataPasien: Array,
+    diagnosa: Array,
     tindakan: Array,
+    riwayat: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    KunjunganAnc: Array,
+    DataDiagnosa: Array,
   });
 
   // Tindakan

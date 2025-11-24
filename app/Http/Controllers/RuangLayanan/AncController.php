@@ -19,6 +19,12 @@ use App\Models\RuangLayanan\SimpusDiagnosaaa;
 use App\Models\RuangLayanan\SimpusLoket;
 use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\tindakan;
+use App\Models\RuangLayanan\SimpusDetailResepObat;
+use App\Models\RuangLayanan\SimpusMasterObat;
+use App\Models\RuangLayanan\SimpusResepObat;
+
+
+
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Inertia\Inertia;
 
@@ -203,6 +209,7 @@ class AncController extends Controller
         $AlergiObat = Alergi::where('category', 2)->get();
         $KunjunganAnc = KunjunganAnc::all();
         $DataDiagnosa = SimpusDataDiagnosa::all();
+
         // dd($AlergiObat);
         // dd($riwayat);
         // dd($DataPasien);
