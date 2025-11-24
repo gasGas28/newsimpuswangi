@@ -6,18 +6,29 @@
         <a
           href="#"
           class="action-card medical-action"
+          :class="{ 'active-card': activeObjTKembang === 'dataAntropometri' }"
           @click.prevent="toggleForm('dataAntropometri')"
         >
           <div class="action-icon"><i class="bi bi-person-check"></i></div>
           <div class="action-label">Pengiriman Data Antropometri</div>
         </a>
-        <a href="#" class="action-card medical-action" @click.prevent="toggleForm('dataStimulasi')">
+        <a
+          href="#"
+          class="action-card medical-action"
+          :class="{ 'active-card': activeObjTKembang === 'dataStimulasi' }"
+          @click.prevent="toggleForm('dataStimulasi')"
+        >
           <div class="action-icon"><i class="bi bi-person-check"></i></div>
           <div class="action-label">
             Pengiriman Data SDIDTK (Stimulasi, Deteksi, dan Intervensi Dini Tumbuh Kembang)
           </div>
         </a>
-        <a href="#" class="action-card medical-action" @click.prevent="toggleForm('dataStatus')">
+        <a
+          href="#"
+          class="action-card medical-action"
+          :class="{ 'active-card': activeObjTKembang === 'dataStatus' }"
+          @click.prevent="toggleForm('dataStatus')"
+        >
           <div class="action-icon"><i class="bi bi-person-check"></i></div>
           <div class="action-label">
             Pengiriman Data Status Pertumbuhan dan Perkembangan, serta Data Lainnya
@@ -36,26 +47,30 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
-import DataAntropometri from './FormObjektif/DataAntropometri.vue';
-import DataStatus from './FormObjektif/DataStatus.vue';
-import DataStimulasi from './FormObjektif/DataStimulasi.vue';
-
+  import { ref, computed, watch } from 'vue';
+  import DataAntropometri from './FormObjektif/DataAntropometri.vue';
+  import DataStatus from './FormObjektif/DataStatus.vue';
+  import DataStimulasi from './FormObjektif/DataStimulasi.vue';
 
   const props = defineProps({
     diagnosa: Array,
   });
 
-  const activeForm = ref(null);
+  // Ambil tab terakhir dari localStorage
+  const activeObjTKembang = ref(localStorage.getItem('activeObjTKembang') || 'dataAntropometri');
 
+  // Simpan kembali jika user ganti tab
+  watch(activeObjTKembang, (val) => {
+    localStorage.setItem('activeObjTKembang', val);
+  });
   // Fungsi toggle form
   const toggleForm = (form) => {
-    activeForm.value = activeForm.value === form ? null : form;
+    activeObjTKembang.value = form;
   };
 
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
-    switch (activeForm.value) {
+    switch (activeObjTKembang.value) {
       case 'dataAntropometri':
         return DataAntropometri;
       case 'dataStatus':
@@ -83,7 +98,12 @@ import DataStimulasi from './FormObjektif/DataStimulasi.vue';
 
   .action-card:hover {
     background: #e9f2ff;
-    color: #0d6efd;
+    color: #10b981;
+  }
+
+  .active-card {
+    background: #10b981;
+    color: #fff;
   }
 
   .action-icon {

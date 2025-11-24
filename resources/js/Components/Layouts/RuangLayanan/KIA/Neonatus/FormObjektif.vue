@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
-      <h5 class="fw-semibold text-danger mb-0">Form Pengiriman Data Bayi / Balita</h5>
+      <h5 class="fw-semibold text-success mb-0">Form Pengiriman Data Bayi / Balita</h5>
     </div>
     <div class="card shadow-sm p-4 border-0 form-card">
       <div class="card-body">
@@ -10,6 +10,7 @@
           <a
             href="#"
             class="action-card medical-action"
+            :class="{ 'active-card': activeFormNeonatus === 'pemeriksaanApgra' }"
             @click.prevent="toggleForm('pemeriksaanApgra')"
           >
             <div class="action-icon"><i class="bi bi-person-check"></i></div>
@@ -18,18 +19,25 @@
           <a
             href="#"
             class="action-card medical-action"
+            :class="{ 'active-card': activeFormNeonatus === 'NeonatalEsensial' }"
             @click.prevent="toggleForm('NeonatalEsensial')"
           >
             <div class="action-icon"><i class="bi bi-person-check"></i></div>
             <div class="action-label">Neonatal Esensial</div>
           </a>
-          <a href="#" class="action-card medical-action" @click.prevent="toggleForm('headtoToe')">
+          <a
+            href="#"
+            class="action-card medical-action"
+            :class="{ 'active-card': activeFormNeonatus === 'headtoToe' }"
+            @click.prevent="toggleForm('headtoToe')"
+          >
             <div class="action-icon"><i class="bi bi-person-check"></i></div>
             <div class="action-label">Pemeriksaan Head to Toe</div>
           </a>
           <a
             href="#"
             class="action-card medical-action"
+            :class="{ 'active-card': activeFormNeonatus === 'beratBadanASI' }"
             @click.prevent="toggleForm('beratBadanASI')"
           >
             <div class="action-icon"><i class="bi bi-person-check"></i></div>
@@ -49,26 +57,29 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import Apgra from './Objektif/Apgra.vue';
   import FormBeratBadan from './Objektif/FormBeratBadan.vue';
   import FormHeadtoToe from './Objektif/FormHeadtoToe.vue';
   import FormNeonatus from './Objektif/Neonatus.vue';
 
-  const activeForm = ref('pemeriksaanApgra');
-
   const props = defineProps({
     diagnosa: Array,
   });
 
-  // Fungsi toggle form
+  const activeFormNeonatus = ref(localStorage.getItem('activeFormNeonatus') || 'pemeriksaanApgra');
+
+  // Simpan kembali jika user ganti tab
+  watch(activeFormNeonatus, (val) => {
+    localStorage.setItem('activeFormNeonatus', val);
+  });
   const toggleForm = (form) => {
-    activeForm.value = activeForm.value === form ? null : form;
+    activeFormNeonatus.value = form;
   };
 
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
-    switch (activeForm.value) {
+    switch (activeFormNeonatus.value) {
       case 'pemeriksaanApgra':
         return Apgra;
       case 'NeonatalEsensial':
@@ -90,15 +101,20 @@
     gap: 8px;
     padding: 10px 14px;
     border-radius: 8px;
-    background: #fbfbfc;
-    color: #141414;
+    background: #f9fafb;
+    color: #333;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
   }
 
   .action-card:hover {
     background: #e9f2ff;
-    color: #0d6efd;
+    color: #10b981;
+  }
+
+  .active-card {
+    background: #10b981;
+    color: #fff;
   }
 
   .action-icon {
@@ -108,9 +124,5 @@
 
   .action-label {
     font-weight: 500;
-  }
-  .form-card {
-    width: 100%;
-    margin: 0;
   }
 </style>

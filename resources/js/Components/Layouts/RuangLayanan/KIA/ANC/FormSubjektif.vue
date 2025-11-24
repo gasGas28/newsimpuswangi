@@ -41,14 +41,17 @@
   import FormDataKunjungan from './Subjektif/FormDataKunjungan.vue';
   import FormPemantauan from './Subjektif/FormPemantauan.vue';
 
-// Ambil tab terakhir dari localStorage
+  // Ambil tab terakhir dari localStorage
   const activeForm = ref(localStorage.getItem('activeForm') || 'pemeriksaanIbu');
 
   // Simpan kembali jika user ganti tab
   watch(activeForm, (val) => {
     localStorage.setItem('activeForm', val);
   });
-
+  // Fungsi toggle form
+  const toggleForm = (form) => {
+    activeForm.value = form;
+  };
 
   const props = defineProps({
     DataPasien: Object,
@@ -56,11 +59,6 @@
     diagnosa: Array,
     riwayat: Array,
   });
-
-  // Fungsi toggle form
-  const toggleForm = (form) => {
-    activeForm.value = form;
-  };
 
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {

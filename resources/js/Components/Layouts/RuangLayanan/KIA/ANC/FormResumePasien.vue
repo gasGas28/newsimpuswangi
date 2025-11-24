@@ -22,7 +22,6 @@
       :class="{ 'active-card': activeResume === 'obstetri' }"
       @click.prevent="toggleForm('obstetri')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Obstetri</div>
     </a>
 
@@ -32,7 +31,6 @@
       :class="{ 'active-card': activeResume === 'subjektif' }"
       @click.prevent="toggleForm('subjektif')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Subjektif</div>
     </a>
     <a
@@ -41,7 +39,6 @@
       :class="{ 'active-card': activeResume === 'objektif' }"
       @click.prevent="toggleForm('objektif')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Objektif</div>
     </a>
 
@@ -51,7 +48,6 @@
       :class="{ 'active-card': activeResume === 'assessment' }"
       @click.prevent="toggleForm('assessment')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Assessment</div>
     </a>
     <a
@@ -60,7 +56,6 @@
       :class="{ 'active-card': activeResume === 'imunisasi' }"
       @click.prevent="toggleForm('imunisasi')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Imunisasi</div>
     </a>
 
@@ -70,7 +65,6 @@
       :class="{ 'active-card': activeResume === 'planning' }"
       @click.prevent="toggleForm('planning')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Planning</div>
     </a>
     <a
@@ -79,10 +73,11 @@
       :class="{ 'active-card': activeResume === 'status_pasien' }"
       @click.prevent="toggleForm('status_pasien')"
     >
-      <div class="action-icon"><i class="bi bi-person-check"></i></div>
       <div class="action-label">Status Pasien</div>
     </a>
   </div>
+
+  <hr>
 
   <!-- Tempat munculnya form yang aktif -->
   <div class="mt-3">
@@ -505,7 +500,7 @@
     padding: 10px 14px;
     border-radius: 8px;
     background: #fbfbfc;
-    color: #141414;
+    color: #10b981;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
   }
@@ -518,11 +513,6 @@
   .active-card {
     background: #10b981;
     color: #fff;
-  }
-
-  .action-icon {
-    font-size: 1.25rem;
-    color: inherit;
   }
 
   .action-label {
