@@ -9,10 +9,11 @@ class Kabupaten extends Model
     protected $table = 'setup_kab';
     protected $primaryKey = 'NO_KAB';
     public $incrementing = false;
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     protected $fillable = ['NO_PROP', 'NO_KAB', 'NAMA_KAB'];
 
+    // Relasi ke provinsi
     public function provinsi()
     {
         return $this->belongsTo(Provinsi::class, 'NO_PROP', 'NO_PROP');
@@ -20,6 +21,7 @@ class Kabupaten extends Model
 
     public function kecamatans()
     {
-        return $this->hasMany(Kecamatan::class, 'NO_KAB', 'NO_KAB');
+        return $this->hasMany(Kecamatan::class, 'NO_KAB', 'NO_KAB')
+            ->where('NO_PROP', $this->NO_PROP);
     }
 }

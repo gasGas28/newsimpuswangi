@@ -186,15 +186,15 @@ Route::prefix('loket')->group(function () {
     // API untuk pencarian pasien
     Route::get('/api/pasien/search', [LoketController::class, 'apiSearch'])->name('api.pasien.search');
     Route::get('/api/check-jenis-pengunjung', [LoketController::class, 'checkJenisPengunjung'])->name('loket.api.check-jenis-pengunjung');
-    Route::get('/api/wilayah-otomatis', [LoketController::class, 'getWilayahOtomatis'])->name('loket.api.wilayah-otomatis');
+    Route::get('/api/wilayah-otomatis', [LoketController::class, 'getWilayahOtomatis'])->middleware('auth')->name('loket.api.wilayah-otomatis');
     Route::get('/api/pasien/{id}', function ($id) {
         return \App\Models\Pasien::findOrFail($id);
     });
 
     // Route untuk halaman pasien
     Route::get('/pasien/{id}', [LoketController::class, 'pasien'])->name('loket.pasien.show');
-    Route::get('/cetak_kartu/{id}', [LoketController::class, 'cetak_kartu'])->name('loket.cetak_kartu');
-    Route::get('/gen_barcode/{no_mr}', [LoketController::class, 'gen_barcode'])->name('loket.gen_barcode');
+    Route::get('/cetak-kartu/{id}', [LoketController::class, 'cetak_kartu'])->name('loket.cetak_kartu');
+    Route::get('/gen-barcode/{NO_MR}', [LoketController::class, 'gen_barcode'])->name('loket.gen_barcode');
 
     // Route untuk operasi CRUD
     Route::post('/simpan', [LoketController::class, 'simpan'])->name('loket.simpan');

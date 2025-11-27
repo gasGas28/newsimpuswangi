@@ -38,7 +38,6 @@ class Loket extends Model
         return $this->belongsTo(Poli::class, 'kdPoli', 'kdPoli');
     }
 
-    // Relasi ke unit detail
     public function unitDetail()
     {
         return $this->belongsTo(UnitDetail::class, 'unitId', 'id_detail');

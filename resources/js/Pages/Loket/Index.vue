@@ -451,7 +451,7 @@
               <thead class="text-center" style="background-color: #90ee90">
                 <tr>
                   <th>TANGGAL<br />NO. URUT<br />(pcare)</th>
-                  <th>NO ANTRIAN<br />POLI</th>
+                  <th>NO. ANTRIAN<br />POLI</th>
                   <th>NO. MR<br />NAMA (UMUR)<br />NIK</th>
                   <th>ALAMAT<br />KECAMATAN-DESA</th>
                   <th>NO. BPJS<br />STATUS</th>
@@ -464,28 +464,32 @@
               <tbody>
                 <tr v-if="loket.data.length > 0" v-for="item in loket.data" :key="item.idLoket">
                   <td>
-                    {{ formatDate(item.tglKunjungan) }}<br />
-                    {{ item.noUrut }}<br />
+                    {{ formatDate(item.tglKunjungan) }}
                     <small v-if="item.noPcare">({{ item.noPcare }})</small>
                   </td>
-                  <td>{{ item.noAntrian }}<br />{{ item.poli?.nmPoli }}</td>
                   <td>
-                    {{ item.pasien?.NO_MR }}<br />
-                    {{ item.pasien?.NAMA_LGKP }}<br />
-                    {{ item.pasien?.NIK }}
+                    {{ item.noAntrian || `A${item.noUrut?.padStart(3, '0')}` }}
                   </td>
                   <td>
-                    {{ item.pasien?.ALAMAT }}<br />
-                    {{ item.pasien?.kecamatan?.NAMA_KEC }} - {{ item.pasien?.kelurahan?.NAMA_KEL }}
+                    <!-- PERBAIKI: item.NO_MR (bukan item.pasien?.NO_MR) -->
+                    {{ item.NO_MR }}<br />
+                    {{ item.NAMA_LGKP }} ({{ item.umur_tahun || '-' }} th)<br />
+                    {{ item.NIK }}
                   </td>
                   <td>
-                    {{ item.pasien?.noKartu || '-' }}<br />
+                    <!-- PERBAIKI: formatAlamatUntukTabel(item) (bukan item.pasien) -->
+                    {{ formatAlamatUntukTabel(item).rtRw }}<br />
+                    {{ item.nama_kecamatan || '-' }} - {{ item.nama_kelurahan || '-' }}
+                  </td>
+                  <td>
+                    <!-- PERBAIKI: item.noKartu (bukan item.pasien?.noKartu) -->
+                    {{ item.noKartu || '-' }}<br />
                     {{ item.statusKartu || '-' }}
                   </td>
-                  <td>{{ item.poli?.nmPoli }}</td>
+                  <td>{{ item.nmPoli }}</td>
                   <td>
-                    {{ item.unit }}<br />
-                    {{ item.subUnit || '-' }}
+                    {{ item.kategori_unit || '-' }}<br />
+                    {{ item.nama_unit || '-' }}
                   </td>
                   <td>
                     {{ item.action || '-' }}<br />
@@ -496,10 +500,15 @@
                     <button class="btn btn-sm btn-info">
                       <i class="bi bi-eye"></i>
                     </button>
+                    <button
+                      class="btn btn-sm btn-success"
+                      title="Cetak Kartu Pasien"
+                      @click="cetakKartuPasien(item.pasien_id)"
+                      :disabled="!item.pasien_id"
+                    >
+                      <i class="bi bi-printer"></i>
+                    </button>
                   </td>
-                </tr>
-                <tr v-else>
-                  <td colspan="9" class="text-center">No matching records found</td>
                 </tr>
               </tbody>
             </table>
@@ -635,12 +644,6 @@
     return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
   });
 
-  // Computed untuk mendapatkan nama wilayah berdasarkan ID
-  const namaWilayah = computed(() => {
-    if (!form.wilayah) return '- Pilih -';
-    return wilayahList.value[form.wilayah] || '- Pilih -';
-  });
-
   // Computed untuk jenisPengunjung
   const jenisPengunjung = computed({
     get: () => {
@@ -679,7 +682,7 @@
       const mappings = {
         'RJTP (RAWAT JALAN)': '10',
         'RJTL (RAWAT JALAN LANJUTAN)': '20',
-        Promotif: '50',
+        'Promotif': '50',
       };
       form.kdTkp = mappings[value] || '10';
     },
@@ -897,39 +900,48 @@
   const formatKecamatanKelurahan = computed(() => {
     const pasien = selectedPasien.value;
 
-    // Cek jika data sudah dalam bentuk object (sudah ada nama)
-    if (
-      pasien.kecamatan &&
-      pasien.kecamatan.NAMA_KEC &&
-      pasien.kelurahan &&
-      pasien.kelurahan.NAMA_KEL
-    ) {
-      return `${pasien.kecamatan.NAMA_KEC} - ${pasien.kelurahan.NAMA_KEL}`;
+    if (pasien.nama_kecamatan && pasien.nama_kelurahan) {
+      return `${pasien.nama_kecamatan} - ${pasien.nama_kelurahan}`;
     }
 
-    // Jika masih kode, lakukan mapping
-    const kodeKecamatan = pasien.NO_KEC;
-    const kodeKelurahan = pasien.NO_KEL;
-
-    const namaKecamatan = masterKecamatan.value[kodeKecamatan] || kodeKecamatan;
-
-    // Untuk kelurahan, kita perlu load berdasarkan kecamatan
-    let namaKelurahan = kodeKelurahan;
-
-    if (kodeKecamatan && kodeKelurahan && masterKelurahan.value[kodeKecamatan]) {
-      namaKelurahan = masterKelurahan.value[kodeKecamatan][kodeKelurahan] || kodeKelurahan;
-    }
-
-    if (namaKecamatan && namaKelurahan) {
-      return `${namaKecamatan} - ${namaKelurahan}`;
-    } else if (namaKecamatan) {
-      return namaKecamatan;
-    } else if (namaKelurahan) {
-      return namaKelurahan;
-    } else {
-      return '';
-    }
+    return `${pasien.NO_KEC} ${pasien.NO_KEL}`;
   });
+
+  const formatAlamatUntukTabel = (item) => {
+    if (!item) return { rtRw: '', wilayah: '' };
+
+    // PERBAIKI: Akses langsung dari item (bukan item.pasien)
+    const rtRw = item.NO_RT || item.NO_RW ? `RT ${item.NO_RT || '?'}/RW ${item.NO_RW || '?'}` : '';
+
+    const wilayah =
+      item.nama_kecamatan && item.nama_kelurahan
+        ? `${item.nama_kecamatan} - ${item.nama_kelurahan}`
+        : `Kec.${item.NO_KEC || '?'} Kel.${item.NO_KEL || '?'}`;
+
+    return { rtRw, wilayah };
+  };
+
+  const cetakKartuPasien = (pasienId) => {
+    if (pasienId) {
+      // Navigasi ke halaman cetak kartu di window yang sama
+      router.visit(route('loket.cetak_kartu', pasienId));
+    } else {
+      alert('Data pasien tidak tersedia untuk dicetak');
+    }
+  };
+
+  // const debugUnitDetailContent = () => {
+  //   if (props.loket.data.length > 0) {
+  //     const item = props.loket.data[0];
+  //     console.log('=== DEBUG UNIT_DETAIL CONTENT ===');
+  //     console.log('unit_detail object:', item.unit_detail);
+  //     console.log('Keys in unit_detail:', Object.keys(item.unit_detail || {}));
+  //     console.log('master_unit:', item.unit_detail?.master_unit);
+  //     console.log('Keys in master_unit:', Object.keys(item.unit_detail?.master_unit || {}));
+  //     console.log('nama_unit:', item.unit_detail?.nama_unit);
+  //     console.log('id_kategori:', item.unit_detail?.id_kategori);
+  //   }
+  // };
 
   // Fungsi pencarian pasien
   const searchPasien = async (type) => {
@@ -1030,11 +1042,18 @@
   // Fungsi untuk load kelurahan berdasarkan kecamatan
   const loadKelurahanByKecamatan = async (kodeKecamatan) => {
     try {
-      const response = await fetch(route('loket.api.kelurahan') + '?kecamatan=' + kodeKecamatan);
+      const response = await fetch(
+        route('loket.api.kelurahan') +
+          '?kecamatan=' +
+          kodeKecamatan +
+          '&propinsi=' +
+          selectedPasien.value.NO_PROP +
+          '&kabupaten=' +
+          selectedPasien.value.NO_KAB
+      );
+
       if (response.ok) {
         const dataKelurahan = await response.json();
-
-        // Simpan ke masterKelurahan dengan struktur: { [kodeKecamatan]: { [kodeKelurahan]: nama } }
         masterKelurahan.value[kodeKecamatan] = {};
         dataKelurahan.forEach((kel) => {
           masterKelurahan.value[kodeKecamatan][kel.NO_KEL] = kel.NAMA_KEL;
@@ -1225,6 +1244,12 @@
     filteredPoliList.value = props.poliList;
     loadMasterData();
     loadMasterWilayah();
+    // debugUnitDetailContent();
+    console.log('=== DEBUG LOKET DATA STRUCTURE ===');
+    if (props.loket.data.length > 0) {
+      console.log('Sample item:', props.loket.data[0]);
+      console.log('Available keys:', Object.keys(props.loket.data[0]));
+    }
 
     // Set initial values untuk computed properties
     jenisPengunjung.value = 'Pengunjung Baru';
