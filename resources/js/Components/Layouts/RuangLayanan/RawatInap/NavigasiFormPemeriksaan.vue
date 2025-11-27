@@ -4,36 +4,27 @@
       <div class="d-flex position-relative align-items-center">
         <div class="d-flex position-relative gap-2">
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'subjective' ? 'active text-primary fw-bold' : 'text-muted'"
-            @click.prevent="changeTab('subjective')">
-            Subjective
+            :class="currentTab === 'anamnesis' ? 'active text-primary' : 'text-muted'"
+            @click.prevent="changeTab('anamnesis')">
+            Anamnesis Rawat Inap
           </a>
 
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'objective' ? 'active text-primary fw-bold' : 'text-muted'"
-            @click.prevent="changeTab('objective')">
-            Objective
-          </a>
-
-          <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'assesment' ? 'active text-primary fw-bold' : 'text-muted'"
+            :class="currentTab === 'assesment' ? 'active text-primary' : 'text-muted'"
             @click.prevent="changeTab('assesment')">
             Assesment
           </a>
-          <a v-if="props.kdPoli == '997'" href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'Gizi' ? 'active text-primary fw-bold' : 'text-muted'" @click.prevent="changeTab('Gizi')">
-            Gizi
-          </a>
 
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'planning' ? 'active text-primary fw-bold' : 'text-muted'"
+            :class="currentTab === 'planning' ? 'active text-primary' : 'text-muted'"
             @click.prevent="changeTab('planning')">
             Planning
           </a>
+
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'status_pasien' ? 'active text-primary fw-bold' : 'text-muted'"
-            @click.prevent="changeTab('status_pasien')">
-            Status Pasien
+            :class="currentTab === 'visit' ? 'active text-primary' : 'text-muted'"
+            @click.prevent="changeTab('visit')">
+            Visit
           </a>
 
           <!-- Active Indicator Line -->
@@ -62,46 +53,19 @@ const props = defineProps({
   },
   kdPoli: String
 });
-console.log('kdPoli', props.kdPoli)
 
 const emit = defineEmits(['change-currentTab']);
 
 function changeTab(tabName) {
   emit('change-currentTab', tabName);
-  //alert(tabName)
 }
 
 const indicatorStyle = ref({ display: 'none' });
 
-// function updateIndicator() {
-//   const tabs = {
-//     subjective: 0,
-//     objective: 1,
-//     assesment: 2,
-//     Gizi: 3,
-//     planning: 4,
-//     status_pasien: 5
-//   };
-
-
-//   const activeIndex = tabs[props.currentTab];
-//   const tabElements = document.querySelectorAll('.tab-item');
-
-//   if (tabElements.length > 0 && activeIndex >= 0) {
-//     const activeTab = tabElements[activeIndex];
-//     indicatorStyle.value = {
-//       width: `${activeTab.offsetWidth}px`,
-//       transform: `translateX(${activeTab.offsetLeft}px)`,
-//       transition: 'all 0.3s ease'
-//     };
-//   } else {
-//     indicatorStyle.value = { display: 'none' };
-//   }
-// }
 function updateIndicator() {
   const tabElements = document.querySelectorAll('.tab-item');
   const activeTab = Array.from(tabElements).find(
-    el => el.textContent.trim().toLowerCase() === props.currentTab.toLowerCase()
+    el => el.textContent.trim().toLowerCase().includes(props.currentTab.toLowerCase())
   );
 
   if (activeTab) {
@@ -115,7 +79,6 @@ function updateIndicator() {
   }
 }
 
-
 onMounted(() => {
   updateIndicator();
 });
@@ -124,3 +87,22 @@ watch(() => props.currentTab, () => {
   updateIndicator();
 });
 </script>
+
+<style scoped>
+.tab-item {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  font-weight: 600;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: -2px;
+  height: 2px;
+  background: #007bff;
+  border-radius: 1px;
+}
+</style>

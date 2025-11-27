@@ -146,7 +146,8 @@ class PoliBpUmumController extends Controller
             return Inertia::render('Ruang_Layanan/Gizi/pasien_poli', $data);
         } elseif ($idPoli == '097') {
             return Inertia::render('Ruang_Layanan/Sanitasi/pasien_poli', $data);
-
+        } elseif ($idPoli == '098') {
+            return Inertia::render('Ruang_Layanan/RawatInap/index', $data);
         } else {
             return Inertia::render('Ruang_Layanan/UGD/pasien_poli', $data);
         }
@@ -436,7 +437,6 @@ class PoliBpUmumController extends Controller
             ->where('idAnamnesa', $idAnam)
             ->update($dataUpdate);
         return redirect()->back();
-
     }
 
     public function mulaiPemeriksaanPasien(Request $request)
@@ -511,7 +511,6 @@ class PoliBpUmumController extends Controller
     {
         SimpusDataDiagnosa::where('idDiagnosa', $idDiagnosa)->delete();
         return redirect()->back();
-
     }
 
     public function setTindakan(Request $request)
@@ -724,7 +723,6 @@ class PoliBpUmumController extends Controller
     {
         SimpusDetailResepObat::where('id_resep_detail', $idDetailResepObat)->delete();
         return redirect()->back();
-
     }
 
     public function simpanRujukan(Request $request, $idLoket, $idPelayanan)
@@ -780,7 +778,6 @@ class PoliBpUmumController extends Controller
             }
 
         } elseif ($request->status_pulang == 6) {
-
         } else {
             SimpusPelayanan::where('idPelayanan', $idPelayanan)->update([
                 'sudahDilayani' => 1,
@@ -801,7 +798,6 @@ class PoliBpUmumController extends Controller
             'idPoli' => $idPoli,
             'idPelayanan' => $idPelayanan
         ]);
-
     }
 
     public function createSuratKeterangan($idPoli, $idPelayanan)
@@ -948,7 +944,6 @@ class PoliBpUmumController extends Controller
             'suket' => $suket,
             'tenagaMedisAskep' => $TenagaMedisAskep
         ]);
-
     }
 
     public function updateSuket(Request $request)
@@ -1113,7 +1108,6 @@ class PoliBpUmumController extends Controller
             'provider' => $provider,
             'poliFktl' => $poliFktl
         ]);
-
     }
 
     public function simpanSuratRujuk(Request $request, $idPoli, $idSurat = null)
@@ -1153,7 +1147,6 @@ class PoliBpUmumController extends Controller
                 'created_by' => Auth()->user()->unit,
                 'modified_date' => now()
             ]);
-
         } else {
             // dd($unit);
             SuratRujuk::create([
@@ -1173,7 +1166,6 @@ class PoliBpUmumController extends Controller
         }
 
         return redirect()->back();
-
     }
 
     public function cetakRujukan($idSurat)
@@ -1249,7 +1241,6 @@ class PoliBpUmumController extends Controller
         return Inertia::render('Ruang_Layanan/Umum/cppt', [
             'riwayatPasien' => $riwayatPasien
         ]);
-
     }
 
     public function getPelayanan($idLoket, $idPelayanan)
@@ -1403,8 +1394,6 @@ class PoliBpUmumController extends Controller
         ]));
 
         return redirect()->back();
-
-
     }
     public function simpanSanitasi(Request $request, $idPelayanan)
     {
@@ -1438,7 +1427,6 @@ class PoliBpUmumController extends Controller
             'sudahDilayani' => 1
         ]);
         return redirect()->back();
-
     }
 
     public function popUpFormRujukLanjut()

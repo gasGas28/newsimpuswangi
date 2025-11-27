@@ -156,6 +156,51 @@
 
         </div>
       </div>
+
+      <!-- Modal Pilih Kamar -->
+      <div v-if="showPilihKamarModal" class="modal-overlay">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h5 class="m-0">Pilih Kamar</h5>
+            <button class="btn-close" @click="closePilihKamar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tanggal Masuk</label>
+              <input type="datetime-local" class="form-control" v-model="form.ranapMsk" readonly />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama Kamar</label>
+              <select class="form-select" v-model="form.kamarId" @change="ambilBed">
+                <option value="">Pilih Kamar</option>
+                <option v-for="kmr in daftarKamar" :key="kmr.id" :value="kmr.id">{{ kmr.nama }}</option>
+              </select>
+              <small class="text-muted" v-if="daftarKamar.length === 0">Belum ada data kamar.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama Bed</label>
+              <select class="form-select" v-model="form.bedId">
+                <option value="">Pilih Bed</option>
+                <option v-for="bed in daftarBed" :key="bed.id" :value="bed.id" :disabled="bed.disabled">{{ bed.nama }}</option>
+              </select>
+              <small class="text-muted" v-if="form.kamarId && daftarBed.length === 0">Belum ada bed untuk kamar ini.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Opsi</label>
+              <select class="form-select" v-model="form.pilihan">
+                <option value="1">Masuk</option>
+                <option value="2">Pindah Kamar</option>
+                <option value="3">Salah Kamar</option>
+                <option value="4">Pasien Keluar</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="closePilihKamar">Tutup</button>
+            <button class="btn btn-primary" @click="simpanKamar">Simpan</button>
+          </div>
+        </div>
+      </div>
     </div>
   </template>
 
@@ -238,4 +283,41 @@ function changePage(url) {
 }
 
 </script>
-<style></style>
+<style>
+/***** Modal sederhana *****/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.modal-container {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-header, .modal-footer {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header { display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 1rem; }
+.btn-close {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+}
+
+/* Menyesuaikan style disabled option seperti referensi */
+select option:disabled {
+  color: #000;
+  background: #e0e0eb;
+}
+</style>

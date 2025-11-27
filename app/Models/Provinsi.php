@@ -9,7 +9,7 @@ class Provinsi extends Model
     protected $table = 'setup_prop';
     protected $primaryKey = 'NO_PROP';
     public $incrementing = false;
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     protected $fillable = ['NO_PROP', 'NAMA_PROP'];
 
