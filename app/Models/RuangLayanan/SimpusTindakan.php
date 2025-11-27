@@ -2,6 +2,7 @@
 
 namespace App\Models\RuangLayanan;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class SimpusTindakan extends Model
@@ -36,5 +37,20 @@ class SimpusTindakan extends Model
         'deskripsi',
         'id_procedure'
     ];
+    public function SimpusPoli()
+    {
+        return $this->belongsTo(SimpusPoliFKTP::class, 'kdPoli', 'kdPoli');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'createdBy', 'id');
+    }
+
+    public function parameteruji()
+    {
+        return $this->belongsTo(ParameterUji::class, 'kdTindakan', 'kode_parameter');
+    }
+
 }
 

@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
-    <div class="bg-warning d-inline-block fw-bold mb-4 ">
-      <span>Tombol "Simpan" ada di tab "Tenaga medis"</span>
-    </div>
+  <div class="container" v-if="props.dataAnamnesa">
+     <div class="fw-bold mb-4">
+                <h6 class="fw-bold mb-3 bg-primary bg-opacity-10 d-inline-block p-2 rounded-3">Tombol "Simpan" ada di tab "Tenaga medis"</h6>
+              </div>
     <form @submit.prevent="submitForm">
       <div class="card shadow-sm rounded-4 border-0">
         <div class="border rounded rounded-bottom-0 shadow-sm d-flex gap-4 p-3">
@@ -12,7 +12,7 @@
           <a href="" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'status_generalis' }"
             @click.prevent="currrentSubTabObjective = 'status_generalis'">Status Generalis ></a>
-          <a v-if="props.halaman === 'gigi'" class="text-decoration-none text-primary"
+          <a href="" v-if="props.halaman === 'gigi'" class="text-decoration-none text-primary"
             :class="{ 'text-primary fw-bold': currrentSubTabObjective === 'pemeriksaan_intra_oral_gigi' }"
             @click.prevent="currrentSubTabObjective = 'pemeriksaan_intra_oral_gigi'">Pemeriksaan Intra Oral Gigi ></a>
           <a href="" class="text-decoration-none text-primary"
@@ -47,67 +47,68 @@
             <div class="mb-3">
               <label class="form-label fw-bold">Kesadaran</label>
               <select class="form-control" id="kesadaran" v-model="form.kesadaran">
+                <option value="" selected>--Pilih--</option>
                 <option v-for="item in dataKesadaran" :key="item.kdSadar" :value="item.kdSadar">
                   {{ item.nmSadar }}
                 </option>
               </select>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imt">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Keterangan IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.keterangan_imt">
-            </div>
-
             <div class="mb-3">
               <label class="form-label fw-bold">Tinggi Badan (cm)</label>
-              <input type="text" class="form-control" v-model="form.tinggi_badan">
+              <input type="number" class="form-control" v-model="form.tinggi_badan" @change="cekimt">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Berat Badan (kg)</label>
-              <input type="text" class="form-control" v-model="form.berat_badan">
+              <input type="number" class="form-control" v-model="form.berat_badan" @change="cekimt">
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">IMT</label>
+              <input type="number" class="form-control bg-light" v-model="form.imt" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Keterangan IMT</label>
+              <input type="text" class="form-control bg-light" v-model="form.imtKet" readonly>
+            </div>
+
+
           </div>
 
           <div class="col-6">
             <div class="mb-3">
               <label class="form-label fw-bold">Lingkar Perut (cm)</label>
-              <input type="text" class="form-control" v-model="form.lingkar_perut">
+              <input type="number" class="form-control" v-model="form.lingkar_perut">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Lingkar Lengan (cm)</label>
-              <input type="text" class="form-control" v-model="form.lingkar_lengan">
+              <input type="number" class="form-control" v-model="form.lingkar_lengan">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Sistole (mmHg)</label>
-              <input type="text" class="form-control" v-model="form.sistole">
+              <input type="number" class="form-control" v-model="form.sistole">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Diastole (mmHg)</label>
-              <input type="text" class="form-control" v-model="form.diastole">
+              <input type="number" class="form-control" v-model="form.diastole">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Resp. Rate (bpm)</label>
-              <input type="text" class="form-control" v-model="form.resp_rate">
+              <input type="number" class="form-control" v-model="form.resp_rate">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Heart Rate (bpm)</label>
-              <input type="text" class="form-control" v-model="form.heart_rate">
+              <input type="number" class="form-control" v-model="form.heart_rate">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Suhu (°C)</label>
-              <input type="text" class="form-control" v-model="form.suhu">
+              <input type="number " class="form-control" v-model="form.suhu">
             </div>
           </div>
         </div>
@@ -291,11 +292,20 @@
         <div class="card-body" v-if="currrentSubTabObjective === 'tenaga_medis'">
           <div class="row">
             <div class="col-6">
-              <slot name="status_pasien">
-              </slot>
+              <div v-if="props.idPoli == '002'">
+                <label for="" class="fw-bold">Status</label>
+                <select class="form-control my-3" v-model="form.statusPasien">
+                  <option value="" selected>-- Pilih --</option>
+                  <option value="1">ANAK SEKOLAH</option>
+                  <option value="2">APRAS</option>
+                  <option value="3">BUMIL</option>
+                  <option value="4">UMUM</option>
+                </select>
+              </div>
               <label for="" class="fw-bold">Tenaga Media Askep</label>
               <select class="form-control my-3" name="" id="tenaga_medis_askep" v-model="form.tenaga_medis_askep">
-                <option value="pract1">Practioner 1</option>
+                <option value="" selected>-- Pilih --</option>
+                <option v-for="item in props.tenagaMedisAskep" :value=item.idDokter> {{ item.nmDokter }}</option>
               </select>
               <button type="submit" class="btn btn-success">Simpan</button>
             </div>
@@ -303,6 +313,9 @@
         </div>
       </div>
     </form>
+  </div>
+  <div v-else class="alert alert-warning text-center py-3 rounded shadow-sm">
+    <strong> INPUT SUBJECTIVE TERLEBIH DAHULU</strong>
   </div>
 </template>
 
@@ -313,6 +326,7 @@ const currrentSubTabObjective = ref('pemeriksaan_fisik');
 import FormPemeriksaanIntraOralGigi from './FormPemeriksaanIntraOralGigi.vue';
 const emit = defineEmits(['dataAnamnesa-update']);
 import { watch } from 'vue';
+import Swal from 'sweetalert2'
 
 const props = defineProps({
   currrentSub: String,
@@ -321,54 +335,57 @@ const props = defineProps({
   dataAnamnesa: Object,
   routeName: String,
   statusPasien: String,
+  tenagaMedisAskep: Object,
+  idLoket: String,
+  idPoli: String
 });
-console.log(props.halaman, 'data anamnesa dari tab objective');
+console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
 
 const form = useForm({
-  idAnamnesa: props.dataAnamnesa.idAnamnesa,
-  tanggal_anamnesa: props.dataAnamnesa.tglAnamnesa,
-  keadaan_umum: props.dataAnamnesa.keadaanUmum,
-  kesadaran: props.dataAnamnesa.kdSadar,
-  imt: props.dataAnamnesa.imt,
-  keterangan_imt: props.dataAnamnesa.imtKet,
-  tinggi_badan: props.dataAnamnesa.tinggiBadan,
-  berat_badan: props.dataAnamnesa.beratBadan,
-  lingkar_perut: props.dataAnamnesa.lingkarPerut,
-  lingkar_lengan: props.dataAnamnesa.lingkarTangan,
-  sistole: props.dataAnamnesa.sistole,
-  diastole: props.dataAnamnesa.diastole,
-  resp_rate: props.dataAnamnesa.respRate,
-  heart_rate: props.dataAnamnesa.heartRate,
-  suhu: props.dataAnamnesa.suhu,
+  idAnamnesa: props.dataAnamnesa?.idAnamnesa ?? '',
+  tanggal_anamnesa: props.dataAnamnesa?.tglAnamnesa ?? '',
+  keadaan_umum: props.dataAnamnesa?.keadaanUmum ?? '',
+  kesadaran: props.dataAnamnesa?.kdSadar ?? '',
+  imt: props.dataAnamnesa?.imt ?? '',
+  imtKet: props.dataAnamnesa?.imtKet ?? '',
+  tinggi_badan: props.dataAnamnesa?.tinggiBadan ?? '',
+  berat_badan: props.dataAnamnesa?.beratBadan ?? '',
+  lingkar_perut: props.dataAnamnesa?.lingkarPerut ?? '',
+  lingkar_lengan: props.dataAnamnesa?.lingkarTangan ?? '',
+  sistole: props.dataAnamnesa?.sistole ?? '',
+  diastole: props.dataAnamnesa?.diastole ?? '',
+  resp_rate: props.dataAnamnesa?.respRate ?? '',
+  heart_rate: props.dataAnamnesa?.heartRate ?? '',
+  suhu: props.dataAnamnesa?.suhu ?? '',
 
-  jantung: props.dataAnamnesa.thoraxJantung ?? 'NORMAL',
-  ket_jantung: props.dataAnamnesa.thoraxJantungKet,
-  pulmo: props.dataAnamnesa.thoraxPulmo ?? 'NORMAL',
-  ket_pulmo: props.dataAnamnesa.thoraxPulmoKet,
-  abdomen_atas: props.dataAnamnesa.abdomanAtas ?? 'NORMAL',
-  ket_abdomen_atas: props.dataAnamnesa.abdomanAtasKet,
-  abdomen_bawah: props.dataAnamnesa.abdomanBawah ?? 'NORMAL',
-  ket_abdomen_bawah: props.dataAnamnesa.abdomanBawahket,
-  extrimitas_atas: props.dataAnamnesa.extrimitasAtas ?? 'NORMAL',
-  ket_extrimitas_atas: props.dataAnamnesa.extrimitasAtasKet,
-  extrimitas_bawah: props.dataAnamnesa.extrimitasBawah ?? 'NORMAL',
-  ket_extrimitas_bawah: props.dataAnamnesa.extrimitasBawahKet,
-  kepala: props.dataAnamnesa.kepala ?? 'NORMAL',
-  ket_kepala: props.dataAnamnesa.kepalaKet,
-  mata: props.dataAnamnesa.mata ?? 'NORMAL',
-  ket_mata: props.dataAnamnesa.mataKet,
-  telinga: props.dataAnamnesa.telinga ?? 'NORMAL',
-  ket_telinga: props.dataAnamnesa.telingatKet,
-  leher: props.dataAnamnesa.leher ?? 'NORMAL',
-  ket_leher: props.dataAnamnesa.leherKet,
-  tenaga_medis_askep: props.dataAnamnesa.tenagaMedisAskep,
+  jantung: props.dataAnamnesa?.thoraxJantung ?? 'NORMAL',
+  ket_jantung: props.dataAnamnesa?.thoraxJantungKet ?? '',
+  pulmo: props.dataAnamnesa?.thoraxPulmo ?? 'NORMAL',
+  ket_pulmo: props.dataAnamnesa?.thoraxPulmoKet ?? '',
+  abdomen_atas: props.dataAnamnesa?.abdomanAtas ?? 'NORMAL',
+  ket_abdomen_atas: props.dataAnamnesa?.abdomanAtasKet ?? '',
+  abdomen_bawah: props.dataAnamnesa?.abdomanBawah ?? 'NORMAL',
+  ket_abdomen_bawah: props.dataAnamnesa?.abdomanBawahket ?? '',
+  extrimitas_atas: props.dataAnamnesa?.extrimitasAtas ?? 'NORMAL',
+  ket_extrimitas_atas: props.dataAnamnesa?.extrimitasAtasKet ?? '',
+  extrimitas_bawah: props.dataAnamnesa?.extrimitasBawah ?? 'NORMAL',
+  ket_extrimitas_bawah: props.dataAnamnesa?.extrimitasBawahKet ?? '',
+  kepala: props.dataAnamnesa?.kepala ?? 'NORMAL',
+  ket_kepala: props.dataAnamnesa?.kepalaKet ?? '',
+  mata: props.dataAnamnesa?.mata ?? 'NORMAL',
+  ket_mata: props.dataAnamnesa?.mataKet ?? '',
+  telinga: props.dataAnamnesa?.telinga ?? 'NORMAL',
+  ket_telinga: props.dataAnamnesa?.telingatKet ?? '',
+  leher: props.dataAnamnesa?.leher ?? 'NORMAL',
+  ket_leher: props.dataAnamnesa?.leherKet ?? '',
+  tenaga_medis_askep: props.dataAnamnesa?.tenagaMedisAskep ?? '',
 
-  perkusi: props.dataAnamnesa.perkusi ?? '',
-  druk: props.dataAnamnesa.druk ?? '',
-  palpasi: props.dataAnamnesa.palpasi ?? '',
-  luxasi: props.dataAnamnesa.luxasi ?? '',
-  vitalitas: props.dataAnamnesa.vitalitas ?? '',
-  statusPasien: props.statusPasien ?? ''
+  perkusi: props.dataAnamnesa?.perkusi ?? '',
+  druk: props.dataAnamnesa?.druk ?? '',
+  palpasi: props.dataAnamnesa?.palpasi ?? '',
+  luxasi: props.dataAnamnesa?.luxasi ?? '',
+  vitalitas: props.dataAnamnesa?.vitalitas ?? '',
+  statusPasien: props.dataAnamnesa?.statusPasien ?? ''
 });
 
 function changeInputKet(field, ketfield) {
@@ -378,16 +395,66 @@ function changeInputKet(field, ketfield) {
 }
 
 function submitForm() {
-  form.post(route(props.routeName), {
+  form.post(route(props.routeName, {
+    idAnam: props.dataAnamnesa?.idAnamnesa ?? ''
+  }), {
     preserveScroll: true,
     onSuccess: () => {
-      alert("Anamnesa Objective tersimpan");
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Data Anamnesa Objective Tersimpan!',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
       emit('dataAnamnesa-update');
     },
+    onError: (errors) => {
+      // Ambil error pertama dari form.errors
+      const firstError = Object.values(errors)[0];
+      Swal.fire({
+        title: 'Error',
+        text: firstError || 'Terjadi kesalahan!',
+        icon: 'error',
+        timer: 1600,
+        showConfirmButton: false
+      });
+    }
+
   })
 }
 watch(() => props.statusPasien, (newVal) => {
   form.statusPasien = newVal;
 });
+
+function cekimt() {
+  let berat = parseFloat(form.berat_badan);
+  let tinggi = parseFloat(form.tinggi_badan);
+
+  let imt1 = (berat / (tinggi * tinggi));
+  let meter = 10000;
+  let imt = parseFloat((imt1 * meter).toFixed(2));
+  console.log('tipe imt', imt)
+
+  let ket = "";
+  if (imt < 18.5) {
+    ket = 'Berat Badan Kurang';
+  } else if (imt >= 18.5 && imt <= 22.9) {
+    ket = 'Berat Badan Normal';
+  } else if (imt == 23.0) {
+    ket = 'Kelebihan Berat Badan';
+  } else if (imt >= 23.1 && imt <= 24.9) {
+    ket = 'Berisiko Menjadi Obes';
+  } else if (imt >= 25.0 && imt <= 29.9) {
+    ket = 'Obes I';
+  } else if (imt >= 30.0) {
+    ket = 'Obes II';
+  }
+
+  if (berat && tinggi) {
+    form.imt = imt;
+    form.imtKet = ket;
+  }
+}
 
 </script>
