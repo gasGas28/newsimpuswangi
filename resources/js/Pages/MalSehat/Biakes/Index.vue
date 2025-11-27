@@ -13,11 +13,11 @@ const entries = ref([
   { nama: 'Pembiayaan Jaminan Sehat', jumlah: 0 },
 ])
 
-function getIcon(nama) {
+function getIconClass(nama) {
   if (nama.includes('Jaminan')) {
-    return 'https://img.icons8.com/ios-filled/50/medical-insurance.png'
+    return { icon: 'bi bi-shield-check', bg: '#4682B4' } // Hijau untuk jaminan kesehatan
   }
-  return 'https://img.icons8.com/ios-filled/50/info.png'
+  return { icon: 'bi bi-info-circle', bg: '#6b7280' }
 }
 
 function goToLayanan(nama) {
@@ -25,50 +25,80 @@ function goToLayanan(nama) {
     router.get('/mal-sehat/biakes/pembiayaanjaminansehat')
   }
 }
+
+const currentDate = new Date().toLocaleDateString('id-ID', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+})
 </script>
 
 <template>
-  <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-    <div class="card-header bg-white text-dark fw-bold fs-5 border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
-      <span>Layanan - Bidan dan Kesehatan{{ kategoriUnit }}</span>
-      <button class="btn btn-sm btn-outline-secondary" @click="kembali">← Kembali</button>
+  <div class="card m-2 shadow-sm border-0 rounded-4">
+    <!-- Header -->
+    <div
+      class="card-header d-flex justify-content-between align-items-center p-4 rounded-4 rounded-bottom-0"
+      style="background: linear-gradient(135deg, #4682B4, #ADD8E6);"
+    >
+      <div>
+        <h1 class="fs-4 m-0 text-white">Layanan - Bidan dan Kesehatan</h1>
+        <div class="bg-white bg-opacity-25 d-inline-block px-3 py-2 rounded-pill mt-2 text-white fw-semibold">
+          <i class="fas fa-calendar-alt me-2"></i>
+          {{ currentDate }}
+        </div>
+      </div>
+      <button
+        class="btn bg-white bg-opacity-25 border-0 btn-sm text-white fw-semibold shadow-sm"
+        @click="kembali"
+      >
+        Kembali
+      </button>
     </div>
 
-    <div class="card-body py-4 px-4" style="background-color: #f8fbfd;">
-      <div class="row g-4">
-        <div
-          v-for="item in entries"
-          :key="item.nama"
-          class="col-12 col-sm-6 col-lg-4"
-        >
-          <div
-            class="card h-100 border-0 shadow-sm rounded-4 cursor-pointer"
-            style="background-color: #B0E0E6; transition: transform 0.2s ease;"
-            @click="goToLayanan(item.nama)"
-            @mouseover="$event.currentTarget.style.transform = 'scale(1.01)'"
-            @mouseleave="$event.currentTarget.style.transform = 'scale(1)'"
-          >
-            <div class="card-body d-flex justify-content-between align-items-center px-3 py-3">
-              <div>
-                <div class="fw-semibold fs-6 mb-1 text-dark">{{ item.nama }}</div>
-                <small class="text-muted">Hari ini {{ item.jumlah }} pasien</small>
-              </div>
-              <img
-                :src="getIcon(item.nama)"
-                alt="icon"
-                class="opacity-50"
-                style="width: 32px; height: 32px;"
-              />
-            </div>
-          </div>
-        </div>
+    <!-- Table Card -->
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle text-center table-bordered">
+          <thead style="background: #10b981; color: white;">
+            <tr>
+              <th>Layanan</th>
+              <th>Total Pasien</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in entries" :key="item.nama">
+              <td class="text-start ps-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div
+                    class="rounded-3 d-flex justify-content-center align-items-center"
+                    :style="{ width: '35px', height: '35px', backgroundColor: getIconClass(item.nama).bg }"
+                  >
+                    <i :class="getIconClass(item.nama).icon" class="text-white fs-6"></i>
+                  </div>
+                  <span class="fw-bold text-dark">{{ item.nama }}</span>
+                </div>
+              </td>
+              <td class="fw-semibold text-secondary">{{ item.jumlah }}</td>
+              <td>
+                <button
+                  class="btn btn-sm rounded-pill shadow-sm text-white"
+                  style="background: linear-gradient(135deg, #4682B4, #5A9BD5);"
+                  @click="goToLayanan(item.nama)"
+                >
+                  Buka
+                </button>
+              </td>
+            </tr>
+            <tr v-if="entries.length === 0">
+              <td colspan="3" class="text-center text-muted py-3">
+                <i class="fas fa-info-circle me-2"></i> Belum ada layanan
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.hover-shadow:hover {
-  box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.04);
-}
-</style>
