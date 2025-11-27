@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="Tumbuh Kembang" :backRoute :unitList :rows>
+    <FormAnamnesa title="Kematian Maternal dan Perinatal" :backRoute :unitList :rows>
 
     </FormAnamnesa>
   </AppLayouts>

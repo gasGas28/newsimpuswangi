@@ -1,5 +1,5 @@
 <template>
-  <h5 class="fw-semibold text-danger">Pemeriksaan Fisik Ibu</h5>
+  <h5 class="fw-semibold text-success">Pemeriksaan Fisik Ibu</h5>
   <div class="card shadow-sm border-0">
     <div class="card-body">
       <form @submit.prevent="saveForm">
@@ -109,11 +109,11 @@
               <label class="form-label fw-bold">Deskripsi</label>
               <textarea class="form-control" rows="3" placeholder="Masukkan Deskripsi"></textarea>
             </div>
+            <!-- Tombol Simpan -->
+            <div class="mt-4 text-start">
+              <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
+            </div>
           </div>
-        </div>
-        <!-- Tombol Simpan -->
-        <div class="mt-4 text-end">
-          <button type="submit" class="btn btn-success w-50 fw-semibold">Simpan</button>
         </div>
       </form>
     </div>

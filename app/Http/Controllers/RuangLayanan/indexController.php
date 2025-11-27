@@ -61,13 +61,16 @@ class indexController extends Controller
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
                 $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienKIA = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '003')->whereHas('SimpusLoket', function ($query) {
+            })->where('tglPelayanan', now()->toDateString())->count();
             //dd($totalPasienUmum);
             //dd($listPoli);
             return Inertia::render(
                 'Ruang_Layanan/klusterPasien/kluster2',
                 [
                     'listPoli' => $listPoli,
-                    'totalPasienUmum' => $totalPasienUmum
+                    'totalPasienUmum' => $totalPasienUmum,
+                    'totalPasienKIA' => $totalPasienKIA,
                 ]
             );
 
