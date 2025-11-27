@@ -157,6 +157,9 @@ return [
         Illuminate\Database\DatabaseServiceProvider::class,
         Illuminate\Encryption\EncryptionServiceProvider::class,
         Illuminate\Cookie\CookieServiceProvider::class, 
+        Illuminate\Translation\TranslationServiceProvider::class,
+        Illuminate\Validation\ValidationServiceProvider::class,
+
 
         /*
          * Application Service Providers...
@@ -169,6 +172,7 @@ return [
     ],
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Lang' => Illuminate\Support\Facades\Lang::class,
         // contoh tambahan alias manual
         // 'PDF' => Barryvdh\DomPDF\Facade\Pdf::class,
     ])->toArray(),

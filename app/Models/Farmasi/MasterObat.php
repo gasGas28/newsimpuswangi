@@ -7,25 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class MasterObat extends Model
 {
-     use HasFactory;
-
     protected $table = 'simpus_master_obat'; // nama tabel
-    protected $primaryKey = 'obat_id';
-    public $timestamps = false;
+    protected $primaryKey = 'OBAT_ID';
+    public $timestamps = false; // soalnya tabelmu pakai CREATED_DATE, bukan created_at/updated_at
 
     protected $fillable = [
-        'obat_id',
-        'kode_obat',
-        'nama',
-        'satuan',
-        'jenis',
-        'golongan',
-        'sumber',
-        'tahun',
-        'harga',
-        'isi',
-        'rek',
-        'aktif',
-        'created_date'
+        'KODE_OBAT',
+        'NAMA',
+        'SATUAN',
+        'JENIS',
+        'GOLONGAN',
+        'SUMBER',
+        'TAHUN',
+        'HARGA',
+        'ISI',
+        'REK',
+        'AKTIF',
+        'CREATED_DATE'
     ];
 }

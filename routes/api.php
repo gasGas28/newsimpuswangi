@@ -2,15 +2,18 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Farmasi\MasterObatController;
-use App\Http\Controllers\PengeluaranLangsungController;
 
-Route::apiResource('obat', MasterObatController::class);
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
 
-Route::prefix('farmasi')->group(function () {
-    Route::get('/resep-langsung', [PengeluaranLangsungController::class, 'index']);
-    Route::post('/resep-langsung', [PengeluaranLangsungController::class, 'store']);
-    Route::get('/resep-langsung/{id}', [PengeluaranLangsungController::class, 'show']);
-    Route::put('/resep-langsung/{id}', [PengeluaranLangsungController::class, 'update']);
-    Route::delete('/resep-langsung/{id}', [PengeluaranLangsungController::class, 'destroy']);
+Route::get('/test', function () {
+    return response()->json(['message' => 'API is working']);
 });

@@ -17,21 +17,23 @@
     13 => 'Illuminate\\Database\\DatabaseServiceProvider',
     14 => 'Illuminate\\Encryption\\EncryptionServiceProvider',
     15 => 'Illuminate\\Cookie\\CookieServiceProvider',
-    16 => 'Inertia\\ServiceProvider',
-    17 => 'Laravel\\Breeze\\BreezeServiceProvider',
-    18 => 'Laravel\\Pail\\PailServiceProvider',
-    19 => 'Laravel\\Sail\\SailServiceProvider',
-    20 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    21 => 'Carbon\\Laravel\\ServiceProvider',
-    22 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    23 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    24 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
-    25 => 'App\\Providers\\AppServiceProvider',
-    26 => 'App\\Providers\\AuthServiceProvider',
-    27 => 'App\\Providers\\EventServiceProvider',
-    28 => 'App\\Providers\\RouteServiceProvider',
-    29 => 'App\\Providers\\AppServiceProvider',
+    16 => 'Illuminate\\Translation\\TranslationServiceProvider',
+    17 => 'Illuminate\\Validation\\ValidationServiceProvider',
+    18 => 'Inertia\\ServiceProvider',
+    19 => 'Laravel\\Breeze\\BreezeServiceProvider',
+    20 => 'Laravel\\Pail\\PailServiceProvider',
+    21 => 'Laravel\\Sail\\SailServiceProvider',
+    22 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    23 => 'Carbon\\Laravel\\ServiceProvider',
+    24 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    25 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    26 => 'Tighten\\Ziggy\\ZiggyServiceProvider',
+    27 => 'App\\Providers\\AppServiceProvider',
+    28 => 'App\\Providers\\AuthServiceProvider',
+    29 => 'App\\Providers\\EventServiceProvider',
     30 => 'App\\Providers\\RouteServiceProvider',
+    31 => 'App\\Providers\\AppServiceProvider',
+    32 => 'App\\Providers\\RouteServiceProvider',
   ),
   'eager' => 
   array (
@@ -198,6 +200,11 @@
     'queue.failer' => 'Illuminate\\Queue\\QueueServiceProvider',
     'queue.listener' => 'Illuminate\\Queue\\QueueServiceProvider',
     'queue.worker' => 'Illuminate\\Queue\\QueueServiceProvider',
+    'translator' => 'Illuminate\\Translation\\TranslationServiceProvider',
+    'translation.loader' => 'Illuminate\\Translation\\TranslationServiceProvider',
+    'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Laravel\\Breeze\\Console\\InstallCommand' => 'Laravel\\Breeze\\BreezeServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
@@ -227,6 +234,12 @@
     array (
     ),
     'Illuminate\\Queue\\QueueServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Translation\\TranslationServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Validation\\ValidationServiceProvider' => 
     array (
     ),
     'Laravel\\Breeze\\BreezeServiceProvider' => 

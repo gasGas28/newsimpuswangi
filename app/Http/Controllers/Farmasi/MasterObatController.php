@@ -2,45 +2,93 @@
 
 namespace App\Http\Controllers\Farmasi;
 
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Farmasi\MasterObat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Carbon\Carbon;
 
 class MasterObatController extends Controller
 {
     // 📌 Ambil semua data obat
     public function index()
     {
-        $obat = MasterObat::all();
-        return response()->json($obat);
+        $data = DB::table('simpus_master_obat')
+            ->select('OBAT_ID', 'KODE_OBAT', 'NAMA', 'SATUAN')
+            ->orderBy('NAMA', 'asc')
+            ->get();
+
+        return Inertia::render('Farmasi/MasterObat', [
+            'obatList' => $data,
+            'today'    => Carbon::now()->format('d-m-Y')
+        ]);
     }
 
-    // 📌 Tambah data obat baru
+
+    public function create()
+    {
+        return Inertia::render('Farmasi/MasterObat-Tambah');
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'obat_id' => 'required|integer|max:20',
-            'kode_obat' => 'required|string|max:50',
-            'nama' => 'required|string|max:255',
-            'satuan' => 'nullable|string|max:100',
-            'jenis' => 'nullable|string|max:100',
-            'golongan' => 'nullable|string|max:100',
-            'sumber' => 'nullable|string|max:100',
-            'tahun' => 'nullable|integer',
-            'harga' => 'nullable|numeric',
-            'isi' => 'nullable|string|max:50',
-            'rek' => 'nullable|string|max:50',
-            'aktif' => 'nullable|boolean',
-            'created_date' => 'nullable|date',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'KODE_OBAT' => 'required|unique:simpus_master_obat,KODE_OBAT',
+                'NAMA'      => 'required',
+                'SATUAN'    => 'required',
+            ]);
 
-        $obat = MasterObat::create($request->all());
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
 
-        return response()->json([
-            'message' => 'Obat berhasil ditambahkan',
-            'data' => $obat
-        ], 201);
+            MasterObat::create($validator->validated());
+
+            return redirect()->route('farmasi.master-obat.data')
+                ->with('success', 'Data obat berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
+
+    public function filter(Request $request)
+    {
+        $query = DB::table('simpus_peng_langsung as p')
+            ->leftJoin('data_master_unit as u', 'p.unitId', '=', 'u.id_kategori')
+            ->leftJoin('data_master_unit_detail as d', 'p.pengMasterId', '=', 'd.id_kategori')
+            ->select(
+                'p.id_peng_langsung as id',
+                'p.tanggal',
+                'u.kategori as unit_nama',
+                'd.nama_unit as sub_unit_nama',
+                'p.keterangan',
+                'p.obat_id',
+                'p.kode_obat',
+                'p.nama_obat',
+                'p.jumlah'
+            );
+
+        if ($request->unit) {
+            $query->where('p.unitId', $request->unit);
+        }
+        if ($request->subunit) {
+            $query->where('p.pengMasterId', $request->subunit);
+        }
+        if ($request->keperluan) {
+            $query->where('p.keterangan', 'like', "%{$request->keperluan}%");
+        }
+        if ($request->periode) {
+            $query->whereDate('p.tanggal', $request->periode);
+        }
+
+        $result = $query->orderBy('p.tanggal', 'desc')->get();
+
+        return response()->json($result);
+    }
+
 
     // 📌 Tampilkan detail obat berdasarkan id
     public function show($id)
@@ -55,18 +103,18 @@ class MasterObatController extends Controller
         $obat = MasterObat::findOrFail($id);
 
         $request->validate([
-            'kode_obat' => 'sometimes|required|string|max:50',
-            'nama' => 'sometimes|required|string|max:255',
-            'satuan' => 'nullable|string|max:100',
-            'jenis' => 'nullable|string|max:100',
-            'golongan' => 'nullable|string|max:100',
-            'sumber' => 'nullable|string|max:100',
-            'tahun' => 'nullable|integer',
-            'harga' => 'nullable|numeric',
-            'isi' => 'nullable|string|max:50',
-            'rek' => 'nullable|string|max:50',
-            'aktif' => 'nullable|boolean',
-            'created_date' => 'nullable|date',
+            'KODE_OBAT' => 'sometimes|required|string|max:50',
+            'NAMA' => 'sometimes|required|string|max:255',
+            'SATUAN' => 'nullable|string|max:100',
+            'JENIS' => 'nullable|string|max:100',
+            'GOLONGAN' => 'nullable|string|max:100',
+            'SUMBER' => 'nullable|string|max:100',
+            'TAHUN' => 'nullable|integer',
+            'HARGA' => 'nullable|numeric',
+            'ISI' => 'nullable|string|max:50',
+            'REK' => 'nullable|string|max:50',
+            'AKTIF' => 'nullable|boolean',
+            'CREATED_DATE' => 'nullable|date',
         ]);
 
         $obat->update($request->all());

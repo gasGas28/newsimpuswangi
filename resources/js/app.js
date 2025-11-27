@@ -7,6 +7,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap';
 import 'tailwindcss';
 
+
 createInertiaApp({
   // title: (title) => `${title} - ${appName}`,
   resolve: (name) =>
