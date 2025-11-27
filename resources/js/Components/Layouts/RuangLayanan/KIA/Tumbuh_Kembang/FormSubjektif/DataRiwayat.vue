@@ -3,17 +3,23 @@
     <div class="p-1">
       <!-- Tombol navigasi antar form -->
       <div class="d-flex gap-3 flex-wrap">
-        <a href="#" class="action-card medical-action" @click.prevent="toggleForm('riwayatGizi')">
+        <a
+          href="#"
+          class="action-card medical-action"
+          :class="{ 'active-card': activeFormRiwayatGizi === 'riwayatGizi' }"
+          @click.prevent="toggleForm('riwayatGizi')"
+        >
           <div class="action-icon"><i class="bi bi-person-check"></i></div>
-          <div class="action-label">Riwayat Gizi >></div>
+          <div class="action-label">Riwayat Gizi</div>
         </a>
         <a
           href="#"
           class="action-card medical-action"
+          :class="{ 'active-card': activeFormRiwayatGizi === 'riwayatMakanan' }"
           @click.prevent="toggleForm('riwayatMakanan')"
         >
           <div class="action-icon"><i class="bi bi-person-check"></i></div>
-          <div class="action-label">Riwayat Makanan >></div>
+          <div class="action-label">Riwayat Makanan</div>
         </a>
       </div>
 
@@ -28,7 +34,7 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import RiwayatGizi from './RiwayatGizi.vue';
   import RiwayatMakanan from './RiwayatMakanan.vue';
 
@@ -36,16 +42,22 @@
     diagnosa: Array,
   });
 
-  const activeForm = ref('riwayatGizi');
+  // Ambil tab terakhir dari localStorage
+  const activeFormRiwayatGizi = ref(
+    localStorage.getItem('activeFormRiwayatGizi') || 'riwayatGizi'
+  );
 
+  // Simpan kembali jika user ganti tab
+  watch(activeFormRiwayatGizi, (val) => {
+    localStorage.setItem('activeFormRiwayatGizi', val);
+  });
   // Fungsi toggle form
   const toggleForm = (form) => {
-    activeForm.value = activeForm.value === form ? null : form;
+    activeFormRiwayatGizi.value = form;
   };
-
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
-    switch (activeForm.value) {
+    switch (activeFormRiwayatGizi.value) {
       case 'riwayatGizi':
         return RiwayatGizi;
       case 'riwayatMakanan':
@@ -71,9 +83,13 @@
 
   .action-card:hover {
     background: #e9f2ff;
-    color: #0d6efd;
+    color: #10b981;
   }
 
+  .active-card {
+    background: #10b981;
+    color: #fff;
+  }
   .action-icon {
     font-size: 1.25rem;
     color: inherit;

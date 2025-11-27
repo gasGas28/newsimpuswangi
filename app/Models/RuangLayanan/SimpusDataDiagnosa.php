@@ -35,4 +35,9 @@ class SimpusDataDiagnosa extends Model
       public function Loket(){
         return $this->belongsTo(SimpusLoket::class, 'loketId','idLoket'); 
     }
+
+    public function SimpusDiagnosa(){
+         return $this->belongsTo(SimpusDiagnosa::class, 'kdDiagnosa','kdDiag'); 
+
+    }
 }

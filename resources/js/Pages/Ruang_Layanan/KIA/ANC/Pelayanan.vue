@@ -121,13 +121,20 @@
           </div>
           <div class="action-label">Riwayat Pasien</div>
         </a>
-
-        <a href="#" class="action-card medical-action">
+        <Link
+          :href="
+            route('ruang-layanan.cppt', {
+              idPoli: props.DataPasien[0].kdPoli,
+              idPasien: props.DataPasien[0].ID,
+            })
+          "
+          class="action-card medical-action"
+        >
           <div class="action-icon">
             <i class="bi bi-file-text"></i>
           </div>
           <div class="action-label">CPPT</div>
-        </a>
+        </Link>
       </div>
     </div>
     <div class="mt-4">
@@ -148,7 +155,8 @@
 
 <script setup>
   import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
-  import FormAnc from '../../../../Components/Layouts/RuangLayanan/KIA/ANC/ANCTab.vue';
+  import FormAnc from '../../../../Components/Layouts/RuangLayanan/KIA/ANC/Index.vue';
+  import { Link } from '@inertiajs/vue3';
 
   import { ref } from 'vue';
   defineOptions({ layout: AppLayouts });
@@ -165,6 +173,9 @@
     AlergiMakanan: Array,
     AlergiObat: Array,
     DataDiagnosa: Array,
+    simpusResepObat: Array,
+    routeResepObat: String,
+    routeDetailResepObat: String,
   });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;

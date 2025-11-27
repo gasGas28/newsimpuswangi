@@ -1,59 +1,73 @@
 <template>
   <div>
-    <h5 class="fw-bold mb-3">Pemeriksaan Pasien / Objektif</h5>
-
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('diagnosa')">
+      <a
+        href="#"
+        class="action-card medical-action"
+        :class="{ 'active-card': activeFormAssesment === 'diagnosa' }"
+        @click.prevent="toggleForm('diagnosa')"
+      >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
         <div class="action-label">Diagnosa</div>
       </a>
 
-      <a href="#" class="action-card medical-action" @click.prevent="toggleForm('skrining')">
+      <a
+        href="#"
+        class="action-card medical-action"
+        :class="{ 'active-card': activeFormAssesment === 'skrining' }"
+        @click.prevent="toggleForm('skrining')"
+      >
         <div class="action-icon"><i class="bi bi-activity"></i></div>
         <div class="action-label">Skrining</div>
       </a>
     </div>
-    <!-- Tempat munculnya form yang aktif -->
+
+    <!-- Form aktif -->
     <div class="mt-4">
       <component
         :DataPasien="props.DataPasien"
         :DataDiagnosa="props.DataDiagnosa"
         :diagnosa="props.diagnosa"
+        :diagnosaKeperawatan="props.diagnosaKeperawatan"
         :AlergiMakanan="props.AlergiMakanan"
         :AlergiObat="props.AlergiObat"
-        :diagnosaKeperawatan="props.diagnosaKeperawatan"
         :is="activeComponent"
         v-if="activeComponent"
       />
+
+      <!-- Pesan jika belum memilih form -->
     </div>
   </div>
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
-  import Diagnosa from './Assesment/Diagnosa.vue';
-  import Skrining from './Assesment/Skrining.vue';
-
-  const activeForm = ref(null);
+  import { ref, computed, watch } from 'vue';
+  import Diagnosa from './Form/Diagnosa.vue';
+  import Skrining from './Form/Skrining.vue';
 
   const props = defineProps({
     DataPasien: Array,
+    DataDiagnosa: Array,
     diagnosa: Array,
     diagnosaKeperawatan: Array,
     AlergiMakanan: Array,
     AlergiObat: Array,
-    DataDiagnosa: Array,
   });
 
-  // Fungsi toggle form
-  const toggleForm = (form) => {
-    activeForm.value = activeForm.value === form ? null : form;
-  };
+  // state aktif (diagnosa / skrining)
+  const activeFormAssesment = ref(localStorage.getItem('activeFormAssesment') || 'diagnosa');
 
+  // Simpan kembali jika user ganti tab
+  watch(activeFormAssesment, (val) => {
+    localStorage.setItem('activeFormAssesment', val);
+  });
+  const toggleForm = (form) => {
+    activeFormAssesment.value = form;
+  };
   // Menentukan komponen aktif berdasarkan state
   const activeComponent = computed(() => {
-    switch (activeForm.value) {
+    switch (activeFormAssesment.value) {
       case 'diagnosa':
         return Diagnosa;
       case 'skrining':
@@ -79,7 +93,12 @@
 
   .action-card:hover {
     background: #e9f2ff;
-    color: #0d6efd;
+    color: #10b981;
+  }
+
+  .active-card {
+    background: #10b981;
+    color: #fff;
   }
 
   .action-icon {

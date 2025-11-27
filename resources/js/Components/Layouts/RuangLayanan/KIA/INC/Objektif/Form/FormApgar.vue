@@ -1,6 +1,6 @@
 <template>
   <div class="form-section border-0 card shadow-sm p-3">
-    <h6 class="mb-3 text-danger">Apgar Menit {{ menit }}</h6>
+    <h6 class="mb-3 text-success">Apgar Menit {{ menit }}</h6>
 
     <div class="mb-2">
       <label class="form-label fw-bold">1.1 Appearance (Warna Kulit)</label>

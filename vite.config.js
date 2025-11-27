@@ -1,8 +1,17 @@
+<<<<<<< HEAD
 import { defineConfig } from 'vite'
 import laravel from 'laravel-vite-plugin'
 import vue from '@vitejs/plugin-vue'
 import ziggy from 'vite-plugin-ziggy'
 import path from 'path'
+=======
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
+import path from 'path';
+import ziggy from 'vite-plugin-ziggy';
+>>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
 export default defineConfig({
   plugins: [
@@ -11,6 +20,11 @@ export default defineConfig({
       input: ['resources/css/app.css', 'resources/js/app.js'],
       refresh: true,
     }),
+<<<<<<< HEAD
+=======
+    vue(),
+    vueJsx(), // ← pastikan versi cocok & posisi setelah vue()
+>>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
     ziggy(),
   ],
   resolve: {

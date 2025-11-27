@@ -149,7 +149,7 @@
 </template>
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-
+import {onMounted } from 'vue';
 const page = usePage();
 
 const dataPasien = page.props.dataPasien
@@ -165,6 +165,13 @@ const today = new Date();
 const options = { day: "numeric", month: "long", year: "numeric" };
 const formattedDate = today.toLocaleDateString("id-ID", options);
 const logoUrl = "/images/logo-dinkes.png";
+
+onMounted(()=>{
+    print()
+})
+function print(){
+  setTimeout(() => window.print(), 500);
+}
 </script>
 
 <style scoped>

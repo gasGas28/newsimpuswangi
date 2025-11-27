@@ -1,6 +1,4 @@
 <template>
-  <div class="card shadow-sm p-3 border-1">
-    <div class="card-body">
       <form @submit.prevent="saveForm">
         <div class="row g-4">
           <div class="col-md-6">
@@ -173,8 +171,7 @@
           </div>
         </div>
       </form>
-    </div>
-  </div>
+
 </template>
 <script setup>
   const saveForm = () => {

@@ -84,4 +84,10 @@ class SimpusPasien extends Model
     {
         return $this->belongsTo(SetupProp::class, 'NO_PROP', 'NO_PROP');
     }
+
+    public function pkrjnmaster(){
+
+        return $this->belongsTo(PkrjnMaster::class, 'JENIS_PKRJN', 'NO');
+
+    }
 }

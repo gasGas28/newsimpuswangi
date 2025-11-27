@@ -21,24 +21,26 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Services\LoketService;
+use App\Services\WilayahService;
 use Carbon\Carbon;
 
 class LoketController extends Controller
 {
     protected $service;
+    protected $wilayahService;
 
-    public function __construct(LoketService $service)
+    public function __construct(LoketService $service, WilayahService $wilayahService)
     {
         $this->service = $service;
+        $this->wilayahService = $wilayahService;
     }
 
     public function index(Request $request)
     {
         $poliList = Poli::where('poliSakit', 'true')->aktif()->get(['kdPoli', 'nmPoli']);
-        $loket = Loket::with(['pasien', 'poli'])
-            ->orderBy('tglKunjungan', 'desc')
-            ->paginate(10);
+        $loket = $this->wilayahService->getLoketWithWilayah(10);
 
         $kategoriUnits = $this->getKategoriUnit();
         $wilayah = $this->getWilayah();
@@ -108,25 +110,7 @@ class LoketController extends Controller
 
     public function search(Request $request)
     {
-        $query = Pasien::query();
-
-        if ($request->filled('nama')) {
-            $query->where('NAMA_LGKP', 'like', '%' . $request->nama . '%');
-        }
-
-        if ($request->filled('nik')) {
-            $query->where('NIK', $request->nik);
-        }
-
-        if ($request->filled('no_mr')) {
-            $query->where('NO_MR', $request->no_mr);
-        }
-
-        if ($request->filled('no_bpjs')) {
-            $query->where('noKartu', $request->no_bpjs);
-        }
-
-        $results = $query->with(['kecamatan', 'kelurahan'])->limit(50)->get();
+        $results = $this->wilayahService->searchPasienWithWilayah($request->all(), 50);
 
         return Inertia::render('Loket/Search', [
             'results' => $results,
@@ -137,21 +121,7 @@ class LoketController extends Controller
 
     public function apiSearch(Request $request)
     {
-        $query = Pasien::query();
-
-        if ($request->filled('no_mr')) {
-            $query->where('NO_MR', $request->no_mr);
-        }
-
-        if ($request->filled('nik')) {
-            $query->where('NIK', $request->nik);
-        }
-
-        if ($request->filled('no_bpjs')) {
-            $query->where('noKartu', $request->no_bpjs);
-        }
-
-        $pasien = $query->first();
+        $pasien = $this->wilayahService->searchPasienWithWilayah($request->all(), 1)->first();
 
         if (!$pasien) {
             return response()->json(['error' => 'Pasien tidak ditemukan'], 404);
@@ -543,11 +513,17 @@ class LoketController extends Controller
 
     public function getKelurahanByKecamatan(Request $request)
     {
-        $kelurahan = Kelurahan::where('NO_KEC', $request->kecamatan)
-            ->orderBy('NAMA_KEL')
-            ->get(['NO_KEL', 'NAMA_KEL']);
+        if (!$request->kecamatan) {
+            return response()->json(['error' => 'Kecamatan harus dipilih'], 400);
+        }
 
-        return response()->json($kelurahan);
+        $query = Kelurahan::query();
+
+        $query->where('NO_PROP', $request->propinsi);
+        $query->where('NO_KAB', $request->kabupaten);
+        $query->where('NO_KEC', $request->kecamatan);
+
+        return response()->json($query->orderBy('NAMA_KEL')->get(['NO_KEL', 'NAMA_KEL']));
     }
 
     public function getPoliByJenisKunjungan(Request $request)
@@ -571,8 +547,14 @@ class LoketController extends Controller
 
     public function cetak_kartu($id)
     {
-        $pasien = Pasien::findOrFail($id);
+        $pasien = $this->wilayahService->getPasienWithWilayah($id);
+
+        if (!$pasien) {
+            abort(404);
+        }
+
         $alamat = DB::table('unit_profiles')->where('unit_id', Auth::user()?->unit ?? 1)->first();
+
         return Inertia::render('Loket/CetakKartu', [
             'pasien' => $pasien,
             'alamat' => $alamat,
@@ -581,8 +563,28 @@ class LoketController extends Controller
 
     public function gen_barcode($NO_MR)
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50"><rect width="200" height="50" fill="#fff"/><text x="10" y="30" font-family="monospace">' . e($NO_MR) . '</text></svg>';
-        return response($svg, 200)->header('Content-Type', 'image/svg+xml');
+        try {
+            // Generate QR Code sebagai SVG
+            $qrCode = QrCode::size(200)
+                ->backgroundColor(255, 255, 255)
+                ->color(0, 0, 0)
+                ->margin(1)
+                ->generate($NO_MR);
+
+            return response($qrCode, 200)
+                ->header('Content-Type', 'image/svg+xml')
+                ->header('Cache-Control', 'public, max-age=3600');
+        } catch (\Exception $e) {
+            Log::error('Error generating barcode: ' . $e->getMessage());
+
+            // Fallback ke SVG sederhana
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="50" viewBox="0 0 200 50">
+            <rect width="200" height="50" fill="#fff" stroke="#ccc"/>
+            <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="monospace" font-size="12">' . e($NO_MR) . '</text>
+        </svg>';
+
+            return response($svg, 200)->header('Content-Type', 'image/svg+xml');
+        }
     }
 
     public function cetak_noAntrian()
@@ -646,8 +648,10 @@ class LoketController extends Controller
         }
 
         // memastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         // SANITIZE: Pastikan kelUmur tidak null
         if (empty($data['kelUmur'])) {
@@ -753,12 +757,14 @@ class LoketController extends Controller
         if ($data['umur'] < 0 || $data['umur'] > 150) {
             Log::warning('Umur tidak valid: ' . $data['umur'] . ', menggunakan default 30');
             $data['umur'] = 30;
-            $data['kelUmur'] = 8; // Default untuk usia 20-44
+            $data['kelUmur'] = 8;
         }
 
         // Juga pastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         $pel = [
             'tglPelayanan' => $data['tglKunjungan'] ?? null,
@@ -901,15 +907,15 @@ class LoketController extends Controller
     /**
      * HELPER FUNCTIONS
      */
-    private function getFieldTable($tableName)
-    {
-        $columns = DB::getSchemaBuilder()->getColumnListing($tableName);
-        $data = [];
-        foreach ($columns as $column) {
-            $data[$column] = '';
-        }
-        return (object)$data;
-    }
+    // private function getFieldTable($tableName)
+    // {
+    //     $columns = DB::getSchemaBuilder()->getColumnListing($tableName);
+    //     $data = [];
+    //     foreach ($columns as $column) {
+    //         $data[$column] = '';
+    //     }
+    //     return (object)$data;
+    // }
 
     public function getId()
     {

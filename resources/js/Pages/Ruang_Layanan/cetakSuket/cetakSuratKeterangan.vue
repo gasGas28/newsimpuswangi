@@ -132,7 +132,7 @@
             </div>
 
             <!-- Penutup -->
-            <p class="mb-2">
+            <p class="mb-1">
                 Setelah kami lakukan pemeriksaan dengan seksama, yang bersangkutan pada saat ini kami nyatakan :
                 <strong>{{ suket.hasil_pemeriksaan }}</strong>.
                 Demikian agar yang berkepentingan maklum.
@@ -142,7 +142,7 @@
             <div class="text-end mt-0">
                 <p class="mb-0">Banyuwangi, {{ formattedDate }}</p>
                 <p class="mb-0">Dokter Pemeriksa</p>
-                <div style="height: 60px;"></div>
+                <div style="height: 40px;"></div>
                 <p class="mb-0">{{ dokter.nmDokter }}</p>
                 <p class="mb-0">NIP. {{ dokter.NIP }}</p>
             </div>
@@ -151,6 +151,7 @@
 
 <script setup>
 import { usePage } from '@inertiajs/vue3';
+import {onMounted } from 'vue';
 const page = usePage();
 
 const dataPasien = page.props.dataPasien
@@ -166,6 +167,13 @@ const today = new Date();
 const options = { day: "numeric", month: "long", year: "numeric" };
 const formattedDate = today.toLocaleDateString("id-ID", options);
 const logoUrl = "/images/logo-dinkes.png";
+
+onMounted(()=>{
+    print()
+})
+function print(){
+   setTimeout(() => window.print(), 500);
+}
 </script>
 
 <style scoped>

@@ -3,8 +3,11 @@
     <div class="card m-4  rounded-4 rounded-bottom-0">
       <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"
         style="background: linear-gradient(135deg, #3b82f6, #10b981);">
-        <h1 class="fs-5 text-white">BP UMUM2</h1>
-        <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+        <h1 class="fs-5 text-white">BP UMUM</h1>
+        <Link :href="route('ruang-layanan.index', {
+          idPoli : idPoli,
+          kluster : kluster
+        })" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
         <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
         </Link>
       </div>
@@ -52,7 +55,7 @@ import FormPelayananPlanning from '../../../Components/Layouts/RuangLayanan/Pela
 import FormPelayananStatusPasien from '../../../Components/Layouts/RuangLayanan/PelayananPasien/FormPelayananStatusPasien.vue';
 import NavigasiFormPemeriksaan from '../../../Components/Layouts/RuangLayanan/PelayananPasien/NavigasiFormPemeriksaan.vue';
 import { ref } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const isMelayani = ref(false);
@@ -81,6 +84,7 @@ const simpusResepObat = computed(() => page.props.SimpusResepObat);
 const diagnosaKeperawatan = computed(() => page.props.diagnosaKeperawatan);
 const poliRujukInternal =computed(() => page.props.poliRujukInternal);
 const pelayanan =computed(() => page.props.pelayanan);
+const kluster = computed(() => page.props.kluster)
 console.log('idPelayanannanysashjbasdsdsdsdid', page.props.poliRujukInternal);
 
 const refreshDataAnamnesa = () => {

@@ -1,6 +1,6 @@
 <template>
   <div class="col-md-6">
-    <div class="card shadow-sm border-1 p-3">
+    <div class="card shadow-sm border-0 p-3">
       <div class="card-body">
         <form @submit.prevent="saveForm">
           <div class="row g-4">

@@ -1,30 +1,29 @@
 <template>
+
+
   <div class="container-fluid p-3">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="fw-bold mb-0">Imunisasi</h5>
-      <button class="btn btn-primary">Lihat Riwayat Imunisasi</button>
+      <h5 class="fw-semibold text-success mb-0">Imunisasi</h5>
     </div>
 
     <div class="row">
       <!-- Form Imunisasi -->
       <div class="col-md-6">
-        <form @submit.prevent="simpanImunisasi" class="border rounded p-3 bg-light">
+        <form @submit.prevent="simpanImunisasi" class="border-0 rounded p-3 shadow-sm">
           <!-- Tanggal Imunisasi -->
           <div class="mb-3 row align-items-center">
             <label class="col-sm-4 col-form-label fw-semibold">Tgl Imunisasi</label>
             <div class="col-sm-8">
-              <input
-                type="datetime-local"
-                class="form-control"
-                v-model="form.tanggal"
-              />
+              <input type="datetime-local" class="form-control" v-model="form.tanggal" />
             </div>
           </div>
 
           <!-- Jenis Imunisasi -->
           <div class="mb-3 row align-items-center">
-            <label class="col-sm-4 col-form-label fw-semibold">Jenis Imunisasi<span class="text-danger">*</span></label>
+            <label class="col-sm-4 col-form-label fw-semibold"
+              >Jenis Imunisasi<span class="text-danger">*</span></label
+            >
             <div class="col-sm-8">
               <select class="form-select" v-model="form.jenis">
                 <option value="">-- Pilih Jenis Imunisasi --</option>
@@ -35,9 +34,13 @@
             </div>
           </div>
 
-          <!-- Tombol Simpan -->
-          <div class="text-start">
-            <button type="submit" class="btn btn-primary">Simpan</button>
+          <div class="row mt-4">
+            <div class="col-auto">
+              <button type="submit" class="btn btn-success fw-semibold px-3">Simpan Data</button>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-primary fw-semibold px-3">Lihat Riwayat Imunisasi</button>
+            </div>
           </div>
         </form>
       </div>
@@ -77,76 +80,71 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+  import { ref, watch } from 'vue';
 
-const props = defineProps({
-  DataPasien: Array,
-});
+  const props = defineProps({
+    DataPasien: Array,
+  });
 
-const form = ref({
-  tanggal: new Date().toISOString().slice(0, 16),
-  jenis: '',
-  usia: '',
-})
+  const form = ref({
+    tanggal: new Date().toISOString().slice(0, 16),
+    jenis: '',
+    usia: '',
+  });
 
-// update usia ketika props.DataPasien sudah tersedia
-watch(
-  () => props.DataPasien,
-  (newVal) => {
-    if (Array.isArray(newVal) && newVal.length > 0 && newVal[0].umur !== undefined) {
-      form.value.usia = newVal[0].umur
+  // update usia ketika props.DataPasien sudah tersedia
+  watch(
+    () => props.DataPasien,
+    (newVal) => {
+      if (Array.isArray(newVal) && newVal.length > 0 && newVal[0].umur !== undefined) {
+        form.value.usia = newVal[0].umur;
+      }
+    },
+    { immediate: true }
+  );
+
+  const daftarImunisasi = ['HB < JAM', 'BCG', 'Polio', 'Campak', 'DPT'];
+
+  const dataImunisasi = ref([]);
+
+  function simpanImunisasi() {
+    if (!form.value.jenis) {
+      alert('Jenis imunisasi wajib diisi!');
+      return;
     }
-  },
-  { immediate: true }
-)
 
-const daftarImunisasi = [
-  'HB < JAM',
-  'BCG',
-  'Polio',
-  'Campak',
-  'DPT'
-]
+    dataImunisasi.value.push({
+      tanggal: form.value.tanggal,
+      umur: form.value.usia,
+      jenis: form.value.jenis,
+      createdBy: 'Petugas A',
+    });
 
-const dataImunisasi = ref([])
-
-function simpanImunisasi() {
-  if (!form.value.jenis) {
-    alert('Jenis imunisasi wajib diisi!')
-    return
+    alert('Data imunisasi berhasil disimpan!');
+    form.value.jenis = '';
   }
 
-  dataImunisasi.value.push({
-    tanggal: form.value.tanggal,
-    umur: form.value.usia,
-    jenis: form.value.jenis,
-    createdBy: 'Petugas A'
-  })
-
-  alert('Data imunisasi berhasil disimpan!')
-  form.value.jenis = ''
-}
-
-function hapusData(index) {
-  dataImunisasi.value.splice(index, 1)
-}
+  function hapusData(index) {
+    dataImunisasi.value.splice(index, 1);
+  }
 </script>
 
 <style scoped>
-.table th, .table td {
-  vertical-align: middle;
-}
+  .table th,
+  .table td {
+    vertical-align: middle;
+  }
 
-form {
-  max-width: 500px;
-}
+  form {
+    max-width: 500px;
+  }
 
-button.btn-primary {
-  background-color: #428bca;
-  border-color: #357ebd;
-}
+  button.btn-primary {
+    background-color: #428bca;
+    border-color: #357ebd;
+  }
 
-button.btn-primary:hover {
-  background-color: #3071a9;
-}
+  button.btn-primary:hover {
+    background-color: #3071a9;
+  }
 </style>

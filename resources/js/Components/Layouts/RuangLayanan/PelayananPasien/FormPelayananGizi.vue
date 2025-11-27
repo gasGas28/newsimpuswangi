@@ -6,7 +6,7 @@
                 <div class="row g-4 mb-4">
                     <!-- Kolom 1: Status Gizi -->
                     <div class="col-md-4">
-                        <h5 class="fw-bold mb-3">Status Gizi</h5>
+                        <h5 class="fw-bold mb-3 text-decoration-underline">Status Gizi</h5>
                         <div class="mb-3">
                             <label class="form-label">BB</label>
                             <input type="number" class="form-control" readonly :value="props.dataAnamnesa.beratBadan" />
@@ -31,7 +31,7 @@
 
                     <!-- Kolom 2: Kebutuhan Energi -->
                     <div class="col-md-4">
-                        <h5 class="fw-bold mb-3">Kebutuhan Energi</h5>
+                        <h5 class="fw-bold mb-3 text-decoration-underline">Kebutuhan Energi</h5>
 
                         <div class="mb-3">
                             <label class="form-label">Energi</label>
@@ -63,7 +63,7 @@
 
                     <!-- Kolom 3: Klinis / Fisik -->
                     <div class="col-md-4">
-                        <h5 class="fw-bold mb-3">Klinis / Fisik</h5>
+                        <h5 class="fw-bold mb-3 text-decoration-underline">Klinis / Fisik</h5>
 
                         <div class="mb-2">
                             <label class="form-label">Sulit menelan</label>
@@ -79,7 +79,7 @@
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label">Sulit mengunyah</label>
+                            <label class="form-label ">Sulit mengunyah</label>
                             <div>
                                 <label class="me-3">
                                     <input type="radio" name="sulitMengunyah" value="Ya"
@@ -134,7 +134,7 @@
 
                 <!-- ====== BARIS 2 ====== -->
                 <div class="mb-4">
-                    <h5 class="fw-bold mb-3">Riwayat Gizi</h5>
+                    <h5 class="fw-bold mb-3 text-decoration-underline">Riwayat Gizi</h5>
                     <div class="mb-3">
                         <label class="form-label">Pola makan di rumah</label>
                         <textarea class="form-control" rows="2" v-model="form.polaMakan"></textarea>
@@ -157,7 +157,7 @@
 
                 <!-- ====== BARIS 3 ====== -->
                 <div>
-                    <h5 class="fw-bold mb-3">Nutrisi / Intervensi</h5>
+                    <h5 class="fw-bold mb-3 text-decoration-underline">Nutrisi / Intervensi</h5>
                     <div class="mb-3">
                         <label class="form-label">Diet</label>
                         <textarea class="form-control" rows="2" v-model="form.diet"></textarea>
@@ -180,7 +180,8 @@
                         <div class="col-md-6">
                             <label class="form-label">Tenaga Medis Gizi</label>
                             <select name="" id="" class="form-control" v-model="form.TenagaMedisAskep">
-                                <option :value="item.idDokter" v-for="item in TenagaMedisAskep">{{ item.nmDokter }}</option>
+                                <option :value="item.idDokter" v-for="item in TenagaMedisAskep">{{ item.nmDokter }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -197,63 +198,69 @@
 
 <script setup>
 import { useForm } from "@inertiajs/vue3";
-import { reactive, computed } from "vue";
+import { computed } from "vue";
 import { route } from "ziggy-js";
+import Swal from "sweetalert2";
 
+const emit = defineEmits(['dataAnamnesa-update']);
 const props = defineProps({
     dataAnamnesa: Object,
     dataPasien: Object,
     TenagaMedisAskep: Object,
-    idLoket : String,
-    gizi : Object
+    idLoket: String,
+    gizi: Object
 })
 console.log('gizi untuk', props.gizi)
 
 const form = useForm({
     energi: props.gizi?.energi ?? "",
-    protein: props.gizi?.protein ??"",
-    lemak: props.gizi?.lemak ??"",
-    karbohidrat: props.gizi?.karbohidrat ??"",
-    biokimia: props.gizi?.biokimia ??"",
+    protein: props.gizi?.protein ?? "",
+    lemak: props.gizi?.lemak ?? "",
+    karbohidrat: props.gizi?.karbohidrat ?? "",
+    biokimia: props.gizi?.biokimia ?? "",
 
-    sulitMenelan:props.gizi?.sulitMenelan ?? "",
-    sulitMengunyah:props.gizi?.sulitMengunyah ?? "",
-    mual:props.gizi?.mual ?? "",
+    sulitMenelan: props.gizi?.sulitMenelan ?? "",
+    sulitMengunyah: props.gizi?.sulitMengunyah ?? "",
+    mual: props.gizi?.mual ?? "",
     konstipasi: props.gizi?.konstipasi ?? "",
     nafsuMakan: props.gizi?.nafsuMakan ?? "",
 
-    polaMakan:props.gizi?.polaMakan ?? "",
-    pantangan:props.gizi?.pantangan ?? "",
-    riwayatPersonal:props.gizi?.riwayatPersonal ?? "",
-    suplemen: props.gizi?.suplemenGizi ??"",
+    polaMakan: props.gizi?.polaMakan ?? "",
+    pantangan: props.gizi?.pantangan ?? "",
+    riwayatPersonal: props.gizi?.riwayatPersonal ?? "",
+    suplemen: props.gizi?.suplemenGizi ?? "",
 
-    diet:props.gizi?.diet ?? "",
-    tujuanEdukasi:props.gizi?.tujuanEdukasi ?? "",
-    kontrolUlang:props.gizi?.kontrolUlang ?? "",
-    TenagaMedisAskep: props.gizi?.tenagaMedisGizi ??""
+    diet: props.gizi?.diet ?? "",
+    tujuanEdukasi: props.gizi?.tujuanEdukasi ?? "",
+    kontrolUlang: props.gizi?.kontrolUlang ?? "",
+    TenagaMedisAskep: props.gizi?.tenagaMedisGizi ?? ""
 });
 
-function submit(){
-   form.post(route('ruang-layanan.simpan-gizi', [props.dataPasien.idLoket],{
-    preserveScroll: true,
-    onSuccess: () => {
-      alert("Anamnesa Objective tersimpan");
-      emit('dataAnamnesa-update');
-    },
-  }))
-
+function submit() {
+    form.post(
+        route('ruang-layanan.simpan-gizi', props.dataPasien.idLoket),
+        {
+            preserveScroll: false,
+            onSuccess: () => {
+                Swal.fire({
+                    title: 'Sukses',
+                    icon: 'success',
+                    text: 'Data Gizi Tersimpan!',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+             emit('dataAnamnesa-update');
+            }
+        }
+    );
 }
+
 
 const statusRasio = computed(() => ({
     "BB/TB": props.dataAnamnesa.beratBadan ? (props.dataAnamnesa.beratBadan / props.dataAnamnesa.tinggiBadan).toFixed(2) : "",
     "BB/U": props.dataPasien.umur ? (props.dataAnamnesa.beratBadan / (props.dataPasien.umur * 0.5)).toFixed(2) : "",
     "TB/U": props.dataPasien.umur ? (props.dataAnamnesa.tinggiBadan / (props.dataPasien.umur * 0.5)).toFixed(2) : ""
 }));
-
-const simpan = () => {
-    console.log("Data disimpan:", form);
-    alert("Data berhasil disimpan!");
-};
 </script>
 
 <style scoped>

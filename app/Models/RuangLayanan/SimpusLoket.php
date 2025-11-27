@@ -86,7 +86,13 @@ class SimpusLoket extends Model
     }
     public function Tindakan()
     {
-        return $this->hasMany(SimpusTindakan::class, 'loketId', 'idLoket');
+        return $this->hasMany(SimpusTindakan::class, 'loketId', 'idLoket')
+            ->where('deskripsi', 'icd9cm');
+    }
+    public function TindakanLab()
+    {
+        return $this->hasMany(SimpusTindakan::class, 'loketId', 'idLoket')
+            ->where('deskripsi', 'lab');
     }
 
     public function ResepObat()
@@ -97,6 +103,15 @@ class SimpusLoket extends Model
     public function unitprofile()
     {
         return $this->belongsTo(UnitProfile::class, 'unitId', 'unit_id');
+    }
+    public function pelayanan()
+    {
+        return $this->hasMany(SimpusPelayanan::class, 'loketId', 'idLoket');
+    }
+     public function pelayananAwal()
+    {
+        return $this->belongsTo(SimpusPelayanan::class, 'loketId', 'idLoket')
+        ->where('pelIdSebelum', 0);
     }
 
 }

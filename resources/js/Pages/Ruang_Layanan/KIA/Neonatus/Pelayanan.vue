@@ -131,10 +131,14 @@
       </div>
     </div>
     <div class="mt-4">
-      <FormTumbuhKembang
+      <FormNeonatus
         :DataPasien="props.DataPasien"
         :diagnosa="props.diagnosa"
+        :AlergiMakanan="props.AlergiMakanan"
+        :AlergiObat="props.AlergiObat"
+        :diagnosa-keperawatan="props.diagnosaKeperawatan"
         :tindakan="props.tindakan"
+        :DataDiagnosa="props.DataDiagnosa"
       />
     </div>
   </div>
@@ -142,7 +146,7 @@
 
 <script setup>
   import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
-  import FormTumbuhKembang from '../../../../Components/Layouts/RuangLayanan/KIA/Neonatus/Index.vue'
+  import FormNeonatus from '../../../../Components/Layouts/RuangLayanan/KIA/Neonatus/Index.vue';
   import { ref } from 'vue';
   defineOptions({ layout: AppLayouts });
 
@@ -152,6 +156,10 @@
     DataPasien: Array,
     diagnosa: Array,
     tindakan: Array,
+    diagnosaKeperawatan: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataDiagnosa: Array,
   });
   const toggleForm = (form) => {
     activeForm.value = activeForm.value === form ? null : form;

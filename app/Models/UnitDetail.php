@@ -27,7 +27,6 @@ class UnitDetail extends Model
         'status' => 'boolean',
     ];
 
-    // Relasi ke master unit
     public function masterUnit()
     {
         return $this->belongsTo(MasterUnit::class, 'id_kategori', 'id_kategori');
