@@ -159,12 +159,32 @@ Route::prefix('admin')->group(function () {
 
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
-
-    Route::get('/', fn() => Inertia::render('Farmasi/Index'));
-    Route::get('/master', fn() => Inertia::render('Farmasi/MasterObat'));
-    Route::get('/resep-langsung', fn() => Inertia::render('Farmasi/ResepLangsung'));
-    Route::get('/pelayanan-resep', fn() => Inertia::render('Farmasi/PelayananResep'));
-    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'));
+    Route::get('/', fn() => Inertia::render('Farmasi/Index')) ->name('farmasi.index');
+    Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'))->name('farmasi.laporan');
+    //master-obat
+    Route::get('/master-obat', [MasterObatController::class, 'index'])->name('farmasi.master-obat.data');
+    Route::get('/master-obat/tambah', [MasterObatController::class, 'create'])->name('master-obat.create');
+    Route::post('/master-obat', [MasterObatController::class, 'store'])->name('master-obat.store');
+    //pengeluaran-langsung
+    Route::get('/units', [PengeluaranLangsungController::class, 'getUnits']);
+    Route::get('/get-sub-units', [PengeluaranLangsungController::class, 'getSubUnits']);
+    Route::get('/pengeluaran-langsung', [PengeluaranLangsungController::class, 'index'])->name('farmasi.pengeluaran-langsung');
+    Route::post('/pengeluaran-langsung', [PengeluaranLangsungController::class, 'store'])->name('farmasi.pengeluaran-langsung.store');
+    Route::get('/pengeluaran-langsung/{id}', [PengeluaranLangsungController::class, 'show'])->name('farmasi.pengeluaran-langsung.show');
+    Route::put('/pengeluaran-langsung/{id}', [PengeluaranLangsungController::class, 'update'])->name('farmasi.pengeluaran-langsung.update');
+    Route::delete('/pengeluaran-langsung/{id}', [PengeluaranLangsungController::class, 'destroy'])->name('farmasi.pengeluaran-langsung.destroy');
+    Route::post('/pengeluaran-langsung/filter', [PengeluaranLangsungController::class, 'filter'])->name('farmasi.pengeluaran-langsung.filter');
+    Route::get('/pengeluaran-langsung/{id}/detail', [PengeluaranLangsungController::class, 'detail'])->name('pengeluaran-langsung.detail');
+    Route::get('/pengeluaran-langsung/{id}/detail/items', [PengeluaranLangsungDetailController::class, 'index'])->name('pengeluaran.detail.index');
+    Route::get('/pengeluaran-langsung/{id}/detail/data', [PengeluaranLangsungDetailController::class, 'getData'])->name('pengeluaran.detail.data');
+    Route::post('/pengeluaran-langsung/{id}/detail', [PengeluaranLangsungDetailController::class, 'store'])->name('pengeluaran.detail.store');
+    Route::delete('/pengeluaran-langsung/{id}/detail/{detailId}', [PengeluaranLangsungDetailController::class, 'destroy'])->name('pengeluaran.detail.destroy');
+    
+    //pelayanan-resep
+    Route::get('/pelayanan-resep', [PelayananResepController::class, 'index'])->name('farmasi.pelayanan-resep.index');
+    Route::get('/pelayanan-resep/data', [PelayananResepController::class, 'getData']);
+    Route::get('/get-units', [PelayananResepController::class, 'getUnits']);
+    Route::get('/get-sub-units', [PelayananResepController::class, 'getSubUnits']);
 });
 
 // Grup Filter

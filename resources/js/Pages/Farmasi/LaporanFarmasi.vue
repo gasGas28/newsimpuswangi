@@ -1,42 +1,28 @@
 <template>
   <div class="container py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="header-blue p-3 rounded-top d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h2 class="fw-bold mb-0">Laporan Farmasi</h2>
-        <p class="text-muted">Laporan berdasarkan unit dan periode</p>
+        <h2 class="fw-bold mb-0 text-white">Laporan Farmasi Hari Ini</h2>
+        <p class="text-white mb-0">Kamis, 27 November 2025</p>
       </div>
+      <a href="/farmasi" class="btn btn-light">Kembali</a>
     </div>
 
-    <!-- Form Filter -->
     <div class="card shadow-sm mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Filter Data Laporan Farmasi</h5>
+      <div class="card-header bg-white">
+        <h5 class="mb-0">Filter Data</h5>
       </div>
       <div class="card-body">
         <form @submit.prevent="filterLaporan">
-          <!-- Baris 1 -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label class="form-label">Jenis Laporan</label>
+              <label class="form-label">Laporan</label>
               <select v-model="form.laporan" class="form-select" required>
                 <option value="">-- Pilih Jenis Laporan --</option>
                 <option>Laporan register pasien</option>
                 <option>Laporan jumlah pengeluaran langsung</option>
                 <option>Laporan jumlah pemakaian harian</option>
               </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Tanggal Awal</label>
-              <input type="date" v-model="form.tanggalAwal" class="form-control" required />
-            </div>
-          </div>
-
-          <!-- Baris 2 -->
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label class="form-label">Tanggal Akhir</label>
-              <input type="date" v-model="form.tanggalAkhir" class="form-control" required />
             </div>
             <div class="col-md-6">
               <label class="form-label">Unit</label>
@@ -55,7 +41,6 @@
             </div>
           </div>
 
-          <!-- Baris 3 -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label class="form-label">Sub Unit</label>
@@ -64,28 +49,36 @@
               </select>
             </div>
             <div class="col-md-6">
-              <!-- Kosong sesuai permintaan -->
+              <label class="form-label">Tanggal Awal</label>
+              <input type="date" v-model="form.tanggalAwal" class="form-control" required />
             </div>
           </div>
 
-          <!-- Tombol -->
-          <div class="d-flex justify-content-end gap-2">
-            <button type="submit" class="btn btn-success">
-              <i class="bi bi-bar-chart-line me-1"></i> Tampilkan Data
-            </button>
-            <button type="button" class="btn btn-outline-success">
-              <i class="bi bi-file-earmark-excel me-1"></i> Download Excel
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Tanggal Akhir</label>
+              <input type="date" v-model="form.tanggalAkhir" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+              </div>
+          </div>
+
+          <div class="d-flex justify-content-start gap-2">
+            <button type="submit" class="btn btn-info text-white">
+              Tampilkan Data
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Tombol Kembali -->
-    <div class="mt-4 text-start">
-      <a href="/farmasi" class="btn btn-secondary">
-        Kembali
-      </a>
+    <div class="card shadow-sm mt-4">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">Daftar Pasien Farmasi</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-center text-muted">Tidak ada data ditemukan.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -106,3 +99,9 @@ const filterLaporan = () => {
   console.log('Filter data', form.value)
 }
 </script>
+
+<style scoped>
+.header-blue {
+  background-color: #00bcd4; /* Warna biru muda */
+}
+</style>
