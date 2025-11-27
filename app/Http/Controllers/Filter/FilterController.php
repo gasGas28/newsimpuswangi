@@ -3,26 +3,64 @@
 namespace App\Http\Controllers\Filter;
 
 use App\Http\Controllers\Controller;
-use App\Models\Filter\DataMasterUnit;
-use App\Models\Filter\DataMasterUnitDetail;
-use App\Models\Filter\DiagnosaKasus;
-use App\Models\Filter\MasterWilayah;
-use App\Models\Filter\SetupDesa;
-use App\Models\Filter\SetupKecamatan;
-use App\Models\Filter\SimpusKunjungan;
-use App\Models\Filter\Loket;
-use App\Models\Filter\SimpusDiagnosa;
+
 use App\Models\Filter\SimpusLoket;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use App\Models\Filter\SimpusProvider;
-use App\Models\Filter\UnitFilter;
+
 
 class FilterController extends Controller
 {
     
     public function index()
     {
+         $DataPasien = DB::table('simpus_pelayanan as pel')
+            ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
+            ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
+            ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
+
+            ->leftJoin('setup_kel as kel', function ($join) {
+                $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
+                    ->on('p.NO_KEC', '=', 'kel.NO_KEC')
+                    ->on('p.NO_KAB', '=', 'kel.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kel.NO_PROP');
+            })
+
+            ->leftJoin('setup_kec as kec', function ($join) {
+                $join->on('p.NO_KEC', '=', 'kec.NO_KEC')
+                    ->on('p.NO_KAB', '=', 'kec.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kec.NO_PROP');
+            })
+
+            ->leftJoin('setup_kab as kab', function ($join) {
+                $join->on('p.NO_KAB', '=', 'kab.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kab.NO_PROP');
+            })
+
+            ->leftJoin('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
+
+            ->where('l.kdPoli', '003')
+
+            ->select(
+                'pel.idpelayanan',
+                'pel.tglPelayanan',
+                'pel.sudahDilayani',
+                'p.NO_MR',
+                'p.NAMA_LGKP',
+                'p.NIK',
+                'kel.nama_kel',
+                'kec.nama_kec',
+                'kab.nama_kab',
+                'prop.nama_prop',
+                'poli.nmPoli',
+                'p.alamat',
+                'p.no_rt',
+                'p.no_rw',
+                'l.tglKunjungan',
+                'l.idLoket',
+                'l.kdPoli'
+            )
+            ->get();
         // $providers = SimpusProvider::all();
         // $data_master_unit = DataMasterUnit::with(['detail'])->get();
         // $data_master_unit_detail = DataMasterUnitDetail::all();
@@ -52,8 +90,11 @@ class FilterController extends Controller
         // dd($data);
         // dd($data->first()->toArray());
 
+        dd($DataPasien);
+
         return Inertia::render('Filter/card', [
             'rekamMedis' => $data,
+            'dataPasien' => $DataPasien
         ]);
     }
 

@@ -3,6 +3,8 @@
     <!-- Header -->
     <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
       <h5 class="fw-semibold text-danger mb-1">Pelayanan Antenatal Care / Pelayanan Ibu Hamil</h5>
+
+      <button class="btn btn-danger btn-sm ms-auto">Akhiri ANC</button>
     </div>
 
     <div class="card border-0 shadow-sm rounded-0">
@@ -17,7 +19,10 @@
         >
           {{ tab.label }}
         </button>
-        <button class="btn btn-sehat btn-sm fw-semibold ml-auto" @click="selectedTab = 'kirim_satu_sehat'">
+        <button
+          class="btn btn-sehat btn-sm fw-semibold ml-auto"
+          @click="selectedTab = 'kirim_satu_sehat'"
+        >
           Kirim Satu Sehat
         </button>
       </div>

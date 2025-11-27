@@ -77,7 +77,7 @@
     </a>
   </div>
 
-  <hr>
+  <hr />
 
   <!-- Tempat munculnya form yang aktif -->
   <div class="mt-3">
@@ -190,12 +190,9 @@
     </div>
 
     <div v-if="activeResume === 'subjektif'" class="p-2">
-      <h5 class="fw-semibold mb-2">Pemeriksaan Kunjungan</h5>
-      <hr class="mb-3" />
-      <h6 class="text-center text-muted mb-3">Layanan tidak diisi oleh Nakes</h6>
-      <h5 class="fw-semibold mb-2">Pemeriksaan Pemantauan dan Riwayat</h5>
-      <hr class="mb-3" />
       <div class="col-md-6">
+        <h5 class="fw-semibold mb-2">Pemeriksaan Kunjungan</h5>
+        <hr class="mb-3" />
         <div class="mb-3">
           <table class="table table-hover table-striped table-sm">
             <thead>
@@ -206,18 +203,131 @@
             </thead>
             <tbody>
               <tr>
-                <td colspan="4" class="text-center text-muted">Tidak ada data pemeriksaan</td>
+                <td>Tanggal Kunjungan</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Usia Kehamilan</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Trimester Ke</td>
+                <td>-</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="row mt-4">
-          <div class="col-auto">
-            <button class="btn btn-success fw-semibold px-3">Simpan Pelayanan</button>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
-          </div>
+      </div>
+
+      <h5 class="fw-semibold mb-2">Pemeriksaan Pemantauan dan Riwayat</h5>
+      <hr />
+      <div class="col-md-6">
+        <div class="mb-3">
+          <h6 class="fw-semibold mb-1">Pemantauan dan Pendampingan</h6>
+          <table class="table table-hover table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Pemeriksaan</th>
+                <th>Hasil</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Terlalu muda usia melahirkan dibawah 20 tahun</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Terlalu rapat jarak kelahiran (< 2 tahun)</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Terlalu tua (kehamilan di atas 35 tahun)</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Terlalu sering melahirkan (anak > 3)</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Status Merokok</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Status Alkohol</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Apakah Disabilitas</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Apakah Mengikuti Kelas Ibu Hamil</td>
+                <td>-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mb-3">
+        <h6 class="fw-semibold mb-2">A. Komplikasi Penyulit Kehamilan</h6>
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Code Komplikasi</th>
+              <th>Nama Komplikasi</th>
+              <th>Sumber</th>
+              <th>Deskripsi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="text-center text-muted">Tidak ada Data Komplikasi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-3">
+        <h6 class="fw-semibold mb-2">B. Riwayat Penyakit Menular Pribadi</h6>
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Code Komplikasi</th>
+              <th>Nama Komplikasi</th>
+              <th>Sumber</th>
+              <th>Deskripsi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="text-center text-muted">Tidak ada Data Komplikasi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mb-3">
+        <h6 class="fw-semibold mb-2">C. Riwayat Penyakit Keluarga</h6>
+        <table class="table table-hover table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Code Komplikasi</th>
+              <th>Nama Komplikasi</th>
+              <th>Sumber</th>
+              <th>Deskripsi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="text-center text-muted">Tidak ada Data Komplikasi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row mt-4">
+        <div class="col-auto">
+          <button class="btn btn-success fw-semibold px-3">Simpan Pelayanan</button>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
         </div>
       </div>
     </div>

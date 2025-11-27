@@ -1,7 +1,7 @@
 <template>
   <div class="card border-0 shadow-sm rounded-4 p-3">
     <!-- Judul -->
-    <h5 class="fw-bold mb-3 text-success">Rujukan</h5>
+    <h5 class="fw-semibold mb-3 text-success">Rujukan</h5>
 
     <form @submit.prevent="simpanData">
       <!-- Grid baris utama -->

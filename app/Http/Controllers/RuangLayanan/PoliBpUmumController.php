@@ -114,7 +114,7 @@ class PoliBpUmumController extends Controller
             'l.idLoket',
             'l.umur',
             'l.unitId'
-        )->get();
+        )->get();                                                                                                             
         // dd($DataPasien);
         if ($request->wantsJson()) {
             return response()->json([
@@ -125,7 +125,7 @@ class PoliBpUmumController extends Controller
                 'unit' => $request->unit
             ]);
         }
-        dd($DataPasien);
+        // dd($DataPasien);
 
         $data = [
             'DataUnit' => $DataUnit,
