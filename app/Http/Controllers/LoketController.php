@@ -648,8 +648,10 @@ class LoketController extends Controller
         }
 
         // memastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         // SANITIZE: Pastikan kelUmur tidak null
         if (empty($data['kelUmur'])) {
@@ -759,8 +761,10 @@ class LoketController extends Controller
         }
 
         // Juga pastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         $pel = [
             'tglPelayanan' => $data['tglKunjungan'] ?? null,

@@ -1,9 +1,10 @@
 <template>
   <div class="container">
     <!-- Judul -->
-    <div class="text-decoration-underline fw-bold t mb-4">
-      <p class="bg-warning d-inline-block px-2">Anamnesa</p>
+    <div class=" mb-4">
+      <h6 class="fw-bold mb-3 bg-primary bg-opacity-10 d-inline-block p-2 rounded-3">Anamnesa</h6>
     </div>
+
     <form @submit.prevent="submitForm">
       <div class="row g-4">
         <!-- PASANGAN INPUT KIRI - KANAN -->
@@ -19,6 +20,9 @@
             <label class="col-sm-4 col-form-label fw-bold">Keluhan Utama/Keperluan</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.keluhan_utama" value></textarea>
+              <div v-if="form.errors.keluhan_utama" class="invalid-feedback d-block">
+                {{ form.errors.keluhan_utama }}
+              </div>
             </div>
           </div>
 
@@ -26,6 +30,9 @@
             <label class="col-sm-4 col-form-label fw-bold">Keluhan Tambahan</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.keluhan_tambahan"></textarea>
+              <div v-if="form.errors.keluhan_tambahan" class="invalid-feedback d-block">
+                {{ form.errors.keluhan_tambahan }}
+              </div>
             </div>
           </div>
 
@@ -33,6 +40,9 @@
             <label class="col-sm-4 col-form-label fw-bold">Riwayat Penyakit Sekarang</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.riwayat_penyakit_sekarang"></textarea>
+              <div v-if="form.errors.riwayat_penyakit_sekarang" class="invalid-feedback d-block">
+                {{ form.errors.riwayat_penyakit_sekarang }}
+              </div>
             </div>
           </div>
 
@@ -40,6 +50,9 @@
             <label class="col-sm-4 col-form-label fw-bold ">Riwayat Penyakit Dahulu</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.riwayat_penyakit_dahulu"></textarea>
+              <div v-if="form.errors.riwayat_penyakit_dahulu" class="invalid-feedback d-block">
+                {{ form.errors.riwayat_penyakit_dahulu }}
+              </div>
             </div>
           </div>
 
@@ -47,6 +60,9 @@
             <label class="col-sm-4 col-form-label fw-bold">Riwayat Penyakit Keluarga</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.riwayat_penyakit_keluarga"></textarea>
+              <div v-if="form.errors.riwayat_penyakit_keluarga" class="invalid-feedback d-block">
+                {{ form.errors.riwayat_penyakit_keluarga }}
+              </div>
             </div>
           </div>
         </div>
@@ -89,6 +105,9 @@
             <label class="col-sm-4 col-form-label fw-bold ">Tindakan/Terapi</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.tindakan"></textarea>
+              <div v-if="form.errors.tindakan" class="invalid-feedback d-block">
+                {{ form.errors.tindakan }}
+              </div>
             </div>
           </div>
 
@@ -96,6 +115,9 @@
             <label class="col-sm-4 col-form-label fw-bold ">Obat yang Sering Digunakan</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.obat_digunakan"></textarea>
+              <div v-if="form.errors.obat_digunakan" class="invalid-feedback d-block">
+                {{ form.errors.obat_digunakan }}
+              </div>
             </div>
           </div>
 
@@ -103,6 +125,9 @@
             <label class="col-sm-4 col-form-label fw-bold ">Obat yang Sering Dikonsumsi</label>
             <div class="col-sm-8">
               <textarea class="form-control" rows="2" v-model="form.obat_dikonsumsi"></textarea>
+              <div v-if="form.errors.obat_dikonsumsi" class="invalid-feedback d-block">
+                {{ form.errors.obat_dikonsumsi }}
+              </div>
             </div>
           </div>
           <div class="d-flex justify-content-end">
@@ -119,8 +144,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { Inertia } from '@inertiajs/inertia';
-import { watch } from 'vue';
+import Swal from 'sweetalert2'
 const props = defineProps({
   dataAnamnesa: Object,
   idLoket: String,
@@ -162,12 +186,18 @@ const form = useForm({
 
 function submitForm() {
   form.post(route(props.routeName, {
-    idLoket : props.idLoket
+    idLoket: props.idLoket
   }),
     {
       preserveScroll: true,
       onSuccess: () => {
-        alert("Anamnesa tersimpan");
+        Swal?.fire({
+          title: 'Sukses',
+          text: 'Data Anamnesa Subjective Tersimpan!',
+          icon: 'success',
+          timer: 1600,
+          showConfirmButton: false
+        });
         emit('dataAnamnesa-update');
       },
     });

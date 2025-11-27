@@ -5,9 +5,9 @@
         <div class="row m-2">
           <!-- Pelayanan Luar Gedung -->
           <div class="col-md-6">
-            <div class="text-decoration-underline fw-bold mb-4">
-              <p class="bg-warning d-inline-block px-2">Pelayanan Luar Gedung</p>
-            </div>
+              <div class="fw-bold mb-4">
+                <h5 class="fw-bold mb-3 bg-primary bg-opacity-10 d-inline-block p-2 rounded-3">Pelayanan Luar Gedung</h5>
+              </div>
 
             <div class="mb-3 row">
               <label class="col-sm-4 col-form-label fw-bold">Interfeksi</label>
@@ -41,29 +41,29 @@
             <div class="mb-3 row">
               <label class="col-sm-4 col-form-label fw-bold">Alergi Makanan</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control bg-warning" :value="props.AlergiPasien.alergi_makanan.namaAlergiBpjs" />
+                <input type="text" class="form-control bg-warning bg-opacity-75" :value="props.AlergiPasien.alergi_makanan.namaAlergiBpjs" />
               </div>
             </div>
 
             <div class="mb-3 row">
               <label class="col-sm-4 col-form-label fw-bold">Alergi Obat</label>
               <div class="col-sm-8">
-                <input  type="text" class="form-control bg-warning" :value="props.AlergiPasien.alergi_obat.namaAlergiBpjs"/>
+                <input  type="text" class="form-control bg-warning bg-opacity-75" :value="props.AlergiPasien.alergi_obat.namaAlergiBpjs"/>
               </div>
             </div>
 
             <div class="mb-3 row">
               <label class="col-sm-4 col-form-label fw-bold">Keterangan Alergi</label>
               <div class="col-sm-8">
-                <textarea  class="form-control bg-warning"  :value="props.AlergiPasien.keterangan"></textarea>
+                <textarea  class="form-control bg-warning bg-opacity-75"  :value="props.AlergiPasien.keterangan"></textarea>
               </div>
             </div>
           </div>
 
           <!-- Pelayanan Dalam Gedung -->
           <div class="col-md-6">
-            <div class="text-decoration-underline fw-bold mb-4">
-              <p class="bg-warning d-inline-block px-2">Pelayanan Dalam Gedung</p>
+            <div class="fw-bold mb-4">
+               <h5 class="fw-bold mb-3 bg-primary bg-opacity-10 d-inline-block p-2 rounded-3">Pelayanan Dalam Gedung</h5>
             </div>
 
             <div class="mb-3 row">

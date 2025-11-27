@@ -76,8 +76,30 @@
                   Diag {{ i + 1 }}: [{{ diag.kdDiagnosa || '-' }}] {{ diag.nmDiagnosa || '-' }}<br>
                   Ket: {{ diag.keterangan || '-' }}
                 </div>
+
               </template>
               <template v-else>-</template>
+              <strong>*Laborat* </strong>
+              <template v-if="data.tindakan_lab">
+                <div v-for="(item, index) in data.tindakan_lab" :key="index" style="margin-bottom: 8px">
+
+                  <strong>Pemeriksaan {{ index + 1 }}</strong><br>
+              
+
+                  <span v-if="item.parameteruji">
+                    [ {{ item.parameteruji.kode_parameter }} ] {{ item.parameteruji.nama_parameter }} <br>
+                    Nilai Lab : {{ item.nilaiLab || '-' }} <br>
+                    Nilai Normal : {{ item.parameteruji.nilai_normal || '-' }} <br>
+                    Nilai Kritis : {{ item.parameteruji.nilai_kritis || '-' }} <br>
+                  </span>
+
+                  <span v-else>
+                    Data parameter tidak ditemukan
+                  </span>
+
+                  <hr v-if="index != data.tindakan_lab.length - 1">
+                </div>
+              </template>
             </td>
 
             <!-- Planning (Tindakan dan Obat) -->
@@ -85,9 +107,10 @@
               <strong>Tindakan:</strong><br>
               <template v-if="data.tindakan && data.tindakan.length">
                 <div v-for="(t, i) in data.tindakan" :key="i" class="mb-2">
-                  <span class="fw-bold">Tindakan {{ i+ 1}} :</span>  [{{ t.idTindakan }}] {{ t.nmTindakan }}<br>
-                 <span class="fw-bold">Ket : </span> {{ t.keterangan && t.keterangan.trim() !== '' ? t.keterangan : '-' }}<br>
-                 <span class="fw-bold">Ket gigi:</span> {{ t.ketGigi && t.ketGigi.trim() !== '' ? t.ketGigi : '-' }}
+                  <span class="fw-bold">Tindakan {{ i + 1 }} :</span> [{{ t.idTindakan }}] {{ t.nmTindakan }}<br>
+                  <span class="fw-bold">Ket : </span> {{ t.keterangan && t.keterangan.trim() !== '' ? t.keterangan : '-'
+                  }}<br>
+                  <span class="fw-bold">Ket gigi:</span> {{ t.ketGigi && t.ketGigi.trim() !== '' ? t.ketGigi : '-' }}
                 </div>
               </template>
               <template v-else>-</template>

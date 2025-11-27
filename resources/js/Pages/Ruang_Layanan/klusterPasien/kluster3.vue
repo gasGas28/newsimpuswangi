@@ -2,16 +2,16 @@
   <AppLayouts>
     <div class="container my-4">
       <div class="p-4 rounded mb-4 text-white" style="background: linear-gradient(135deg, #3b82f6, #10b981);">
-        <h1 class="h3 mb-2">
-          JUMLAH PASIEN RUANG LAYANAN PUSKESMAS WONGSOREJO HARI INI
+        <h1 class="h5 mb-2">
+          JUMLAH PASIEN RUANG LAYANAN PUSKESMAS WONGSOREJO HARI INI (KLUSTER 3)
         </h1>
-        <div class="bg-white bg-opacity-25 d-inline-block px-3 py-2 rounded-pill mt-2">
+        <div class="bg-white bg-opacity-25 d-inline-block px-3 py-2 rounded-pill mt-3 fs-6">
           <i class="fas fa-calendar-alt me-2"></i>
           {{ currentDate }}
         </div>
       </div>
       <div class="row g-4">
-        <div class="col-md-4" v-for="poli in dataLayanan" :key="listPoli.id">
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3" v-for="poli in dataLayanan" :key="listPoli.id">
           <Link :href="route('ruang-layanan.index' , {idPoli : poli.kdPoli, kluster : '3'})" class="text-decoration-none">
           <div class="card shadow ">
             <div class="card-body ">
@@ -19,10 +19,10 @@
                 :style="{ width: '60px', height: '60px', backgroundColor: poli.bg }">
                 <i :class="poli.icon" class="text-white fs-2"></i>
               </div>
-              <h5 class="card-title mb-2">{{ poli.nama }}</h5>
+              <h5 class="card-title mb-2 fs-6">{{ poli.nama }}</h5>
               <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Total Pasien</small>
-                <strong class="fs-4">{{ poli.jumlah }}</strong>
+                <strong class="fs-5">{{ poli.jumlah }}</strong>
               </div>
             </div>
           </div>

@@ -19,29 +19,29 @@
             <i class="bi bi-person-vcard text-primary"></i> Data Pasien
           </h6>
 
-          <div class="row g-3">
+          <div class="row g-5">
             <div class="col-md-6">
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">No MR</label>
+                <label class="form-label small mb-1 fw-semibold">No MR</label>
                 <input type="text" class="form-control" :value="props.dataAnamnesa.loket.simpus_pasien.NO_MR ?? '-'"
                   disabled>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Nama</label>
+                <label class="form-label small mb-1 fw-semibold">Nama</label>
                 <input type="text" class="form-control" :value="props.dataAnamnesa.loket.simpus_pasien.NAMA_LGKP ?? '-'"
                   disabled>
               </div>
 
               <div class="row g-2">
                 <div class="col-6">
-                  <label class="form-label small text-muted mb-1">Tempat Lahir</label>
+                  <label class="form-label small mb-1 fw-semibold">Tempat Lahir</label>
                   <input type="text" class="form-control" v-model.trim="props.dataAnamnesa.loket.simpus_pasien.TMPT_LHR"
                     placeholder="Isi tempat lahir" disabled>
                 </div>
                 <div class="col-6">
-                  <label class="form-label small text-muted mb-1">Tgl Lahir</label>
-                  <input type="date" class="form-control" v-model="props.dataAnamnesa.loket.simpus_pasien.TGL_LHR"
+                  <label class="form-label small mb-1 fw-semibold">Tgl Lahir</label>
+                  <input class="form-control" :value="formatDate(props.dataAnamnesa.loket.simpus_pasien.TGL_LHR)"
                     disabled>
                 </div>
               </div>
@@ -49,30 +49,30 @@
 
             <div class="col-md-6">
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Agama</label>
+                <label class="form-label small mb-1 fw-semibold">Agama</label>
                 <input type="text" class="form-control" v-model.trim="props.dataAnamnesa.loket.simpus_pasien.AGAMA"
                   disabled>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Pekerjaan</label>
+                <label class="form-label small mb-1 fw-semibold">Pekerjaan</label>
                 <input type="text" class="form-control"
                   v-model.trim="props.dataAnamnesa.loket.simpus_pasien.JENIS_PKRJN" disabled>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Alamat</label>
+                <label class="form-label small mb-1 fw-semibold">Alamat</label>
                 <input type="text" class="form-control" :value="props.dataAnamnesa.loket.simpus_pasien.ALAMAT" disabled>
               </div>
 
               <div class="row g-2">
                 <div class="col-6">
-                  <label class="form-label small text-muted mb-1">Kecamatan</label>
+                  <label class="form-label small mb-1 fw-semibold">Kecamatan</label>
                   <input type="text" class="form-control"
                     :value="props.dataAnamnesa.loket.simpus_pasien.setup_kab.NAMA_KAB ?? ''" disabled>
                 </div>
                 <div class="col-6">
-                  <label class="form-label small text-muted mb-1">Kel/Desa</label>
+                  <label class="form-label small mb-1 fw-semibold">Kel/Desa</label>
                   <input type="text" class="form-control"
                     :value="props.dataAnamnesa.loket.simpus_pasien.setup_kel.NAMA_KEL ?? ''" disabled>
                 </div>
@@ -87,67 +87,85 @@
             <i class="bi bi-envelope-paper text-primary"></i> Data Surat
           </h6>
 
-          <div class="row g-3">
+          <div class="row g-5">
             <div class="col-md-6">
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Tanggal Rujuk</label>
+                <label class="form-label small mb-1 fw-semibold">Tanggal Rujuk</label>
                 <input type="text" class="form-control" v-model="form.tgl_rujuk" disabled>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">No Surat</label>
+                <label class="form-label small mb-1 fw-semibold">No Surat</label>
                 <input type="text" class="form-control" v-model="form.no_surat">
+                <div v-if="form.errors.no_surat" class="invalid-feedback d-block">
+                  {{ form.errors.no_surat }}
+                </div>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">No Telp/HP</label>
+                <label class="form-label small mb-1 fw-semibold">No Telp/HP</label>
                 <input type="tel" class="form-control" v-model="form.no_hp">
+                  <div v-if="form.errors.no_hp" class="invalid-feedback d-block">
+                  {{ form.errors.no_hp }}
+                </div>
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Rumah Sakit</label>
+                <label class="form-label small mb-1 fw-semibold">Rumah Sakit</label>
                 <select class="form-select" v-model="form.provider">
                   <option value="" selected>--Pilih Rumah Sakit --</option>
                   <option v-for="item in props.provider" :value="item.kdProvider"> {{
                     item.nmProvider }}</option>
                 </select>
+                <div v-if="form.errors.provider" class="invalid-feedback d-block">
+                  {{ form.errors.provider }}
+                </div>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Poli</label>
+                <label class="form-label small mb-1 fw-semibold">Poli</label>
                 <select class="form-select" v-model="form.Poli">
                   <option value="" selected>--Pilih Poli --</option>
                   <option v-for="item in props.poliFktl" :value="item.kdPoli"> {{
                     item.nmPoli }}</option>
                 </select>
+                <div v-if="form.errors.Poli" class="invalid-feedback d-block">
+                  {{ form.errors.Poli }}
+                </div>
               </div>
 
               <div class="mb-2">
-                <label class="form-label small text-muted mb-1">Dokter Jaga</label>
+                <label class="form-label small mb-1 fw-semibold">Dokter Jaga</label>
                 <select class="form-select" v-model="form.tenagaMedis">
                   <option value="" selected>--Pilih Dokter --</option>
                   <option v-for="item in props.tenagaMedisAskep" :value="item.idDokter"> {{
                     item.nmDokter }}</option>
                 </select>
+                <div v-if="form.errors.tenagaMedis" class="invalid-feedback d-block">
+                  {{ form.errors.tenagaMedis }}
+                </div>
+              </div>
+              <div class=" mt-4">
+                <div class=" d-flex justify-content-end gap-2">
+                  <button type="submit" :disabled="formProcessing" class="btn btn-primary text-white rounded-3">
+                    <span v-if="!formProcessing"><i class="bi bi-save me-1"></i> Simpan</span>
+                    <span v-else>Menyimpan…</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Actions -->
-          <div class="row mt-3">
-            <div class="col-md-4">
-              <a href="#" class="btn w-100 btn-outline-secondary rounded-3">
-                Kembali
-              </a>
-            </div>
+          <!-- <div class="row mt-3">
             <div class="col-md-8">
               <button type="submit" class="btn btn-info text-white w-100 rounded-3">
                 <i class="bi bi-save me-1"></i> Simpan
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
       </form>
     </div>
@@ -158,6 +176,7 @@
 import { computed, reactive, ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
   idPoli: String,
@@ -179,12 +198,18 @@ const form = useForm({
 })
 
 function submit() {
-
   if (!props.surat) {
     form.post(route('ruang-layanan.simpan-rujukan', {
       idPoli: props.idPoli
     }), {
       onSuccess: () => {
+        Swal.fire({
+          title: 'Sukses',
+          text: 'Suskes Menambah Data Surat Rujukan',
+          icon: 'success',
+          timer: 1600,
+          showConfirmButton: false
+        })
         router.visit(route('ruang-layanan.surat-rujuk', {
           idPoli: props.idPoli,
           idPelayanan: props.idPelayanan
@@ -200,6 +225,13 @@ function submit() {
       idSurat: props.surat.id_surat_rujukan
     }), {
       onSuccess: () => {
+         Swal.fire({
+          title: 'Sukses',
+          text: 'Suskes Mengubah Data Surat Rujukan',
+          icon: 'success',
+          timer: 1600,
+          showConfirmButton: false
+        })
         router.visit(route('ruang-layanan.surat-rujuk', {
           idPoli: props.idPoli,
           idPelayanan: props.idPelayanan
@@ -210,6 +242,16 @@ function submit() {
       }
     })
   }
+}
+function formatDate(tgl) {
+  if (!tgl) return "-"
+  const date = new Date(tgl);
+  console.log(tgl)
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
 }
 
 </script>

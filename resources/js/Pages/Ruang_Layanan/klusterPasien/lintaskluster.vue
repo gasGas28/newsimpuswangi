@@ -65,44 +65,11 @@
   import { route } from 'ziggy-js';
   const { props } = usePage();
 
-  const listPoli = props.listPoli;
-  const totalPasienUGD = props.totalPasienUGD;
-  const totalPasienGigi = props.totalPasienGigi;
-  console.log(listPoli);
-
-  const currentDate = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  const dataLayanan = [
-    {
-      nama: 'Gigi',
-      jumlah: totalPasienGigi,
-      kdPoli: '002',
-      link: 'ruang-layanan.index',
-      icon: 'bi bi-clipboard-check',
-      bg: '#10b981',
-    },
-    {
-      nama: 'UGD',
-      jumlah: totalPasienUGD,
-      kdPoli: '005',
-      link: 'ruang-layanan.index',
-      icon: 'bi bi-hospital',
-      bg: '#facc15',
-    },
-    {
-      nama: 'Rawat Inap',
-      jumlah: 0,
-      kdPoli: '098',
-      link: 'ruang-layanan.rawat-inap',
-      icon: 'bi bi-heart-pulse',
-      bg: '#facc15',
-    },
-  ];
+const dataLayanan = [
+  { nama: 'Gigi', jumlah: totalPasienGigi,kdPoli:'002', link: 'ruang-layanan.index', icon: 'bi bi-clipboard-check', bg: '#10b981' },
+  { nama: 'UGD', jumlah: totalPasienUGD, kdPoli:'005',link: 'ruang-layanan.index', icon: 'bi bi-hospital', bg: '#facc15' },
+  { nama: 'Rawat Inap', jumlah: 0, kdPoli:'001',link: 'ruang-layanan.rawat-inap', icon: 'bi bi-heart-pulse', bg: '#facc15' },
+]
 </script>
 
 <style></style>

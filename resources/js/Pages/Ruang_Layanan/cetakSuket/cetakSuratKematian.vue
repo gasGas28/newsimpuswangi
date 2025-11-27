@@ -94,23 +94,22 @@
         </p>
 
         <!-- Tanda Tangan -->
-        <div class="text-end mt-0">
+        <!-- <div class="text-end mt-0">
             <p class="mb-0">Banyuwangi, {{ formattedDate }}</p>
             <p class="mb-0">Dokter</p>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-
+import {onMounted } from 'vue';
 const page = usePage();
 
 const dataPasien = page.props.dataPasien
 const suket = page.props.suket
 const dataAnamnesa = page.props.dataAnamnesa
 const unit = page.props.unit
-const dokter = page.props.dokter
 const Kecamatan = page.props.kecamatan
 console.log('data pasien', dataPasien)
 console.log('suket', suket)
@@ -124,6 +123,13 @@ function formatDate(dateStr) {
   if (!dateStr) return "-";
   const [year, month, day] = dateStr.split("-");
   return `${day}-${month}-${year}`;
+}
+
+onMounted(()=>{
+    print()
+})
+function print(){
+   setTimeout(() => window.print(), 500);
 }
 </script>
 

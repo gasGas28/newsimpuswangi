@@ -23,44 +23,44 @@
 
     <!-- Body -->
     <div class="card-body">
-      <div class="table-responsive rounded-3 border">
-        <table class="table table-sm align-middle mb-0">
-          <thead class="table-light">
+      <div class="table-responsive rounded-3 border my-4">
+        <table class="table table-sm table-bordered align-middle mb-0">
+          <thead class="table-primary">
             <tr class="text-uppercase small text-muted">
-              <th class="px-3" style="width: 56px;">No</th>
-              <th>Tanggal</th>
-              <th>Surat Keterangan</th>
-              <th>No Surat</th>
-              <th>Rumah Sakit</th>
-              <th>Poli</th>
-              <th>Tenaga medis</th>
+              <th class="text-center" style="width: 56px;">No</th>
+              <th class="text-center">Tanggal</th>
+              <th class="text-center">Surat Keterangan</th>
+              <th class="text-center">No Surat</th>
+              <th class="text-center">Rumah Sakit</th>
+              <th class="text-center">Poli</th>
+              <th class="text-center">Tenaga medis</th>
               <th class="text-center" style="width: 160px;">Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in props.suratRujuks">
-              <td class="px-3">{{ index + 1 }}</td>
+              <td class="text-center">{{ index + 1 }}</td>
               <td class="fw-semibold">{{ item.tgl_rujuk }}</td>
-              <td>SURAT RUJUKAN</td>
-              <td>{{ item.no_surat }}</td>
-              <td>{{ item.provider.nmProvider }}</td>
-              <td>{{ item.poli_rujukan.nmPoli }}</td>
-              <td>{{ item.tenaga_medis.nmDokter }}</td>
+              <td class="text-center">SURAT RUJUKAN</td>
+              <td class="text-center">{{ item.no_surat }}</td>
+              <td class="text-center">{{ item.provider.nmProvider }}</td>
+              <td class="text-center">{{ item.poli_rujukan.nmPoli }}</td>
+              <td class="text-center">{{ item.tenaga_medis.nmDokter }}</td>
               <td class="text-center">
-                <div class="btn-group btn-group-sm">
+                <div class="d-flex justify-content-evenly">
                   <Link :href="route('ruang-layanan.surat-rujuk-form-edit', {
                     idPoli: props.idPoli,
                     idPelayanan: props.idPelayanan,
                     idSurat: item.id_surat_rujukan
-                  })" class="btn btn-outline-primary" title="Lihat / Edit">
+                  })" class="btn btn-primary" title="Lihat / Edit">
                   <i class="bi bi-pencil-square"></i>
                   </Link>
                   <Link :href="route('ruang-layanan.cetak-rujukan', {
                     idSurat: item.id_surat_rujukan
-                  })" type="button" class="btn btn-outline-success" title="Cetak">
+                  })" type="button" class="btn btn-success" title="Cetak">
                   <i class="bi bi-printer"></i>
                   </Link>
-                  <button @click="onDelete(item.id_surat_rujukan)" type="button" class="btn btn-outline-danger"
+                  <button @click="onDelete(item.id_surat_rujukan)" type="button" class="btn btn-danger"
                     title="Hapus">
                     <i class="bi bi-trash3"></i>
                   </button>

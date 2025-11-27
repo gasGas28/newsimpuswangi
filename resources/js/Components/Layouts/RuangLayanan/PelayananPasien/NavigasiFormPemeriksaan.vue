@@ -4,34 +4,34 @@
       <div class="d-flex position-relative align-items-center">
         <div class="d-flex position-relative gap-2">
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'subjective' ? 'active text-primary' : 'text-muted'"
+            :class="currentTab === 'subjective' ? 'active text-primary fw-bold' : 'text-muted'"
             @click.prevent="changeTab('subjective')">
             Subjective
           </a>
 
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'objective' ? 'active text-primary' : 'text-muted'"
+            :class="currentTab === 'objective' ? 'active text-primary fw-bold' : 'text-muted'"
             @click.prevent="changeTab('objective')">
             Objective
           </a>
 
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'assesment' ? 'active text-primary' : 'text-muted'"
+            :class="currentTab === 'assesment' ? 'active text-primary fw-bold' : 'text-muted'"
             @click.prevent="changeTab('assesment')">
             Assesment
           </a>
           <a v-if="props.kdPoli == '997'" href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'Gizi' ? 'active text-primary' : 'text-muted'" @click.prevent="changeTab('Gizi')">
+            :class="currentTab === 'Gizi' ? 'active text-primary fw-bold' : 'text-muted'" @click.prevent="changeTab('Gizi')">
             Gizi
           </a>
 
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'planning' ? 'active text-primary' : 'text-muted'"
+            :class="currentTab === 'planning' ? 'active text-primary fw-bold' : 'text-muted'"
             @click.prevent="changeTab('planning')">
             Planning
           </a>
           <a href="#" class="text-decoration-none btn tab-item px-3 py-2"
-            :class="currentTab === 'status_pasien' ? 'active text-primary' : 'text-muted'"
+            :class="currentTab === 'status_pasien' ? 'active text-primary fw-bold' : 'text-muted'"
             @click.prevent="changeTab('status_pasien')">
             Status Pasien
           </a>

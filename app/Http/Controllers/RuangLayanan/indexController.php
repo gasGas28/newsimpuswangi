@@ -216,14 +216,45 @@ class indexController extends Controller
         );
     }
 
+    public function totalPasienKlusterAndPoli()
+    {
+        $jumlahPasienKluster2 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '003'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienKluster3 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '008'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienLintasKluster = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['002', '004', '005', '098'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienSanitasi = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '097')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienGizi =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '997')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienKunjOnline =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '999')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        return response()->json([
+            'jumlahPasienKluster2' => $jumlahPasienKluster2,
+            'jumlahPasienKluster3' => $jumlahPasienKluster3,
+            'jumlahPasienLintasKluster' => $jumlahPasienLintasKluster,
+            'jumlahPasienSanitasi' => $jumlahPasienSanitasi,
+            'jumlahPasienGizi' => $jumlahPasienGizi,
+            'jumlahPasienKunjOnline' => $jumlahPasienKunjOnline
+        ]);
+
+    }
+
     public function listPoliKluster($kluster)
     {
-
-
         if ($kluster == '2') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '<=', 17);
+                $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienKIA = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '003')->whereHas('SimpusLoket', function ($query) {
             })->where('tglPelayanan', now()->toDateString())->count();
             //dd($totalPasienUmum);
             //dd($listPoli);
@@ -231,17 +262,18 @@ class indexController extends Controller
                 'Ruang_Layanan/klusterPasien/kluster2',
                 [
                     'listPoli' => $listPoli,
-                    'totalPasienUmum' => $totalPasienUmum
+                    'totalPasienUmum' => $totalPasienUmum,
+                    'totalPasienKIA' => $totalPasienKIA,
                 ]
             );
 
         } elseif ($kluster == '3') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008'])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17);
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             $totalPasienKB = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '008')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17);
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             // dd($listPoli);
             //dd($totalPasienKB);
@@ -415,6 +447,85 @@ class indexController extends Controller
                 'last_page' => $MasterTindakan->lastPage(),
                 'per_page' => $MasterTindakan->perPage(),
                 'total' => $MasterTindakan->total(),
+            ],
+            'links' => $links,
+        ]);
+    }
+
+    public function MasterObat(Request $request)
+    {
+        $search = $request->get('search');
+        
+        $query = SimpusMasterObat::where('AKTIF', '1');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%");
+            });
+        }
+        $MasterObat = $query->paginate(10);
+
+        $links = [];
+
+        // Previous
+        $links[] = [
+            'label' => 'Previous',
+            'url' => $MasterObat->previousPageUrl(),
+            'active' => false,
+        ];
+
+        $lastPage = $MasterObat->lastPage();
+        $current = $MasterObat->currentPage();
+
+        // Always tampil halaman pertama
+        $links[] = [
+            'label' => 1,
+            'url' => $MasterObat->url(1),
+            'active' => $current === 1,
+        ];
+
+        // Tambah "..." kalau current jauh dari 1
+        if ($current > 3) {
+            $links[] = ['label' => '...', 'url' => null, 'active' => false];
+        }
+
+        // Window: current-1, current, current+1
+        for ($i = max(2, $current - 1); $i <= min($lastPage - 1, $current + 1); $i++) {
+            $links[] = [
+                'label' => $i,
+                'url' => $MasterObat->url($i),
+                'active' => $current === $i,
+            ];
+        }
+
+        // Tambah "..." kalau current jauh dari lastPage
+        if ($current < $lastPage - 2) {
+            $links[] = ['label' => '...', 'url' => null, 'active' => false];
+        }
+
+        // Always tampil halaman terakhir (kalau lebih dari 1)
+        if ($lastPage > 1) {
+            $links[] = [
+                'label' => $lastPage,
+                'url' => $MasterObat->url($lastPage),
+                'active' => $current === $lastPage,
+            ];
+        }
+
+        // Next
+        $links[] = [
+            'label' => 'Next',
+            'url' => $MasterObat->nextPageUrl(),
+            'active' => false,
+        ];
+
+        return response()->json([
+            'data' => $MasterObat->items(),
+            'meta' => [
+                'current_page' => $MasterObat->currentPage(),
+                'last_page' => $MasterObat->lastPage(),
+                'per_page' => $MasterObat->perPage(),
+                'total' => $MasterObat->total(),
             ],
             'links' => $links,
         ]);
