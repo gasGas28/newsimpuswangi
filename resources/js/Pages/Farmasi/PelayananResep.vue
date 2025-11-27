@@ -39,7 +39,7 @@ const goBack = () => {
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-body bg-info text-white rounded-top-4">
         <h3 class="fw-semibold mb-3" style="margin-left: 10px;">
-          Jumlah Resep Pelayanan Poli Hari Ini
+          Jumlah Resep Pelayanan Poli Hari Ini2 ya
         </h3>
 
         <div class="d-flex justify-content-between align-items-center">
