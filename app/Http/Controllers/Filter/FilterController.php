@@ -61,6 +61,8 @@ class FilterController extends Controller
                 'l.kdPoli'
             )
             ->get();
+        // $DataPasien = DB::table("simpus_loket as l")
+        // ->join
         // $providers = SimpusProvider::all();
         // $data_master_unit = DataMasterUnit::with(['detail'])->get();
         // $data_master_unit_detail = DataMasterUnitDetail::all();
@@ -90,7 +92,7 @@ class FilterController extends Controller
         // dd($data);
         // dd($data->first()->toArray());
 
-        dd($DataPasien);
+        // dd($DataPasien);
 
         return Inertia::render('Filter/card', [
             'rekamMedis' => $data,

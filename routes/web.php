@@ -300,7 +300,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     });
 
     // PTM
-    Route::prefix('ptm')->name('ptm.')->group(function () {
+     Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
@@ -317,26 +317,30 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Yankes Primer
     Route::prefix('yankes-primer')->name('yankes-primer.')->group(function () {
         Route::inertia('/', 'MalSehat/YankesPrimer/Index')->name('index');
-        Route::inertia('kunjungankonsultasitradisional', 'MalSehat/YankesPrimer/KunjunganKonsultasiTradisional')->name('kunjungankonsultasitradisional');
-        Route::inertia('kunjunganketerangansehat', 'MalSehat/YankesPrimer/KunjunganKeteranganSehat')->name('kunjunganketerangansehat');
+
+        // Route::get('kunjungankonsultasitradisional', [\App\Http\Controllers\MalSehat\YankesController::class, 'kunjunganKonsultasiTradisional'])
+        //     ->name('kunjungankonsultasitradisional');
+
+        // Route::get('kunjunganketerangansehat', [\App\Http\Controllers\MalSehat\YankesController::class, 'kunjunganKeteranganSehat'])
+        //     ->name('kunjunganketerangansehat');
     });
 
     // Farmasi
     Route::prefix('farmasi')->name('farmasi.')->group(function () {
         Route::inertia('/', 'MalSehat/Farmasi/Index')->name('index');
-        Route::inertia('permintaanobat', 'MalSehat/Farmasi/PermintaanObat')->name('permintaanobat');
+        // Route::get('permintaanobat', [\App\Http\Controllers\MalSehat\FarmasiController::class, 'permintaanObat'])
+        //     ->name('permintaanobat');
+
+        // Route::get('permintaanobat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\FarmasiController::class, 'pelayanan'])
+        //     ->name('permintaanobat.pelayanan')
+        //     ->middleware('web');
     });
 
     // Biakes
     Route::prefix('biakes')->name('biakes.')->group(function () {
         Route::inertia('/', 'MalSehat/Biakes/Index')->name('index');
-
         Route::get('pembiayaanjaminansehat', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pembiayaanJaminanSehat'])
             ->name('pembiayaanjaminansehat');
-
-        Route::get('pembiayaanjaminansehat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\BiakesController::class, 'pelayanan'])
-            ->name('pembiayaanjaminansehat.pelayanan')
-            ->middleware('web');
     });
 
     // Promkes
@@ -349,15 +353,39 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
         Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
             ->name('kesehatanpeduliremaja.pelayanan')
             ->middleware('web');
-
+            
         // ✅ route untuk diagnosa
         Route::get('diagnosa/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getDiagnosa'])
             ->name('diagnosa.list');
-
+        
         // ✅ route untuk tindakan
         Route::get('tindakan/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getTindakan'])
             ->name('tindakan.list');
-    });
+            
+        // ✅ route baru untuk halaman Surat Keterangan
+        // ✅ route baru dengan parameter no_mr
+        Route::get('surat-keterangan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'suratKeterangan'])
+                ->name('suratketerangan');
+
+        Route::get('surat-rujukan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'suratRujukan'])
+            ->name('suratrujukan');
+
+        Route::get('promkes/providers', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getProviders'])
+            ->name('promkes.providers');
+
+        Route::get('riwayat-pasien/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'riwayatPasien'])
+            ->name('riwayatpasien');
+
+});
+
+// Surat Keterangan API
+Route::prefix('promkes/surat-keterangan')->group(function () {
+    Route::get('/list/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getSuratKeterangan']);
+    Route::post('/store', [\App\Http\Controllers\MalSehat\PromkesController::class, 'storeSuratKeterangan']);
+    Route::put('/update/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'updateSuratKeterangan']);
+    Route::delete('/delete/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'deleteSuratKeterangan']);
+});
+
 
     // Lain-lain
     Route::inertia('home-visit', 'MalSehat/HomeVisit/Index')->name('home-visit');
@@ -365,6 +393,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
+
 });
 Route::prefix('ruang_layanan/simpus/kunjungan-online')
     ->name('kunj-online.')

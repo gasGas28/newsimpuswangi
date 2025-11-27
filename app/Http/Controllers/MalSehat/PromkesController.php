@@ -54,6 +54,7 @@ class PromkesController extends Controller
                 'PHONE as phone',
                 'TGL_LHR as tgl_lahir',
                 'JENIS_KLMIN as jenis_kelamin',
+                'ALERGI as alergi',
                 'created as tanggal'
             )
             ->first();

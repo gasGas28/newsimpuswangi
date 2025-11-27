@@ -1,10 +1,8 @@
 <template>
   <div class="card m-2 rounded-4 shadow-sm overflow-hidden">
     <!-- Header -->
-    <div
-      class="card-header d-flex justify-content-between align-items-center p-3"
-      style="background: linear-gradient(135deg, #4682B4, #5A9BD5);"
-    >
+    <div class="card-header d-flex justify-content-between align-items-center p-3"
+      style="background: linear-gradient(135deg, #4682B4, #5A9BD5);">
       <h5 class="text-white fw-bold m-0">
         <i class="fas fa-stethoscope me-2"></i> Form Anamnesa
       </h5>
@@ -53,11 +51,7 @@
               <label class="form-label fw-bold">Alergi Makanan</label>
               <select class="form-select shadow-sm rounded-3 bg-primary bg-opacity-10" v-model="selectedMakanan">
                 <option value="">Tidak Ada Alergi</option>
-                <option
-                  v-for="a in alergiMakanan"
-                  :key="a.id"
-                  :value="a.namaAlergiBpjs"
-                >
+                <option v-for="a in alergiMakanan" :key="a.id" :value="a.namaAlergiBpjs">
                   {{ a.namaAlergiBpjs }}
                 </option>
               </select>
@@ -67,11 +61,7 @@
               <label class="form-label fw-bold">Alergi Obat</label>
               <select class="form-select shadow-sm rounded-3 bg-primary bg-opacity-10" v-model="selectedObat">
                 <option value="">Tidak Ada Alergi</option>
-                <option
-                  v-for="a in alergiObat"
-                  :key="a.id"
-                  :value="a.namaAlergiBpjs"
-                >
+                <option v-for="a in alergiObat" :key="a.id" :value="a.namaAlergiBpjs">
                   {{ a.namaAlergiBpjs }}
                 </option>
               </select>
@@ -79,10 +69,8 @@
 
             <div class="mb-3">
               <label class="form-label fw-bold">Keterangan Alergi</label>
-              <textarea
-                class="form-control shadow-sm rounded-3 bg-primary bg-opacity-10"
-                rows="2"
-              ></textarea>
+              <textarea class="form-control shadow-sm rounded-3 bg-primary bg-opacity-10" rows="2"
+                v-model="keteranganAlergi"></textarea>
             </div>
 
             <div class="mb-3">
@@ -101,11 +89,9 @@
             </div>
 
             <div class="d-flex justify-content-end">
-              <button
-                type="submit"
+              <button type="submit"
                 class="btn btn-success d-flex align-items-center gap-2 px-4 fw-semibold text-white shadow-sm rounded-pill"
-                style="background: linear-gradient(135deg, #4682B4, #5A9BD5); border: none;"
-              >
+                style="background: linear-gradient(135deg, #4682B4, #5A9BD5); border: none;">
                 <i class="fas fa-save"></i> SIMPAN
               </button>
             </div>
@@ -117,15 +103,45 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+
+// data dari backend (Laravel)
+const alergiMakanan = ref(page.props.alergiMakanan);
+const alergiObat = ref(page.props.alergiObat);
+const pasien = ref(page.props.pasien);
 
 const props = defineProps({
   alergiMakanan: Array,
   alergiObat: Array,
 });
 
-const selectedMakanan = ref("");
-const selectedObat = ref("");
+// isi default sesuai database
+const selectedMakanan = ref('');
+const selectedObat = ref('');
+const keteranganAlergi = ref('');
+
+// isi otomatis dari data pasien
+onMounted(() => {
+  if (pasien.value && pasien.value.alergi) {
+    // misal kolom ALERGI berisi teks seperti "Makanan: Susu, Obat: Paracetamol"
+    const alergiText = pasien.value.alergi.toLowerCase();
+
+    if (alergiText.includes('makanan')) {
+      const match = alergiText.match(/makanan[:\-]?\s*([a-z0-9\s]+)/i);
+      if (match) selectedMakanan.value = match[1].trim();
+    }
+
+    if (alergiText.includes('obat')) {
+      const match = alergiText.match(/obat[:\-]?\s*([a-z0-9\s]+)/i);
+      if (match) selectedObat.value = match[1].trim();
+    }
+
+    keteranganAlergi.value = pasien.value.alergi;
+  }
+});
 
 function goBack() {
   window.history.back();

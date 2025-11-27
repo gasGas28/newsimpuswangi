@@ -91,10 +91,10 @@ function goBack() {
 
             <!-- Actions -->
             <div class="card-footer bg-light d-flex flex-wrap gap-2 justify-content-end p-3 rounded-bottom-4">
-                <button
+                <Link href="/mal-sehat/promkes/surat-keterangan"
                     class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 px-3 rounded-pill shadow-sm">
-                    <i class="fas fa-file-alt"></i> Surat Keterangan
-                </button>
+                <i class="fas fa-file-alt"></i> Surat Keterangan
+                </Link>
                 <button
                     class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 px-3 rounded-pill shadow-sm">
                     <i class="fas fa-file-medical"></i> Surat Rujukan
