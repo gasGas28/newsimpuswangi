@@ -1,106 +1,160 @@
+<script setup>
+import { ref, reactive, computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
+
+const { props } = usePage();
+
+// Props dari Controller
+const units = ref(props.units ?? []);
+const subUnits = ref(props.subUnits ?? []);
+const pasien = ref(props.data ?? []);
+
+const filters = reactive({
+  unit: props.filters?.unit ?? "",
+  sub_unit: props.filters?.sub_unit ?? "",
+  periode: props.filters?.periode ?? "",
+});
+
+// Helper: Sub Unit terfilter berdasarkan Unit yang dipilih
+const filteredSubUnits = computed(() => {
+  if (!filters.unit) return subUnits.value;
+  return subUnits.value.filter((s) => s.id_kategori == filters.unit);
+});
+
+// Reload halaman dengan filter
+const applyFilter = () => {
+  const params = new URLSearchParams(filters).toString();
+  window.location.href = `/farmasi/pelayanan-resep?${params}`;
+};
+
+// Fungsi tombol kembali
+const goBack = () => {
+  window.location.href = "/farmasi";
+};
+</script>
+
 <template>
   <div class="container py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h2 class="fw-bold mb-0">Pelayanan Resep dari Poli</h2>
-        <p class="text-muted">Daftar pasien yang menerima resep dari poli layanan</p>
+    <!-- Card Judul -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body bg-info text-white rounded-top-4">
+        <h3 class="fw-semibold mb-3" style="margin-left: 10px;">
+          Jumlah Resep Pelayanan Poli Hari Ini2 ya
+        </h3>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span
+              class="badge bg-light text-dark px-4 py-2 rounded-pill"
+              style="margin-left: 10px;"
+            >
+              {{ new Date().toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) }}
+            </span>
+          </div>
+          <button class="btn btn-light shadow-sm" @click="goBack">
+            Kembali
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Form Filter -->
+    <!-- Filter Data -->
     <div class="card shadow-sm mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Filter Data</h5>
-      </div>
       <div class="card-body">
-        <form @submit.prevent="filterData">
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label class="form-label">Unit</label>
-              <select v-model="form.unit" class="form-select" required>
-                <option value="">-- Pilih Unit --</option>
-                <option>PUSKESMAS</option>
-                <option>PUSTU</option>
-                <option>POLINDES</option>
-                <option>POSKESDES</option>
-                <option>PUSLING</option>
-                <option>POSKESTREN</option>
-                <option>PONKESDES</option>
-              </select>
-            </div>
+        <h5 class="fw-bold mb-3">Filter Data</h5>
 
-            <div class="col-md-4">
-              <label class="form-label">Sub Unit</label>
-              <select v-model="form.subUnit" class="form-select">
-                <option value="">-- Pilih Sub Unit --</option>
-                <option>PUSKESMAS WONGSOREJO</option>
-                <option>PUSKESMAS BANGOREJO</option>
-              </select>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Periode</label>
-              <input type="date" v-model="form.periode" class="form-control" />
-            </div>
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-medium">Unit</label>
+            <select v-model="filters.unit" class="form-select">
+              <option value="">-- Pilih Unit --</option>
+              <option v-for="u in units" :key="u.id" :value="u.id">
+                {{ u.nama }}
+              </option>
+            </select>
           </div>
 
-           <div class="text-end">
-            <button type="submit" class="btn btn-success">
-              <i class=""></i> Tampilkan Data
+          <div class="col-12">
+            <label class="form-label fw-medium">Sub Unit</label>
+            <select v-model="filters.sub_unit" class="form-select">
+              <option value="">-- Pilih Sub Unit --</option>
+              <option v-for="s in filteredSubUnits" :key="s.id" :value="s.id">
+                {{ s.nama }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-medium">Periode</label>
+            <input type="date" v-model="filters.periode" class="form-control" />
+          </div>
+
+          <div class="col-12">
+            <button class="btn btn-info text-white px-4 shadow-sm" @click="applyFilter">
+              Tampilkan Data
             </button>
           </div>
-
-        </form>
+        </div>
       </div>
     </div>
 
-    <div class="mb-3">
-      <h5 class="fw-bold">Daftar Pasien Farmasi</h5>
-    </div>
+    <!-- Tabel Data -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Daftar Pasien Farmasi</h6>
+        <div v-if="pasien.length">
+          <table class="table table-bordered table-striped align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>No RM</th>
+                <th>Pasien</th>
+                <th>Alamat</th>
+                <th>Poli</th>
+                <th>Diagnosa</th>
+                <th>Obat</th>
+                <th>Jumlah</th>
+                <th>Dosis</th>
+                <th>Stok Unit</th>
+                <th>Status Resep</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in pasien" :key="row.id">
+                <td>{{ row.no_rm }}</td>
+                <td>{{ row.pasien }}</td>
+                <td>{{ row.alamat }}</td>
+                <td>{{ row.poli }}</td>
+                <td>{{ row.diagnosa }}</td>
+                <td>{{ row.nama_obat }}</td>
+                <td>{{ row.jumlah }}</td>
+                <td>{{ row.dosis }}</td>
+                <td>{{ row.stok_unit }}</td>
+                <td>{{ row.status_resep }}</td>
+                <td>{{ row.created_at }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-    <!-- Tabel Pasien -->
-    <vue-good-table
-      :columns="columns"
-      :rows=[]
-      :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true, perPage: 10 }"
-    />
-
-    <!-- Tombol Kembali -->
-    <div class="mt-4 text-start">
-      <a href="/farmasi" class="btn btn-secondary">
-        <i class=""></i> Kembali
-      </a>
+        <div v-else class="alert alert-info mb-0">
+          Tidak ada data ditemukan.
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { VueGoodTable } from 'vue-good-table-next'
-import 'vue-good-table-next/dist/vue-good-table-next.css'
-
-const columns = [
-  { label: 'No', field: 'no' },
-  { label: 'Created', field: 'nama' },
-  { label: 'No RM', field: 'nomor' },
-  { label: 'Alamat', field: 'address' },
-  { label: 'Kategori', field: 'kategori' },
-  { label: 'Diagnosa', field: 'diagnosa' },
-  { label: 'Sample', field: 'sample' },
-  { label: 'Status Resep', field: 'status-resep' },
-  { label: 'Action', field: 'action' },
-]
-
-const form = ref({
-  unit: '',
-  subUnit: '',
-  periode: ''
-})
-
-function filterData() {
-  console.log('Data difilter:', form.value)
+<style scoped>
+@media (max-width: 768px) {
+  h3 {
+    font-size: 1.25rem;
+  }
+  .badge {
+    font-size: 0.85rem;
+  }
+  .btn {
+    font-size: 0.9rem;
+  }
 }
-</script>
-
+</style>
