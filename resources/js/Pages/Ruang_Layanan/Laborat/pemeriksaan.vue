@@ -16,105 +16,112 @@
         <div class="card-body">
           <div class="row g-4">
             <!-- ============ KIRI: IDENTITAS + AKSI ============ -->
-<div class="col-lg-4">
-  <div class="border rounded-4 h-100">
-    <!-- Header -->
-    <div class="p-3 border-bottom" style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
-      <div class="d-flex justify-content-between align-items-center">
-        <h6 class="m-0 fs-5 fw-semibold">Identitas Pasien</h6>
+            <div class="col-lg-4">
+              <div class="border rounded-4 h-100">
+                <!-- Header -->
+                <div class="p-3 border-bottom" style="background: linear-gradient(135deg,#e0f2fe,#dcfce7);">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fs-5 fw-semibold">Identitas Pasien</h6>
 
-        <div class="btn-group">
-          <div class="btn-group" role="group">
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket Darah Lengkap</a></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <div class="btn-group">
+                      <div class="btn-group" role="group">
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketCatin')">Paket Catin</a>
+                          </li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck1')">Paket ANC K1</a>
+                          </li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketAnck3')">Paket ANC K3</a>
+                          </li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketPtm')">Paket PTM</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketDarahLengkap')">Paket
+                              Darah Lengkap</a></li>
+                          <li><a class="dropdown-item" href="#" @click.prevent="addPaket('paketWidal')">Paket Widal</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-    <!-- Identitas -->
-    <div class="p-3" style="font-size: 1rem;">  <!-- 🔹 teks sedikit diperbesar -->
-      <div class="fw-semibold fs-5">{{ pasien.NAMA_LGKP || '-' }}</div>
-      <div class="text-muted">NO. MR: <span class="fw-medium">{{ pasien.NO_MR || '-' }}</span></div>
-      <hr />
-      <div><span class="text-muted">Tgl Kunjungan:</span> <span class="fw-medium">{{ pasien.tglKunjungan || '-' }}</span></div>
-      <div><span class="text-muted">NIK:</span> <span class="fw-medium">{{ pasien.NIK || '-' }}</span></div>
-      <div><span class="text-muted">Jenis Kelamin:</span> <span class="fw-medium">{{ pasien.jenis_klmin || '-' }}</span></div>
-      <div class="mt-2">
-        <span class="text-muted">Alamat:</span>
-        <div class="fw-medium">{{ alamatLengkap }}</div>
-      </div>
-    </div>
+                <!-- Identitas -->
+                <div class="p-3" style="font-size: 1rem;"> <!-- 🔹 teks sedikit diperbesar -->
+                  <div class="fw-semibold fs-5">{{ pasien.NAMA_LGKP || '-' }}</div>
+                  <div class="text-muted">NO. MR: <span class="fw-medium">{{ pasien.NO_MR || '-' }}</span></div>
+                  <hr />
+                  <div><span class="text-muted">Tgl Kunjungan:</span> <span class="fw-medium">{{ pasien.tglKunjungan ||
+                      '-' }}</span></div>
+                  <div><span class="text-muted">NIK:</span> <span class="fw-medium">{{ pasien.NIK || '-' }}</span></div>
+                  <div><span class="text-muted">Jenis Kelamin:</span> <span class="fw-medium">{{ pasien.jenis_klmin ||
+                      '-' }}</span></div>
+                  <div class="mt-2">
+                    <span class="text-muted">Alamat:</span>
+                    <div class="fw-medium">{{ alamatLengkap }}</div>
+                  </div>
+                </div>
 
-    <!-- Objective -->
-<div class="p-3 border-top">
-<h6 class="mb-2 text-dark fw-bold fs-5">Hasil Pemeriksaan Objective</h6>
-
-
-<!-- Fisik -->
-<div class="mb-2 text-danger fw-bold fs-6">Fisik</div> <!-- 🔴 Merah & tebal -->
-<ul class="list-unstyled ps-3 mb-3 fs-6"> <!-- Sedikit lebih besar dari normal -->
-  <li class="d-flex justify-content-between gap-3">
-    <span>Keadaan umum</span>
-    <span>{{ objective?.keadaanUmum || '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Kesadaran</span>
-    <span>{{ objective?.kesadaran || 'Compos mentis' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Tinggi Badan</span>
-    <span>{{ objective?.tinggiBadan ? objective.tinggiBadan + ' cm' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Berat badan</span>
-    <span>{{ objective?.beratBadan ? objective.beratBadan + ' kg' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Lingkar perut</span>
-    <span>{{ objective?.lingkarPerut ? objective.lingkarPerut + ' cm' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Tinggi lutut</span>
-    <span>{{ objective?.tinggiLutut ? objective.tinggiLutut + ' cm' : '-' }}</span>
-  </li>
-</ul>
+                <!-- Objective -->
+                <div class="p-3 border-top">
+                  <h6 class="mb-2 text-dark fw-bold fs-5">Hasil Pemeriksaan Objective</h6>
 
 
+                  <!-- Fisik -->
+                  <div class="mb-2 text-danger fw-bold fs-6">Fisik</div> <!-- 🔴 Merah & tebal -->
+                  <ul class="list-unstyled ps-3 mb-3 fs-6"> <!-- Sedikit lebih besar dari normal -->
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Keadaan umum</span>
+                      <span>{{ objective?.keadaanUmum || '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Kesadaran</span>
+                      <span>{{ objective?.kesadaran || 'Compos mentis' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Tinggi Badan</span>
+                      <span>{{ objective?.tinggiBadan ? objective.tinggiBadan + ' cm' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Berat badan</span>
+                      <span>{{ objective?.beratBadan ? objective.beratBadan + ' kg' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Lingkar perut</span>
+                      <span>{{ objective?.lingkarPerut ? objective.lingkarPerut + ' cm' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Tinggi lutut</span>
+                      <span>{{ objective?.tinggiLutut ? objective.tinggiLutut + ' cm' : '-' }}</span>
+                    </li>
+                  </ul>
 
-<!-- Tekanan darah -->
-<div class="mb-2 text-danger fw-bold fs-6">Tekanan darah</div> <!-- 🔴 Merah & tebal -->
-<ul class="list-unstyled ps-3 mb-0 fs-6"> <!-- Agak besar tapi tidak lebih dari header -->
-  <li class="d-flex justify-content-between gap-3">
-    <span>Sistole</span>
-    <span>{{ objective?.sistole ? objective.sistole + ' mmHg' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Diastole</span>
-    <span>{{ objective?.diastole ? objective.diastole + ' mmHg' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Resp. rate</span>
-    <span>{{ objective?.respRate ? objective.respRate + ' bpm' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Heart rate</span>
-    <span>{{ objective?.heartRate ? objective.heartRate + ' bpm' : '-' }}</span>
-  </li>
-  <li class="d-flex justify-content-between gap-3">
-    <span>Suhu</span>
-    <span>{{ objective?.suhu ? objective.suhu + ' °C' : '-' }}</span>
-  </li>
-</ul>
-</div>
-  </div>
-</div>
+
+
+                  <!-- Tekanan darah -->
+                  <div class="mb-2 text-danger fw-bold fs-6">Tekanan darah</div> <!-- 🔴 Merah & tebal -->
+                  <ul class="list-unstyled ps-3 mb-0 fs-6"> <!-- Agak besar tapi tidak lebih dari header -->
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Sistole</span>
+                      <span>{{ objective?.sistole ? objective.sistole + ' mmHg' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Diastole</span>
+                      <span>{{ objective?.diastole ? objective.diastole + ' mmHg' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Resp. rate</span>
+                      <span>{{ objective?.respRate ? objective.respRate + ' bpm' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Heart rate</span>
+                      <span>{{ objective?.heartRate ? objective.heartRate + ' bpm' : '-' }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between gap-3">
+                      <span>Suhu</span>
+                      <span>{{ objective?.suhu ? objective.suhu + ' °C' : '-' }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
 
             <!-- ============ KANAN: PERMOHONAN + TABEL ============ -->
@@ -159,19 +166,18 @@
                         <td class="text-end">
                         <td class="text-end">
                           <div class="btn-group btn-group-sm" role="group" style="white-space:nowrap;">
-                            <button class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4" @click="openMasterModal">
+                            <button
+                              class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4"
+                              @click="openMasterModal">
                               <i class="bi bi-plus-square me-1"></i>Tambah
                             </button>
-                                <button
-                                  class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4"
-                                  @click="printHasil"
-                                  :disabled="!order"
-                                  title="Cetak / Print lembar hasil"
-                                  aria-label="Cetak lembar hasil"
-                                >
-                                  <i class="bi bi-printer fs-5"></i>
-                                  <span class="fw-semibold">Cetak</span>
-                                </button>
+                            <button
+                              class="btn btn-lg btn-print gradient-btn shadow-sm rounded-pill d-inline-flex align-items-center gap-2 px-4"
+                              @click="printHasil" :disabled="!order" title="Cetak / Print lembar hasil"
+                              aria-label="Cetak lembar hasil">
+                              <i class="bi bi-printer fs-5"></i>
+                              <span class="fw-semibold">Cetak</span>
+                            </button>
 
                           </div>
                         </td>
@@ -198,15 +204,11 @@
                       <i class="bi bi-arrow-clockwise me-1"></i> Reload
                     </button>
 
-                          <!-- NEW: Hapus semua -->
-<button
-  class="btn btn-danger btn-sm shadow-sm rounded-3 px-3 fw-semibold"
-  @click="hapusSemua"
-  :disabled="!order || rows.length===0"
-  title="Hapus semua item pemeriksaan dalam permohonan ini"
->
-  <i class="bi bi-trash3 me-2"></i> Hapus Semua
-</button>
+                    <!-- NEW: Hapus semua -->
+                    <button class="btn btn-danger btn-sm shadow-sm rounded-3 px-3 fw-semibold" @click="hapusSemua"
+                      :disabled="!order || rows.length === 0" title="Hapus semua item pemeriksaan dalam permohonan ini">
+                      <i class="bi bi-trash3 me-2"></i> Hapus Semua
+                    </button>
 
 
 
@@ -225,38 +227,62 @@
                           <th style="width:56px;">No</th>
                           <th style="width:120px;">Kode</th>
                           <th>Nama pemeriksaan</th>
+
                           <th style="width:220px;">Nilai Normal/kritis</th>
                           <th style="width:240px;">Nilai Lab (satuan)</th>
                           <th style="width:100px;">Aksi</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        <tr v-for="(row, i) in rows" :key="row.detail_id">
-                          <td class="text-center">{{ i + 1 }}</td>
-                          <td class="text-center">{{ row.kode }}</td>
-                          <td>{{ row.nama_pemeriksaan }}</td>
-                          <td class="small">
-                            <div class="text-muted white-pre-line">{{ row.nilai_normal_kritis || '-' }}</div>
-                          </td>
-                          <td>
-                            <div class="input-group">
-                              <input type="text" class="form-control" v-model="hasil[row.detail_id]"
-                                :placeholder="row.satuan ? `(${row.satuan})` : ''" />
-                              <span class="input-group-text">{{ row.satuan || '-' }}</span>
-                            </div>
-                          </td>
-                          <td class="text-center">
+                      <tbody v-if="groupedRows.length">
+                        <!-- loop per kategori -->
+                        <template v-for="(g, gi) in groupedRows" :key="'grp-main-'+gi">
+                          <!-- baris judul kategori -->
+                          <tr class="table-secondary">
+                            <!-- 6 kolom: No, Kode, Nama, Nilai normal, Nilai Lab, Aksi -->
+                            <td colspan="6" class="fw-bold text-uppercase">
+                              {{ g.kategori }}
+                            </td>
+                          </tr>
 
-                            <button class="btn btn-outline-danger" @click="hapusRow(row)" :disabled="!order"
-                              title="Hapus item ini">
-                              <i class="bi bi-trash"></i>
-                            </button>
+                          <!-- baris item dalam kategori -->
+                          <tr v-for="(row, i) in g.items" :key="row.detail_id">
+                            <td class="text-center">{{ i + 1 }}</td>
+                            <td class="text-center">{{ row.kode }}</td>
+                            <td>{{ row.nama_pemeriksaan }}</td>
+
+                            <td class="small">
+                              <div class="text-muted white-pre-line">
+                                {{ row.nilai_normal_kritis || '-' }}
+                              </div>
+                            </td>
+
+                            <td>
+                              <div class="input-group">
+                                <input type="text" class="form-control" v-model="hasil[row.detail_id]"
+                                  :placeholder="row.satuan ? `(${row.satuan})` : ''" />
+                                <span class="input-group-text">{{ row.satuan || '-' }}</span>
+                              </div>
+                            </td>
+
+                            <td class="text-center">
+                              <button class="btn btn-outline-danger" @click="hapusRow(row)" :disabled="!order"
+                                title="Hapus item ini">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+
+                      <tbody v-else>
+                        <tr>
+                          <!-- 6 kolom juga -->
+                          <td colspan="6" class="text-center text-muted py-4">
+                            Belum ada item pemeriksaan.
                           </td>
-                        </tr>
-                        <tr v-if="rows.length === 0">
-                          <td colspan="6" class="text-center text-muted py-4">Belum ada item pemeriksaan.</td>
                         </tr>
                       </tbody>
+
                     </table>
 
                   </div>
@@ -376,39 +402,68 @@
               </button>
             </div>
           </div>
+
+          <!-- ============== FILTER: Kategori ============== -->
+          <!-- <div class="px-4 mb-3">
+  <div class="d-flex flex-wrap gap-2 align-items-center">
+    <span class="text-secondary small fw-semibold me-1">
+      <i class="bi bi-collection me-1"></i> Kategori:
+    </span>
+
+    <button
+      class="btn btn-sm"
+      :class="selectedKategori === null ? 'btn-primary' : 'btn-outline-primary'"
+      @click="selectedKategori = null; loadParams(1);"
+    >
+      Semua
+    </button>
+
+    <button
+      v-for="kat in kategoriList"
+      :key="'kat-'+kat.id_kategori"
+      class="btn btn-sm"
+      :class="selectedKategori === kat.id_kategori ? 'btn-primary' : 'btn-outline-primary'"
+      @click="selectedKategori = kat.id_kategori; loadParams(1);"
+      :title="`Jumlah parameter: ${kat.jumlah}`"
+    >
+      {{ kat.nama_kategori }}
+      <span class="badge text-bg-light ms-1">{{ kat.jumlah }}</span>
+    </button>
+  </div>
+</div> -->
+
+
+
           <div class="modal-body">
 
             <div class="row g-3 align-items-end mb-3 px-3">
-<div class="col-lg-6">
-  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
-<!-- HEADER (paket) -->
-<div class="d-flex flex-wrap gap-2 mb-2">
-  <button
-    v-for="ph in paketHeaders"
-    :key="'h-'+ph.header"
-    class="btn btn-outline-success btn-sm"
-    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
-    @click="pickHeader(ph)"
-    :disabled="!order"
-  >
-    {{ ph.header_name || ('Header ' + ph.header) }}
-    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
-  </button>
-</div>
+              <div class="col-lg-6">
+                <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
+                <!-- HEADER (paket) -->
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                  <button v-for="ph in paketHeaders" :key="'h-' + ph.header" class="btn btn-outline-success btn-sm"
+                    :class="{ 'active': selectedHeader && selectedHeader.header === ph.header }" @click="pickHeader(ph)"
+                    :disabled="!order">
+                    {{ ph.header_name || ('Header ' + ph.header) }}
+                    <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
+                  </button>
+                </div>
 
                 <!-- SUBHEADER (opsional) -->
                 <div v-if="selectedHeader" class="d-flex flex-wrap gap-2">
-                  <button class="btn btn-outline-primary btn-sm" @click="addPaketHeader(selectedHeader)"
+                  <!-- <button class="btn btn-outline-primary btn-sm" @click="addPaketHeader(selectedHeader)"
                     :disabled="!order" title="Tambahkan semua item di header ini">
                     + Tambah SEMUA ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
-                  </button>
+                  </button> -->
 
 
 
-                  <button v-for="sh in paketSubs" :key="'s-' + sh.sub_header" class="btn btn-outline-secondary btn-sm"
-                    @click="addPaketSub(selectedHeader, sh)" :disabled="!order">
+                  <button v-for="sh in paketSubs" v-if="false" :key="'s-' + sh.sub_header"
+                    class="btn btn-outline-secondary btn-sm" @click="addPaketSub(selectedHeader, sh)"
+                    :disabled="!order">
                     Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
                   </button>
+
                 </div>
               </div>
             </div>
@@ -425,31 +480,45 @@
                     <th style="width:60px;" class="text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr v-if="browse.loading">
+                <tbody v-if="browse.loading">
+                  <tr>
                     <td colspan="6" class="text-center py-4">Memuat...</td>
                   </tr>
-                  <tr v-for="(it, idx) in master.items" :key="'m-' + it.id">
-                    <td class="text-muted">{{ it.kode || '-' }}</td>
-                    <td class="fw-semibold">
-                      {{ it.nama || '-' }}
-                    </td>
-                    <td>{{ it.satuan || '-' }}</td>
-                    <td class="small">
-                      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
-                    </td>
-                    <td>
-                      <input class="form-control form-control-sm" v-model="valueMap[it.id]"
-                        placeholder="isian opsional" />
-                    </td>
-                    <td class="text-center">
-                      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
-                    </td>
-                  </tr>
-                  <tr v-if="!browse.loading && master.items.length === 0">
+                </tbody>
+
+                <tbody v-else-if="!groupedItems.length">
+                  <tr>
                     <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
                   </tr>
                 </tbody>
+
+                <!-- Kelompok per kategori -->
+                <tbody v-else v-for="(g, gi) in groupedItems" :key="'grp-' + gi">
+                  <!-- Judul kategori -->
+                  <tr class="table-secondary">
+                    <td colspan="6" class="fw-bold text-uppercase">
+                      {{ g.kategori }}
+                    </td>
+                  </tr>
+
+                  <!-- Baris item dalam kategori -->
+                  <tr v-for="(it, idx) in g.items" :key="'m-' + it.id">
+                    <td class="text-muted" style="width:120px;">{{ it.kode || '-' }}</td>
+                    <td class="fw-semibold">{{ it.nama || '-' }}</td>
+                    <td style="width:120px;">{{ it.satuan || '-' }}</td>
+                    <td class="small" style="width:260px;">
+                      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
+                    </td>
+                    <td style="width:180px;">
+                      <input class="form-control form-control-sm" v-model="valueMap[it.id]"
+                        placeholder="isian opsional" />
+                    </td>
+                    <td class="text-center" style="width:60px;">
+                      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
+                    </td>
+                  </tr>
+                </tbody>
+
               </table>
             </div>
 
@@ -468,12 +537,33 @@
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button class="btn btn-light" @click="showMaster = false">Close</button>
-            <button class="btn btn-success" :disabled="!order" @click="submitSelected">
-              <i class="bi bi-check2-square me-1"></i> SIMPAN
-            </button>
+          <div class="modal-footer d-flex justify-content-between align-items-center">
+
+            <!-- Bagian kiri -->
+            <div class="d-flex gap-2">
+              <button class="btn btn-light" @click="showMaster = false">Close</button>
+            </div>
+
+            <!-- Bagian kanan -->
+            <div class="d-flex gap-2 align-items-center">
+
+              <!-- Tambah Semua Header (hanya muncul jika header dipilih) -->
+              <button v-if="selectedHeader" class="btn btn-success gradient-btn btn-sm text-white fw-semibold"
+                @click="addPaketHeader(selectedHeader)" :disabled="!order" title="Tambahkan semua item di header ini">
+                <i class="bi bi-plus-circle me-1"></i>
+                Tambah SEMUA
+                ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
+              </button>
+
+
+              <!-- Tombol Simpan -->
+              <button class="btn btn-success" :disabled="!order" @click="submitSelected">
+                <i class="bi bi-check2-square me-1"></i> SIMPAN
+              </button>
+
+            </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -497,67 +587,97 @@
       <!-- Identitas -->
       <table class="ps-info">
         <tr>
-          <td>Nama</td>
-          <td>: {{ pasien.NAMA_LGKP || '-' }}</td>
-          <td>No reg lab</td>
-          <td>: {{ order.no_reg_lab || order.order_id || '-' }}</td>
+          <td class="label">Nama</td>
+          <td class="value">: {{ pasien.NAMA_LGKP || '-' }}</td>
+
+          <td class="label">No reg lab</td>
+          <td class="value">: {{ order.no_reg_lab || order.order_id || '-' }}</td>
         </tr>
+
         <tr>
-          <td>Tgl Lahir</td>
-          <td>: {{ pasien.TGL_LHR || '-' }}</td>
-          <td>Tgl periksa</td>
-          <td>: {{ order.tgl_dibuat || '-' }}</td>
+          <td class="label">Tgl Lahir</td>
+          <td class="value">: {{ pasien.TGL_LHR || '-' }}</td>
+
+          <td class="label">Tgl periksa</td>
+          <td class="value">: {{ order.tgl_dibuat || '-' }}</td>
         </tr>
+
         <tr>
-          <td>Jenis kelamin</td>
-          <td>: {{ jenisKelaminLabel }}</td>
-          <td>Spec diambil jam</td>
-          <td>: {{ order.sample_diambil_at || '-' }}</td>
+          <td class="label">Jenis kelamin</td>
+          <td class="value">: {{ jenisKelaminLabel }}</td>
+
+          <td class="label">Spec diambil jam</td>
+          <td class="value">: {{ order.sample_diambil_at || '-' }}</td>
         </tr>
+
         <tr>
-          <td>Alamat</td>
-          <td>: {{ alamatLengkap }}</td>
-          <td>Spec selesai jam</td>
-          <td>: {{ order.sample_selesai_at || '-' }}</td>
+          <td class="label">Alamat</td>
+          <td class="value">: {{ alamatLengkap }}</td>
+
+          <td class="label">Spec selesai jam</td>
+          <td class="value">: {{ order.sample_selesai_at || '-' }}</td>
         </tr>
+
         <tr>
-          <td>No RM</td>
-          <td>: {{ pasien.NO_MR || '-' }}</td>
-          <td>Unit pengirim</td>
-          <td>: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
+          <td class="label">No RM</td>
+          <td class="value">: {{ pasien.NO_MR || '-' }}</td>
+
+          <td class="label">Unit pengirim</td>
+          <td class="value">: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
         </tr>
-        <!-- Tambahan: Tenaga Medis Pemeriksa -->
+
         <tr>
-          <td>Pemeriksa</td>
-          <td colspan="3">: {{ order.tenaga_medis_pemeriksa || '-' }}</td>
+          <td class="label">Pemeriksa</td>
+          <td class="value" colspan="3">: {{ order.tenaga_medis_pemeriksa || '-' }}</td>
         </tr>
       </table>
 
+
       <!-- Section contoh -->
-      <div class="ps-section">HEMATOLOGI</div>
-      <table class="ps-table">
-        <thead>
-          <tr>
-            <th class="w-1">No.</th>
-            <th class="w-2">Kode</th>
-            <th>Nama pemeriksaan</th>
-            <th>Nilai Normal/kritis</th>
-            <th>Nilai Lab (satuan)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(r, i) in rows" :key="r.detail_id">
-            <td class="t-center">{{ i + 1 }}</td>
-            <td class="t-center">{{ r.kode }}</td>
-            <td>{{ r.nama_pemeriksaan }}</td>
-            <td class="t-small">{{ r.nilai_normal_kritis }}</td>
-            <td>{{ (hasil && hasil[r.detail_id]) || r.nilai_lab || '' }} <span class="muted">{{ r.satuan }}</span></td>
-          </tr>
-          <tr v-if="rows.length === 0">
-            <td colspan="5" class="t-center">Belum ada data</td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- ========== CETAK PER KATEGORI ========== -->
+      <div v-if="groupedRows.length">
+        <!-- loop per kategori -->
+        <div v-for="(g, gi) in groupedRows" :key="'psgrp-' + gi" class="ps-group">
+          <!-- judul kategori dari database -->
+          <div class="ps-section">
+            {{ g.kategori }}
+          </div>
+
+          <table class="ps-table">
+            <thead>
+              <tr>
+                <th class="w-1">No.</th>
+                <th class="w-2">Kode</th>
+                <th>Nama pemeriksaan</th>
+                <th>Nilai Normal/kritis</th>
+                <th>Nilai Lab (satuan)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(r, i) in g.items" :key="r.detail_id">
+                <td class="t-center">{{ i + 1 }}</td>
+                <td class="t-center">{{ r.kode }}</td>
+                <td>{{ r.nama_pemeriksaan }}</td>
+                <td class="t-small">{{ r.nilai_normal_kritis || '-' }}</td>
+                <td>
+                  {{ (hasil && hasil[r.detail_id]) || r.nilai_lab || '' }}
+                  <span class="muted">{{ r.satuan }}</span>
+                </td>
+              </tr>
+              <tr v-if="g.items.length === 0">
+                <td colspan="5" class="t-center">Belum ada data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- kalau sama sekali tidak ada pemeriksaan -->
+      <div v-else>
+        <div class="ps-section">PEMERIKSAAN LABORATORIUM</div>
+        <div class="t-center" style="margin-top:8px;">Belum ada data pemeriksaan.</div>
+      </div>
+
 
       <!-- Tanda tangan -->
       <div class="ps-sign">
@@ -593,11 +713,27 @@ const order = computed(() => pageProps.value.DataPermohonan || null);
 const rows = computed(() => pageProps.value.DataPemeriksaan || []);
 const objective = computed(() => pageProps.value.DataObjective || null);
 const tenagaMedis = computed(() => pageProps.value.TenagaMedis || []);
+const Source = computed(() => page.props.Source ?? 'laborat')
 const paketHeaders = ref([]);
 const paketSubs = ref([]);
 const selectedHeader = ref(null);
 const selectedSub = ref(null);
+const loketId = computed(() => DataPasien.value?.idLoket ?? '')
+
 // === STATE TAMBAHAN UNTUK PAKET PARAMETER_UJI
+const groupedRows = computed(() => {
+  const list = rows.value || [];
+  const groups = new Map();
+
+  for (const r of list) {
+    const key = r.kategori || r.nama_kategori || '';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(r);
+  }
+
+  // ubah Map jadi array [{kategori, items: [...]}, ...]
+  return Array.from(groups, ([kategori, items]) => ({ kategori, items }));
+});
 
 async function loadPaketHeaders() {
   try {
@@ -628,10 +764,25 @@ function addPaketHeader(headerObj) {
     onSuccess: () => {
       const nama = headerObj.header_name || ('Header ' + headerObj.header);
       toast('success', 'Tambah semua berhasil', nama);
-        closeMaster();       // <—— tutup modal di sini
+      console.log('headaer', headerObj.header)
+      closeMaster();       // <—— tutup modal di sini
       reloadPage();
     }
   });
+}
+const kategoriList = ref([]);       // [{id_kategori, nama_kategori, jumlah}]
+const selectedKategori = ref(null); // id_kategori atau null
+
+async function loadKategori() {
+  try {
+    const res = await fetch(route('ruang-layanan.laborat.param.categories'), {
+      headers: { 'Accept': 'application/json' }
+    });
+    kategoriList.value = await res.json();
+  } catch (e) {
+    console.error(e);
+    kategoriList.value = [];
+  }
 }
 
 function hapusSemua() {
@@ -655,14 +806,14 @@ function hapusSemua() {
           timer: 1600,
           showConfirmButton: false
         });
-      } catch {}
+      } catch { }
     }
   });
 }
 
 
 
-async function loadParamItems(header, sub=null) {
+async function loadParamItems(header, sub = null) {
   try {
     const base = route('ruang-layanan.laborat.param.items', { header });
     const url = new URL(base, window.location.origin);
@@ -981,6 +1132,12 @@ async function loadParams(page = 1) {
     if (master.search) url.searchParams.set('search', master.search);
     if (browse.filters.header != null) url.searchParams.set('header', String(browse.filters.header));
     if (browse.filters.sub_header != null) url.searchParams.set('sub_header', String(browse.filters.sub_header));
+
+    // <<< TAMBAHAN: filter kategori
+    if (selectedKategori.value != null) {
+      url.searchParams.set('kategori', String(selectedKategori.value));
+    }
+
     url.searchParams.set('page', String(page));
     url.searchParams.set('per_page', '25');
 
@@ -993,7 +1150,10 @@ async function loadParams(page = 1) {
       nama: x.nama,
       satuan: x.satuan,
       nilaiNormalKritis: x.nilai_normal_kritis,
+      // ⬇️ ambil kategori dari apa pun nama field-nya
+      kategori: x.kategori_nama ?? x.nama_kategori ?? x.kategori ?? '',
     }));
+
     master.meta = data?.meta || {};
     master.links = data?.links || [];
   } catch (e) {
@@ -1003,6 +1163,17 @@ async function loadParams(page = 1) {
     browse.loading = false;
   }
 }
+const groupedItems = computed(() => {
+  const groups = new Map();
+  for (const it of master.items) {
+    const key = it.kategori || '';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(it);
+  }
+  // urutkan kategori (opsional)
+  return Array.from(groups, ([kategori, items]) => ({ kategori, items }));
+});
+
 
 // klik paging
 function gotoLink(url) {
@@ -1015,8 +1186,10 @@ function gotoLink(url) {
 function doSearchAll() {
   browse.filters.header = null;
   browse.filters.sub_header = null;
+  selectedKategori.value = null; // <<< reset kategori
   loadParams(1);
 }
+
 
 // ----- Paket (header/sub) -----
 async function pickHeader(hdr) {
@@ -1049,7 +1222,7 @@ function toast(icon, title, text = '') {
       position: 'top-end',
       timerProgressBar: true,
     });
-  } catch {}
+  } catch { }
 }
 
 
@@ -1098,16 +1271,18 @@ function closeMaster() {
 // PASTIKAN hanya SATU versi ini
 function openMasterModal() {
   if (!order.value) return;
-  // reset dulu
   Object.keys(selectedMap).forEach(k => delete selectedMap[k]);
   Object.keys(valueMap).forEach(k => delete valueMap[k]);
   selectedHeader.value = null;
   paketSubs.value = [];
+  selectedKategori.value = null;      // reset pilihan kategori
 
   showMaster.value = true;
   if (!paketHeaders.value.length) loadPaketHeaders();
+  loadKategori();                      // <<< panggil load kategori
   doSearchAll();
 }
+
 
 async function loadMaster(page = 1) {
   master.loading = true;
@@ -1184,32 +1359,12 @@ onMounted(() => {
   margin: 14mm 12mm;
 }
 
-/* HANYA untuk mode print — tampilkan cuma .print-sheet */
+/* MODE PRINT */
 @media print {
 
-  /* Sembunyikan SEMUA konten halaman */
-  body * {
-    visibility: hidden !important;
-  }
-
-  /* Tampilkan hanya lembar cetak + isinya */
-  .print-sheet,
-  .print-sheet * {
-    visibility: visible !important;
-  }
-
-  /* Posisikan lembar cetak memenuhi halaman */
-  .print-sheet {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    z-index: 9999;
-  }
-
-  /* Jaga-jaga: matikan layout/header/footers app kalau ada */
+  /* Sembunyikan semua layout aplikasi */
   .app-shell,
+  .modal-mask,
   header,
   .navbar,
   .sidebar,
@@ -1217,34 +1372,95 @@ onMounted(() => {
   footer {
     display: none !important;
   }
+
+  .ps-info {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+  }
+
+  .ps-info td {
+    padding: 3px 6px;
+    vertical-align: top;
+  }
+
+  .ps-info .label {
+    width: 22%;
+    /* stabil */
+    font-weight: bold;
+  }
+
+  .ps-info .value {
+    width: 28%;
+    /* stabil */
+  }
+
+  /* Tampilkan lembar print */
+  .print-sheet {
+    display: block !important;
+    position: static !important;
+    /* ⬅️ penting: biar bisa multi-page */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Biar teks dan border tetap jelas */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Jaga elemen-elemen penting tidak kepotong di tengah halaman */
+  .ps-section,
+  .ps-info,
+  .ps-sign {
+    page-break-inside: avoid;
+  }
+
+  .ps-table {
+    page-break-inside: auto;
+  }
+
+  .ps-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
 }
 
-/* Default: sembunyikan print-sheet saat layar biasa */
+/* MODE LAYAR: print-sheet disembunyikan */
 @media screen {
   .print-sheet {
     display: none;
   }
 }
 
+
+
 /* Tombol print versi besar & cantik */
 .btn-print {
   border: 0 !important;
   transition: transform .15s ease, box-shadow .15s ease, filter .2s ease;
 }
+
 .btn-print:hover {
   transform: translateY(-1px);
-  box-shadow: 0 .75rem 1.5rem rgba(16,185,129,.18);
+  box-shadow: 0 .75rem 1.5rem rgba(16, 185, 129, .18);
   filter: saturate(1.05);
 }
+
 .btn-print:active {
   transform: translateY(0);
-  box-shadow: 0 .25rem .75rem rgba(16,185,129,.22);
+  box-shadow: 0 .25rem .75rem rgba(16, 185, 129, .22);
 }
+
 .btn-print:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 .2rem rgba(59,130,246,.25), /* biru */
-    0 0 0 .45rem rgba(16,185,129,.18); /* hijau */
+    0 0 0 .2rem rgba(59, 130, 246, .25),
+    /* biru */
+    0 0 0 .45rem rgba(16, 185, 129, .18);
+  /* hijau */
 }
 
 /* Gradient-nya selaras dengan tema kamu */
@@ -1252,6 +1468,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #3b82f6, #10b981) !important;
   color: #fff !important;
 }
+
 .btn-print[disabled] {
   opacity: .6;
   cursor: not-allowed;
@@ -1383,11 +1600,21 @@ onMounted(() => {
   border: none !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.gradient-btn:hover { transform: translateY(-1px); box-shadow: 0 .5rem 1rem rgba(16,185,129,.15); }
-.table th, .table td { vertical-align: middle; }
+
+.gradient-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .5rem 1rem rgba(16, 185, 129, .15);
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
 /* Tombol merah besar dan cantik */
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626); /* merah gradien */
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  /* merah gradien */
   border: none;
   color: #fff !important;
   transition: all 0.2s ease;

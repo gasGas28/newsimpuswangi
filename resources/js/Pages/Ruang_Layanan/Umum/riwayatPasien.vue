@@ -56,7 +56,18 @@
           <td>{{ index + 1 }}</td>
           <td>{{ data.tglKunjungan || '-' }}</td>
           <td>{{ data.unitprofile.nama_unit || '-' }}</td>
-          <td>Poli : {{ data.simpus_poli.nmPoli || '-' }}</td>
+          <td>
+            <div v-for="value in data.pelayanan">
+              <template v-if="value.pelIdSebelum === '0'">
+                Poli 1 : {{ value.simpus_poli.nmPoli }} <span class="fw-bold">{{  value.status_pulang?.nmStatusPulang }}</span> <br>
+               <template v-if=" value.poli_tujuan">
+                 Poli 2 : {{ value.poli_tujuan.nmPoli }}
+               </template>
+              </template>
+
+
+            </div>
+          </td>
           <td v-if="data.anamnesa?.length">
             <div v-for="(data, i) in data.anamnesa" :key="i">
               TB: {{ data.tinggiBadan || '-' }} cm<br>
@@ -71,8 +82,26 @@
             </div>
           </td>
           <td v-else></td>
+          <td>
+            <div v-for="(item, index) in data.tindakan_lab" :key="index" style="margin-bottom: 8px">
 
-          <td>{{ data.hasil_lab || '-' }}</td>
+              <strong>Pemeriksaan {{ index + 1 }}</strong><br>
+
+              <span v-if="item.parameteruji">
+                [ {{ item.parameteruji.kode_parameter }} ] {{ item.parameteruji.nama_parameter }} <br>
+                Nilai Lab : {{ item.nilaiLab || '-' }} <br>
+                Nilai Normal : {{ item.parameteruji.nilai_normal || '-' }} <br>
+                Nilai Kritis : {{ item.parameteruji.nilai_kritis || '-' }} <br>
+              </span>
+
+              <span v-else>
+                Data parameter tidak ditemukan
+              </span>
+
+              <hr v-if="index != data.tindakan_lab.length - 1">
+            </div>
+          </td>
+
           <td>
             <template v-if="data.diagnosa && data.diagnosa.length">
               <div v-for="(diag, i) in data.diagnosa" :key="i" class="mb-2">
@@ -81,7 +110,7 @@
                 Ket: {{ diag.keterangan || '-' }}
               </div>
             </template>
-            <template v-else>-</template>
+            <template v-else></template>
           </td>
           <td style="vertical-align: text-top;" class="isi">
             <template v-if="data.tindakan && data.tindakan.length">
@@ -108,7 +137,7 @@
                     <small>
                       Dosis: {{ r.dosis_pakai_puyer }} |
                       Setiap {{ r.tiapJam }} jam sekali |
-                      Waktu: {{ r.waktu }} 
+                      Waktu: {{ r.waktu }}
                     </small>
                   </template>
                 </div>
@@ -116,7 +145,7 @@
                 <!-- Detail Obat di dalam resep -->
                 <div v-if="r.detail_resep_obat && r.detail_resep_obat.length" class="ms-3 mt-1">
                   <div v-for="(d, j) in r.detail_resep_obat" :key="j" class="text-bold" style="font-size: 13px;">
-                  <span class="fw-bold"> • {{ d.master_obat.NAMA }} ({{ d.jumlah }})</span>
+                    <span class="fw-bold"> • {{ d.master_obat.NAMA }} ({{ d.jumlah }})</span>
                     <br />
                     <small>
                       Dosis: {{ d.dosis_pakai }}

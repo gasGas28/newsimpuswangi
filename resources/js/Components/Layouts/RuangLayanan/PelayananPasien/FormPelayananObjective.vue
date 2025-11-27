@@ -1,8 +1,8 @@
 <template>
   <div class="container" v-if="props.dataAnamnesa">
-    <div class="bg-warning d-inline-block fw-bold mb-4 ">
-      <span>Tombol "Simpan" ada di tab "Tenaga medis"</span>
-    </div>
+     <div class="fw-bold mb-4">
+                <h6 class="fw-bold mb-3 bg-primary bg-opacity-10 d-inline-block p-2 rounded-3">Tombol "Simpan" ada di tab "Tenaga medis"</h6>
+              </div>
     <form @submit.prevent="submitForm">
       <div class="card shadow-sm rounded-4 border-0">
         <div class="border rounded rounded-bottom-0 shadow-sm d-flex gap-4 p-3">
@@ -47,67 +47,68 @@
             <div class="mb-3">
               <label class="form-label fw-bold">Kesadaran</label>
               <select class="form-control" id="kesadaran" v-model="form.kesadaran">
+                <option value="" selected>--Pilih--</option>
                 <option v-for="item in dataKesadaran" :key="item.kdSadar" :value="item.kdSadar">
                   {{ item.nmSadar }}
                 </option>
               </select>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imt" readonly>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-bold">Keterangan IMT</label>
-              <input type="text" class="form-control bg-warning bg-opacity-75" v-model="form.imtKet" readonly>
-            </div>
-
             <div class="mb-3">
               <label class="form-label fw-bold">Tinggi Badan (cm)</label>
-              <input type="text" class="form-control" v-model="form.tinggi_badan" @change="cekimt">
+              <input type="number" class="form-control" v-model="form.tinggi_badan" @change="cekimt">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Berat Badan (kg)</label>
-              <input type="text" class="form-control" v-model="form.berat_badan" @change="cekimt">
+              <input type="number" class="form-control" v-model="form.berat_badan" @change="cekimt">
             </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">IMT</label>
+              <input type="number" class="form-control bg-light" v-model="form.imt" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Keterangan IMT</label>
+              <input type="text" class="form-control bg-light" v-model="form.imtKet" readonly>
+            </div>
+
+
           </div>
 
           <div class="col-6">
             <div class="mb-3">
               <label class="form-label fw-bold">Lingkar Perut (cm)</label>
-              <input type="text" class="form-control" v-model="form.lingkar_perut">
+              <input type="number" class="form-control" v-model="form.lingkar_perut">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Lingkar Lengan (cm)</label>
-              <input type="text" class="form-control" v-model="form.lingkar_lengan">
+              <input type="number" class="form-control" v-model="form.lingkar_lengan">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Sistole (mmHg)</label>
-              <input type="text" class="form-control" v-model="form.sistole">
+              <input type="number" class="form-control" v-model="form.sistole">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Diastole (mmHg)</label>
-              <input type="text" class="form-control" v-model="form.diastole">
+              <input type="number" class="form-control" v-model="form.diastole">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Resp. Rate (bpm)</label>
-              <input type="text" class="form-control" v-model="form.resp_rate">
+              <input type="number" class="form-control" v-model="form.resp_rate">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Heart Rate (bpm)</label>
-              <input type="text" class="form-control" v-model="form.heart_rate">
+              <input type="number" class="form-control" v-model="form.heart_rate">
             </div>
 
             <div class="mb-3">
               <label class="form-label fw-bold">Suhu (°C)</label>
-              <input type="text" class="form-control" v-model="form.suhu">
+              <input type="number " class="form-control" v-model="form.suhu">
             </div>
           </div>
         </div>
@@ -291,7 +292,7 @@
         <div class="card-body" v-if="currrentSubTabObjective === 'tenaga_medis'">
           <div class="row">
             <div class="col-6">
-              <div v-if="props.idPoli == '002'" >
+              <div v-if="props.idPoli == '002'">
                 <label for="" class="fw-bold">Status</label>
                 <select class="form-control my-3" v-model="form.statusPasien">
                   <option value="" selected>-- Pilih --</option>
@@ -325,6 +326,7 @@ const currrentSubTabObjective = ref('pemeriksaan_fisik');
 import FormPemeriksaanIntraOralGigi from './FormPemeriksaanIntraOralGigi.vue';
 const emit = defineEmits(['dataAnamnesa-update']);
 import { watch } from 'vue';
+import Swal from 'sweetalert2'
 
 const props = defineProps({
   currrentSub: String,
@@ -335,7 +337,7 @@ const props = defineProps({
   statusPasien: String,
   tenagaMedisAskep: Object,
   idLoket: String,
-  idPoli : String
+  idPoli: String
 });
 console.log(props.dataAnamnesa, 'data anamnesa dari tab objective');
 
@@ -398,9 +400,27 @@ function submitForm() {
   }), {
     preserveScroll: true,
     onSuccess: () => {
-      alert("Anamnesa Objective tersimpan");
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Data Anamnesa Objective Tersimpan!',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
       emit('dataAnamnesa-update');
     },
+    onError: (errors) => {
+      // Ambil error pertama dari form.errors
+      const firstError = Object.values(errors)[0];
+      Swal.fire({
+        title: 'Error',
+        text: firstError || 'Terjadi kesalahan!',
+        icon: 'error',
+        timer: 1600,
+        showConfirmButton: false
+      });
+    }
+
   })
 }
 watch(() => props.statusPasien, (newVal) => {

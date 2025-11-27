@@ -74,8 +74,6 @@ const dataLayanan = [
   { nama: 'UGD', jumlah: totalPasienUGD, kdPoli:'005',link: 'ruang-layanan.index', icon: 'bi bi-hospital', bg: '#facc15' },
   { nama: 'Rawat Inap', jumlah: 0, kdPoli:'001',link: 'ruang-layanan.rawat-inap', icon: 'bi bi-heart-pulse', bg: '#facc15' },
 ]
-
-
 </script>
 
 <style></style>

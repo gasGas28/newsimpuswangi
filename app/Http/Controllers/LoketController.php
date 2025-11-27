@@ -36,7 +36,9 @@ class LoketController extends Controller
     public function index(Request $request)
     {
         $poliList = Poli::where('poliSakit', 'true')->aktif()->get(['kdPoli', 'nmPoli']);
+        $selectedDate = $request->get('tanggal', now()->format('Y-m-d'));
         $loket = Loket::with(['pasien', 'poli'])
+            ->whereDate('tglKunjungan', $selectedDate)
             ->orderBy('tglKunjungan', 'desc')
             ->paginate(10);
 
@@ -543,7 +545,7 @@ class LoketController extends Controller
 
     public function getKelurahanByKecamatan(Request $request)
     {
-        $kelurahan = Kelurahan::where('NO_KEC', $request->kecamatan)
+        $kelurahan = Kelurahan::where('NO_KEC', $request->kecamatan)->where('NO_KAB', $request->kabupaten)->where('NO_PROP', $request->provinsi)
             ->orderBy('NAMA_KEL')
             ->get(['NO_KEL', 'NAMA_KEL']);
 
@@ -646,8 +648,10 @@ class LoketController extends Controller
         }
 
         // memastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         // SANITIZE: Pastikan kelUmur tidak null
         if (empty($data['kelUmur'])) {
@@ -757,8 +761,10 @@ class LoketController extends Controller
         }
 
         // Juga pastikan umur_bulan dan umur_hari tidak negatif
-        if ($data['umur_bulan'] < 0) $data['umur_bulan'] = 0;
-        if ($data['umur_hari'] < 0) $data['umur_hari'] = 0;
+        if ($data['umur_bulan'] < 0)
+            $data['umur_bulan'] = 0;
+        if ($data['umur_hari'] < 0)
+            $data['umur_hari'] = 0;
 
         $pel = [
             'tglPelayanan' => $data['tglKunjungan'] ?? null,
@@ -908,7 +914,7 @@ class LoketController extends Controller
         foreach ($columns as $column) {
             $data[$column] = '';
         }
-        return (object)$data;
+        return (object) $data;
     }
 
     public function getId()

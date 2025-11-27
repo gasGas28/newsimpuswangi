@@ -35,6 +35,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Str;
 use Log;
+use Validator;
 
 
 class PoliBpUmumController extends Controller
@@ -53,12 +54,11 @@ class PoliBpUmumController extends Controller
             ->orderBy('id_kategori')
             ->get();
 
-        // dd($DataUnit);
-
-
         $DataPasien = DB::table('simpus_pelayanan as pel')
             ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
+            ->leftJoin('simpus_statuspulang as sp' , 'pel.kdStatusPulang', '=', 'sp.kdStatusPulang')
+            ->leftJoin('simpus_poli_fktp as poliTujuan', 'pel.tujuanPoli', '=','poliTujuan.kdPoli')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'pel.kdPoli')
             ->join('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -99,6 +99,7 @@ class PoliBpUmumController extends Controller
             'pel.sudahDilayani',
             'pel.kunjSakitPel',
             'pel.kdPoli',
+            'sp.nmStatusPulang',
             'p.NO_MR',
             'p.NAMA_LGKP',
             'p.NIK',
@@ -107,14 +108,17 @@ class PoliBpUmumController extends Controller
             'kab.nama_kab',
             'prop.nama_prop',
             'poli.nmPoli',
+            'poli.poliSakit',
+            'poliTujuan.nmPoli as poliTujuan',
             'p.alamat',
             'p.no_rt',
             'p.no_rw',
             'l.tglKunjungan',
             'l.idLoket',
             'l.umur',
-            'l.unitId'
-        )->get();                                                                                                             
+            'l.unitId',
+        )->orderBy('pel.tglPelayanan', 'desc')
+            ->paginate(10);
         // dd($DataPasien);
         if ($request->wantsJson()) {
             return response()->json([
@@ -125,14 +129,13 @@ class PoliBpUmumController extends Controller
                 'unit' => $request->unit
             ]);
         }
-        // dd($DataPasien);
-
         $data = [
             'DataUnit' => $DataUnit,
             'DataPasien' => $DataPasien,
             'kluster' => $kluster,
             'kdPoli' => $idPoli
         ];
+        //dd($idPoli);
         if ($idPoli == '008') {
             return Inertia::render('Ruang_Layanan/KB/pasien_poli', $data);
         } elseif ($idPoli == '001') {
@@ -143,13 +146,14 @@ class PoliBpUmumController extends Controller
             return Inertia::render('Ruang_Layanan/Gizi/pasien_poli', $data);
         } elseif ($idPoli == '097') {
             return Inertia::render('Ruang_Layanan/Sanitasi/pasien_poli', $data);
+
         } else {
             return Inertia::render('Ruang_Layanan/UGD/pasien_poli', $data);
         }
     }
-    public function pelayanan($id, $idPoli, $idpelayanan)
+    public function pelayanan($id, $idPoli, $idpelayanan, $kluster = null)
     {
-        //dd($idPoli);
+        // dd($idPoli);
         $DataPasien = DB::table('simpus_pelayanan as pel')
             ->join('simpus_loket as l', 'pel.loketId', '=', 'l.idLoket')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
@@ -172,7 +176,7 @@ class PoliBpUmumController extends Controller
             })
             ->join('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
             // ->where('l.kdPoli', $idPoli)
-            // ->where('idLoket', $id)
+            ->where('idLoket', $id)
             ->where('pel.idPelayanan', $idpelayanan)
             ->select(
                 'p.NO_MR',
@@ -200,6 +204,7 @@ class PoliBpUmumController extends Controller
                 'pel.tujuanPoli'
             )
             ->first();
+        //  dd($DataPasien);
         if ($DataPasien->pelIdSebelum) {
             $poliAwal = DB::table('simpus_pelayanan as pel')
                 ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'pel.kdPoli')
@@ -220,10 +225,11 @@ class PoliBpUmumController extends Controller
         $DataKesadaran = DB::table('simpus_kesadaran')->get();
         $DiagnosaKasus = DB::table('master_diagnosa_kasus')->get();
         $MasterAlergi = DB::table('master_alergi')->get();
-        $SimpusDataDiagnosa = SimpusDataDiagnosa::with(['SimpusPoliFKTP', 'MasterDiagnosaKasus'])->where('loketId', $DataPasien->idLoket)->whereNotNull('kdDiagnosa')->get();
-        $SimpusTindakan = SimpusTindakan::where('loketId', $DataPasien->idLoket)->with('SimpusPoli')->get();
+        $SimpusDataDiagnosa = SimpusDataDiagnosa::with(['SimpusPoliFKTP', 'MasterDiagnosaKasus', 'SimpusDiagnosa'])->where('loketId', $DataPasien->idLoket)->whereNotNull('kdDiagnosa')->get();
+        $SimpusTindakan = SimpusTindakan::where('loketId', $DataPasien->idLoket)->where('deskripsi', 'icd9cm')->with('SimpusPoli')->get();
+        //  dd($SimpusTindakan);
         $AlergiPasien = SimpusAlergiData::with(['alergiObat', 'alergiMakanan'])->where('pasienId', $DataPasien->ID)->first();
-        $StatusPulang = StatusPulang::where('rawatInap', 'false')->get();
+        $StatusPulang = StatusPulang::where('rawatInap', 'false')->whereNotIn('kdStatusPulang', [12, 4, 6])->get();
         $SimpusResepObat = SimpusResepObat::with('DetailResepObat.MasterObat', 'Loket.SimpusPoli')->where('loketId', $DataPasien->idLoket)->get();
         $MasterObat = SimpusMasterObat::all();
         //dd($SimpusDataDiagnosa);
@@ -234,6 +240,7 @@ class PoliBpUmumController extends Controller
         $DataRujuk = SimpusPelayanan::with(['SimpusLoket', 'SimpusPoli', 'StatusPulang'])->where('loketId', $DataPasien->idLoket)->orderBy('createdDate', 'desc')->get();
         $poliRujukInternal = SimpusPoliFKTP::where('rujukIntern', 'TRUE')->get();
         $pelayanan = SimpusPelayanan::where('idpelayanan', $idpelayanan)->first();
+        $masterTacc = DB::table('master_tacc')->get();
         //dd($poliRujukInternal);
         $data = [
             'DataPasien' => $DataPasien,
@@ -255,8 +262,11 @@ class PoliBpUmumController extends Controller
             'DataRujuk' => $DataRujuk,
             'idPoli' => $idPoli,
             'poliRujukInternal' => $poliRujukInternal,
-            'pelayanan' => $pelayanan
+            'pelayanan' => $pelayanan,
+            'masterTacc' => $masterTacc,
+            'kluster' => $kluster
         ];
+        // dd($data);
         if ($idPoli == '001') {
             return Inertia::render('Ruang_Layanan/Umum/pelayanan', $data);
         } elseif ($idPoli == '008') {
@@ -278,6 +288,28 @@ class PoliBpUmumController extends Controller
 
     public function setAnamnesaSubjective(Request $request, $idLoket)
     {
+        //  dd($request->all());
+        $request->validate([
+            'tgl_anamnesa' => 'required|date',
+            'keluhan_utama' => 'required|string',
+            'keluhan_tambahan' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'riwayat_penyakit_sekarang' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'riwayat_penyakit_dahulu' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'riwayat_penyakit_keluarga' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'tindakan' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'obat_digunakan' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'obat_dikonsumsi' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+        ], [
+            'keluhan_utama.required' => 'Keluhan Wajib Diisi',
+            'keluhan_tambahan.regex' => 'Wajib Diisi Dengan Huruf',
+            'riwayat_penyakit_sekarang.regex' => 'Wajib Diisi Dengan Huruf',
+            'riwayat_penyakit_dahulu.regex' => 'Wajib Diisi Dengan Huruf',
+            'riwayat_penyakit_keluarga.regex' => 'Wajib Diisi Dengan Huruf',
+            'tindakan.regex' => 'Wajib Diisi Dengan Huruf',
+            'obat_digunakan.regex' => 'Wajib Diisi Dengan Huruf',
+            'obat_dikonsumsi.regex' => 'Wajib Diisi Dengan Huruf',
+
+        ]);
 
         $data = [
             'tglAnamnesa' => $request->tgl_anamnesa,
@@ -322,6 +354,29 @@ class PoliBpUmumController extends Controller
     public function setAnamnesaObjective(Request $request, $idAnam)
     {
         // dd($request->all());
+
+        $validator = Validator::make($request->all(), [
+            'keadaan_umum' => 'required',
+            'kesadaran' => 'required',
+            'imt' => 'required|numeric',
+            'tinggi_badan' => 'required|numeric',
+            'berat_badan' => 'required|numeric',
+            'lingkar_perut' => 'required|numeric',
+            'lingkar_lengan' => 'required|numeric',
+            'sistole' => 'required|numeric',
+            'diastole' => 'required|numeric',
+            'resp_rate' => 'required|numeric',
+            'heart_rate' => 'required|numeric',
+            'suhu' => 'required|numeric',
+            'tenaga_medis_askep' => 'required',
+        ], [
+            'required' => ':attribute wajib diisi.',
+            'numeric' => ':attribute harus berupa angka.'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
         $anamnesa = DB::table('simpus_anamnesa')
             ->where('idAnamnesa', $idAnam)
             ->first();
@@ -381,6 +436,7 @@ class PoliBpUmumController extends Controller
             ->where('idAnamnesa', $idAnam)
             ->update($dataUpdate);
         return redirect()->back();
+
     }
 
     public function mulaiPemeriksaanPasien(Request $request)
@@ -404,8 +460,19 @@ class PoliBpUmumController extends Controller
 
     public function setDiagnosaMedis(Request $request, $idLoket, $idPelayanan)
     {
-        //dd($idLoket);
-        $diagnosa = SimpusDataDiagnosa::create([
+        // dd($request);
+
+        $request->validate([
+            'kode_diagnosa' => 'required',
+            'nama_diagnosa' => 'required',
+            'kunjungan_khusus' => 'required',
+
+        ], [
+            'kode_diagnosa.required' => 'Kode Diagnosa wajib diisi',
+            'nama_diagnosa.required' => 'Nama Diagnosa wajib diisi',
+            'kunjungan_khusus.required' => 'Diagnosa Kasus wajib diisi'
+        ]);
+        SimpusDataDiagnosa::create([
             'kdDiagnosa' => $request->kode_diagnosa,
             'nmDiagnosa' => $request->nama_diagnosa,
             'diagnosaKasus' => $request->kunjungan_khusus,
@@ -414,20 +481,17 @@ class PoliBpUmumController extends Controller
             'loketId' => $idLoket,
             'pelayananId' => $idPelayanan,
         ]);
-        return back()->with('newDiagnosa', $diagnosa);
+        return redirect()->back();
     }
 
     public function setDiagnosaKeperawatan(Request $request, $idLoket, $idPelayanan)
     {
-        //dd($request->all());
-        $cek = SimpusDataDiagnosa::where('pelayananId', $idPelayanan)
-            ->where('nmDiagnosa', $request->nama_diagnosa)
-            ->exists();
+        //    dd($request->all());
+        $request->validate([
+            'kode_diagnosa' => 'required',
+            'nama_diagnosa' => 'required',
+        ], ['nama_diagnosa.required' => 'Nama Diagnosa wajib diisi', 'kode_diagnosa.required' => 'Kode Diagnosa wajib diisi']);
 
-        if ($cek) {
-            // Kalau sudah ada, jangan disimpan
-            return redirect()->back()->with('error', 'Diagnosa sudah ada untuk pelayanan ini!');
-        }
 
         SimpusDataDiagnosa::create([
             'nmDiagnosa' => $request->nama_diagnosa,
@@ -447,11 +511,25 @@ class PoliBpUmumController extends Controller
     {
         SimpusDataDiagnosa::where('idDiagnosa', $idDiagnosa)->delete();
         return redirect()->back();
+
     }
 
     public function setTindakan(Request $request)
     {
         // dd($request->all());
+        $request->validate([
+            'kode_tindakan' => 'required',
+            'nama_tindakan' => 'required',
+            'keterangan_tindakan' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+            'keterangangigi' => 'nullable|string|regex:/^[A-Za-z\s.,-]+$/',
+
+        ], [
+            'kode_tindakan.required' => 'Kode Tindakan wajib diisi!',
+            'nama_tindakan.required' => 'Nama Tindakan wajib diisi!',
+            'keterangan_tindakan.regex' => 'Inputan harus huruf',
+            'keterangangigi.regex' => 'Inputan Harus huruf'
+
+        ]);
         SimpusTindakan::create([
             'idPelayanan' => $request->idPelayanan,
             'loketId' => $request->loketId,
@@ -461,6 +539,7 @@ class PoliBpUmumController extends Controller
             'keterangan' => $request->keterangan_tindakan,
             'kdPoli' => $request->kdPoli,
             'ketGigi' => $request->keterangangigi,
+            'deskripsi' => 'icd9cm',
             'createdBy' => Auth()->user()->username
         ]);
         return redirect()->back();
@@ -553,7 +632,23 @@ class PoliBpUmumController extends Controller
 
     public function setResepObat(Request $request, $idLoket, $idPelayanan)
     {
-        // dd($request->all());
+        //  dd($request->all());
+
+        if ($request->jenis_obat === '1') {
+            $request->validate([
+                'jumlah_puyer' => 'required',
+                'dosis_pakai' => 'required',
+                'dosis_pakai_jam' => 'required',
+                'waktu' => 'required',
+                'kondisi' => 'required'
+            ], [
+                'jumlah_puyer.required' => 'jumlah wajib diisi',
+                'dosis_pakai.required' => 'dosis pakai wajib diisi',
+                'dosis_pakai_jam.required' => 'dosis pakai wajib diisi',
+                'waktu.required' => 'waktu wajib diisi',
+                'kondisi.required' => 'kondisi wajib diisi'
+            ]);
+        }
         SimpusResepObat::create([
             'id_resep' => Str::uuid(),
             'kode_resep' => Str::random(10),
@@ -571,19 +666,51 @@ class PoliBpUmumController extends Controller
     }
     public function setDetailResepObat(Request $request, $idResep, $idObat)
     {
-        //dd($idResep);
-        SimpusDetailResepObat::create([
+        // dd($request->all());
+        if ($request->kategori === '0') {
+            $request->validate([
+                'obat_id' => 'required',
+                'jumlah_obat' => 'required',
+                'dosis_pakai' => 'required',
+                'dosis_pakai_jam' => 'required',
+                'waktu' => 'required',
+                'kondisi' => 'required',
+            ], [
+                'obat_id.required' => 'Obat wajib dipilih.',
+                'jumlah_obat.required' => 'Jumlah obat wajib diisi.',
+                'dosis_pakai.required' => 'Dosis pakai wajib diisi.',
+                'dosis_pakai_jam.required' => 'Keterangan jam wajib diisi.',
+                'waktu.required' => 'Waktu wajib diisi.',
+                'kondisi.required' => 'Kondisi wajib diisi.',
+            ]);
+        } else {
+            $request->validate([
+                'jumlah_obat' => 'required',
+            ], [
+                'jumlah_obat.required' => 'Jumlah obat wajib diisi.',
+            ]);
+
+        }
+
+        $data = [
             'id_resep_detail' => Str::uuid(),
             'resep_id' => $idResep,
             'poli' => $request->poli,
             'obat_id' => $idObat,
             'jumlah' => $request->jumlah_obat,
-            'jumlah_puyer' => $request->jumlah_puyer,
-            'dosis_pakai' => $request->dosis_pakai,
-            'tiapJam' => $request->dosis_pakai_jam,
-            'waktu' => is_array($request->waktu) ? implode(',', $request->waktu) : $request->waktu,
-            'kondisi' => is_array($request->kondisi) ? implode(',', $request->kondisi) : $request->kondisi,
-        ]);
+        ];
+        if ($request->kategori === '0') {
+            $data = array_merge($data, [
+                'jumlah_puyer' => $request->jumlah_puyer,
+                'dosis_pakai' => $request->dosis_pakai,
+                'tiapJam' => $request->dosis_pakai_jam,
+                'keterangan' => $request->keterangan,
+                'waktu' => is_array($request->waktu) ? implode(',', $request->waktu) : $request->waktu,
+                'kondisi' => is_array($request->kondisi) ? implode(',', $request->kondisi) : $request->kondisi,
+            ]);
+        }
+
+        SimpusDetailResepObat::create($data);
         return redirect()->back();
     }
     public function hapusResepObat($idResepObat)
@@ -597,12 +724,30 @@ class PoliBpUmumController extends Controller
     {
         SimpusDetailResepObat::where('id_resep_detail', $idDetailResepObat)->delete();
         return redirect()->back();
+
     }
 
     public function simpanRujukan(Request $request, $idLoket, $idPelayanan)
     {
-        // dd($request->all(), $idLoket);
+        // dd($request->all());
         // dd($request->status_pulang == 5);
+
+        $rules = [
+            'status_pulang' => 'required',
+            'tenaga_medis' => 'required',
+
+        ];
+        $messages = [
+            'status_pulang.required' => 'status pulang wajib diisi',
+            'tenaga_medis.required' => 'Tenaga medis wajib diisi',
+        ];
+
+        if ($request->status_pulang == 5) {
+            $rules['poli_rujuk_internal'] = 'required';
+            $messages['poli_rujuk_internal.required'] = 'poli rujuk internal wajib diisi';
+        }
+
+        $request->validate($rules, $messages);
         if ($request->status_pulang == 5) {
             $insert = [
                 'tglPelayanan' => now()->toDateString(),
@@ -625,7 +770,17 @@ class PoliBpUmumController extends Controller
                 'tujuanPoli' => $request->poli_rujuk_internal,
                 'endTime' => now()
             ]);
+            if($request->poli_rujuk_internal === '098'){
+                DB::table('simpus_ranap')->insert([
+                    'pelayananId' => $insert['idpelayanan'],
+                    'createdDate' => now(),
+                    'createdBy' => Auth()->user()->username,
+                    'modifiedDate' => null
+                ]);
+            }
+
         } elseif ($request->status_pulang == 6) {
+
         } else {
             SimpusPelayanan::where('idPelayanan', $idPelayanan)->update([
                 'sudahDilayani' => 1,
@@ -646,6 +801,7 @@ class PoliBpUmumController extends Controller
             'idPoli' => $idPoli,
             'idPelayanan' => $idPelayanan
         ]);
+
     }
 
     public function createSuratKeterangan($idPoli, $idPelayanan)
@@ -654,22 +810,36 @@ class PoliBpUmumController extends Controller
         $jenisSurat = SuratMaster::get();
         $pelayanan = SimpusPelayanan::where('idPelayanan', $idPelayanan)->first();
         // dd($pelayanan);
-        $dataAnamnesa = SimpusAnamnesa::with(['loket', 'loket.SimpusPasien.SetupKab', 'loket.SimpusPasien.SetupKel'])->where('loketId', $pelayanan->loketId)->first();
+        $dataAnamnesa = SimpusAnamnesa::with(['loket', 'loket.SimpusPasien.SetupKab', 'loket.SimpusPasien.SetupKel', 'loket.SimpusPasien.pkrjnmaster'])->where('loketId', $pelayanan->loketId)->first();
         // dd($dataAnamnesa);
         $TenagaMedisAskep = MasterDokter::whereIn('profesi_id', [19, 20])->where('aktif', 1)->get();
-        // dd($dataAnamnesa);
-        return Inertia::render('Ruang_Layanan/Umum/SuratKeteranganCreate', [
-            'jenisSurat' => $jenisSurat,
-            'idPoli' => $idPoli,
-            'idPelayanan' => $idPelayanan,
-            'dataAnamnesa' => $dataAnamnesa,
-            'tenagaMedisAskep' => $TenagaMedisAskep
-        ]);
+        if ($dataAnamnesa) {
+            return Inertia::render('Ruang_Layanan/Umum/SuratKeteranganCreate', [
+                'jenisSurat' => $jenisSurat,
+                'idPoli' => $idPoli,
+                'idPelayanan' => $idPelayanan,
+                'dataAnamnesa' => $dataAnamnesa,
+                'tenagaMedisAskep' => $TenagaMedisAskep
+            ]);
+        }
+        redirect()->back()->with('message', 'Isikan Terlebih Dahulu Data Pemeriksaan');
+
     }
 
     public function simpanSuket(Request $request, $idPoli)
     {
-        // dd($request->all());
+        //  dd($request->all());
+        $request->validate([
+            'id_jns_surat' => 'required',
+            'no_surat' => 'required',
+            'tenagaMedis' => 'required',
+            'hasil_pemeriksaan' => 'required'
+        ], [
+            'id_jns_surat.required' => 'Jenis Surat Wajib Dipilih',
+            'no_surat.required' => 'No Surat Wajib Diisi',
+            'tenagaMedis.required' => 'Tenaga Medis Wajib Dipilih',
+            'hasil_pemeriksaan.required' => 'Hasil pemeriksaan Wajib Diisi'
+        ]);
         if ($request->idAnamnesa) {
             SimpusAnamnesa::where('idAnamnesa', $request->idAnamnesa)->update(
                 [
@@ -753,13 +923,13 @@ class PoliBpUmumController extends Controller
         if ($suket->id_jns_surat == 1) {
             return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeterangan', $data);
         } elseif ($suket->id_jns_surat == 2) {
-            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeterangan', $data);
+            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeteranganDokter', $data);
         } elseif ($suket->id_jns_surat == 3) {
-            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeterangan', $data);
+            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeteranganCatin', $data);
         } elseif ($suket->id_jns_surat == 4) {
-            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeterangan', $data);
+            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeteranganCalonHaji', $data);
         } elseif ($suket->id_jns_surat == 5) {
-            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKeterangan', $data);
+            return Inertia::render('Ruang_Layanan/cetakSuket/cetakSuratKematian', $data);
         }
     }
     public function editSuket($idPoli, $idPelayanan, $idSurat)
@@ -778,6 +948,7 @@ class PoliBpUmumController extends Controller
             'suket' => $suket,
             'tenagaMedisAskep' => $TenagaMedisAskep
         ]);
+
     }
 
     public function updateSuket(Request $request)
@@ -818,17 +989,65 @@ class PoliBpUmumController extends Controller
         ]);
         return redirect()->back();
     }
+    private function sqlNorm(string $col): string
+    {
+        // CONVERT(... USING utf8mb4) memastikan collation seragam
+        return "UPPER(TRIM(CONVERT($col USING utf8mb4)))";
+    }
 
     public function formLaborat(Request $request, $idPoli, $idLoket, $idPelayanan)
     {
-        // dd($idPoli);
         $Pelayanan = SimpusPelayanan::with('SimpusLoket.anamnesa', 'SimpusPoli')->where('idPelayanan', $idPelayanan)->first();
         $Pasien = SimpusPasien::where('ID', $Pelayanan->SimpusLoket->pasienId)->first();
         $TenagaMedisAskep = MasterDokter::whereIn('profesi_id', [19, 20])->where('aktif', 1)->get();
+
+
+        $puSub = DB::table('parameter_uji as pu0')
+            ->leftJoin('master_kategori as k', 'k.id_kategori', '=', 'pu0.id_kategori')
+            ->selectRaw("
+        {$this->sqlNorm('pu0.kode_parameter')} AS kode,
+        MAX(pu0.satuan) AS satuan,
+        MAX(NULLIF(pu0.nilai_normal,'')) AS nilai_normal,
+        MAX(NULLIF(pu0.nilai_kritis,'')) AS nilai_kritis,
+        MAX(pu0.id_kategori) AS id_kategori,
+        MAX(k.nama_kategori) AS kategori
+    ")
+            ->whereNotNull('pu0.kode_parameter')
+            ->groupBy(DB::raw($this->sqlNorm('pu0.kode_parameter')));
+
+        $DataPemeriksaan = $DataPemeriksaan = DB::table('simpus_tindakan as t')
+            ->leftJoinSub($puSub, 'pu', function ($j) {
+                $j->on('pu.kode', '=', DB::raw($this->sqlNorm('t.kdTindakan')));
+            })
+            ->where('t.loketId', $idLoket)
+            ->where('t.deskripsi', 'lab')
+            ->selectRaw("
+           t.idTindakan                                        AS detail_id,
+                        t.kdTindakan                                        AS kode,
+                        COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
+                        t.nilaiLab                                          AS nilai_lab,
+                        pu.satuan                                           AS satuan,
+                        pu.nilai_normal                                     AS nilai_normal,
+                        pu.nilai_kritis                                     AS nilai_kritis,
+                        CONCAT(
+                            'Nilai Normal : ', COALESCE(pu.nilai_normal, '-'),
+                            '\nNilai Kritis : ', COALESCE(pu.nilai_kritis, '-')
+                        ) AS nilai_normal_kritis,
+                        /* Tambahan untuk FE */
+                        pu.id_kategori                                      AS id_kategori,
+                        COALESCE(pu.kategori, 'Tanpa kategori')             AS kategori
+    ")
+            ->orderBy('t.idTindakan')
+            ->get();
+
+        // dd($DataPemeriksaan);
+
         return Inertia::render('Ruang_Layanan/Umum/formLaborat', [
             'Pelayanan' => $Pelayanan,
             'Pasien' => $Pasien,
-            'tenagaMedisAskep' => $TenagaMedisAskep
+            'tenagaMedisAskep' => $TenagaMedisAskep,
+            'idLoket' => $idLoket,
+            'DataPemeriksaan' => $DataPemeriksaan
         ]);
     }
 
@@ -894,12 +1113,32 @@ class PoliBpUmumController extends Controller
             'provider' => $provider,
             'poliFktl' => $poliFktl
         ]);
+
     }
 
     public function simpanSuratRujuk(Request $request, $idPoli, $idSurat = null)
     {
         //dd($idSurat);
-        $unit = UnitProfile::select('nama_unit', 'alamat')->where('unit_id', 1)->first();
+        // dd($request->all());
+        $unit = UnitProfile::select('nama_unit', 'alamat')->where('unit_id', Auth()->user()->unit)->first();
+        // dd($unit);
+
+        $request->validate([
+            'tgl_rujuk' => 'required',
+            'no_surat' => 'required',
+            'provider' => 'required',
+            'Poli' => 'required',
+            'tenagaMedis' => 'required',
+            'no_hp' => 'required'
+        ], [
+            'tgl_rujuk.required' => 'Tanggal Wajib Diisi',
+            'no_surat.required' => 'No Surat Wajib Diisi',
+            'provider.required' => 'Pilih Rumah Sakit Terlebih Dahulu',
+            'Poli.required' => 'Poli Rujukan Wajib Diisi',
+            'tenagaMedis.required' => 'Tenaga Medis Wajib Diisi',
+            'no_hp.required' => 'NO HP Wajib Diisi',
+        ]);
+
         if ($idSurat) {
             SuratRujuk::where('id_surat_rujukan', $idSurat)->update([
                 'tgl_rujuk' => $request->tgl_rujuk,
@@ -911,9 +1150,10 @@ class PoliBpUmumController extends Controller
                 'tenagaMedis' => $request->tenagaMedis,
                 'nama_unit' => $unit->nama_unit,
                 'alamat' => $unit->alamat,
-                'created_by' => 1,
+                'created_by' => Auth()->user()->unit,
                 'modified_date' => now()
             ]);
+
         } else {
             // dd($unit);
             SuratRujuk::create([
@@ -926,13 +1166,14 @@ class PoliBpUmumController extends Controller
                 'tenagaMedis' => $request->tenagaMedis,
                 'nama_unit' => $unit->nama_unit,
                 'alamat' => $unit->alamat,
-                'created_by' => 1,
+                // 'created_by' => 1,
                 'created_date' => now(),
                 'modified_date' => now()
             ]);
         }
 
         return redirect()->back();
+
     }
 
     public function cetakRujukan($idSurat)
@@ -958,13 +1199,17 @@ class PoliBpUmumController extends Controller
             })
             ->join('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')->where('p.ID', $suratRujuk->pelayanan->SimpusLoket->pasienId)->first();
         $dataAnamnesa = SimpusAnamnesa::where('loketId', $suratRujuk->pelayanan->loketId)->with(['kesadaran', 'loket.Diagnosa'])->first();
+        $dokter = MasterDokter::where('idDokter', $suratRujuk->tenagaMedis)->first();
         $unit = UnitProfile::where('unit_id', 1)->first();
-        // dd($dataPasien);
+        $diagnosa = SimpusDataDiagnosa::where('loketId', $suratRujuk->pelayanan->SimpusLoket->idLoket)->get();
+        //dd($diagnosa);
         return Inertia::render('Ruang_Layanan/cetakSuratRujukan/FormCetakSuratRujukan', [
             'suratRujuk' => $suratRujuk,
             'dataPasien' => $dataPasien,
             'dataAnamnesa' => $dataAnamnesa,
-            'unit' => $unit
+            'unit' => $unit,
+            'dokter' => $dokter,
+            'diagnosa' => $diagnosa
         ]);
     }
 
@@ -984,8 +1229,14 @@ class PoliBpUmumController extends Controller
     public function riwayatPasien($idPoli, $idPasien)
     {
         // dd($idPoli);
-        $riwayatPasien = SimpusPasien::where('ID', $idPasien)->with('SimpusLoket.anamnesa', 'SimpusLoket.Diagnosa', 'SimpusLoket.Tindakan', 'SimpusLoket.ResepObat.DetailResepObat.MasterObat', 'SimpusLoket.unitprofile', 'SimpusLoket.SimpusPoli')->first();
-        // dd($riwayatPasien);
+        $riwayatPasien = SimpusPasien::where('ID', $idPasien)->with('SimpusLoket.anamnesa', 'SimpusLoket.Diagnosa', 'SimpusLoket.Tindakan', 'SimpusLoket.TindakanLab.parameteruji', 'SimpusLoket.ResepObat.DetailResepObat.MasterObat', 'SimpusLoket.unitprofile', 'SimpusLoket.SimpusPoli', 'SimpusLoket.pelayanan.StatusPulang', 'SimpusLoket.pelayanan.SimpusPoli','SimpusLoket.pelayanan.poliTujuan')->first();
+
+        // $loketId = $riwayatPasien->SimpusLoket;
+        // $tindakan
+
+        // $tindakan = SimpusTindakan::with('parameteruji')->get();
+       // dd($riwayatPasien);
+        //$tindakanLab = DB::table('simpus_tindakan as t')->join('parameter_uji as p')->on('t.kdTindakan', 'p.kode_parameter')->where('t.loketId');
         return Inertia::render('Ruang_Layanan/Umum/riwayatPasien', [
             'riwayatPasien' => $riwayatPasien
         ]);
@@ -993,16 +1244,17 @@ class PoliBpUmumController extends Controller
 
     public function getCppt($idPoli, $idPasien)
     {
-        $riwayatPasien = SimpusPasien::where('ID', $idPasien)->with('SimpusLoket.anamnesa', 'SimpusLoket.Diagnosa', 'SimpusLoket.Tindakan', 'SimpusLoket.ResepObat.DetailResepObat.MasterObat', 'SimpusLoket.unitprofile', 'SimpusLoket.SimpusPoli')->first();
+        $riwayatPasien = SimpusPasien::where('ID', $idPasien)->with('SimpusLoket.anamnesa', 'SimpusLoket.Diagnosa', 'SimpusLoket.Tindakan', 'SimpusLoket.TindakanLab.parameteruji', 'SimpusLoket.ResepObat.DetailResepObat.MasterObat', 'SimpusLoket.unitprofile', 'SimpusLoket.SimpusPoli', 'SimpusLoket.pelayanan')->first();
         // dd($riwayatPasien);
         return Inertia::render('Ruang_Layanan/Umum/cppt', [
             'riwayatPasien' => $riwayatPasien
         ]);
+
     }
 
     public function getPelayanan($idLoket, $idPelayanan)
     {
-        $pelayanan = SimpusPelayanan::with(['SimpusLoket', 'SimpusPoli', 'StatusPulang'])
+        $pelayanan = SimpusPelayanan::with(['SimpusLoket', 'SimpusPoli', 'StatusPulang', 'poliTujuan'])
             ->where('loketId', $idLoket)
             // ->orWhere('pelIdSebelum', $idPelayanan)
             ->orderBy('createdDate', 'asc')
@@ -1031,6 +1283,7 @@ class PoliBpUmumController extends Controller
         $batal['tenagaMedis'] = null;
         $batal['sudahDilayani'] = null;
         SimpusPelayanan::where('idpelayanan', $pel)->update($batal);
+        DB::table('simpus_ranap')->where('pelayananId',  $idpelayanan)->delete();
 
         $rujuk->delete();
         return response()->json(
@@ -1086,26 +1339,36 @@ class PoliBpUmumController extends Controller
     }
     public function batalBerobatJalan($idLoket, $idpelayanan)
     {
-        SimpusPelayanan::where('idPelayanan', $idpelayanan)->update([
+        $pelayanan = SimpusPelayanan::where('idPelayanan', $idpelayanan)->first();
+
+        if (!$pelayanan) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data pelayanan tidak ditemukan'
+            ], 404);
+        }
+
+        $pelayanan->update([
             'tujuanPoli' => null,
             'kdStatusPulang' => null,
             'tenagaMedis' => null,
             'sudahDilayani' => 2,
             'endTime' => null
         ]);
+
         return response()->json([
             'idLoket' => $idLoket,
             'idPelayanan' => $idpelayanan,
-            'message' => 'Berhasil batal berobat jalan '
+            'message' => 'Berhasil batal berobat jalan'
         ]);
     }
+
 
     public function simpanGizi(Request $request, $idLoket)
     {
         //  dd($request->all());
-        DB::table('simpus_gizi')->insert([
-            'idGizi' => Str::uuid(),
-            'loketId' => $idLoket,
+        $gizi = DB::table('simpus_gizi')->where('loketId', $idLoket)->first();
+        $data = [
             'energi' => $request->energi,
             'protein' => $request->protein,
             'lemak' => $request->lemak,
@@ -1123,16 +1386,30 @@ class PoliBpUmumController extends Controller
             'diet' => $request->diet,
             'tujuanEdukasi' => $request->tujuanEdukasi,
             'kontrolUlang' => $request->kontrolUlang,
-            'tenagaMedisGizi' => $request->TenagaMedisAskep,
-            'createdDate' => now(),
-            'createdBy' => Auth::user()->username
-        ]);
+            'tenagaMedisGizi' => $request->TenagaMedisAskep
+        ];
+        if (!$gizi) {
+            DB::table('simpus_gizi')->insert(array_merge($data, [
+                'idGizi' => Str::uuid(),
+                'loketId' => $idLoket,
+                'createdDate' => now(),
+                'createdBy' => Auth::user()->username
+            ]));
+        }
+        DB::table('simpus_gizi')->where('idgizi', $gizi->idGizi)->update(array_merge($data, [
+
+            'modifiedDate' => now(),
+            'modifiedBy' => Auth::user()->username
+        ]));
+
         return redirect()->back();
+
+
     }
     public function simpanSanitasi(Request $request, $idPelayanan)
     {
         //dd($request->all());
-        $sanitasi =  DB::table('simpus_sanitasi')->where('pelayananId', $idPelayanan)->exists();
+        $sanitasi = DB::table('simpus_sanitasi')->where('pelayananId', $idPelayanan)->exists();
         if (!$sanitasi) {
             DB::table('simpus_sanitasi')->insert([
                 'pelayananId' => $idPelayanan,
@@ -1144,6 +1421,7 @@ class PoliBpUmumController extends Controller
                 'createdBy' => Auth::user()->username,
                 'createdDate' => now(),
             ]);
+
         }
         DB::table('simpus_sanitasi')->update([
             'pelayananId' => $idPelayanan,
@@ -1160,6 +1438,22 @@ class PoliBpUmumController extends Controller
             'sudahDilayani' => 1
         ]);
         return redirect()->back();
+
+    }
+
+    public function popUpFormRujukLanjut()
+    {
+        $spesialis = DB::table('simpus_spesialis')->get();
+        $subspesialis = DB::table('simpus_subspesialis')->get();
+        $spesialisSarana = DB::table('simpus_spesialissarana')->get();
+
+        return response()->json(
+            [
+                'spesialis' => $spesialis,
+                'subspesialis' => $subspesialis,
+                'spesialisSarana' => $spesialisSarana,
+            ]
+        );
     }
 
 

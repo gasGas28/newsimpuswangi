@@ -19,7 +19,10 @@
               <div class="input-group">
                 <input type="text" class="form-control bg-light" disabled v-model="form.kode_tindakan" />
                 <button type="button" class="btn btn-info" @click="openModal()">Cari</button>
-                <button type="button" class="btn btn-danger ">Del</button>
+                <button type="button" class="btn btn-danger" @click="delTindakan()">Del</button>
+              </div>
+              <div v-if="form.errors.kode_tindakan" class="invalid-feedback d-block">
+                {{ form.errors.kode_tindakan }}
               </div>
             </div>
           </div>
@@ -29,6 +32,9 @@
             <label class="col-sm-2 col-form-label fw-bold">Nama Tindakan</label>
             <div class="col-sm-4">
               <input type="text" class="form-control bg-light" disabled v-model="form.nama_tindakan" />
+              <div v-if="form.errors.nama_tindakan" class="invalid-feedback d-block">
+                {{ form.errors.nama_tindakan }}
+              </div>
             </div>
           </div>
 
@@ -45,6 +51,9 @@
             <label class="col-sm-2 col-form-label fw-bold">Keterangan</label>
             <div class="col-sm-4">
               <textarea class="form-control" rows="2" v-model="form.keterangan_tindakan"></textarea>
+              <div v-if="form.errors.keterangan_tindakan" class="invalid-feedback d-block">
+                {{ form.errors.keterangan_tindakan }}
+              </div>
             </div>
           </div>
 
@@ -81,9 +90,9 @@
                 <td>{{ item.peraturan }}</td>
                 <td>{{ item.harga }}</td>
                 <td>{{ item.bayar }}</td>
-                <td>{{ item.simpus_poli.nmPoli }}</td>
+                <td>{{ item.simpus_poli?.nmPoli }}</td>
                 <td>{{ item.keterangan }}</td>
-                <td  v-if="props.idPoli == '002'">{{ item.ketGigi }}</td>
+                <td v-if="props.idPoli == '002'">{{ item.ketGigi }}</td>
                 <td>{{ item.createdBy }}</td>
                 <td>
                   <button class="btn btn-sm btn-danger" @click="hapusDataTindakan(item.idTindakan)">Hapus</button>
@@ -110,6 +119,9 @@
                 <label class="col-sm-2 col-form-label fw-bold">Jumlah puyer</label>
                 <div class="col-sm-4">
                   <input type="number" v-model="FormResepObat.jumlah_puyer">
+                  <div v-if="FormResepObat.errors.jumlah_puyer" class="invalid-feedback d-block">
+                    {{ FormResepObat.errors.jumlah_puyer }}
+                  </div>
                 </div>
               </div>
               <div class="mb-3 row align-items-center">
@@ -122,6 +134,10 @@
                     <input type="number" class="form-control" placeholder="Jam"
                       v-model="FormResepObat.dosis_pakai_jam" />
                     <span class="input-group-text">Jam Sekali</span>
+                  </div>
+                  <div v-if="FormResepObat.errors.dosis_pakai || FormResepObat.errors.dosis_pakai_jam"
+                    class="invalid-feedback d-block">
+                    {{ FormResepObat.errors.dosis_pakai }} dan {{ FormResepObat.errors.dosis_pakai_jam }}
                   </div>
                 </div>
               </div>
@@ -142,6 +158,10 @@
                       <input class="form-check-input" type="checkbox" value="Malam" v-model="FormResepObat.waktu">
                       <label class="form-check-label"> Malam</label>
                     </div>
+
+                  </div>
+                  <div v-if="FormResepObat.errors.waktu" class="invalid-feedback d-block">
+                    {{ FormResepObat.errors.waktu }}
                   </div>
                 </div>
               </div>
@@ -150,17 +170,21 @@
                 <div class="col-sm-4">
                   <div class="d-flex gap-4">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Baik" v-model="FormResepObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Sebelum makan" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Sebelum makan</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Sedang" v-model="FormResepObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Saat makan" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Saat makan</label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="Lemah" v-model="FormResepObat.kondisi">
+                      <input class="form-check-input" type="checkbox" value="Sesudah makan" v-model="FormResepObat.kondisi">
                       <label class="form-check-label">Sesudah makan</label>
                     </div>
+
+                  </div>
+                  <div v-if="FormResepObat.errors.kondisi" class="invalid-feedback d-block">
+                    {{ FormResepObat.errors.kondisi }}
                   </div>
                 </div>
               </div>
@@ -317,11 +341,11 @@
               </div>
               <div class="w-100 d-flex align-items-center">
                 <h5 class="modal-title mb-0">Pilih Obat</h5>
-                <form class="d-flex ms-auto">
-                  <input type="text" v-model="keyword"  id="search-diagnosa" class="form-control form-control-sm me-2"
-                    placeholder="Cari diagnosa...">
-                  <button type="submit" class="btn btn-sm btn-primary">Cari</button>
-                </form>
+                <div class="d-flex ms-auto">
+                  <input type="text" v-model="keyword"  @input="searchObat" id="search-obat" class="form-control form-control-sm me-2"
+                    placeholder="Cari obat...">
+                  <button @click="searchObat" class="btn btn-sm btn-primary">Cari</button>
+                </div>
               </div>
             </div>
             <div class="modal-body">
@@ -394,6 +418,9 @@
                           class="form-control form-control-sm w-25 me-2">
                         <small class="text-danger fst-italic">gunakan titik (.) untuk desimal</small>
                       </div>
+                      <div v-if="FormDetailResepObat.errors.jumlah_obat" class="invalid-feedback d-block">
+                        {{ FormDetailResepObat.errors.jumlah_obat }}
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -450,7 +477,11 @@
                       <input type="number" step="0.01" class="form-control d-inline-block w-auto"
                         v-model="FormDetailResepObat.jumlah_obat">
                       <small class="text-danger ms-2">gunakan titik (.) untuk input jumlah desimal</small>
+                      <div v-if="FormDetailResepObat.errors.jumlah_obat" class="invalid-feedback d-block">
+                        {{ FormDetailResepObat.errors.jumlah_obat }}
+                      </div>
                     </td>
+
                   </tr>
                   <tr>
                     <td class="fw-bold">Dosis Pakai</td>
@@ -462,6 +493,12 @@
                       <input type="number" class="form-control d-inline-block w-auto"
                         v-model="FormDetailResepObat.dosis_pakai_jam">
                       Jam sekali
+                      <div v-if="FormDetailResepObat.errors.dosis_pakai || FormDetailResepObat.errors.dosis_pakai_jam"
+                        class="invalid-feedback d-block">
+                        {{ FormDetailResepObat.errors.dosis_pakai }} dan {{ FormDetailResepObat.errors.dosis_pakai_jam
+                        }}
+                      </div>
+
                     </td>
                   </tr>
                   <tr>
@@ -483,6 +520,9 @@
                           v-model="FormDetailResepObat.waktu">
                         <label class="form-check-label">malam</label>
                       </div>
+                      <div v-if="FormDetailResepObat.errors.waktu" class="invalid-feedback d-block">
+                        {{ FormDetailResepObat.errors.waktu }}
+                      </div>
                     </td>
                   </tr>
                   <tr>
@@ -503,6 +543,9 @@
                         <input class="form-check-input" type="checkbox" value="setelah"
                           v-model="FormDetailResepObat.kondisi">
                         <label class="form-check-label">setelah makan</label>
+                      </div>
+                      <div v-if="FormDetailResepObat.errors.kondisi" class="invalid-feedback d-block">
+                        {{ FormDetailResepObat.errors.kondisi }}
                       </div>
                     </td>
                   </tr>
@@ -539,7 +582,7 @@ import { useForm } from '@inertiajs/vue3';
 import axios from 'axios';
 import { route } from 'ziggy-js';
 import { computed, watch } from 'vue';
-
+import Swal from 'sweetalert2';
 const currrentSubTabPlanning = ref('tindakan');
 const keyword = ref('');
 const showModal = ref(false);
@@ -563,7 +606,7 @@ const props = defineProps({
   idPoli: String
 });
 const emit = defineEmits(['dataAnamnesa-update']);
-console.log('data resep:', props.simpusResepObat);
+console.log('data resep obat:', props.simpusResepObat);
 
 function pilihMasterTindakan(item) {
   form.kode_tindakan = item.kode
@@ -639,6 +682,10 @@ function openModalMasterObat(item) {
 function searchTindakan() {
   fetchPage(route('ruang-layanan.master-tindakan', { search: keyword.value }));
 }
+function searchObat() {
+  //alert( keyword.value)
+  fetchPageMasterObat(route('ruang-layanan.master-obat', { search: keyword.value }));
+}
 
 function fetchPage(url) {
   if (!url) return;
@@ -673,7 +720,13 @@ function submitForm() {
   }), {
     preserveScroll: true,
     onSuccess: () => {
-      alert("Plannngin tersimpan");
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Data TIndakan Tersimpan!',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
       emit('dataAnamnesa-update');
     },
   })
@@ -686,7 +739,13 @@ function submitFormPengobatan() {
   }), {
     preserveScroll: true,
     onSuccess: () => {
-      alert("Data Obat tersimpan");
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Data resep obat Tersimpan!',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
       emit('dataAnamnesa-update');
     },
   });
@@ -699,7 +758,16 @@ function submitFormPengobatanDetail() {
   }), {
     preserveScroll: true,
     onSuccess: () => {
-      alert("Obat berhasil disimpan tersimpan");
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Data detail resep obat Tersimpan!',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
+      FormDetailResepObat.reset();
+      FormDetailResepObat.obat_id = selectedObat?.OBAT_ID ?? '';
+      FormDetailResepObat.poli = props?.dataPasien?.nmPoli ?? '';
       emit('dataAnamnesa-update');
       showModalTambahObatPuyer.value = false;
       showModalTambahObatBukanPuyer.value = false;
@@ -707,16 +775,34 @@ function submitFormPengobatanDetail() {
   });
 }
 function hapusDataTindakan(id) {
-  form.delete(route('ruang-layanan-gigi.remove-data-tindakan', id), {
-    data: {
-      _method: 'delete',
-    },
-    preserveScroll: true,
-    onSuccess: () => {
-      alert("Diagnosa Medis dihapus");
-      emit('dataAnamnesa-update');
-    },
-  });
+  Swal.fire({
+    title: 'Yakin ingin menghapus?',
+    text: 'Data yang dihapus tidak bisa dikembalikan!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      form.delete(route('ruang-layanan-gigi.remove-data-tindakan', id), {
+        data: {
+          _method: 'delete',
+        },
+        preserveScroll: true,
+        onSuccess: () => {
+          Swal?.fire({
+            title: 'Sukses',
+            text: 'Hapus Data Tindakan!',
+            icon: 'success',
+            timer: 1600,
+            showConfirmButton: false
+          });
+          emit('dataAnamnesa-update');
+        },
+      });
+    }
+  })
+
 }
 function hapusResepObat(id) {
   FormResepObat.delete(route('ruang-layanan.hapus-resep-obat', id), {
@@ -739,5 +825,10 @@ function hapusDetailResepObat(id) {
       emit('dataAnamnesa-update');
     },
   });
+}
+function delTindakan() {
+  form.kode_tindakan = '',
+    form.nama_tindakan = '',
+    form.nama_tindakan_indonesia = ''
 }
 </script>

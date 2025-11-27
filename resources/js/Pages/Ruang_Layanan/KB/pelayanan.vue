@@ -3,14 +3,14 @@
     <div class="card m-4  rounded-4 rounded-bottom-0">
       <div class="card-header bg-info d-flex justify-content-between p-3  rounded-4 rounded-bottom-0"
         style="background: linear-gradient(135deg, #3b82f6, #10b981);">
-        <h1 class="fs-5 text-white">KB</h1>
-        <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 btn-sm text-white">
+        <h1 class="fs-3 text-white">KB</h1>
+        <Link :href="backRoute" class="btn bg-white bg-opacity-25 border border-1 text-white">
         <i class="fas fa-arrow-left me-1 text-white"></i> Kembali
         </Link>
       </div>
       <div class="card-body">
         <PelayananPasien @ubah-melayani="isMelayani = $event" :dataPasien="DataPasien" :dataAnamnesa="DataAnamnesa"
-          :id-pelayanan="idPelayanan" :pelayanan=pelayanan>
+          :id-pelayanan="idPelayanan" :pelayanan=pelayanan :klsuter="klsuter">
           <div class="shadow-sm rounded-5">
             <NavigasiFormPemeriksaan :currentTab="currentTab" @change-currentTab="currentTab = $event">
             </NavigasiFormPemeriksaan>
@@ -33,7 +33,8 @@
                 route-resep-obat="ruang-layanan.set-resep-obat"
                 routePlanningTindakan="ruang-layanan.simpan-Tindakan" route-detail-resep-obat="ruang-layanan.set-detail-resep">
               </FormPelayananPlanning>
-              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'"  @dataRujuk-update="refreshDataAnamnesa" :idLoket="DataPasien.idLoket":idPelayanan="idPelayanan" :statusPulang="statusPulang" :DataRujuk="DataRujuk" :TenagaMedis="TenagaMedis" :poliRujukInternal="poliRujukInternal">
+              <FormPelayananStatusPasien v-if="currentTab === 'status_pasien'"  @dataRujuk-update="refreshDataAnamnesa" :idLoket="DataPasien.idLoket":idPelayanan="idPelayanan" 
+              :statusPulang="statusPulang" :DataRujuk="DataRujuk" :TenagaMedis="TenagaMedis" :poliRujukInternal="poliRujukInternal" :masterTacc="masterTacc" :simpusDataDiagnosaMedis="SimpusDataDiagnosaMedis"  :idPoli="idPoli" >
               </FormPelayananStatusPasien>
             </div>
           </div>
@@ -81,7 +82,8 @@ const simpusResepObat = computed(() => page.props.SimpusResepObat);
 const diagnosaKeperawatan = computed(() => page.props.diagnosaKeperawatan);
 const poliRujukInternal =computed(() => page.props.poliRujukInternal);
 const pelayanan =computed(() => page.props.pelayanan);
-
+const masterTacc = computed(() => page.props.masterTacc)
+const klsuter = computed(() => page.props.kluster)
 const refreshDataAnamnesa = () => {
   router.reload({
     only: ['DataAnamnesa', 'SimpusDataDiagnosaMedis', 'SimpusTindakan', 'DataRujuk'],

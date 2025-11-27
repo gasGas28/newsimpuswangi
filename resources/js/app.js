@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let timerInterval;
   let warningShown = false;
 
-  // // === buat elemen floating timer ===
+  // === buat elemen floating timer ===
   // const timerDiv = document.createElement("div");
   // timerDiv.style.position = "fixed";
   // timerDiv.style.bottom = "15px";
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // timerDiv.style.borderRadius = "8px";
   // timerDiv.style.fontFamily = "monospace";
   // timerDiv.style.zIndex = "9999";
-  // timerDiv.textContent = `Auto logout: ${timeLeft}s`;
+  //timerDiv.textContent = `Auto logout: ${timeLeft}s`;
   // document.body.appendChild(timerDiv);
 
   const resetTimer = () => {
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === hitung mundur setiap detik ===
   timerInterval = setInterval(() => {
     timeLeft--;
-    timerDiv.textContent = `Auto logout: ${timeLeft}s`;
+    //timerDiv.textContent = `Auto logout: ${timeLeft}s`;
 
     if (timeLeft <= warningBefore / 1000 && !warningShown) {
       showWarning();

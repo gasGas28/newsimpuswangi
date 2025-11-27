@@ -647,7 +647,7 @@
 
     try {
       const response = await axios.get(route('loket.api.kelurahan'), {
-        params: { kecamatan: form.NO_KEC },
+        params: { kecamatan: form.NO_KEC, kabupaten:form.NO_KAB, provinsi:form.NO_PROP },
       });
       kelurahanList.value = response.data;
     } catch (error) {
