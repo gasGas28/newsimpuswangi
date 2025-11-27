@@ -28,25 +28,25 @@ if (token) {
 // (Opsional) export ke window biar gampang dipakai di komponen
 window.axios = axios;
 // =================== AUTO LOGOUT + TIMER DISPLAY ===================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   const maxIdle = 600 * 1000; // 60 detik
   const warningBefore = 10 * 1000; // popup muncul 10 detik sebelum logout
-  const events = ["mousemove", "keypress", "click", "scroll", "touchstart"];
+  const events = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart'];
   let timeLeft = maxIdle / 1000;
   let timerInterval;
   let warningShown = false;
 
   // === buat elemen floating timer ===
-  const timerDiv = document.createElement("div");
-  timerDiv.style.position = "fixed";
-  timerDiv.style.bottom = "15px";
-  timerDiv.style.right = "15px";
-  timerDiv.style.background = "rgba(0,0,0,0.7)";
-  timerDiv.style.color = "white";
-  timerDiv.style.padding = "8px 14px";
-  timerDiv.style.borderRadius = "8px";
-  timerDiv.style.fontFamily = "monospace";
-  timerDiv.style.zIndex = "9999";
+  const timerDiv = document.createElement('div');
+  timerDiv.style.position = 'fixed';
+  timerDiv.style.bottom = '15px';
+  timerDiv.style.right = '15px';
+  timerDiv.style.background = 'rgba(0,0,0,0.7)';
+  timerDiv.style.color = 'white';
+  timerDiv.style.padding = '8px 14px';
+  timerDiv.style.borderRadius = '8px';
+  timerDiv.style.fontFamily = 'monospace';
+  timerDiv.style.zIndex = '9999';
   timerDiv.textContent = `Auto logout: ${timeLeft}s`;
   document.body.appendChild(timerDiv);
 
@@ -58,22 +58,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const autoLogout = async () => {
     clearInterval(timerInterval);
     try {
-      await axios.post("/logout");
-      window.location.href = "/login";
+      await axios.post('/logout');
+      window.location.href = '/login';
     } catch (error) {
-      console.error("Auto logout gagal:", error);
+      console.error('Auto logout gagal:', error);
     }
   };
 
   const showWarning = () => {
     warningShown = true;
     Swal.fire({
-      title: "Kamu akan logout otomatis!",
-      text: "Tidak ada aktivitas. Logout dalam 10 detik...",
-      icon: "warning",
+      title: 'Kamu akan logout otomatis!',
+      text: 'Tidak ada aktivitas. Logout dalam 10 detik...',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Lanjutkan sesi",
-      cancelButtonText: "Logout sekarang",
+      confirmButtonText: 'Lanjutkan sesi',
+      cancelButtonText: 'Logout sekarang',
       timer: warningBefore,
       timerProgressBar: true,
       allowOutsideClick: false,
@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener(e, () => resetTimer());
   });
 });
-
 
 createInertiaApp({
   // title: (title) => `${title} - ${appName}`,

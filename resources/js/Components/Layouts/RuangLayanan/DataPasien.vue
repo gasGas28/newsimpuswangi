@@ -114,7 +114,18 @@
                     </div>
                   </td>
                   <td class="text-center">
-                    <Link :href="route(backRoute, [item.idLoket, item.kdPoli, item.idpelayanan])" class="btn">
+                    <Link v-if="title === 'RANAP PERAWATAN'" :href="route('ruang-layanan.rawat-inap.perawatan.detail', item.idpelayanan)" class="btn">
+                      <span class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i> Detail Keperawatan
+                      </span>
+                    </Link>
+                    <button v-else-if="title === 'RANAP PENERIMAAN'" class="btn btn-sm btn-primary" @click="pilihKamar(item.idpelayanan)">
+                      Pilih Kamar
+                    </button>
+                    <button v-else-if="title === 'RANAP KELUAR'" class="btn btn-sm btn-danger" @click="pasienKeluar(item.idpelayanan)">
+                      Pasien Keluar
+                    </button>
+                    <Link v-else :href="route(backRoute, [item.idLoket, item.kdPoli, item.idpelayanan])" class="btn">
                     <span class="btn btn-sm btn-success" v-if="item.sudahDilayani == 1">
                       <i class="fas fa-check-circle "></i> Selesai Dilayani
                     </span>
@@ -132,6 +143,51 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Pilih Kamar -->
+      <div v-if="showPilihKamarModal" class="modal-overlay">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h5 class="m-0">Pilih Kamar</h5>
+            <button class="btn-close" @click="closePilihKamar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tanggal Masuk</label>
+              <input type="datetime-local" class="form-control" v-model="form.ranapMsk" readonly />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama Kamar</label>
+              <select class="form-select" v-model="form.kamarId" @change="ambilBed">
+                <option value="">Pilih Kamar</option>
+                <option v-for="kmr in daftarKamar" :key="kmr.id" :value="kmr.id">{{ kmr.nama }}</option>
+              </select>
+              <small class="text-muted" v-if="daftarKamar.length === 0">Belum ada data kamar.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama Bed</label>
+              <select class="form-select" v-model="form.bedId">
+                <option value="">Pilih Bed</option>
+                <option v-for="bed in daftarBed" :key="bed.id" :value="bed.id" :disabled="bed.disabled">{{ bed.nama }}</option>
+              </select>
+              <small class="text-muted" v-if="form.kamarId && daftarBed.length === 0">Belum ada bed untuk kamar ini.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Opsi</label>
+              <select class="form-select" v-model="form.pilihan">
+                <option value="1">Masuk</option>
+                <option value="2">Pindah Kamar</option>
+                <option value="3">Salah Kamar</option>
+                <option value="4">Pasien Keluar</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="closePilihKamar">Tutup</button>
+            <button class="btn btn-primary" @click="simpanKamar">Simpan</button>
           </div>
         </div>
       </div>
@@ -194,5 +250,127 @@ const ListDataPasien = computed(() => {
 watch(ListDataPasien, (newVal) => {
   console.log('DataPasien berubah:', newVal)
 })
+
+// State & helpers untuk modal Pilih Kamar
+const showPilihKamarModal = ref(false)
+const selectedPelayananId = ref(null)
+const form = ref({
+  ranapMsk: getNowForInput(),
+  kamarId: '',
+  bedId: '',
+  pilihan: '1'
+})
+const daftarKamar = ref([])
+const daftarBed = ref([])
+
+function getNowForInput() {
+  const d = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  const mm = pad(d.getMonth() + 1)
+  const dd = pad(d.getDate())
+  const hh = pad(d.getHours())
+  const ii = pad(d.getMinutes())
+  return `${yyyy}-${mm}-${dd}T${hh}:${ii}`
+}
+
+async function loadKamar() {
+  try {
+    const { data } = await axios.get(route('ruang-layanan.ranap.kamar-list'))
+    daftarKamar.value = data.map(k => ({ id: k.id, nama: k.nama_kamar }))
+  } catch (e) {
+    console.error('Gagal load kamar:', e)
+    daftarKamar.value = []
+  }
+}
+
+async function ambilBed() {
+  form.value.bedId = ''
+  daftarBed.value = []
+  if (!form.value.kamarId) return
+  try {
+    const tglCek = form.value.ranapMsk.replace('T',' ') + ':00'
+    const { data } = await axios.get(route('ruang-layanan.ranap.bed-on', form.value.kamarId), { params: { tglCek }})
+    daftarBed.value = data.map(b => ({ id: b.id, nama: b.nama, disabled: !!b.penuh }))
+  } catch (e) {
+    console.error('Gagal load bed:', e)
+    daftarBed.value = []
+  }
+}
+
+function closePilihKamar() {
+  showPilihKamarModal.value = false
+}
+
+function pilihKamar(idpelayanan) {
+  selectedPelayananId.value = idpelayanan
+  showPilihKamarModal.value = true
+  loadKamar()
+  // Tetap emit agar parent yang sudah mendengar event tidak rusak
+  emit('update-dataPelayanan', { type: 'pilih-kamar', idpelayanan })
+}
+
+function pasienKeluar(idpelayanan) {
+  // Emit ke parent agar bisa ditangani (misal proses pasien keluar)
+  emit('update-dataPelayanan', { type: 'pasien-keluar', idpelayanan })
+}
+
+async function simpanKamar() {
+  try {
+    const payload = {
+      idPelayanan: selectedPelayananId.value,
+      ranapMsk: form.value.ranapMsk.replace('T',' ') + ':00',
+      kamarId: form.value.kamarId,
+      bedId: form.value.bedId,
+      pilihan: form.value.pilihan
+    }
+    const { data } = await axios.post(route('ruang-layanan.ranap.simpan-kamar'), payload)
+    if (data.status === 'success') {
+      showPilihKamarModal.value = false
+    } else {
+      alert(data.message || 'Gagal menyimpan kamar')
+    }
+  } catch (e) {
+    console.error('Gagal simpan kamar:', e)
+    alert('Gagal menyimpan kamar')
+  }
+}
 </script>
-<style></style>
+<style>
+/***** Modal sederhana *****/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.modal-container {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-header, .modal-footer {
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header { display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 1rem; }
+.btn-close {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+}
+
+/* Menyesuaikan style disabled option seperti referensi */
+select option:disabled {
+  color: #000;
+  background: #e0e0eb;
+}
+</style>

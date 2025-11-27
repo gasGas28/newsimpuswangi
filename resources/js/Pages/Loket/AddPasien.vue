@@ -511,8 +511,8 @@
     STAT_HBKEL: null,
     NO_KK: '',
     NAMA_LGKP_AYAH: '',
-    NO_PROP: '35', // DEFAULT: Jawa Timur
-    NO_KAB: '10', // DEFAULT: Banyuwangi
+    NO_PROP: '35',
+    NO_KAB: '10',
     NO_KEC: '',
     NO_KEL: '',
     ALAMAT: '',
@@ -622,6 +622,12 @@
           kabupaten: form.NO_KAB,
         },
       });
+
+      if (response.data.error) {
+            alert(response.data.error);
+            return;
+        }
+
       kecamatanList.value = response.data;
 
       // Reset kelurahan
@@ -638,26 +644,31 @@
 
   async function loadKelurahan() {
     if (!form.NO_KEC) {
-      kelurahanList.value = [];
-      form.NO_KEL = '';
-      return;
+        kelurahanList.value = [];
+        form.NO_KEL = '';
+        return;
     }
-
-    isLoading.value = true;
 
     try {
-      const response = await axios.get(route('loket.api.kelurahan'), {
-        params: { kecamatan: form.NO_KEC },
-      });
-      kelurahanList.value = response.data;
+        const response = await axios.get(route('loket.api.kelurahan'), {
+            params: { 
+                kecamatan: form.NO_KEC,
+                propinsi: form.NO_PROP,
+                kabupaten: form.NO_KAB
+            },
+        });
+        
+        if (response.data.error) {
+            alert(response.data.error);
+            return;
+        }
+        
+        kelurahanList.value = response.data;
     } catch (error) {
-      console.error('Error loading kelurahan:', error);
-      alert('Gagal memuat data kelurahan');
-      kelurahanList.value = [];
-    } finally {
-      isLoading.value = false;
+        console.error('Error loading kelurahan:', error);
+        kelurahanList.value = [];
     }
-  }
+}
 
   defineProps({
     hubunganKeluargaList: {

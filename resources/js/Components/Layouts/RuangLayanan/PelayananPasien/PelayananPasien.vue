@@ -162,33 +162,33 @@
               <div class="d-flex gap-5">
                 <div>
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Pekerjaan</label>
-                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    <label for="ukk-pekerjaan" class="form-label">Pekerjaan</label>
+                    <input type="text" class="form-control" id="ukk-pekerjaan" aria-describedby="emailHelp"
                       v-model="formUkk.pekerjaan">
                   </div>
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Tipe Kerja</label>
-                    <select class="form-select" v-model="formUkk.tipe_kerja">
+                    <label for="ukk-tipe-kerja" class="form-label">Tipe Kerja</label>
+                    <select class="form-select" id="ukk-tipe-kerja" v-model="formUkk.tipe_kerja">
                       <option value="" selected>--Pilih--</option>
                       <option value="true">Formal</option>
                       <option value="false">Informal</option>
                     </select>
                   </div>
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Tempat Kerja</label>
-                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    <label for="ukk-tempat-kerja" class="form-label">Tempat Kerja</label>
+                    <input type="text" class="form-control" id="ukk-tempat-kerja" aria-describedby="emailHelp"
                       v-model="formUkk.tempat_kerja">
                   </div>
                 </div>
                 <div>
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Lama Kerja</label>
-                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                    <label for="ukk-lama-kerja" class="form-label">Lama Kerja</label>
+                    <input type="text" class="form-control" id="ukk-lama-kerja" aria-describedby="emailHelp"
                       v-model="formUkk.lama_kerja">
                   </div>
                   <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Jenis UKK</label>
-                    <select class="form-select" v-model="formUkk.jenis_ukk">
+                    <label for="ukk-jenis-ukk" class="form-label">Jenis UKK</label>
+                    <select class="form-select" id="ukk-jenis-ukk" v-model="formUkk.jenis_ukk">
                       <option value="" selected>--Pilih--</option>
                       <option v-for="value in jenisUkk" :key="value.id_jenis" :value="value.id_jenis">
                         {{ value.jenis_ukk }}
@@ -219,7 +219,7 @@ import * as bootstrap from 'bootstrap'
 
 const props = defineProps({
   isMelayani: Boolean,
-  dataPasien: Array,
+  dataPasien: Object,
   dataAnamnesa: Array,
   idPelayanan: String,
   pelayanan: Object
