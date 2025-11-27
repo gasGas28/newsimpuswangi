@@ -4,15 +4,16 @@ namespace App\Models\Filter;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Anamnesa extends Model
+class SimpusAnamnesa extends Model
 {
     protected $table = 'simpus_anamnesa';
     protected $primaryKey = 'idAnamnesa';
-    public $timestamps = false;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     public function loket()
     {
-        return $this->belongsTo(Loket::class, 'loketId', 'idLoket');
+        return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
     }
     //
 }
