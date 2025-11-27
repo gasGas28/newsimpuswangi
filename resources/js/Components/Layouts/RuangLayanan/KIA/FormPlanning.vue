@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h5 class="fw-bold mb-3">Pemeriksaan Pasien / Objektif</h5>
-
     <!-- Tombol navigasi antar form -->
     <div class="d-flex gap-3 flex-wrap">
       <a
@@ -27,7 +25,7 @@
     <!-- Tempat munculnya form yang aktif -->
     <div class="mt-4">
       <div v-if="activeFormPlanning === 'tindakan'" class="p-2">
-        <h5 class="fw-semibold text-danger">Tindakan</h5>
+        <h5 class="fw-semibold text-success">Tindakan</h5>
         <div class="card border-0 shadow-sm rounded-4 p-3">
           <!-- Kode Tindakan -->
           <div class="row mb-2">
@@ -138,7 +136,7 @@
         />
       </div>
       <div v-if="activeFormPlanning === 'pengobatan'" class="p-2">
-        <h5 class="fw-semibold text-danger">Pengobatan</h5>
+        <h5 class="fw-semibold text-success">Pengobatan</h5>
         <div class="card border-0 shadow-sm rounded-4 p-3">
           <!-- Form Input -->
           <div class="row mb-2 align-items-center">

@@ -9,7 +9,7 @@
         @click.prevent="toggleForm('pemeriksaanIbu')"
       >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Pemeriksaan Ibu >></div>
+        <div class="action-label">Pemeriksaan Ibu</div>
       </a>
 
       <a
@@ -19,7 +19,7 @@
         @click.prevent="toggleForm('pemeriksaanFisikIbu')"
       >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Pemeriksaan Fisik Ibu >></div>
+        <div class="action-label">Pemeriksaan Fisik Ibu</div>
       </a>
 
       <a
@@ -29,7 +29,7 @@
         @click.prevent="toggleForm('pemeriksaanUSG')"
       >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Pemeriksaan USG >></div>
+        <div class="action-label">Pemeriksaan USG</div>
       </a>
 
       <a
@@ -39,7 +39,7 @@
         @click.prevent="toggleForm('pemeriksaanJanin')"
       >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Pemeriksaan Janin >></div>
+        <div class="action-label">Pemeriksaan Janin</div>
       </a>
 
       <a
@@ -49,7 +49,7 @@
         @click.prevent="toggleForm('pemeriksaan10T')"
       >
         <div class="action-icon"><i class="bi bi-person-check"></i></div>
-        <div class="action-label">Pemeriksaan 10T >></div>
+        <div class="action-label">Pemeriksaan 10T</div>
       </a>
     </div>
 

@@ -206,6 +206,7 @@
 
   const props = defineProps({
     rekamMedis: Array,
+    dataPasien: Array,
   });
 
   const searchQuery = ref('');

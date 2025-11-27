@@ -1,24 +1,27 @@
 <template>
-  <h5 class="fw-semibold text-success">Pemeriksaan Ibu</h5>
-  <div class="card shadow-sm border-0 rounded-4">
-    <div class="card-body">
-      <form @submit.prevent="saveForm">
-        <div class="row g-3">
-          <!-- Kolom Kiri -->
-          <div class="col-md-6">
-            <div class="mb-2">
-              <label class="form-label">Berat Badan</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="Kg" />
-                <span class="input-group-text">Kg</span>
+  <div class="bg-white shadow-sm p-3 rounded-3 mb-3 d-flex align-items-center">
+    <h5 class="fw-semibold text-success mb-1">Pemeriksaan Ibu</h5>
+  </div>
+  <form @submit.prevent="saveForm">
+    <div class="row g-3">
+      <!-- Kolom Kiri -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Berat Badan</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">KG</span>
+                </div>
               </div>
-            </div>
-
-            <div class="mb-2">
-              <label class="form-label">Lingkar Lengan</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="Cm" />
-                <span class="input-group-text">Cm</span>
+              <div class="col-6">
+                <label class="form-label">Lingkar Lengan</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">CM</span>
+                </div>
               </div>
             </div>
 
@@ -35,77 +38,82 @@
               <label class="form-label">Deskripsi</label>
               <textarea class="form-control" rows="4" placeholder="Enter ..."></textarea>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="mb-2">
-              <label class="form-label">Tinggi Fundus</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="Cm" />
-                <span class="input-group-text">Cm</span>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-2">
+      <!-- Kolom Kanan -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-6">
                 <label class="form-label">Sistolik</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" placeholder="mmHg" />
+                  <input type="number" class="form-control" />
                   <span class="input-group-text">mm[Hg]</span>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-6">
                 <label class="form-label">Diastolik</label>
                 <div class="input-group">
-                  <input type="number" class="form-control" placeholder="mmHg" />
+                  <input type="number" class="form-control" />
                   <span class="input-group-text">mm[Hg]</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Kolom Kanan -->
-          <div class="col-md-6">
-            <div class="mb-2">
-              <label class="form-label">Nadi</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="BPM" />
-                <span class="input-group-text">/min</span>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Nadi</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">/min</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Suhu</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">°C</span>
+                </div>
               </div>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label">Suhu</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="°C" />
-                <span class="input-group-text">°C</span>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Pernapasan</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">/min</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Tinggi Fundus</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">Cm</span>
+                </div>
               </div>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label">Pernapasan</label>
-              <div class="input-group">
-                <input type="number" class="form-control" placeholder="BPM" />
-                <span class="input-group-text">/min</span>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Golongan Darah</label>
+                <select class="form-select">
+                  <option>O</option>
+                  <option>A</option>
+                  <option>B</option>
+                  <option>AB</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Rhesus</label>
+                <select class="form-select">
+                  <option>+</option>
+                  <option>-</option>
+                </select>
               </div>
             </div>
-
-            <div class="mb-2">
-              <label class="form-label">Golongan Darah</label>
-              <select class="form-select">
-                <option>O</option>
-                <option>A</option>
-                <option>B</option>
-                <option>AB</option>
-              </select>
-            </div>
-
-            <div class="mb-2">
-              <label class="form-label">Rhesus</label>
-              <select class="form-select">
-                <option>+</option>
-                <option>-</option>
-              </select>
-            </div>
-
             <div class="form-check mt-3">
               <input
                 class="form-check-input"
@@ -145,9 +153,9 @@
             </div>
           </div>
         </div>
-      </form>
+      </div>
     </div>
-  </div>
+  </form>
 </template>
 
 <script setup>
