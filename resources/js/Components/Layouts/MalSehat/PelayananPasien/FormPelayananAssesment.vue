@@ -127,8 +127,8 @@
             </h6>
           </div>
           <div class="card-body">
-            <Link href="/surat-keterangan" class="btn btn-info">
-            <i class="fas fa-vials me-2"></i>Laboratorium
+            <Link href="/mal-sehat/promkes/laboratorium" class="btn btn-info">
+            <i class="fas fa-vials me-2"></i> Laboratorium
             </Link>
           </div>
         </div>
@@ -317,6 +317,7 @@
 
 <script>
 import axios from "axios";
+import { Link } from '@inertiajs/vue3'
 
 export default {
   data() {
