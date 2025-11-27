@@ -12,7 +12,7 @@
       </div>
       <div class="row g-4">
         <div class="col-md-4" v-for="poli in dataLayanan" :key="listPoli.id">
-          <Link :href="route('ruang-layanan.index' , {idPoli : poli.kdPoli, kluster : '2'})" class="text-decoration-none">
+          <Link :href="poli.kdPoli === '003' ? route('ruang-layanan.kia') : route('ruang-layanan.index' , {idPoli : poli.kdPoli, kluster : '2'})" class="text-decoration-none">
           <div class="card shadow ">
             <div class="card-body ">
               <div class="mb-3 rounded-4 d-flex justify-content-center"
@@ -40,6 +40,7 @@ const { props } = usePage();
 
 const listPoli = props.listPoli
 const totalPasienUmum = props.totalPasienUmum
+const totalPasienkia = props.totalPasienKIA
 console.log(listPoli)
 
 const currentDate = new Date().toLocaleDateString('id-ID', {
@@ -51,7 +52,7 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
 
 const dataLayanan = [
   { nama: 'Umum', jumlah: totalPasienUmum, kdPoli:'001', link: 'ruang-layanan.umum', icon: 'bi bi-person-fill', bg: '#3b82f6' },
-  { nama: 'KIA', jumlah: 0, kdPoli:'001', link: 'ruang-layanan.kb', icon: 'bi bi-people-fill', bg: '#3b82f6' },
+  { nama: 'KIA', jumlah: totalPasienkia, kdPoli:'003', link: 'ruang-layanan.kia', icon: 'bi bi-people-fill', bg: '#3b82f6' },
 ]
 
 </script>

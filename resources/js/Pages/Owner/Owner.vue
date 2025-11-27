@@ -458,7 +458,7 @@ const puskesmasOnline = computed(() => {
                     <td class="text-end">
                       <div class="btn-group">
                         <button class="btn btn-sm btn-primary" @click="openRoleModal(u)"><i class="bi bi-shield-lock me-1"></i> Role</button>
-                        <button class="btn btn-sm btn-outline-danger" @click="forceLogout(u)" :disabled="!u.is_logged_in"><i class="bi bi-box-arrow-right me-1"></i> Force Logout</button>
+                        <!-- <button class="btn btn-sm btn-outline-danger" @click="forceLogout(u)" :disabled="!u.is_logged_in"><i class="bi bi-box-arrow-right me-1"></i> Force Logout</button> -->
                       </div>
 
                           <button class="btn btn-sm btn-outline-warning" @click="openPwdModal(u)">

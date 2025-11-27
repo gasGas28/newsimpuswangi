@@ -166,130 +166,129 @@ private function applyLoketRequiredDefaults(array $row): array
     /** =========================
      *  INDEX
      *  ========================= */
-    public function index(Request $request)
-    {
-        // DataUnit
-        $DataUnit = DB::table('data_master_unit_detail as d')
-            ->leftJoin('data_master_unit as u', 'u.id_kategori', '=', 'd.id_kategori')
-            ->leftJoin('setup_kec as kec', function ($j) {
-                $j->on('kec.NO_KEC', '=', 'd.no_kec')
-                  ->on('kec.NO_KAB', '=', DB::raw('18'))
-                  ->on('kec.NO_PROP', '=', DB::raw('35'));
-            })
-            ->where('d.no_kec', 18)
-            ->where('u.kategori', 'PUSKESMAS')
-            ->select(
-                'd.no_kec',
-                'd.id_kategori',
-                DB::raw('COALESCE(u.kategori, d.nama_unit) as kategori'),
-                DB::raw('COALESCE(d.nama_unit, u.kategori) as nama_unit'),
-                'kec.nama_kec'
-            )
-            ->groupBy('d.no_kec', 'd.id_kategori', 'kategori', 'nama_unit', 'kec.nama_kec')
-            ->orderBy('kec.nama_kec')
-            ->orderBy('nama_unit')
-            ->get();
+public function index(Request $request)
+{
+    // =========================
+    // 1) Data untuk header & dropdown
+    // =========================
+    $DataUnit = DB::table('data_master_unit_detail as d')
+        ->join('data_master_unit as k', 'k.id_kategori', '=', 'd.id_kategori')
+        ->select('d.id_unit','d.id_kategori','d.nama_unit','d.no_kec','d.no_kel','k.kategori')
+        ->groupBy('d.id_unit','d.id_kategori','d.nama_unit','d.no_kec','d.no_kel','k.kategori')
+        ->orderBy('k.kategori')->orderBy('d.nama_unit')
+        ->get();
 
-        // Dropdown filter
-        $FilterKategori = DB::table('data_master_unit')
-            ->select('id_kategori', 'kategori')
-            ->orderBy('kategori')
-            ->get();
+    $FilterKategori = DB::table('data_master_unit')
+        ->select('id_kategori','kategori')
+        ->orderBy('kategori')->get();
 
-        $FilterUnits = DB::table('data_master_unit_detail as d')
-            ->join('data_master_unit as k', 'k.id_kategori', '=', 'd.id_kategori')
-            ->join('unit_profiles as up', 'up.unit_id', '=', 'd.id_unit')
-            ->select('k.id_kategori','k.kategori','up.unit_id','up.nama_unit')
-            ->distinct()
-            ->orderBy('k.kategori')
-            ->orderBy('up.nama_unit')
-            ->get();
+    $FilterUnits = DB::table('data_master_unit_detail as d')
+        ->join('data_master_unit as k', 'k.id_kategori', '=', 'd.id_kategori')
+        ->select('k.id_kategori','k.kategori','d.id_unit','d.nama_unit')
+        ->distinct()->orderBy('k.kategori')->orderBy('d.nama_unit')
+        ->get();
 
-        // join ke unit_profiles jika ada pasangan kolomnya
-        $loketCols = Schema::getColumnListing('simpus_loket');
-        $upCols    = Schema::getColumnListing('unit_profiles');
+    // =========================
+    // 2) Query utama: permohonan lab (+loket/pasien/poli)
+    // =========================
+    $q = DB::table('simpus_permohonan_lab as lo')
+        ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
+        ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
+        ->leftJoin('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli');
 
-        $candidates = [
-            ['loket' => 'unit_id',       'up' => 'unit_id'],
-            ['loket' => 'puskesmas_id',  'up' => 'kode_puskesmas'],
-            ['loket' => 'PUSK_ID',       'up' => 'kode_puskesmas'],
-            ['loket' => 'kode_unit',     'up' => 'unit_id'],
-            ['loket' => 'kode_puskesmas','up' => 'kode_puskesmas'],
-        ];
+    // Map unit via subquery dari l.unitId -> data_master_unit_detail.id_unit
+    // (pakai CAST + TRIM supaya angka ' 1 ' tetap nyambung ke id_unit=1)
+    $subIdKategori = "(SELECT d1.id_kategori FROM data_master_unit_detail d1 WHERE d1.id_unit = CAST(TRIM(l.unitId) AS SIGNED) LIMIT 1)";
+    $subNamaUnit   = "(SELECT d2.nama_unit   FROM data_master_unit_detail d2 WHERE d2.id_unit = CAST(TRIM(l.unitId) AS SIGNED) LIMIT 1)";
+    $subKategori   = "(SELECT k.kategori     FROM data_master_unit k WHERE k.id_kategori = {$subIdKategori} LIMIT 1)";
 
-        $loketKey = null; $upKey = null;
-        foreach ($candidates as $pair) {
-            if (in_array($pair['loket'], $loketCols) && in_array($pair['up'], $upCols)) {
-                $loketKey = $pair['loket'];
-                $upKey    = $pair['up'];
-                break;
-            }
-        }
+    $Rows = $q->addSelect(
+            // identitas & waktu
+            DB::raw('COALESCE(l.idLoket, lo.loketId) as idLoket'),
+            DB::raw('COALESCE(p.NO_MR, lo.pasienId) as NO_MR'),
+            DB::raw('COALESCE(p.NAMA_LGKP, "") as NAMA_LGKP'),
+            DB::raw('COALESCE(p.ALAMAT, "") as alamat'),
+            DB::raw('COALESCE(p.NO_RT, "") as no_rt'),
+            DB::raw('COALESCE(p.NO_RW, "") as no_rw'),
+            DB::raw('COALESCE(poli.nmPoli, lo.nmPoli) as nmPoli'),
+            DB::raw('COALESCE(l.tglKunjungan, lo.tglDibuat) as tglKunjungan'),
+DB::raw("lo.statusLayanan as statusLayanan"), // 🔥 kirim angka mentah ke FE
+DB::raw("CASE 
+            WHEN lo.statusLayanan = '1' THEN 'Selesai'
+            WHEN lo.statusLayanan = '2' THEN 'Proses'
+            ELSE 'Belum dilayani'
+         END as status_text"),               // 🔥 kirim teks juga kalau mau
 
-        $q = DB::table('simpus_permohonan_lab as lo')
-            ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
-            ->leftJoin('simpus_pasien as p', 'p.ID', '=', 'l.pasienId')
-            ->leftJoin('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli');
+// kolom unit untuk filter FE
+DB::raw('l.unitId as loket_unit_id'),
+            DB::raw("CAST(TRIM(l.unitId) AS SIGNED) as unit_id"),
+            DB::raw("$subNamaUnit   as nama_unit"),
+            DB::raw("$subIdKategori as id_kategori"),
+            DB::raw("$subKategori   as kategori"),
+            // penanda berhasil terpetakan
+            DB::raw("CASE WHEN ($subNamaUnit) IS NULL THEN 0 ELSE 1 END as unit_mapped")
+        )
+        ->orderByDesc(DB::raw('COALESCE(l.tglKunjungan, lo.tglDibuat)'))
+        ->limit(200)
+        ->get();
 
-        if ($loketKey && $upKey) {
-            $q->leftJoin('unit_profiles as up', "up.$upKey", '=', "l.$loketKey")
-              ->leftJoin('data_master_unit_detail as d2', 'd2.id_unit', '=', 'up.unit_id')
-              ->leftJoin('data_master_unit as k', 'k.id_kategori', '=', 'd2.id_kategori')
-              ->addSelect(
-                  DB::raw('up.unit_id as unit_id'),
-                  DB::raw('up.nama_unit as nama_unit'),
-                  DB::raw('k.id_kategori as id_kategori'),
-                  DB::raw('k.kategori as kategori')
-              );
-        } else {
-            $q->addSelect(
-                DB::raw('NULL as unit_id'),
-                DB::raw('NULL as nama_unit'),
-                DB::raw('NULL as id_kategori'),
-                DB::raw('NULL as kategori')
-            );
-        }
+    // =========================
+    // 3) DEBUG (selalu ada nilainya)
+    // =========================
+    $totalPermohonan = (int) DB::table('simpus_permohonan_lab')->count();
+    $joinLoketCount  = (int) DB::table('simpus_permohonan_lab as lo')
+                        ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
+                        ->whereNotNull('l.idLoket')->count();
+    $joinUnitIdCount = (int) DB::table('simpus_permohonan_lab as lo')
+                        ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
+                        ->whereNotNull('l.unitId')->count();
 
-        $Rows = $q->addSelect(
-                DB::raw('COALESCE(l.idLoket, lo.loketId) as idLoket'),
-                DB::raw('COALESCE(p.NO_MR, lo.pasienId) as NO_MR'),
-                DB::raw('COALESCE(p.NAMA_LGKP, "") as NAMA_LGKP'),
-                DB::raw('COALESCE(p.ALAMAT, "") as alamat'),
-                DB::raw('COALESCE(p.NO_RT, "") as no_rt'),
-                DB::raw('COALESCE(p.NO_RW, "") as no_rw'),
-                DB::raw('COALESCE(poli.nmPoli, lo.nmPoli) as nmPoli'),
-                DB::raw('COALESCE(l.tglKunjungan, lo.tglDibuat) as tglKunjungan'),
-                DB::raw("COALESCE(lo.alasanDirujuk, '-') as alasan"),
-                DB::raw("CASE 
-                            WHEN lo.statusLayanan = '1' THEN 'Selesai'
-                            WHEN lo.statusLayanan = '2' THEN 'Proses'
-                            ELSE 'Belum dilayani' 
-                         END as status")
-            )
-            ->orderByDesc(DB::raw('COALESCE(l.tglKunjungan, lo.tglDibuat)'))
-            ->limit(200)
-            ->get();
+    $exampleNoLoket = DB::table('simpus_permohonan_lab as lo')
+        ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
+        ->whereNull('l.idLoket')
+        ->select('lo.idPermohonan','lo.loketId','lo.tglDibuat')
+        ->orderByDesc('lo.tglDibuat')->limit(5)->get();
 
-        $Debug = [
-            'rows'       => $Rows->count(),
-            'sample'     => $Rows->take(3),
-            'perm_lab'   => (int) DB::table('simpus_permohonan_lab')->count(),
-            'join_used'  => ['loket_key' => $loketKey, 'unit_profiles_key' => $upKey],
-        ];
+    $exampleNoUnit = DB::table('simpus_permohonan_lab as lo')
+        ->leftJoin('simpus_loket as l', 'l.idLoket', '=', 'lo.loketId')
+        ->whereNotNull('l.idLoket')->whereNull('l.unitId')
+        ->select('lo.idPermohonan','lo.loketId','l.idLoket','l.unitId')
+        ->orderByDesc('lo.tglDibuat')->limit(5)->get();
 
-        return Inertia::render('Ruang_Layanan/Laborat/index', [
-            'DataUnit'        => $DataUnit,
-            'DataPasien'      => $Rows,
-            'FilterKategori'  => $FilterKategori,
-            'FilterUnits'     => $FilterUnits,
-            'Debug'           => $Debug,
-        ]);
-    }
+    $Debug = [
+        'rows'                 => $Rows->count(),
+        'sample'               => $Rows->take(3)->values(),    // biar terlihat di FE
+        'perm_lab_total'       => $totalPermohonan,
+        'join_loket_rows'      => $joinLoketCount,
+        'join_with_unitId'     => $joinUnitIdCount,
+        'unit_mapped_true'     => $Rows->where('unit_mapped', 1)->count(),
+        'unit_mapped_false'    => $Rows->where('unit_mapped', 0)->count(),
+        'example_no_loket'     => $exampleNoLoket,
+        'example_no_unitId'    => $exampleNoUnit,
+        'loket_has_unitId_col' => Schema::hasColumn('simpus_loket','unitId'),
+        'note' => 'Jika rows=0 → kemungkinan lo.loketId tidak match ke l.idLoket (cek example_no_loket). Jika unit_mapped_false>0 → isi l.unitId belum sesuai id_unit.',
+    ];
+
+    // =========================
+    // 4) Return ke Inertia (Debug DIKIRIM)
+    // =========================
+    return Inertia::render('Ruang_Layanan/Laborat/index', [
+        'DataUnit'        => $DataUnit,
+        'DataPasien'      => $Rows,
+        'FilterKategori'  => $FilterKategori,
+        'FilterUnits'     => $FilterUnits,
+        'Debug'           => $Debug,
+    ]);
+}
+
+
+
+
 
     /** =========================
      *  PEMERIKSAAN (DETAIL)
      *  ========================= */
-public function pemeriksaan($loketId)
+public function pemeriksaan(Request $request, $loketId)
 {
     $paramLoketId    = trim($loketId);
     $resolvedLoketId = $this->resolveLoketId($paramLoketId);
@@ -456,36 +455,44 @@ public function pemeriksaan($loketId)
     // 5) DETAIL PEMERIKSAAN — AMBIL META DARI parameter_uji SAJA (tanpa join ke master)
     $DataPemeriksaan = collect();
     if ($DataPermohonan && $DataPermohonan->order_id) {
-        // subquery parameter_uji → unik per kode (pakai TRIM)
-        $puSub = DB::table($this->paramTable . ' as pu0')
-            ->selectRaw("
-                TRIM(pu0.kode_parameter)               AS kode,
-                MAX(pu0.satuan)                         AS satuan,
-                MAX(NULLIF(pu0.nilai_normal,''))        AS nilai_normal,
-                MAX(NULLIF(pu0.nilai_kritis,''))        AS nilai_kritis
-            ")
-            ->whereNotNull('pu0.kode_parameter')
-            ->groupBy(DB::raw('TRIM(pu0.kode_parameter)'));
 
-        $DataPemeriksaan = DB::table('simpus_tindakan as t')
-            ->leftJoinSub($puSub, 'pu', function ($j) {
-                $j->on('pu.kode', '=', DB::raw('TRIM(t.kdTindakan)'));
-            })
-            ->whereRaw('TRIM(t.loketId) = ?', [$this->norm($resolvedLoketId)])
-            ->whereRaw('TRIM(t.permohonanId) = ?', [$this->norm($DataPermohonan->order_id)])
-            ->selectRaw("
-                t.idTindakan                                        AS detail_id,
-                t.kdTindakan                                        AS kode,
-                COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
-                t.nilaiLab                                          AS nilai_lab,
-                pu.satuan                                           AS satuan,
-                pu.nilai_normal                                     AS nilai_normal,
-                pu.nilai_kritis                                     AS nilai_kritis,
-                CONCAT(
-                    'Nilai Normal : ', COALESCE(pu.nilai_normal, '-'),
-                    '\nNilai Kritis : ', COALESCE(pu.nilai_kritis, '-')
-                ) AS nilai_normal_kritis
-            ")
+        $puSub = DB::table($this->paramTable . ' as pu0')
+    ->leftJoin('master_kategori as k', 'k.id_kategori', '=', 'pu0.id_kategori')
+    ->selectRaw("
+        {$this->sqlNorm('pu0.kode_parameter')}    AS kode,
+        MAX(pu0.satuan)                           AS satuan,
+        MAX(NULLIF(pu0.nilai_normal,''))          AS nilai_normal,
+        MAX(NULLIF(pu0.nilai_kritis,''))          AS nilai_kritis,
+        MAX(pu0.id_kategori)                      AS id_kategori,
+        MAX(k.nama_kategori)                      AS kategori
+    ")
+    ->whereNotNull('pu0.kode_parameter')
+    ->groupBy(DB::raw($this->sqlNorm('pu0.kode_parameter')));
+
+
+$DataPemeriksaan = DB::table('simpus_tindakan as t')
+    ->leftJoinSub($puSub, 'pu', function ($j) {
+        $j->on('pu.kode', '=', DB::raw($this->sqlNorm('t.kdTindakan')));
+    })
+    ->whereRaw('TRIM(t.loketId) = ?', [$this->norm($resolvedLoketId)])
+    ->whereRaw('TRIM(t.permohonanId) = ?', [$this->norm($DataPermohonan->order_id)])
+    ->selectRaw("
+                        t.idTindakan                                        AS detail_id,
+                        t.kdTindakan                                        AS kode,
+                        COALESCE(NULLIF(t.nmTindakanInd,''), t.nmTindakan)  AS nama_pemeriksaan,
+                        t.nilaiLab                                          AS nilai_lab,
+                        pu.satuan                                           AS satuan,
+                        pu.nilai_normal                                     AS nilai_normal,
+                        pu.nilai_kritis                                     AS nilai_kritis,
+                        CONCAT(
+                            'Nilai Normal : ', COALESCE(pu.nilai_normal, '-'),
+                            '\nNilai Kritis : ', COALESCE(pu.nilai_kritis, '-')
+                        ) AS nilai_normal_kritis,
+                        /* Tambahan untuk FE */
+                        pu.id_kategori                                      AS id_kategori,
+                        COALESCE(pu.kategori, 'Tanpa kategori')             AS kategori
+                    ")
+
             ->orderBy('t.idTindakan')
             ->get();
     }
@@ -494,6 +501,7 @@ public function pemeriksaan($loketId)
         ->select('kdDokter as id', 'nmDokter as nama', DB::raw('NULL as profesi'))
         ->orderBy('nmDokter')
         ->get();
+    $source = $request->query('from', 'laborat'); // default: laborat
 
     return Inertia::render('Ruang_Layanan/Laborat/pemeriksaan', [
         'DataPasien'      => $DataPasien,
@@ -501,6 +509,8 @@ public function pemeriksaan($loketId)
         'DataPemeriksaan' => $DataPemeriksaan,
         'DataObjective'   => $DataObjective,
         'TenagaMedis'     => $TenagaMedis,
+        'Source'          => $source,
+
     ]);
 }
 
@@ -1279,28 +1289,27 @@ public function paramSimpanTerpilih(Request $request)
     return back();
 }
 
-    public function simpanPermohonanLab(Request $request, $idLoket)
-    {
-        // dd($request->all());
+public function simpanPermohonanLab(Request $request, $idLoket)
+{
+    $namaPoli = SimpusPoliFKTP::where('kdPoli', $request->idPoli)->first();
 
-        // $loket = SimpusLoket::where('');
-        $namaPoli = SimpusPoliFKTP::where('kdPoli', $request->idPoli)->first();
-        SimpusPermohonanLab::create([
-            'idPermohonan' => Str::random(20),
-            'pasienId' => $request->idPasien,
-            'loketId' => $idLoket,
-            'pelayananId' => $request->idPelayanan,
-            'nmPoli' => $namaPoli->nmPoli,
-            'tglDibuat' => now(),
-            'tenagaMedisPengirim' => $request->tenaga_medis,
-            'alasanDirujuk' => $request->alasan,
-            'hasilLabLuarFaskes' => $request->hasil_lab_luar_faskes,
-            'statusLayanan' => '0',
-            'createdDate' => now(),
-        ]);
+    SimpusPermohonanLab::create([
+        'idPermohonan'        => Str::random(20),
+        'pasienId'            => $request->idPasien,
+        'loketId'             => $idLoket,
+        'pelayananId'         => $request->idPelayanan,
+        'nmPoli'              => $namaPoli->nmPoli,
+        'tglDibuat'           => now(),
+        'tenagaMedisPengirim' => $request->tenaga_medis,
+        'alasanDirujuk'       => $request->alasan,
+        'hasilLabLuarFaskes'  => $request->hasil_lab_luar_faskes,
+        'statusLayanan'       => '0',
+        'createdDate'         => now(),
+    ]);
 
-        return redirect()->back();
-    }
+    return redirect()->back();
+}
+
 
     public function paramCategories(Request $request)
 {

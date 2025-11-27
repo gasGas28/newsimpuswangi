@@ -45,11 +45,11 @@ const currentDate = new Date().toLocaleDateString('id-ID', {
 
 const dataLayanan = [
   { nama: 'ANC', jumlah: 1000, link: 'ruang-layanan.anc', icon: 'bi bi-person-fill', bg: '#3b82f6' },
-  { nama: 'Tumbuh Kembang', jumlah: 0, link: 'ruang-layanan.gigi', icon: 'bi bi-clipboard-check', bg: '#10b981' },
-  { nama: 'Neonatus', jumlah: 0, link: 'ruang-layanan.ugd', icon: 'bi bi-hospital', bg: '#facc15' },
-  { nama: 'INC', jumlah: 0, link: 'ruang-layanan.kb', icon: 'bi bi-people-fill', bg: '#3b82f6' },
+  { nama: 'Tumbuh Kembang', jumlah: 0, link: 'ruang-layanan.tkembang', icon: 'bi bi-clipboard-check', bg: '#10b981' },
+  { nama: 'Neonatus', jumlah: 0, link: 'ruang-layanan.neonatus', icon: 'bi bi-hospital', bg: '#facc15' },
+  { nama: 'INC', jumlah: 0, link: 'ruang-layanan.inc', icon: 'bi bi-people-fill', bg: '#3b82f6' },
   { nama: 'Kematian', jumlah: 0, link: 'ruang-layanan.kematian', icon: 'bi bi-droplet-half', bg: '#14b8a6' },
-  { nama: 'PNC', jumlah: 0, link: 'ruang-layanan.rawat-inap', icon: 'bi bi-heart-pulse', bg: '#facc15' },
+  { nama: 'PNC', jumlah: 0, link: 'ruang-layanan.pnc', icon: 'bi bi-heart-pulse', bg: '#facc15' },
 ]
 
 </script>

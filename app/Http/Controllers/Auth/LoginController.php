@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +41,7 @@ class LoginController extends Controller
         }
 
         // 3) Attempt login dengan username/password
-        if (!auth()->attempt(['username' => $data['username'], 'password' => $data['password']])) {
+        if (!Auth::attempt(['username' => $data['username'], 'password' => $data['password']])) {
             throw ValidationException::withMessages([
                 'username' => 'Username atau password salah.',
             ]);
@@ -52,14 +53,14 @@ class LoginController extends Controller
             DB::table('sessions')
                 ->where('id', $request->session()->getId())
                 ->update([
-                    'user_id'       => auth()->id(),
+                    'user_id'       => Auth::id(),
                     'last_activity' => time(),
                 ]);
         } catch (\Throwable $e) {
             // lanjutkan walau update sessions gagal
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         // 5) Password expiry: 15 hari sejak "forgotten_password_time" (fallback: created_on)
         $changedTs   = $user->forgotten_password_time ?: ($user->created_on ?? time());
@@ -71,7 +72,7 @@ class LoginController extends Controller
 
         // 6) Tentukan redirect berdasarkan prioritas role
         //    (pastikan nama rute di bawah ini ada di routes kamu)
-        $roles = collect($user->roleNames())->map(fn ($r) => strtolower($r));
+        $roles = collect($user->roleNames())->map(fn($r) => strtolower($r));
 
         $to = route('login'); // fallback
         if ($roles->contains('owner') || $roles->contains('kapus')) {
