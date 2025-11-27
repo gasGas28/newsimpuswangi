@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="GIGI" :backRoute :unitList :rows>
+    <FormAnamnesa title="GIGI" :backRoute :unitList :rows :kluster=kluster :kdPoli="idPoli">
 
     </FormAnamnesa>
   </AppLayouts>

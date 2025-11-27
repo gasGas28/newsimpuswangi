@@ -156,7 +156,7 @@
 
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-
+import {onMounted } from 'vue';
 const page = usePage();
 
 const dataPasien = page.props.dataPasien
@@ -183,6 +183,13 @@ function selisihHari(tglAwal, tglAkhir) {
     const diffTime = end - start;
     // hitung selisih hari +1 supaya termasuk hari awal
     return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+}
+
+onMounted(()=>{
+    print()
+})
+function print(){
+   setTimeout(() => window.print(), 500);
 }
 </script>
 

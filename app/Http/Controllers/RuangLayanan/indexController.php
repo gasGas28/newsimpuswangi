@@ -23,14 +23,43 @@ class indexController extends Controller
         );
     }
 
+    public function totalPasienKlusterAndPoli()
+    {
+        $jumlahPasienKluster2 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '003'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienKluster3 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '008'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienLintasKluster = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['002', '004', '005', '098'])->whereHas('SimpusLoket', function ($query) {
+            $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienSanitasi = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '097')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienGizi =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '997')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        $jumlahPasienKunjOnline =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '999')->whereHas('SimpusLoket', function ($query) {
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+            })->where('tglPelayanan', now()->toDateString())->count();
+        return response()->json([
+            'jumlahPasienKluster2' => $jumlahPasienKluster2,
+            'jumlahPasienKluster3' => $jumlahPasienKluster3,
+            'jumlahPasienLintasKluster' => $jumlahPasienLintasKluster,
+            'jumlahPasienSanitasi' => $jumlahPasienSanitasi,
+            'jumlahPasienGizi' => $jumlahPasienGizi,
+            'jumlahPasienKunjOnline' => $jumlahPasienKunjOnline
+        ]);
+
+    }
+
     public function listPoliKluster($kluster)
     {
-
-
         if ($kluster == '2') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '<=', 17);
+                $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             //dd($totalPasienUmum);
             //dd($listPoli);
@@ -45,10 +74,10 @@ class indexController extends Controller
         } elseif ($kluster == '3') {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008'])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17);
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             $totalPasienKB = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '008')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17);
+                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             // dd($listPoli);
             //dd($totalPasienKB);
@@ -230,6 +259,7 @@ class indexController extends Controller
     public function MasterObat(Request $request)
     {
         $search = $request->get('search');
+        
         $query = SimpusMasterObat::where('AKTIF', '1');
 
         if ($search) {

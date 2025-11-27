@@ -19,7 +19,7 @@ const kluster = props.kluster;
 const idPoli = props.kdPoli;
 const backRoute = 'ruang-layanan.pelayanan';
 
-console.log('data unit',DataUnit);
+console.log('data pasien',DataPasien);
 const unitList = DataUnit.map(item => {
   const kategori = item.data_master_unit.kategori
   const nama = item.nama_unit

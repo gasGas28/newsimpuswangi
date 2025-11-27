@@ -17,7 +17,8 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => function () {
                     $u = Auth::user();
-                    if (!$u) return null;
+                    if (!$u)
+                        return null;
 
                     // Puskesmas dari unit_profiles (unit_id)
                     $pusk = DB::table('unit_profiles')
@@ -27,7 +28,7 @@ class HandleInertiaRequests extends Middleware
 
                     // Password last changed (fallback created_on)
                     $changedTs = $u->forgotten_password_time ?: ($u->created_on ?? time());
-                    $changed   = Carbon::createFromTimestamp((int)$changedTs);
+                    $changed = Carbon::createFromTimestamp((int) $changedTs);
 
                     // Wajib ganti jika >= 15 hari (boleh override via session flag dari LoginController)
                     $mustChange = session('force_password_change', $changed->diffInDays(now()) >= 15);
@@ -36,23 +37,28 @@ class HandleInertiaRequests extends Middleware
                     $roles = array_map('strtolower', $u->roleNames() ?? []);
                     $rolemap = Config::get('rolemap', []); // fitur => [roles...]
                     $abilities = collect($rolemap)
-                        ->filter(fn($allowed) =>
-                            collect($allowed)->map(fn($r)=>strtolower($r))->intersect($roles)->isNotEmpty()
+                        ->filter(
+                            fn($allowed) =>
+                            collect($allowed)->map(fn($r) => strtolower($r))->intersect($roles)->isNotEmpty()
                         )
                         ->keys()->values()->all();
 
                     return [
-                        'id'        => $u->id,
-                        'username'  => $u->username,
+                        'id' => $u->id,
+                        'username' => $u->username,
                         'firstName' => $u->first_name,
-                        'lastName'  => $u->last_name,
-                        'roles'     => $roles,
-                        'abilities' => $abilities,                        
+                        'lastName' => $u->last_name,
+                        'roles' => $roles,
+                        'abilities' => $abilities,
                         'puskesmas' => $pusk ?: null,
-                        'mustChangePassword'   => $mustChange,
-                        'passwordLastChanged'  => $changed->format('d-m-Y H:i'), 
+                        'mustChangePassword' => $mustChange,
+                        'passwordLastChanged' => $changed->format('d-m-Y H:i'),
                     ];
                 },
+            ],
+            'flash' => [
+                'message' => fn() => $request->session()->get('message'),
+                'error' => fn() => $request->session()->get('error'),
             ],
         ]);
     }

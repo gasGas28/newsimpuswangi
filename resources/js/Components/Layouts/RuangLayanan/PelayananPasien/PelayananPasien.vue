@@ -7,7 +7,7 @@
             <i class="bi bi-person-fill text-primary fs-1"></i>
           </div>
           <div>
-            <h3 class="mb-1 fw-bold">{{ dataPasien.NAMA_LGKP }} <span class="text-muted">(-)</span></h3>
+            <h1 class="mb-1 fw-bold h5">{{ dataPasien.NAMA_LGKP }}</h1>
           </div>
         </div>
 
@@ -16,7 +16,8 @@
           <div class="col-md-4">
             <div class="info-item bg-light bg-opacity-50 p-3 rounded-3 h-100">
               <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-calendar3 text-primary me-2"></i>
+                <i :class="dataPasien.jenis_klmin === 1 ? 'bi bi-gender-male text-primary' : 'bi bi-gender-female text-primary'"
+                  class="me-2"></i>
                 <h6 class="mb-0 text-muted">Jk / Umur</h6>
               </div>
               <p class="mb-0 fw-semibold"> {{ dataPasien.jenis_klmin === 1 ? 'L' : "P" }} {{ dataPasien.umur }} Tahun -
@@ -34,10 +35,10 @@
               <p class="mb-0 fw-semibold">{{ dataPasien.alamat }}
                 {{ 'RT ' + dataPasien.no_rt }}
                 {{ 'RW ' + dataPasien.no_rw }}
-                {{ dataPasien.nama_kel }}
-                {{ dataPasien.nama_kec }}
+                {{ 'Desa ' + dataPasien.nama_kel }}
+                {{ 'Kec ' + dataPasien.nama_kec }}
                 {{ dataPasien.nama_kab }}
-                {{ dataPasien.nama_prop }}</p>
+                {{dataPasien.nama_prop }}</p>
             </div>
           </div>
 
@@ -48,7 +49,10 @@
                 <i class="bi bi-heart-pulse-fill text-success me-2"></i>
                 <h6 class="mb-0 text-muted">Jenis/Poli</h6>
               </div>
-              <p class="mb-0 fw-semibold">{{ dataPasien.kunjSakit = true ? 'Kunjungan Sakit' : 'Kunjungan Sehat' }} ({{ dataPasien.nmPoli }} <template v-if="dataPasien.poliAwal"> / {{ dataPasien.poliAwal.nmPoli }}</template>)</p>
+              <p class="mb-0 fw-semibold">{{ dataPasien.kunjSakit = true ? 'Kunjungan Sakit' : 'Kunjungan Sehat' }} ({{
+                dataPasien.nmPoli }} <template v-if="dataPasien.poliAwal"> / {{ dataPasien.poliAwal.nmPoli
+                  }}</template>)
+              </p>
             </div>
           </div>
 
@@ -56,7 +60,7 @@
           <div class="col-md-4">
             <div class="info-item bg-light bg-opacity-50 p-3 rounded-3 h-100">
               <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-calendar-check-fill text-info me-2"></i>
+                <i class="bi bi-calendar-check-fill text-success me-2"></i>
                 <h6 class="mb-0 text-muted">Tanggal Kunjungan</h6>
               </div>
               <p class="mb-0 fw-semibold">{{ dataPasien.tglKunjungan }}</p>
@@ -67,7 +71,7 @@
           <div class="col-md-4">
             <div class="info-item bg-light bg-opacity-50 p-3 rounded-3 h-100">
               <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-credit-card-fill text-warning me-2"></i>
+                <i class="bi bi-credit-card-fill text-info me-2"></i>
                 <h6 class="mb-0 text-muted">No. RM / NIK</h6>
               </div>
               <p class="mb-0 fw-semibold">{{ dataPasien.NO_MR }} / {{ dataPasien.NIK }}</p>
@@ -76,7 +80,7 @@
           <div class="col-md-4">
             <div class="info-item bg-light bg-opacity-50 p-3 rounded-3 h-100">
               <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-credit-card-fill text-warning me-2"></i>
+                <i class="bi bi-credit-card-fill text-info me-2"></i>
                 <h6 class="mb-0 text-muted">No. BPJS/Provider</h6>
               </div>
               <p class="mb-0 fw-semibold">/</p>
@@ -216,13 +220,15 @@ import { route } from 'ziggy-js'
 import { Link } from '@inertiajs/vue3'
 import axios from 'axios';
 import * as bootstrap from 'bootstrap'
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   isMelayani: Boolean,
   dataPasien: Array,
   dataAnamnesa: Array,
   idPelayanan: String,
-  pelayanan: Object
+  pelayanan: Object,
+  klsuter: String
 });
 
 console.log('data pasien', props.pelayanan);
@@ -259,7 +265,7 @@ function fetchUkk(url) {
       formUkk.tempat_kerja = ukk.value?.tempatKerja ?? '';
       formUkk.lama_kerja = ukk.value?.lamaKerja ?? '';
       formUkk.jenis_ukk = ukk.value?.jenisUKK ?? '';
-      console.log('jenis ukk',res.data)
+      console.log('jenis ukk', res.data)
       console.log('fetching URL:', url);
     })
     .catch(err => console.error(err));
@@ -277,13 +283,19 @@ function mulaiPemeriksaanPasien() {
     onSuccess: (page) => {
       isMelayani.value = true;
       emit('ubah-melayani', false);
-      alert('sukses memulai melayani pasien')
+      Swal?.fire({
+        title: 'Sukses',
+        text: 'Mulai melayani pasien',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
     }
   });
 }
 
 const formUkk = useForm({
-  pekerjaan:  '',
+  pekerjaan: '',
   tipe_kerja: '',
   tempat_kerja: '',
   lama_kerja: '',

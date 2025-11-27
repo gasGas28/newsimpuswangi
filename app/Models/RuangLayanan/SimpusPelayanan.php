@@ -40,16 +40,22 @@ class SimpusPelayanan extends Model
         'endTIme',
         'responPutEncounter',
     ];
-    public function Loket()
+    public function SimpusLoket()
     {
         return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
     }
-    public function SimpusPoli()
-    {
+       public function SimpusPoli(){
         return $this->belongsTo(SimpusPoliFKTP::class, 'kdPoli', 'kdPoli');
     }
-    public function StatusPulang()
+       public function StatusPulang()
     {
         return $this->belongsTo(StatusPulang::class, 'kdStatusPulang', 'kdStatusPulang');
     }
+
+    public function poliTujuan(){
+
+        return $this->belongsTo(SimpusPoliFKTP::class, 'tujuanPoli', 'kdPoli');
+    }
+
+
 }

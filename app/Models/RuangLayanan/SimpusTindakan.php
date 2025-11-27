@@ -46,5 +46,11 @@ class SimpusTindakan extends Model
     {
         return $this->belongsTo(User::class, 'createdBy', 'id');
     }
+
+    public function parameteruji()
+    {
+        return $this->belongsTo(ParameterUji::class, 'kdTindakan', 'kode_parameter');
+    }
+
 }
 
