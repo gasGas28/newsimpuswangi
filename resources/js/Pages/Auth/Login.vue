@@ -23,10 +23,15 @@ const pendingRedirect = ref('/') // redirect tujuan setelah ganti password
 // ====== State login ======
 const username = ref('')
 const password = ref('')
-const loading  = ref(false)
-const siteKey  = import.meta.env.VITE_RECAPTCHA_SITE_KEY
-const errors   = ref({ username: '', password: '', captcha: '' })
-let widgetId   = null
+
+const loading = ref(false)
+
+const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY
+
+const errors = ref({ username: '', password: '', captcha: '' })
+
+let widgetId = null
+
 
 // (aman) set CSRF header kalau meta tag ada
 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
@@ -60,8 +65,11 @@ const loadRecaptcha = () => {
    PING / INDICATOR LOGIC
 ================================ */
 const latencyMs = ref(null)          // number | null
-const quality  = ref('checking')     // 'checking' | 'good' | 'ok' | 'bad' | 'down'
-const lastAt   = ref(null)           // Date | null
+
+const quality = ref('checking')     // 'checking' | 'good' | 'ok' | 'bad' | 'down'
+
+const lastAt = ref(null)           // Date | null
+
 const intervalMs = 3000
 let pingTimer = null
 
@@ -209,7 +217,8 @@ const swalToast = (title = 'Info', icon = 'info') => {
 const submit = async () => {
   errors.value = { username: '', password: '', captcha: '' }
 
-  if (!username.value) errors.value.username = 'Username wajib diisi.'
+  if (!username.value) errors.value.username = 'Username waib diisi.'
+
   if (!password.value) errors.value.password = 'Password wajib diisi.'
 
   const recaptchaToken = window.grecaptcha?.getResponse(widgetId) || ''
@@ -321,8 +330,9 @@ async function saveNewPassword() {
   <div class="login-page d-flex align-items-center justify-content-center px-3 py-5 position-relative">
     <div class="login-card row g-0 shadow-lg overflow-hidden position-relative z-1 w-100"
          style="max-width: 900px;">
+
       
-      <!-- Panel Kiri -->
+
       <div class="left-panel col-12 col-md-6 d-flex flex-column justify-content-center align-items-center text-center order-2 order-md-1">
         <img
           src="../../../../public/images/Pukesmas.webp"
@@ -333,10 +343,10 @@ async function saveNewPassword() {
         <p class="small mt-3 text-muted mb-4 mb-md-0">&copy; 2025 Puskesmas App<br />Powered by FAIZ</p>
       </div>
 
-      <!-- Panel Kanan -->
+
       <div class="right-panel col-12 col-md-6 text-white d-flex flex-column justify-content-center p-4 p-md-5 order-1 order-md-2">
 
-        <!-- Badge ping di pojok kanan atas -->
+
         <div class="d-flex justify-content-end mb-2">
           <div
             class="d-flex align-items-center px-2 py-1 rounded-3 ping-badge"
@@ -397,7 +407,7 @@ async function saveNewPassword() {
       </div>
     </div>
 
-    <!-- Modal Paksa Ganti Password -->
+
     <div v-if="showForceModal"
          class="modal fade show"
          style="display:block; background: rgba(0,0,0,.35);"

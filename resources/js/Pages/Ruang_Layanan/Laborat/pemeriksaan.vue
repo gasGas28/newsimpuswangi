@@ -274,17 +274,8 @@
                             </td>
 
                             <td class="text-center">
-<<<<<<< HEAD
-                              <button
-                                class="btn btn-outline-danger"
-                                @click="hapusRow(row)"
-                                :disabled="!order"
-                                title="Hapus item ini"
-                              >
-=======
                               <button class="btn btn-outline-danger" @click="hapusRow(row)" :disabled="!order"
                                 title="Hapus item ini">
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
                                 <i class="bi bi-trash"></i>
                               </button>
                             </td>
@@ -421,13 +412,8 @@
             </div>
           </div>
 
-<<<<<<< HEAD
-<!-- ============== FILTER: Kategori ============== -->
-<!-- <div class="px-4 mb-3">
-=======
           <!-- ============== FILTER: Kategori ============== -->
           <!-- <div class="px-4 mb-3">
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
   <div class="d-flex flex-wrap gap-2 align-items-center">
     <span class="text-secondary small fw-semibold me-1">
       <i class="bi bi-collection me-1"></i> Kategori:
@@ -460,20 +446,6 @@
           <div class="modal-body">
 
             <div class="row g-3 align-items-end mb-3 px-3">
-<<<<<<< HEAD
-                <div class="col-lg-6">
-                  <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
-                <!-- HEADER (paket) -->
-                <div class="d-flex flex-wrap gap-2 mb-2">
-                  <button
-                    v-for="ph in paketHeaders"
-                    :key="'h-'+ph.header"
-                    class="btn btn-outline-success btn-sm"
-                    :class="{'active': selectedHeader && selectedHeader.header===ph.header}"
-                    @click="pickHeader(ph)"
-                    :disabled="!order"
-                  >
-=======
               <div class="col-lg-6">
                 <!-- <label class="form-label small text-danger">Paket dari parameter_uji (Header ➝ Subheader)</label> -->
                 <!-- HEADER (paket) -->
@@ -481,7 +453,6 @@
                   <button v-for="ph in paketHeaders" :key="'h-' + ph.header" class="btn btn-outline-success btn-sm"
                     :class="{ 'active': selectedHeader && selectedHeader.header === ph.header }" @click="pickHeader(ph)"
                     :disabled="!order">
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
                     {{ ph.header_name || ('Header ' + ph.header) }}
                     <span class="badge text-bg-light ms-1">{{ ph.jumlah }}</span>
                   </button>
@@ -496,23 +467,11 @@
 
 
 
-<<<<<<< HEAD
-                        <button
-                          v-for="sh in paketSubs"
-                          v-if="false"
-                          :key="'s-' + sh.sub_header"
-                          class="btn btn-outline-secondary btn-sm"
-                          @click="addPaketSub(selectedHeader, sh)"
-                          :disabled="!order">
-                          Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
-                        </button>
-=======
                   <button v-for="sh in paketSubs" v-if="false" :key="'s-' + sh.sub_header"
                     class="btn btn-outline-secondary btn-sm" @click="addPaketSub(selectedHeader, sh)"
                     :disabled="!order">
                     Sub {{ sh.sub_header }} <span class="badge text-bg-light ms-1">{{ sh.jumlah }}</span>
                   </button>
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
                 </div>
               </div>
@@ -530,45 +489,6 @@
                     <th style="width:60px;" class="text-center">Aksi</th>
                   </tr>
                 </thead>
-<<<<<<< HEAD
-<tbody v-if="browse.loading">
-  <tr>
-    <td colspan="6" class="text-center py-4">Memuat...</td>
-  </tr>
-</tbody>
-
-<tbody v-else-if="!groupedItems.length">
-  <tr>
-    <td colspan="6" class="text-center text-muted py-4">Data kosong.</td>
-  </tr>
-</tbody>
-
-<!-- Kelompok per kategori -->
-<tbody v-else v-for="(g, gi) in groupedItems" :key="'grp-'+gi">
-  <!-- Judul kategori -->
-  <tr class="table-secondary">
-    <td colspan="6" class="fw-bold text-uppercase">
-      {{ g.kategori }}
-    </td>
-  </tr>
-
-  <!-- Baris item dalam kategori -->
-  <tr v-for="(it, idx) in g.items" :key="'m-'+it.id">
-    <td class="text-muted" style="width:120px;">{{ it.kode || '-' }}</td>
-    <td class="fw-semibold">{{ it.nama || '-' }}</td>
-    <td style="width:120px;">{{ it.satuan || '-' }}</td>
-    <td class="small" style="width:260px;">
-      <div class="text-muted white-pre-line">{{ it.nilaiNormalKritis || '-' }}</div>
-    </td>
-    <td style="width:180px;">
-      <input class="form-control form-control-sm" v-model="valueMap[it.id]" placeholder="isian opsional" />
-    </td>
-    <td class="text-center" style="width:60px;">
-      <input type="checkbox" class="form-check-input" v-model="selectedMap[it.id]" />
-    </td>
-  </tr>
-</tbody>
-=======
                 <tbody v-if="browse.loading">
                   <tr>
                     <td colspan="6" class="text-center py-4">Memuat...</td>
@@ -607,7 +527,6 @@
                     </td>
                   </tr>
                 </tbody>
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
               </table>
             </div>
@@ -627,39 +546,6 @@
             </div>
           </div>
 
-<<<<<<< HEAD
-<div class="modal-footer d-flex justify-content-between align-items-center">
-
-  <!-- Bagian kiri -->
-  <div class="d-flex gap-2">
-    <button class="btn btn-light" @click="showMaster = false">Close</button>
-  </div>
-
-  <!-- Bagian kanan -->
-  <div class="d-flex gap-2 align-items-center">
-
-    <!-- Tambah Semua Header (hanya muncul jika header dipilih) -->
-<button
-  v-if="selectedHeader"
-  class="btn btn-success gradient-btn btn-sm text-white fw-semibold"
-  @click="addPaketHeader(selectedHeader)"
-  :disabled="!order"
-  title="Tambahkan semua item di header ini"
->
-  <i class="bi bi-plus-circle me-1"></i>
-  Tambah SEMUA
-  ({{ selectedHeader.header_name || ('Header ' + selectedHeader.header) }})
-</button>
-
-
-    <!-- Tombol Simpan -->
-    <button class="btn btn-success" :disabled="!order" @click="submitSelected">
-      <i class="bi bi-check2-square me-1"></i> SIMPAN
-    </button>
-
-  </div>
-</div>
-=======
           <div class="modal-footer d-flex justify-content-between align-items-center">
 
             <!-- Bagian kiri -->
@@ -686,7 +572,6 @@
 
             </div>
           </div>
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
         </div>
       </div>
@@ -709,55 +594,6 @@
       <h3 class="ps-report-title">LEMBAR HASIL LABORATORIUM</h3>
 
       <!-- Identitas -->
-<<<<<<< HEAD
-<table class="ps-info">
-  <tr>
-    <td class="label">Nama</td>
-    <td class="value">: {{ pasien.NAMA_LGKP || '-' }}</td>
-
-    <td class="label">No reg lab</td>
-    <td class="value">: {{ order.no_reg_lab || order.order_id || '-' }}</td>
-  </tr>
-
-  <tr>
-    <td class="label">Tgl Lahir</td>
-    <td class="value">: {{ pasien.TGL_LHR || '-' }}</td>
-
-    <td class="label">Tgl periksa</td>
-    <td class="value">: {{ order.tgl_dibuat || '-' }}</td>
-  </tr>
-
-  <tr>
-    <td class="label">Jenis kelamin</td>
-    <td class="value">: {{ jenisKelaminLabel }}</td>
-
-    <td class="label">Spec diambil jam</td>
-    <td class="value">: {{ order.sample_diambil_at || '-' }}</td>
-  </tr>
-
-  <tr>
-    <td class="label">Alamat</td>
-    <td class="value">: {{ alamatLengkap }}</td>
-
-    <td class="label">Spec selesai jam</td>
-    <td class="value">: {{ order.sample_selesai_at || '-' }}</td>
-  </tr>
-
-  <tr>
-    <td class="label">No RM</td>
-    <td class="value">: {{ pasien.NO_MR || '-' }}</td>
-
-    <td class="label">Unit pengirim</td>
-    <td class="value">: {{ order.unit_pengirim || order.poli || pasien.nmPoli || 'Umum' }}</td>
-  </tr>
-
-  <tr>
-    <td class="label">Pemeriksa</td>
-    <td class="value" colspan="3">: {{ order.tenaga_medis_pemeriksa || '-' }}</td>
-  </tr>
-</table>
-
-=======
       <table class="ps-info">
         <tr>
           <td class="label">Nama</td>
@@ -804,55 +640,9 @@
           <td class="value" colspan="3">: {{ order.tenaga_medis_pemeriksa || '-' }}</td>
         </tr>
       </table>
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
 
       <!-- Section contoh -->
-<<<<<<< HEAD
-<!-- ========== CETAK PER KATEGORI ========== -->
-<div v-if="groupedRows.length">
-  <!-- loop per kategori -->
-  <div v-for="(g, gi) in groupedRows" :key="'psgrp-'+gi" class="ps-group">
-    <!-- judul kategori dari database -->
-    <div class="ps-section">
-      {{ g.kategori }}
-    </div>
-
-    <table class="ps-table">
-      <thead>
-        <tr>
-          <th class="w-1">No.</th>
-          <th class="w-2">Kode</th>
-          <th>Nama pemeriksaan</th>
-          <th>Nilai Normal/kritis</th>
-          <th>Nilai Lab (satuan)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(r, i) in g.items" :key="r.detail_id">
-          <td class="t-center">{{ i + 1 }}</td>
-          <td class="t-center">{{ r.kode }}</td>
-          <td>{{ r.nama_pemeriksaan }}</td>
-          <td class="t-small">{{ r.nilai_normal_kritis || '-' }}</td>
-          <td>
-            {{ (hasil && hasil[r.detail_id]) || r.nilai_lab || '' }}
-            <span class="muted">{{ r.satuan }}</span>
-          </td>
-        </tr>
-        <tr v-if="g.items.length === 0">
-          <td colspan="5" class="t-center">Belum ada data</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- kalau sama sekali tidak ada pemeriksaan -->
-<div v-else>
-  <div class="ps-section">PEMERIKSAAN LABORATORIUM</div>
-  <div class="t-center" style="margin-top:8px;">Belum ada data pemeriksaan.</div>
-</div>
-=======
       <!-- ========== CETAK PER KATEGORI ========== -->
       <div v-if="groupedRows.length">
         <!-- loop per kategori -->
@@ -896,7 +686,6 @@
         <div class="ps-section">PEMERIKSAAN LABORATORIUM</div>
         <div class="t-center" style="margin-top:8px;">Belum ada data pemeriksaan.</div>
       </div>
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
 
       <!-- Tanda tangan -->
@@ -933,11 +722,7 @@ const order = computed(() => pageProps.value.DataPermohonan || null);
 const rows = computed(() => pageProps.value.DataPemeriksaan || []);
 const objective = computed(() => pageProps.value.DataObjective || null);
 const tenagaMedis = computed(() => pageProps.value.TenagaMedis || []);
-<<<<<<< HEAD
-const Source          = computed(() => page.props.Source ?? 'laborat')
-=======
 const Source = computed(() => page.props.Source ?? 'laborat')
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 const paketHeaders = ref([]);
 const paketSubs = ref([]);
 const selectedHeader = ref(null);
@@ -988,13 +773,8 @@ function addPaketHeader(headerObj) {
     onSuccess: () => {
       const nama = headerObj.header_name || ('Header ' + headerObj.header);
       toast('success', 'Tambah semua berhasil', nama);
-<<<<<<< HEAD
-                   console.log('headaer',headerObj.header)
-        closeMaster();       // <—— tutup modal di sini
-=======
       console.log('headaer', headerObj.header)
       closeMaster();       // <—— tutup modal di sini
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
       reloadPage();
     }
   });
@@ -1373,17 +1153,6 @@ async function loadParams(page = 1) {
     const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
 
-<<<<<<< HEAD
-master.items = (data?.data || []).map((x) => ({
-  id: x.id_parameter,
-  kode: x.kode,
-  nama: x.nama,
-  satuan: x.satuan,
-  nilaiNormalKritis: x.nilai_normal_kritis,
-  // ⬇️ ambil kategori dari apa pun nama field-nya
-  kategori: x.kategori_nama ?? x.nama_kategori ?? x.kategori ?? '',
-}));
-=======
     master.items = (data?.data || []).map((x) => ({
       id: x.id_parameter,
       kode: x.kode,
@@ -1393,7 +1162,6 @@ master.items = (data?.data || []).map((x) => ({
       // ⬇️ ambil kategori dari apa pun nama field-nya
       kategori: x.kategori_nama ?? x.nama_kategori ?? x.kategori ?? '',
     }));
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 
     master.meta = data?.meta || {};
     master.links = data?.links || [];
@@ -1602,10 +1370,6 @@ onMounted(() => {
 
 /* MODE PRINT */
 @media print {
-<<<<<<< HEAD
-=======
-
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
   /* Sembunyikan semua layout aplikasi */
   .app-shell,
   .modal-mask,
@@ -1616,60 +1380,6 @@ onMounted(() => {
   footer {
     display: none !important;
   }
-<<<<<<< HEAD
-.ps-info {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11pt;
-}
-
-.ps-info td {
-  padding: 3px 6px;
-  vertical-align: top;
-}
-
-.ps-info .label {
-  width: 22%;      /* stabil */
-  font-weight: bold;
-}
-
-.ps-info .value {
-  width: 28%;      /* stabil */
-}
-
-  /* Tampilkan lembar print */
-  .print-sheet {
-    display: block !important;
-    position: static !important;   /* ⬅️ penting: biar bisa multi-page */
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Biar teks dan border tetap jelas */
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Jaga elemen-elemen penting tidak kepotong di tengah halaman */
-  .ps-section,
-  .ps-info,
-  .ps-sign {
-    page-break-inside: avoid;
-  }
-
-  .ps-table {
-    page-break-inside: auto;
-  }
-
-  .ps-table tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-}
-
-=======
 
   .ps-info {
     width: 100%;
@@ -1726,7 +1436,6 @@ onMounted(() => {
   }
 }
 
->>>>>>> a72b058f18138d5394cb3d1820a917d6e0d4041f
 /* MODE LAYAR: print-sheet disembunyikan */
 @media screen {
   .print-sheet {
