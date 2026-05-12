@@ -143,7 +143,6 @@ class KematianController extends Controller
             ->get();
 
         // dd($DataPasien);
-        // ← WAJIB, AGAR TIDAK UNDEFINED
 
         $diagnosa = SimpusDiagnosaaa::whereNotNull('F3')->get();
         $diagnosaKeperawatan = SimpusDiagnosa::where('kategori', 1)->get();

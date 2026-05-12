@@ -1,522 +1,454 @@
 <template>
   <AppLayout title="Loket">
-    <div class="container py-4">
-      <!-- Tombol Aksi -->
-      <div class="d-flex justify-content-end mb-3 gap-2">
-        <Link :href="route('loket.search')" class="btn btn-success text-white">
-          <i class="bi bi-search me-1"></i> CARI PASIEN
-        </Link>
-        <Link :href="route('loket.pasien')" class="btn btn-primary text-white">
-          <i class="bi bi-plus-lg me-1"></i> TAMBAH PASIEN
-        </Link>
-      </div>
+    <div class="loket-page">
+      <div class="loket-shell">
+        <div class="page-toolbar">
+          <div>
+            <p class="page-kicker">Loket pendaftaran</p>
+            <h1 class="page-title">Form Loket</h1>
+          </div>
+          <div class="page-actions">
+            <Link :href="route('loket.search')" class="btn btn-outline-success">
+              <i class="bi bi-search"></i>
+              <span>Cari Pasien</span>
+            </Link>
+            <Link :href="route('loket.pasien')" class="btn btn-success">
+              <i class="bi bi-plus-lg"></i>
+              <span>Tambah Pasien</span>
+            </Link>
+          </div>
+        </div>
 
-      <!-- Form Loket -->
-      <div class="card border-success mb-4">
-        <div class="card-header bg-info text-white fw-bold">Form Loket</div>
-        <div class="card-body">
-          <div class="row">
-            <!-- Kolom Kiri -->
-            <div class="col-md-6">
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">NO. MR</label>
-                  </div>
-                  <div class="col-8">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-model="searchParams.no_mr"
-                        @keyup.enter="searchPasien('no_mr')"
-                      />
-                      <button class="btn btn-info text-white btn-sm" @click="searchPasien('no_mr')">
-                        CEK ..!
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">NIK</label>
-                  </div>
-                  <div class="col-8">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-model="searchParams.nik"
-                        @keyup.enter="searchPasien('nik')"
-                      />
-                      <button class="btn btn-info text-white btn-sm" @click="searchPasien('nik')">
-                        CEK ..!
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">NO. BPJS</label>
-                  </div>
-                  <div class="col-8">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-model="searchParams.no_bpjs"
-                        @keyup.enter="searchPasien('no_bpjs')"
-                      />
-                      <button
-                        class="btn btn-info text-white btn-sm"
-                        @click="searchPasien('no_bpjs')"
-                      >
-                        CEK ..!
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">NAMA</label>
-                  </div>
-                  <div class="col-8">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-model="selectedPasien.NAMA_LGKP"
-                        disabled
-                      />
-                      <button class="btn btn-danger text-white btn-sm" @click="openSearchModal">
-                        Cari.....
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Tanggal Kunjungan</label>
-                  </div>
-                  <div class="col-8">
-                    <input
-                      type="date"
-                      class="form-control form-control-sm"
-                      v-model="form.tglKunjungan"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- KATEGORI UNIT -->
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Kategori Unit</label>
-                  </div>
-                  <div class="col-8">
-                    <select
-                      class="form-select form-select-sm"
-                      v-model="form.kategoriUnitId"
-                      @change="loadUnitList"
-                      :disabled="loading.kategoriUnit"
-                    >
-                      <option value="">- Pilih Kategori Unit -</option>
-                      <option v-for="(name, id) in kategoriUnits" :key="id" :value="id">
-                        {{ name }}
-                      </option>
-                    </select>
-                    <div v-if="loading.kategoriUnit" class="text-muted small mt-1">
-                      <i class="bi bi-arrow-repeat spinner"></i> Loading...
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- UNIT -->
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Unit</label>
-                  </div>
-                  <div class="col-8">
-                    <select
-                      class="form-select form-select-sm"
-                      v-model="form.unitId"
-                      :disabled="!form.kategoriUnitId || loading.unitList"
-                    >
-                      <option value="">- Pilih Unit -</option>
-                      <option v-for="(name, id) in unitList" :key="id" :value="id">
-                        {{ name }}
-                      </option>
-                    </select>
-                    <div v-if="loading.unitList" class="text-muted small mt-1">
-                      <i class="bi bi-arrow-repeat spinner"></i> Loading unit...
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Status Kartu</label>
-                  </div>
-                  <div class="col-8">
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-model="selectedPasien.statusKartu"
-                        disabled
-                      />
-                      <button class="btn btn-info text-white btn-sm" @click="checkCardStatus">
-                        CEK ..!
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Provider Kartu</label>
-                  </div>
-                  <div class="col-8">
-                    <input
-                      type="text"
-                      class="form-control form-control-sm"
-                      v-model="selectedPasien.kdProvider"
-                      disabled
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Jenis Peserta</label>
-                  </div>
-                  <div class="col-8">
-                    <input
-                      type="text"
-                      class="form-control form-control-sm"
-                      v-model="selectedPasien.jenisPeserta"
-                      disabled
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">No HP</label>
-                  </div>
-                  <div class="col-8">
-                    <input type="text" class="form-control form-control-sm" v-model="form.PHONE" />
-                  </div>
-                </div>
-              </div>
+        <div class="loket-card mb-4">
+          <div class="loket-card-header">
+            <div>
+              <h2><i class="bi bi-clipboard2-pulse"></i> Pendaftaran Kunjungan</h2>
+              <p>Lengkapi data pasien, unit pelayanan, dan detail kunjungan.</p>
             </div>
-
-            <!-- Kolom Kanan -->
-            <div class="col-md-6">
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Alamat *</label>
-                  </div>
-                  <div class="col-8">
-                    <textarea
-                      class="form-control form-control-sm"
-                      rows="2"
-                      :value="formatKecamatanKelurahan"
-                      disabled
-                      style="height: 60px"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <!-- WILAYAH -->
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Wilayah *</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm bg-warning" v-model="form.wilayah">
-                      <option value="">- Pilih Wilayah -</option>
-                      <option
-                        v-for="(name, id) in wilayahList"
-                        :key="id"
-                        :value="id"
-                        v-if="id !== '0'"
-                      >
-                        {{ name }}
-                      </option>
-                    </select>
-
-                    <!-- Info wilayah otomatis -->
-                    <small
-                      v-if="autoDetectedWilayah && form.wilayah === autoDetectedWilayah"
-                      class="text-info d-block mt-1"
-                    >
-                      <i class="bi bi-check-circle"></i> Terdeteksi otomatis
-                    </small>
-                    <small v-else-if="form.wilayah" class="text-success d-block mt-1">
-                      <i class="bi bi-pencil"></i> Dipilih manual
-                    </small>
-                  </div>
-                </div>
-              </div>
-
-              <!-- JENIS PENGUNJUNG DENGAN FITUR OTOMATIS -->
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Jenis Pengunjung *</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm bg-warning" v-model="jenisPengunjung">
-                      <option value="Pengunjung Baru">Pengunjung Baru</option>
-                      <option value="Pengunjung Lama">Pengunjung Lama</option>
-                    </select>
-
-                    <!-- Info status otomatis - HANYA TAMPIL JIKA PENGUNJUNG LAMA -->
-                    <small
-                      v-if="jenisPengunjungAuto === 'Pengunjung Lama'"
-                      class="text-warning d-block mt-1"
-                    >
-                      <small>💡 Pasien sudah pernah daftar di {{ currentMonthYear }}</small>
-                    </small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Kategori *</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm bg-warning" v-model="kategori">
-                      <option value="NON_BPJS">NON BPJS</option>
-                      <option value="JKN_PBI">JKN PBI</option>
-                      <option value="JKN_NON_PBI">JKN NON PBI</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Jenis Kunjungan</label>
-                  </div>
-                  <div class="col-8">
-                    <select
-                      class="form-select form-select-sm"
-                      v-model="jenisKunjungan"
-                      @change="updatePoliOptions"
-                    >
-                      <option value="Kunjungan Sakit">Kunjungan Sakit</option>
-                      <option value="Kunjungan Sehat">Kunjungan Sehat</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Kegiatan</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm" v-model="form.kdPoli">
-                      <option value="">- Pilih Kegiatan -</option>
-                      <option v-for="poli in filteredPoliList" :value="poli.kdPoli">
-                        {{ poli.nmPoli }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Sub Kegiatan</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm" disabled></select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <div class="row">
-                  <div class="col-4">
-                    <label class="form-label form-label-sm fw-bold">Kode TKP</label>
-                  </div>
-                  <div class="col-8">
-                    <select class="form-select form-select-sm" v-model="kodeTKP">
-                      <option value="RJTP (RAWAT JALAN)">RJTP (RAWAT JALAN)</option>
-                      <option value="RJTL (RAWAT JALAN LANJUTAN)">
-                        RJTL (RAWAT JALAN LANJUTAN)
-                      </option>
-                      <option value="Promotif">Promotif</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <span class="status-pill" :class="{ complete: formValid }">
+              {{ formValid ? 'Siap disimpan' : 'Belum lengkap' }}
+            </span>
           </div>
 
-          <!-- Tombol Bawah -->
-          <div class="d-flex justify-content-end mt-4 gap-2">
+          <div class="loket-card-body">
+            <section class="form-section">
+              <div class="section-heading">
+                <i class="bi bi-search"></i>
+                <div>
+                  <h3>Pencarian Pasien</h3>
+                  <p>Cari cepat berdasarkan salah satu identitas pasien.</p>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">No. MR</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="searchParams.no_mr"
+                      @keyup.enter="searchPasien('no_mr')"
+                      placeholder="Masukkan No. MR"
+                    />
+                    <button class="btn btn-soft-primary" @click="searchPasien('no_mr')">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">NIK</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="searchParams.nik"
+                      @keyup.enter="searchPasien('nik')"
+                      placeholder="Masukkan NIK"
+                    />
+                    <button class="btn btn-soft-primary" @click="searchPasien('nik')">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">No. BPJS</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="searchParams.no_bpjs"
+                      @keyup.enter="searchPasien('no_bpjs')"
+                      placeholder="Masukkan No. BPJS"
+                    />
+                    <button class="btn btn-soft-primary" @click="searchPasien('no_bpjs')">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <div class="section-heading">
+                <i class="bi bi-person-vcard"></i>
+                <div>
+                  <h3>Data Pasien</h3>
+                  <p>Data utama pasien terisi setelah pencarian berhasil.</p>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-lg-6">
+                  <label class="form-label">Nama</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="selectedPasien.NAMA_LGKP"
+                      disabled
+                      readonly
+                    />
+                    <button class="btn btn-outline-danger" @click="openSearchModal">
+                      <i class="bi bi-search"></i>
+                      <span>Cari</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Tanggal Kunjungan</label>
+                  <input type="date" class="form-control" v-model="form.tglKunjungan" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Alamat <span class="required">*</span></label>
+                  <textarea
+                    class="form-control"
+                    rows="2"
+                    :value="formatKecamatanKelurahan"
+                    disabled
+                    readonly
+                  ></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <div class="section-heading">
+                <i class="bi bi-building"></i>
+                <div>
+                  <h3>Unit & Wilayah</h3>
+                  <p>Tentukan layanan dan wilayah pendaftaran pasien.</p>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-lg-6">
+                  <label class="form-label">Kategori Unit <span class="required">*</span></label>
+                  <select
+                    class="form-select"
+                    v-model="form.kategoriUnitId"
+                    @change="loadUnitList"
+                    :disabled="loading.kategoriUnit"
+                  >
+                    <option value="">- Pilih Kategori Unit -</option>
+                    <option v-for="(name, id) in kategoriUnits" :key="id" :value="id">
+                      {{ name }}
+                    </option>
+                  </select>
+                  <div v-if="loading.kategoriUnit" class="field-hint">
+                    <i class="bi bi-arrow-repeat spinner"></i> Memuat kategori unit...
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Unit <span class="required">*</span></label>
+                  <select
+                    class="form-select"
+                    v-model="form.unitId"
+                    :disabled="!form.kategoriUnitId || loading.unitList"
+                  >
+                    <option value="">- Pilih Unit -</option>
+                    <option v-for="(name, id) in unitList" :key="id" :value="id">
+                      {{ name }}
+                    </option>
+                  </select>
+                  <div v-if="loading.unitList" class="field-hint">
+                    <i class="bi bi-arrow-repeat spinner"></i> Memuat daftar unit...
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Wilayah <span class="required">*</span></label>
+                  <select class="form-select highlighted-input" v-model="form.wilayah">
+                    <option value="">- Pilih Wilayah -</option>
+                    <template v-for="(name, id) in wilayahList" :key="id">
+                      <option v-if="id !== '0'" :value="id">
+                        {{ name }}
+                      </option>
+                    </template>
+                  </select>
+                  <div
+                    v-if="autoDetectedWilayah && form.wilayah === autoDetectedWilayah"
+                    class="field-hint success"
+                  >
+                    <i class="bi bi-check-circle-fill"></i> Terdeteksi otomatis
+                  </div>
+                  <div v-else-if="form.wilayah" class="field-hint info">
+                    <i class="bi bi-pencil-fill"></i> Dipilih manual
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <div class="section-heading">
+                <i class="bi bi-shield-check"></i>
+                <div>
+                  <h3>Status BPJS</h3>
+                  <p>Informasi kartu dan peserta untuk pasien terpilih.</p>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-lg-4">
+                  <label class="form-label">Status Kartu</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="selectedPasien.statusKartu"
+                      disabled
+                      readonly
+                    />
+                    <button class="btn btn-soft-primary" @click="checkCardStatus">
+                      <i class="bi bi-check-circle"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <label class="form-label">Provider Kartu</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="selectedPasien.kdProvider"
+                    disabled
+                    readonly
+                  />
+                </div>
+                <div class="col-lg-4">
+                  <label class="form-label">Jenis Peserta</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="selectedPasien.jenisPeserta"
+                    disabled
+                    readonly
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section class="form-section">
+              <div class="section-heading">
+                <i class="bi bi-calendar2-check"></i>
+                <div>
+                  <h3>Detail Kunjungan</h3>
+                  <p>Atur kategori kunjungan, kegiatan, dan kontak pasien.</p>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-lg-6">
+                  <label class="form-label">Jenis Pengunjung <span class="required">*</span></label>
+                  <select class="form-select highlighted-input" v-model="jenisPengunjung">
+                    <option value="Pengunjung Baru">Pengunjung Baru</option>
+                    <option value="Pengunjung Lama">Pengunjung Lama</option>
+                  </select>
+                  <div v-if="jenisPengunjungAuto === 'Pengunjung Lama'" class="field-hint warning">
+                    <i class="bi bi-info-circle-fill"></i>
+                    Pasien sudah pernah daftar di {{ currentMonthYear }}
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Kategori <span class="required">*</span></label>
+                  <select class="form-select highlighted-input" v-model="kategori">
+                    <option value="NON_BPJS">NON BPJS</option>
+                    <option value="JKN_PBI">JKN PBI</option>
+                    <option value="JKN_NON_PBI">JKN NON PBI</option>
+                  </select>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Jenis Kunjungan</label>
+                  <select class="form-select" v-model="jenisKunjungan" @change="updatePoliOptions">
+                    <option value="Kunjungan Sakit">Kunjungan Sakit</option>
+                    <option value="Kunjungan Sehat">Kunjungan Sehat</option>
+                  </select>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Kegiatan</label>
+                  <select class="form-select" v-model="form.kdPoli">
+                    <option value="">- Pilih Kegiatan -</option>
+                    <option
+                      v-for="poli in filteredPoliList"
+                      :key="poli.kdPoli"
+                      :value="poli.kdPoli"
+                    >
+                      {{ poli.nmPoli }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Sub Kegiatan</label>
+                  <select class="form-select" disabled>
+                    <option value="">- Pilih Sub Kegiatan -</option>
+                  </select>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">Kode TKP</label>
+                  <select class="form-select" v-model="kodeTKP">
+                    <option value="RJTP (RAWAT JALAN)">RJTP (RAWAT JALAN)</option>
+                    <option value="RJTL (RAWAT JALAN LANJUTAN)">RJTL (RAWAT JALAN LANJUTAN)</option>
+                    <option value="Promotif">Promotif</option>
+                  </select>
+                </div>
+                <div class="col-lg-6">
+                  <label class="form-label">No HP</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="form.PHONE"
+                    placeholder="Masukkan nomor HP"
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="form-footer">
             <button
-              class="btn btn-success"
+              class="btn btn-outline-secondary"
               @click="showRiwayatKunjungan"
               :disabled="!selectedPasien.ID"
             >
-              RIWAYAT KUNJUNGAN
+              <i class="bi bi-clock-history"></i>
+              <span>Riwayat Kunjungan</span>
             </button>
             <button
-              class="btn btn-primary"
+              class="btn btn-success btn-save"
               @click="registerPasien"
               :disabled="!selectedPasien.ID || !formValid"
             >
-              SIMPAN
+              <i class="bi bi-check-circle"></i>
+              <span>Simpan</span>
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Daftar Loket -->
-      <div class="card border-success">
-        <div
-          class="card-header bg-info text-white d-flex justify-content-between align-items-center"
-        >
-          <span class="fw-bold">Daftar Loket</span>
-          <button class="btn btn-success btn-sm">Cek Pendaftaran Pcare</button>
-        </div>
-
-        <!-- Show entries & Search -->
-        <div
-          class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom flex-wrap"
-          style="background-color: #f0fdf0"
-        >
-          <div class="d-flex align-items-center">
-            <label class="me-2 mb-0">Show</label>
-            <select class="form-select form-select-sm" style="width: 80px" v-model="perPage">
-              <option>10</option>
-              <option>25</option>
-              <option>50</option>
-              <option>100</option>
-            </select>
-            <label class="ms-2 mb-0">entries</label>
+        <div class="loket-card">
+          <div class="loket-card-header table-header">
+            <div>
+              <h2><i class="bi bi-list-check"></i> Daftar Loket</h2>
+              <p>Daftar pasien yang sudah terdaftar di loket.</p>
+            </div>
+            <button class="btn btn-light btn-sm">
+              <i class="bi bi-cloud-check"></i>
+              <span>Cek Pendaftaran Pcare</span>
+            </button>
           </div>
 
-          <div class="d-flex align-items-center mt-2 mt-sm-0">
-            <label class="me-2 mb-0">Search:</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              placeholder="Cari..."
-              style="width: 200px"
-              v-model="searchQuery"
-            />
-          </div>
-        </div>
+          <div class="table-tools">
+            <div class="entries-control">
+              <span>Show</span>
+              <select class="form-select form-select-sm" v-model="perPage">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+              </select>
+              <span>entries</span>
+            </div>
 
-        <div class="card-body">
+            <div class="search-control">
+              <i class="bi bi-search"></i>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Cari..."
+                v-model="searchQuery"
+              />
+            </div>
+          </div>
+
           <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-              <thead class="text-center" style="background-color: #90ee90">
+            <table class="table loket-table mb-0">
+              <thead>
                 <tr>
-                  <th>TANGGAL<br />NO. URUT<br />(pcare)</th>
-                  <th>NO. ANTRIAN<br />POLI</th>
-                  <th>NO. MR<br />NAMA (UMUR)<br />NIK</th>
-                  <th>ALAMAT<br />KECAMATAN-DESA</th>
-                  <th>NO. BPJS<br />STATUS</th>
-                  <th>POLI</th>
-                  <th>UNIT<br />SUB UNIT</th>
-                  <th>ACTION<br />PCARE<br />KATEGORI</th>
-                  <th>ACTION</th>
+                  <th>Tanggal<br />No. Urut<br />(pcare)</th>
+                  <th>No. Antrian<br />Poli</th>
+                  <th>No. MR<br />Nama (Umur)<br />NIK</th>
+                  <th>Alamat<br />Kecamatan-Desa</th>
+                  <th>No. BPJS<br />Status</th>
+                  <th>Poli</th>
+                  <th>Unit<br />Sub Unit</th>
+                  <th>Action<br />Pcare<br />Kategori</th>
+                  <th class="text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="loket.data.length > 0" v-for="item in loket.data" :key="item.idLoket">
-                  <td>
-                    {{ formatDate(item.tglKunjungan) }}
-                    <small v-if="item.noPcare">({{ item.noPcare }})</small>
-                  </td>
-                  <td>
-                    {{ item.noAntrian || `A${item.noUrut?.padStart(3, '0')}` }}
-                  </td>
-                  <td>
-                    <!-- PERBAIKI: item.NO_MR (bukan item.pasien?.NO_MR) -->
-                    {{ item.NO_MR }}<br />
-                    {{ item.NAMA_LGKP }} ({{ item.umur_tahun || '-' }} th)<br />
-                    {{ item.NIK }}
-                  </td>
-                  <td>
-                    <!-- PERBAIKI: formatAlamatUntukTabel(item) (bukan item.pasien) -->
-                    {{ formatAlamatUntukTabel(item).rtRw }}<br />
-                    {{ item.nama_kecamatan || '-' }} - {{ item.nama_kelurahan || '-' }}
-                  </td>
-                  <td>
-                    <!-- PERBAIKI: item.noKartu (bukan item.pasien?.noKartu) -->
-                    {{ item.noKartu || '-' }}<br />
-                    {{ item.statusKartu || '-' }}
-                  </td>
-                  <td>{{ item.nmPoli }}</td>
-                  <td>
-                    {{ item.kategori_unit || '-' }}<br />
-                    {{ item.nama_unit || '-' }}
-                  </td>
-                  <td>
-                    {{ item.action || '-' }}<br />
-                    {{ item.noPcare || '-' }}<br />
-                    {{ item.kategori || '-' }}
-                  </td>
-                  <td class="text-center">
-                    <button class="btn btn-sm btn-info">
-                      <i class="bi bi-eye"></i>
-                    </button>
-                    <button
-                      class="btn btn-sm btn-success"
-                      title="Cetak Kartu Pasien"
-                      @click="cetakKartuPasien(item.pasien_id)"
-                      :disabled="!item.pasien_id"
-                    >
-                      <i class="bi bi-printer"></i>
-                    </button>
+                <template v-if="loket.data.length > 0">
+                  <tr v-for="item in loket.data" :key="item.idLoket">
+                    <td>
+                      <strong>{{ formatDate(item.tglKunjungan) }}</strong>
+                      <span v-if="item.noPcare" class="table-muted">({{ item.noPcare }})</span>
+                    </td>
+                    <td>{{ item.noAntrian || `A${item.noUrut?.padStart(3, '0')}` }}</td>
+                    <td>
+                      <strong>{{ item.NO_MR }}</strong><br />
+                      {{ item.NAMA_LGKP }} ({{ item.umur_tahun || '-' }} th)<br />
+                      <span class="table-muted">{{ item.NIK }}</span>
+                    </td>
+                    <td>
+                      {{ formatAlamatUntukTabel(item).rtRw }}<br />
+                      <span class="table-muted">
+                        {{ item.nama_kecamatan || '-' }} - {{ item.nama_kelurahan || '-' }}
+                      </span>
+                    </td>
+                    <td>
+                      {{ item.noKartu || '-' }}<br />
+                      <span class="table-muted">{{ item.statusKartu || '-' }}</span>
+                    </td>
+                    <td>{{ item.nmPoli }}</td>
+                    <td>
+                      {{ item.kategori_unit || '-' }}<br />
+                      <span class="table-muted">{{ item.nama_unit || '-' }}</span>
+                    </td>
+                    <td>
+                      {{ item.action || '-' }}<br />
+                      {{ item.noPcare || '-' }}<br />
+                      <span class="table-muted">{{ item.kategori || '-' }}</span>
+                    </td>
+                    <td class="text-center">
+                      <div class="action-buttons">
+                        <button class="btn btn-icon btn-outline-info" title="Lihat Detail">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button
+                          class="btn btn-icon btn-outline-success"
+                          title="Cetak Kartu Pasien"
+                          @click="cetakKartuPasien(item.pasien_id)"
+                          :disabled="!item.pasien_id"
+                        >
+                          <i class="bi bi-printer"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+                <tr v-else>
+                  <td colspan="9" class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <span>Belum ada data loket.</span>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Pagination -->
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
+          <nav aria-label="Page navigation" class="pagination-wrap">
+            <ul class="pagination justify-content-center mb-0">
               <li
                 v-for="link in loket.links"
                 :key="link.label"
@@ -682,7 +614,7 @@
       const mappings = {
         'RJTP (RAWAT JALAN)': '10',
         'RJTL (RAWAT JALAN LANJUTAN)': '20',
-        'Promotif': '50',
+        Promotif: '50',
       };
       form.kdTkp = mappings[value] || '10';
     },
@@ -1095,9 +1027,7 @@
           alert('Terjadi kesalahan. Silakan coba lagi.');
         }
       },
-      onFinish: () => {
-        // Loading state cleanup jika needed
-      },
+      onFinish: () => {},
     });
   };
 
@@ -1260,22 +1190,419 @@
 </script>
 
 <style scoped>
+  .loket-page {
+    min-height: 100%;
+    background: #f4f7fb;
+    padding: 24px;
+  }
+
+  .loket-shell {
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  .page-toolbar,
+  .loket-card-header,
+  .table-tools,
+  .form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .page-toolbar {
+    margin-bottom: 18px;
+  }
+
+  .page-kicker {
+    margin: 0 0 4px;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .page-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.65rem;
+    font-weight: 750;
+  }
+
+  .page-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .loket-card {
+    overflow: hidden;
+    border: 1px solid #d9e5df;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
+  }
+
+  .loket-card-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #e5edf0;
+    background: #ffffff;
+  }
+
+  .loket-card-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #0f3d2e;
+    font-size: 1.05rem;
+    font-weight: 750;
+  }
+
+  .loket-card-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .table-header {
+    background: #0f6b4c;
+  }
+
+  .table-header h2,
+  .table-header p {
+    color: #ffffff;
+  }
+
+  .table-header p {
+    opacity: 0.82;
+  }
+
+  .loket-card-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    padding: 22px;
+  }
+
+  .form-section {
+    padding: 18px;
+    border: 1px solid #e3ebef;
+    border-radius: 8px;
+    background: #fbfdff;
+  }
+
+  .form-section:first-child,
+  .form-section:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .section-heading {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-heading > i {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border-radius: 8px;
+    background: #e7f5ef;
+    color: #08734f;
+    font-size: 1.05rem;
+  }
+
+  .section-heading h3 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 0.98rem;
+    font-weight: 750;
+  }
+
+  .section-heading p {
+    margin: 3px 0 0;
+    color: #64748b;
+    font-size: 0.84rem;
+  }
+
   .form-label {
-    font-weight: 500;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.86rem;
   }
-  .table th,
+
+  .form-control,
+  .form-select {
+    border-radius: 8px;
+    border: 1px solid #cfd9e3;
+    color: #0f172a;
+    min-height: 42px;
+    transition:
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
+  }
+
+  textarea.form-control {
+    min-height: 74px;
+    resize: none;
+  }
+
+  .form-control:disabled,
+  .form-select:disabled {
+    background-color: #f1f5f9;
+    color: #64748b;
+    opacity: 1;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #16a36f;
+    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
+  }
+
+  .highlighted-input {
+    background-color: #f6fbf8;
+  }
+
+  .btn {
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 650;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  }
+
+  .btn-soft-primary {
+    border-color: #bfdbea;
+    background: #edf8fc;
+    color: #09637b;
+  }
+
+  .btn-save {
+    min-width: 150px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 0.8rem;
+    font-weight: 750;
+  }
+
+  .status-pill.complete {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .required {
+    color: #dc2626;
+    font-weight: 800;
+  }
+
+  .field-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .field-hint.success {
+    color: #15803d;
+  }
+
+  .field-hint.info {
+    color: #0369a1;
+  }
+
+  .field-hint.warning {
+    color: #a16207;
+  }
+
+  .form-footer {
+    justify-content: flex-end;
+    padding: 18px 22px;
+    border-top: 1px solid #e5edf0;
+    background: #f8fafc;
+  }
+
+  .table-tools {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e5edf0;
+    background: #f8fafc;
+  }
+
+  .entries-control,
+  .search-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #475569;
+    font-size: 0.87rem;
+    font-weight: 650;
+  }
+
+  .entries-control .form-select {
+    width: 82px;
+    min-height: 36px;
+  }
+
+  .search-control {
+    position: relative;
+  }
+
+  .search-control i {
+    position: absolute;
+    left: 12px;
+    color: #64748b;
+  }
+
+  .search-control .form-control {
+    width: 240px;
+    min-height: 36px;
+    padding-left: 34px;
+  }
+
+  .table th {
+    padding: 14px 12px;
+    border-bottom: 1px solid #c9ded6;
+    background: #e7f5ef;
+    color: #174236;
+    font-weight: 600;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    border-top: none;
+    white-space: nowrap;
+  }
+
   .table td {
+    padding: 13px 12px;
+    color: #1e293b;
     vertical-align: middle;
+    font-size: 0.84rem;
+    line-height: 1.55;
   }
+
+  .loket-table tbody tr:hover {
+    background: #f6fbf8;
+  }
+
+  .table-muted {
+    color: #64748b;
+  }
+
+  .table-responsive {
+    width: 100%;
+  }
+
+  .action-buttons {
+    display: inline-flex;
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+  }
+
+  .empty-state {
+    height: 96px;
+    color: #64748b;
+    text-align: center;
+  }
+
+  .empty-state i {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 1.5rem;
+  }
+
+  .pagination-wrap {
+    padding: 16px;
+    border-top: 1px solid #e5edf0;
+    background: #ffffff;
+  }
+
+  .pagination .page-link {
+    margin: 0 2px;
+    border-radius: 7px;
+    color: #0f6b4c;
+  }
+
   .spinner {
     animation: spin 1s linear infinite;
   }
+
   @keyframes spin {
     from {
       transform: rotate(0deg);
     }
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  :deep(.pagination .page-item.active .page-link) {
+    border-color: #0f6b4c;
+    background: #0f6b4c;
+    color: #ffffff;
+  }
+
+  @media (max-width: 768px) {
+    .loket-page {
+      padding: 16px;
+    }
+
+    .loket-card-body {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+
+    .form-section {
+      grid-column: 1 / -1;
+      padding: 16px;
+    }
+
+    .page-actions,
+    .page-actions .btn,
+    .form-footer .btn,
+    .search-control,
+    .search-control .form-control {
+      width: 100%;
+    }
+
+    .form-footer {
+      justify-content: stretch;
+      padding: 16px;
+    }
+
+    .table-tools {
+      align-items: stretch;
+      flex-direction: column;
     }
   }
 </style>

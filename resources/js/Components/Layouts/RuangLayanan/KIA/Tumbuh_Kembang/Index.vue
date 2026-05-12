@@ -91,7 +91,7 @@
       kirim_satu_sehat: FormResumePasien,
     };
 
-    return map[selectedTab.value] || FormObstetri;
+    return map[selectedTab.value] || FormSubjektif;
   });
 </script>
 

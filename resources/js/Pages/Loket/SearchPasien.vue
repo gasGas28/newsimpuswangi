@@ -70,7 +70,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in paginatedPasien" :key="item.ID">
+                <tr class="text-start" v-for="(item, index) in paginatedPasien" :key="item.ID">
                   <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                   <td>
                     {{ item.NO_MR }}<br /><small class="text-muted">{{ item.NO_KK }}</small>

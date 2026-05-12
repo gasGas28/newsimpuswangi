@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Filter\SimpusLoket;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
+
 
 
 class FilterController extends Controller

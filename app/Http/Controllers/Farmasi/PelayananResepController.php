@@ -33,7 +33,6 @@ class PelayananResepController extends Controller
                 'p.NAMA_LGKP as pasien',
                 'p.ALAMAT as alamat',
                 'l.kdPoli as poli',
-                'l.keluhan as diagnosa',
                 'po.nama_obat',
                 'po.jumlah',
                 'po.dosis_pakai as dosis',

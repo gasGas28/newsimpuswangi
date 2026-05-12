@@ -34,7 +34,7 @@
       <div class="action-label">Assessment</div>
     </a>
   </div>
-  <hr>
+  <hr />
   <div class="mt-3">
     <div v-if="activeResumeKematian === 'laporanKematian'" class="p-2">
       <div class="row g-4">
@@ -72,6 +72,14 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="row mt-4">
+            <div class="col-auto">
+              <button class="btn btn-success fw-semibold px-3">Simpan Pelayanan</button>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-primary fw-semibold px-3">Kirim Satu Sehat</button>
+            </div>
           </div>
         </div>
         <div class="col-md-6">

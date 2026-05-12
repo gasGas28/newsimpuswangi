@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Foundation\MaintenanceModeManager; // ← Tambahkan ini
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,11 +29,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-public function boot()
-{
-    if (str_starts_with(config('app.url'), 'https://')) {
-        URL::forceScheme('https');
+    public function boot()
+    {
+        if (str_starts_with(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
-}
-
 }

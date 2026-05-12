@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="Poli Kesehatan Ibu dan Anak (KIA)" :backRoute :unitList :rows>
+    <FormAnamnesa title="Pelayanan Antenatal Care" :backRoute :unitList :rows>
 
     </FormAnamnesa>
   </AppLayouts>

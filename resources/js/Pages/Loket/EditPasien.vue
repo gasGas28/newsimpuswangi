@@ -144,7 +144,11 @@
                     <div class="col-sm-8">
                       <select v-model="form.kabupaten" class="form-select">
                         <option></option>
-                        <option v-for="kab in filteredKabupaten" :key="kab.NO_KAB" :value="kab.NO_KAB">
+                        <option
+                          v-for="kab in filteredKabupaten"
+                          :key="kab.NO_KAB"
+                          :value="kab.NO_KAB"
+                        >
                           {{ kab.NAMA_KAB }}
                         </option>
                       </select>
@@ -156,7 +160,13 @@
                     <div class="col-sm-8">
                       <select v-model="form.kecamatan" class="form-select">
                         <option></option>
-                        <option v-for="kec in filteredKecamatan" :key="kec.NO_KEC" :value="kec.NO_KEC">{{ kec.NAMA_KEC }}</option>
+                        <option
+                          v-for="kec in filteredKecamatan"
+                          :key="kec.NO_KEC"
+                          :value="kec.NO_KEC"
+                        >
+                          {{ kec.NAMA_KEC }}
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -166,7 +176,13 @@
                     <div class="col-sm-8">
                       <select v-model="form.kelurahan" class="form-select">
                         <option></option>
-                        <option v-for="kel in filteredKelurahan" :key="kel.NO_KEL" :value="kel.NO_KEL">{{ kel.NAMA_KEL }}</option>
+                        <option
+                          v-for="kel in filteredKelurahan"
+                          :key="kel.NO_KEL"
+                          :value="kel.NO_KEL"
+                        >
+                          {{ kel.NAMA_KEL }}
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -218,8 +234,7 @@
 <script setup>
   import AppLayouts from '@/Components/Layouts/AppLayouts.vue';
   import { useForm, router, Link, Head } from '@inertiajs/vue3';
-  import { ref, computed, watch } from "vue";
-
+  import { ref, computed, watch } from 'vue';
 
   const props = defineProps({
     pasien: Object,
@@ -256,7 +271,6 @@
     ihs_pasien: props.pasien.IHS_NUMBER ?? '',
   });
 
-
   const submit = () => {
     form.post(route('pasien.update', props.pasien.ID), {
       onSuccess: () => {
@@ -266,19 +280,17 @@
   };
 
   const filteredKabupaten = computed(() =>
-    props.kabupaten.filter((kab) => kab.NO_PROP === form.provinsi)
+    props.kabupaten.filter((kab) => kab.NO_PROP == form.provinsi)
   );
 
   const filteredKecamatan = computed(() =>
-    props.kecamatan.filter((kec) => kec.NO_PROP === form.provinsi && kec.NO_KAB === form.kabupaten)
+    props.kecamatan.filter((kec) => kec.NO_PROP == form.provinsi && kec.NO_KAB == form.kabupaten)
   );
 
   const filteredKelurahan = computed(() =>
     props.kelurahan.filter(
       (kel) =>
-        kel.NO_PROP === form.provinsi &&
-        kel.NO_KAB === form.kabupaten &&
-        kel.NO_KEC === form.kecamatan
+        kel.NO_PROP == form.provinsi && kel.NO_KAB == form.kabupaten && kel.NO_KEC == form.kecamatan
     )
   );
   // const selectedProvinsi = ref('');
