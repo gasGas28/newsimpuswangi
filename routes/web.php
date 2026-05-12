@@ -35,6 +35,11 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Profile\ProfileController;
+use App\Http\Controllers\Farmasi\MasterObatController;
+use App\Http\Controllers\Farmasi\PelayananResepController;
+use App\Http\Controllers\Farmasi\PengeluaranLangsungController;
+use App\Http\Controllers\Farmasi\PengeluaranLangsungDetailController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])
@@ -79,8 +84,7 @@ Route::match(['GET', 'POST'], '/_csrf-debug', function (Request $r) {
 // Protect home (wajib login)
 Route::get('/', function () {
     return Inertia::render('Templete/Index');
-})->middleware('auth')->name('home');
-;
+})->middleware('auth')->name('home');;
 
 
 // Login
@@ -123,18 +127,24 @@ Route::prefix('home')->group(function () {
         ->name('home.home');
 });
 
+// Skrining PTM
+Route::get('/simpus/skriningptm', [SkriningPTMController::class, 'index'])->name('ruang-layanan.ptm');
+Route::get('/simpus/skrining-ptm/pelayanan/{id}/{idPoli}/{idPelayanan}', [SkriningPTMController::class, 'pelayanan'])->name('ruang-layanan.skrining-ptm');
+Route::post('/simpus/skrining-ptm/update-status', [SkriningPTMController::class, 'updateStatus'])
+    ->name('pelayanan.update-status');
+
 // Kia
 // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
 Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
-    //ANC
-    // Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
-    Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
-    Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
-    Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
-    Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
-    Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
-    Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
-    Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
+//ANC
+// Route::inertia('/simpus/kia/anc1', 'Ruang_Layanan/KIA/ANC/Index')->name('ruang-layanan.anc1');
+Route::get('/simpus/kia/anc', [AncController::class, 'index'])->name('ruang-layanan.anc');
+Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
+Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
+Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
+Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
+Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
+Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
 
 // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
 Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
@@ -159,7 +169,7 @@ Route::prefix('admin')->group(function () {
 
 //Grup Farmasi
 Route::prefix('farmasi')->group(function () {
-    Route::get('/', fn() => Inertia::render('Farmasi/Index')) ->name('farmasi.index');
+    Route::get('/', fn() => Inertia::render('Farmasi/Index'))->name('farmasi.index');
     Route::get('/laporan', fn() => Inertia::render('Farmasi/LaporanFarmasi'))->name('farmasi.laporan');
     //master-obat
     Route::get('/master-obat', [MasterObatController::class, 'index'])->name('farmasi.master-obat.data');
@@ -179,7 +189,7 @@ Route::prefix('farmasi')->group(function () {
     Route::get('/pengeluaran-langsung/{id}/detail/data', [PengeluaranLangsungDetailController::class, 'getData'])->name('pengeluaran.detail.data');
     Route::post('/pengeluaran-langsung/{id}/detail', [PengeluaranLangsungDetailController::class, 'store'])->name('pengeluaran.detail.store');
     Route::delete('/pengeluaran-langsung/{id}/detail/{detailId}', [PengeluaranLangsungDetailController::class, 'destroy'])->name('pengeluaran.detail.destroy');
-    
+
     //pelayanan-resep
     Route::get('/pelayanan-resep', [PelayananResepController::class, 'index'])->name('farmasi.pelayanan-resep.index');
     Route::get('/pelayanan-resep/data', [PelayananResepController::class, 'getData']);
@@ -261,6 +271,8 @@ Route::prefix('templete')->group(function () {
 //     Route::get('/', fn() => Inertia::render('Loket/Index'))->name('loket.index');
 // });
 
+
+
 // Grup Laporan
 
 Route::prefix('laporan')
@@ -320,7 +332,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     });
 
     // PTM
-     Route::prefix('ptm')->name('ptm.')->group(function () {
+    Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
@@ -373,19 +385,15 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
         Route::get('kesehatanpeduliremaja/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'pelayanan'])
             ->name('kesehatanpeduliremaja.pelayanan')
             ->middleware('web');
-            
-        // ✅ route untuk diagnosa
+
         Route::get('diagnosa/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getDiagnosa'])
             ->name('diagnosa.list');
-        
-        // ✅ route untuk tindakan
+
         Route::get('tindakan/list', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getTindakan'])
             ->name('tindakan.list');
-            
-        // ✅ route baru untuk halaman Surat Keterangan
-        // ✅ route baru dengan parameter no_mr
+
         Route::get('surat-keterangan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'suratKeterangan'])
-                ->name('suratketerangan');
+            ->name('suratketerangan');
 
         Route::get('surat-rujukan/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'suratRujukan'])
             ->name('suratrujukan');
@@ -395,16 +403,15 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
 
         Route::get('riwayat-pasien/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'riwayatPasien'])
             ->name('riwayatpasien');
+    });
 
-});
-
-// Surat Keterangan API
-Route::prefix('promkes/surat-keterangan')->group(function () {
-    Route::get('/list/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getSuratKeterangan']);
-    Route::post('/store', [\App\Http\Controllers\MalSehat\PromkesController::class, 'storeSuratKeterangan']);
-    Route::put('/update/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'updateSuratKeterangan']);
-    Route::delete('/delete/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'deleteSuratKeterangan']);
-});
+    // Surat Keterangan API
+    Route::prefix('promkes/surat-keterangan')->group(function () {
+        Route::get('/list/{no_mr}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'getSuratKeterangan']);
+        Route::post('/store', [\App\Http\Controllers\MalSehat\PromkesController::class, 'storeSuratKeterangan']);
+        Route::put('/update/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'updateSuratKeterangan']);
+        Route::delete('/delete/{id}', [\App\Http\Controllers\MalSehat\PromkesController::class, 'deleteSuratKeterangan']);
+    });
 
 
     // Lain-lain
@@ -413,7 +420,6 @@ Route::prefix('promkes/surat-keterangan')->group(function () {
     Route::inertia('sehat', 'MalSehat/Sehat/Index')->name('sehat');
     Route::inertia('sehat/pelayanan', 'MalSehat/Sehat/Pelayanan')->name('sehat.pelayanan');
     Route::inertia('rapid-test', 'MalSehat/RapidTest/Index')->name('rapid-test');
-
 });
 Route::prefix('ruang_layanan/simpus/kunjungan-online')
     ->name('kunj-online.')
@@ -434,7 +440,6 @@ Route::prefix('ruang_layanan/simpus/kunjungan-online')
 
 Route::prefix('ruang_layanan')->middleware(['auth'])
     ->group(function () {
-
         Route::get('simpus/popUpFormRujukLanjut', [PoliBpUmumController::class, 'popUpFormRujukLanjut'])->name('ruang-layanan.popUpFormRujukLanjut');
 
         //Simpan rujuk
@@ -534,11 +539,6 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
 
 
         // 🔹 Kunjungan Online
-    
-
-
-
-
 
         //Sanitasi
         Route::inertia('/simpus/sanitasi', 'Ruang_Layanan/Sanitasi/pasien_poli')->name('ruang-layanan.sanitasi');
@@ -547,28 +547,16 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         Route::inertia('/simpus/gizi', 'Ruang_Layanan/Gizi/pasien_poli')->name('ruang-layanan.gizi');
         Route::inertia('/simpus/gizi/pelayanan', 'Ruang_Layanan/Gizi/pelayanan')->name('ruang-layanan.gizi.pelayanan');
 
-
-
-        //ANC
-// Route::get('/simpus/kia/anc/pelayanan/{id}/{idPoli}/{idPelayanan}', [AncController::class, 'pelayanan'])->name('ruang-layanan-anc.pelayanan');
-// Route::post('simpus/kia/anc/pelayanan/', [AncController::class, 'setKunjunganANC'])->name('ruang-layanan-anc.kunjunganANC');
-// Route::post('simpus/kia/anc/pelayanan/obstetri', [AncController::class, 'setObstetri'])->name('ruang-layanan-anc.obstetri');
-// Route::post('simpus/kia/anc/pelayanan/DataDiagnosa', [AncController::class, 'setDataDiagnosa'])->name('ruang-layanan-anc.dataDiagnosa');
-// Route::delete('simpus/kia/anc/pelayanan/DataDiagnosa/{id}', [AncController::class, 'hapusDataDiagnosa'])->name('diagnosa.destroy');
-// Route::post('simpus/kia/anc/pelayanan/diagnosaKep', [AncController::class, 'setDataDiagnosaKep'])->name('ruang-layanan-anc.diagnosaKep');
-    
-        // Route::get('/simpus/kia/ruang-layanan', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
-// Route::get('/simpus/kia/pelayanan/{id}/{idPoli}/{idPelayanan}', [PoliKIAController::class, 'pelayanan'])->name('ruang-layanan-kia.pelayanan');
-// Route::get('/api/kia/cari-diagnosa', [PoliKIAController::class, 'searchDiagnosa'])->name('api.cari-diagnosa');
-    
-
-
-
         //Rawat Inap
         Route::inertia('/simpus/rawat-inap', 'Ruang_Layanan/RawatInap/index')->name('ruang-layanan.rawat-inap');
         Route::inertia('/simpus/rawat-inap/penerimaan-pasien', 'Ruang_Layanan/RawatInap/PenerimaanPasien/pasien_poli')->name('ruang-layanan.rawat-inap.penerimaan-pasien');
         Route::inertia('/simpus/rawat-inap/perawatan', 'Ruang_Layanan/RawatInap/DataKeperawatan/DataRanapKeperawatan')->name('ruang-layanan.rawat-inap.perawatan');
         Route::inertia('/simpus/rawat-inap/pengeluaran', 'Ruang_Layanan/RawatInap/PasienKeluar/DataPasienKeluar')->name('ruang-layanan.rawat-inap.pengeluaran');
+
+
+
+        // // Skrining PTM
+        // Route::inerta('/simpus/skrining-ptm', )
     });
 
 //Laborat

@@ -145,7 +145,7 @@ class indexController extends Controller
                 throw new \RuntimeException('Bed tidak tersedia pada tanggal tersebut');
             }
 
-            if (in_array($data['pilihan'], ['1','2','3'])) {
+            if (in_array($data['pilihan'], ['1', '2', '3'])) {
                 // Masuk / Pindah / Salah Kamar
                 if (!$ranap->tglMasuk) {
                     $ranap->tglMasuk = $tglEfektif;
@@ -228,14 +228,14 @@ class indexController extends Controller
             $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
         })->where('tglPelayanan', now()->toDateString())->count();
         $jumlahPasienSanitasi = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '097')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
-            })->where('tglPelayanan', now()->toDateString())->count();
+            $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
         $jumlahPasienGizi =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '997')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
-            })->where('tglPelayanan', now()->toDateString())->count();
+            $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
         $jumlahPasienKunjOnline =  SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '999')->whereHas('SimpusLoket', function ($query) {
-                $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
-            })->where('tglPelayanan', now()->toDateString())->count();
+            $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
+        })->where('tglPelayanan', now()->toDateString())->count();
         return response()->json([
             'jumlahPasienKluster2' => $jumlahPasienKluster2,
             'jumlahPasienKluster3' => $jumlahPasienKluster3,
@@ -244,20 +244,18 @@ class indexController extends Controller
             'jumlahPasienGizi' => $jumlahPasienGizi,
             'jumlahPasienKunjOnline' => $jumlahPasienKunjOnline
         ]);
-
     }
 
     public function listPoliKluster($kluster)
     {
         if ($kluster == '2') {
-            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003])->get();
+            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', [001, 003, 006])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
                 $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
-            $totalPasienKIA = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '003')->whereHas('SimpusLoket', function ($query) {
-            })->where('tglPelayanan', now()->toDateString())->count();
-            //dd($totalPasienUmum);
-            //dd($listPoli);
+            $totalPasienKIA = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '003')->whereHas('SimpusLoket', function ($query) {})->where('tglPelayanan', now()->toDateString())->count();
+
+
             return Inertia::render(
                 'Ruang_Layanan/klusterPasien/kluster2',
                 [
@@ -266,15 +264,15 @@ class indexController extends Controller
                     'totalPasienKIA' => $totalPasienKIA,
                 ]
             );
-
         } elseif ($kluster == '3') {
-            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008'])->get();
+            $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['001', '008', '006'])->get();
             $totalPasienUmum = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '001')->whereHas('SimpusLoket', function ($query) {
                 $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
             $totalPasienKB = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '008')->whereHas('SimpusLoket', function ($query) {
                 $query->where('umur', '>', 17)->where('unitId', Auth()->user()->unit);
             })->where('tglPelayanan', now()->toDateString())->count();
+            $totalPasienPTM = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '006')->whereHas('SimpusLoket', function ($query) {})->where('tglPelayanan', now()->toDateString())->count();
             // dd($listPoli);
             //dd($totalPasienKB);
             return Inertia::render(
@@ -282,10 +280,10 @@ class indexController extends Controller
                 [
                     'listPoli' => $listPoli,
                     'totalPasienUmum' => $totalPasienUmum,
-                    'totalPasienKB' => $totalPasienKB
+                    'totalPasienKB' => $totalPasienKB,
+                    'totalPasienPTM' => $totalPasienPTM,
                 ]
             );
-
         } else {
             $listPoli = SimpusPoliFKTP::whereIn('kdPoli', ['002', '005', '098',])->get();
             $totalPasienGigi = SimpusPelayanan::with('SimpusLoket')->where('kdPoli', '002')->where('tglPelayanan', now()->toDateString())->count();
@@ -455,7 +453,7 @@ class indexController extends Controller
     public function MasterObat(Request $request)
     {
         $search = $request->get('search');
-        
+
         $query = SimpusMasterObat::where('AKTIF', '1');
 
         if ($search) {
@@ -529,7 +527,6 @@ class indexController extends Controller
             ],
             'links' => $links,
         ]);
-
     }
 
     public function getPermohonanLaborat($idLoket)
@@ -541,5 +538,4 @@ class indexController extends Controller
             ]
         );
     }
-
 }

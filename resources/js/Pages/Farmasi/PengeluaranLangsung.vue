@@ -47,10 +47,10 @@
               <option value="">-- Pilih Sub Unit --</option>
               <option
                 v-for="su in subUnits"
-                :key="s.id_detail"
-                :value="s.id_detail"
+                :key="su.id_detail"
+                :value="su.id_detail"
               >
-                {{ s.nama_unit }}
+                {{ su.nama_unit }}
               </option>
             </select>
           </div>

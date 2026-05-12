@@ -15,6 +15,7 @@ use App\Models\Pasien\MasterPekerjaan;
 use App\Models\Pasien\Pasien;
 use App\Models\Pasien\Provinsi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class PasienController extends Controller
@@ -40,7 +41,7 @@ class PasienController extends Controller
             )
             ->get();
 
-            // dd($pasien);
+        // dd($pasien);
 
         return Inertia::render('Loket/SearchPasien', [
             'pasien' => $pasien,
@@ -53,9 +54,19 @@ class PasienController extends Controller
         $pekerjaan = MasterPekerjaan::all();
         $keluarga = HubKeluarga::all();
         $provinsi = Provinsi::all();
-        $kabupaten = Kabupaten::all();
-        $kecamatan = Kecamatan::all();
-        $kelurahan = Kelurahan::all();
+        $kabupaten = Kabupaten::where('NO_PROP', $pasien->NO_PROP)->get();
+
+        // Filter kecamatan berdasarkan provinsi + kabupaten pasien
+        $kecamatan = Kecamatan::where('NO_PROP', $pasien->NO_PROP)
+            ->where('NO_KAB', $pasien->NO_KAB)
+            ->get();
+
+        // Filter kelurahan berdasarkan provinsi + kabupaten + kecamatan pasien
+        $kelurahan = Kelurahan::where('NO_PROP', $pasien->NO_PROP)
+            ->where('NO_KAB', $pasien->NO_KAB)
+            ->where('NO_KEC', $pasien->NO_KEC)
+            ->get();
+
         return Inertia::render('Loket/EditPasien', [
             'pasien' => $pasien,
             'agama' => $agama,
@@ -69,26 +80,29 @@ class PasienController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
+        $validated = Validator::make($request->all(), [
             'nama' => 'required|string|max:60',
             'nik' => 'required|string|max:16',
             'alamat' => 'required|string|max:160',
             'tanggal_lahir' => 'required|date',
+            'provinsi' => 'required',
             'kabupaten' => 'required',
             'kecamatan' => 'required',
             'kelurahan' => 'required',
-        ]);
+        ])->validate();
 
         $pasien = Pasien::findOrFail($id);
         $pasien->update([
-            'NAMA_LGKP' => $request->nama,
-            'NIK' => $request->nik,
-            'ALAMAT' => $request->alamat,
-            'TGL_LHR' => $request->tanggal_lahir,
-            'NO_KAB' => $request->kabupaten,  
-            'NO_KEC' => $request->kecamatan,
-            'NO_KEL' => $request->kelurahan,
+            'NAMA_LGKP' => $validated['nama'],
+            'NIK' => $validated['nik'],
+            'ALAMAT' => $validated['alamat'],
+            'TGL_LHR' => $validated['tanggal_lahir'],
+            'NO_PROP' => $validated['provinsi'],
+            'NO_KAB' => $validated['kabupaten'],
+            'NO_KEC' => $validated['kecamatan'],
+            'NO_KEL' => $validated['kelurahan'],
         ]);
+
 
         return Inertia::location(route('loket.search'));
     }

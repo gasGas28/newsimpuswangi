@@ -41,6 +41,7 @@ const { props } = usePage();
 const listPoli = props.listPoli
 const totalPasienUmum = props.totalPasienUmum
 const totalPasienkia = props.totalPasienKIA
+const totalPasienPTM = props.totalPasienPTM
 console.log(listPoli)
 
 const currentDate = new Date().toLocaleDateString('id-ID', {

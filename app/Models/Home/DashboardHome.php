@@ -129,7 +129,7 @@ class DashboardHome
     public static function topDiseases(string $startDate, string $endDate, int $limit = 10): array
     {
         $rows = DB::table('simpus_loket as l')
-            ->selectRaw("TRIM(COALESCE(l.keluhan, 'Tidak diketahui')) AS nama, COUNT(*) AS total")
+            ->selectRaw("TRIM(COALESCE(l.jnsPeserta, 'PBI')) AS nama, COUNT(*) AS total")
             ->whereBetween(DB::raw('DATE(l.tglKunjungan)'), [$startDate, $endDate])
             ->groupBy('nama')
             ->orderByDesc('total')

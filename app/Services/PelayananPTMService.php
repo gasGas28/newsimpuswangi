@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\DB;
+use App\Models\RuangLayanan\MasterRiwayat;
+use App\Models\RuangLayanan\KIA\Alergi;
+use App\Models\RuangLayanan\SimpusDataDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosaaa;
+use App\Models\RuangLayanan\tindakan;
+
+class PelayananPTMService
+{
+    public function getData($id, $idPoli)
+    {
+        return DB::table('simpus_loket as l')
+            ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
+            ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
+            ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
+
+            ->leftJoin('setup_kel as kel', function ($join) {
+                $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
+                    ->on('p.NO_KEC', '=', 'kel.NO_KEC')
+                    ->on('p.NO_KAB', '=', 'kel.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kel.NO_PROP');
+            })
+
+            ->leftJoin('setup_kec as kec', function ($join) {
+                $join->on('p.NO_KEC', '=', 'kec.NO_KEC')
+                    ->on('p.NO_KAB', '=', 'kec.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kec.NO_PROP');
+            })
+
+            ->leftJoin('setup_kab as kab', function ($join) {
+                $join->on('p.NO_KAB', '=', 'kab.NO_KAB')
+                    ->on('p.NO_PROP', '=', 'kab.NO_PROP');
+            })
+
+            ->leftJoin('setup_prop as prop', 'p.NO_PROP', '=', 'prop.NO_PROP')
+
+            ->where('l.kdPoli', $idPoli)
+            ->where('l.idLoket', $id)
+
+            ->select(
+                'p.ID',
+                'p.NO_MR',
+                'p.NAMA_LGKP',
+                'p.NIK',
+                'kel.nama_kel',
+                'kec.nama_kec',
+                'kab.nama_kab',
+                'prop.nama_prop',
+                'poli.nmPoli',
+                'l.kdPoli',
+                'p.alamat',
+                'p.no_rt',
+                'p.no_rw',
+                'p.jenis_klmin',
+                'l.umur',
+                'l.umur_bulan',
+                'l.umur_hari',
+                'l.tglKunjungan',
+                'l.idLoket',
+                'pel.idpelayanan',
+                'pel.sudahDilayani',
+                'pel.startTime',
+                'pel.progressTime'
+            )
+            ->get();
+    }
+
+    public function getMasterData()
+    {
+        return [
+            'diagnosa' => SimpusDiagnosaaa::whereNotNull('F3')->get(),
+            'diagnosaKeperawatan' => SimpusDiagnosa::where('kategori', 1)->get(),
+            'tindakan' => tindakan::where('kdPoli', 003)->get(),
+            'riwayat' => MasterRiwayat::all(),
+            'AlergiMakanan' => Alergi::where('category', 1)->get(),
+            'AlergiObat' => Alergi::where('category', 2)->get(),
+            'DataDiagnosa' => SimpusDataDiagnosa::all(),
+        ];
+    }
+    public function updateStatusPelayanan($idPelayanan, $status)
+    {
+        DB::table('simpus_pelayanan')
+            ->where('idpelayanan', $idPelayanan)
+            ->update([
+                'sudahDilayani' => $status,
+                'startTime' => now(),
+            ]);
+    }
+}

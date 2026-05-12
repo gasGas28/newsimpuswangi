@@ -142,7 +142,6 @@ const props = defineProps({
 });
 console.log('data pasien/unit list', props.rows);
 
-
 const emit = defineEmits(['filter', 'update-dataPelayanan'])
 
 const tanggal_kunjungan = ref('')

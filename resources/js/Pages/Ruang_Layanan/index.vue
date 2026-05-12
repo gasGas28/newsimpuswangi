@@ -58,6 +58,7 @@ const poliStyles = {
   'Kunjungan Online': { bg: '#3b82f6', icon: 'bi bi-chat-dots' },
   'Gizi': { bg: '#22c55e', icon: 'bi bi-egg-fried' },
   'KIA': { bg: '#f97316', icon: 'bi bi-gender-female' },
+  'Skrining PTM': {bg: '#f97316', icon: 'bi bi-gender-female'},
 }
 
   const listPoliWithStyle = listPoli.map(poli => ({

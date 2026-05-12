@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa title="Kematian Maternal dan Perinatal" :backRoute :unitList :rows>
+    <FormAnamnesa title="Pelayanan Neonatus" :backRoute :unitList :rows>
 
     </FormAnamnesa>
   </AppLayouts>
@@ -9,7 +9,7 @@
 import { ref } from 'vue'
 import { route } from 'ziggy-js';
 import { usePage } from '@inertiajs/vue3';
-import FormAnamnesa from '../../../../Components/Layouts/RuangLayanan/DataPasien.vue';
+import FormAnamnesa from '../../../../Components/Layouts/RuangLayanan/KIA/DataPasien.vue';
 import AppLayouts from '../../../../Components/Layouts/AppLayouts.vue';
 
 const {props} = usePage();

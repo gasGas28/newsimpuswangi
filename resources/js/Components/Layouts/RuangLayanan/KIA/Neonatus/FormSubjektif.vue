@@ -41,15 +41,17 @@
                 <option value="0">Perempuan</option>
               </select>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Anak Ke</label>
-              <input type="number" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Gestasi</label>
-              <div class="input-group">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Anak Ke</label>
                 <input type="number" class="form-control" />
-                <span class="input-group-text">Week</span>
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Gestasi</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" />
+                  <span class="input-group-text">Week</span>
+                </div>
               </div>
             </div>
             <div class="d-flex justify-content-end">

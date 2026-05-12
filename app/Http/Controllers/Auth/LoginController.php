@@ -9,17 +9,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
     public function store(Request $request)
     {
         // 1) Validasi input dasar + reCAPTCHA
-        $data = $request->validate([
+        $data = Validator::make($request->all(), [
             'username'             => ['required', 'string'],
             'password'             => ['required', 'string'],
             'g-recaptcha-response' => ['required', 'string'],
-        ]);
+        ])->validate();
 
         // 2) Verifikasi reCAPTCHA ke Google
         try {

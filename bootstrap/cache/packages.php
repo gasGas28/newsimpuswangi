@@ -1,4 +1,11 @@
 <?php return array (
+  'barryvdh/laravel-ide-helper' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Barryvdh\\LaravelIdeHelper\\IdeHelperServiceProvider',
+    ),
+  ),
   'inertiajs/inertia-laravel' => 
   array (
     'providers' => 
@@ -25,6 +32,13 @@
     'providers' => 
     array (
       0 => 'Laravel\\Sail\\SailServiceProvider',
+    ),
+  ),
+  'laravel/sanctum' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     ),
   ),
   'laravel/tinker' => 
