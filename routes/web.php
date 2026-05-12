@@ -133,7 +133,11 @@ Route::get('/simpus/skrining-ptm/pelayanan/{id}/{idPoli}/{idPelayanan}', [Skrini
 Route::post('/simpus/skrining-ptm/update-status', [SkriningPTMController::class, 'updateStatus'])
     ->name('pelayanan.update-status');
 
-// Kia
+Route::prefix('wilayah')->group(function () {
+    Route::get('/kabupaten/{provinsi}', [PasienController::class, 'getKabupaten'])->name('wilayah.kabupaten');
+    Route::get('/kecamatan/{provinsi}/{kabupaten}', [PasienController::class, 'getKecamatan'])->name('wilayah.kecamatan');
+    Route::get('/kelurahan/{provinsi}/{kabupaten}/{kecamatan}', [PasienController::class, 'getKelurahan'])->name('wilayah.kelurahan');  
+});
 // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
 Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
 //ANC
