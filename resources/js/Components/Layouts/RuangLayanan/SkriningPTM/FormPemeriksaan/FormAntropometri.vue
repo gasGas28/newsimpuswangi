@@ -1,6 +1,6 @@
 <template>
   <div class="p-3">
-    <h5 class="mb-4 fw-semibold text-success">Antropometri dan Tekanan Darah</h5>
+    <h5 class="mb-4 fw-semibold text-success">Skrining PTM - Antropometri dan Data Risiko</h5>
 
     <div class="row g-3">
       <div class="col-md-6">
@@ -80,6 +80,33 @@
         />
       </div>
 
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Gula Darah Sewaktu (mg/dL)</label>
+        <input
+          v-model.number="form.gula_darah"
+          type="number"
+          min="0"
+          class="form-control"
+          placeholder="Masukkan gula darah"
+        />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Kolesterol Total (mg/dL)</label>
+        <input
+          v-model.number="form.kolesterol_total"
+          type="number"
+          min="0"
+          class="form-control"
+          placeholder="Masukkan kolesterol total"
+        />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Kategori Risiko PTM</label>
+        <input :value="form.kategori_risiko" type="text" class="form-control bg-light" readonly />
+      </div>
+
       <div class="col-md-12">
         <label class="form-label fw-semibold">Interpretasi Hipertensi</label>
         <input
@@ -89,77 +116,104 @@
           readonly
         />
       </div>
+
+      <div class="col-md-4" v-for="(option, index) in faktorRisiko" :key="index">
+        <label class="form-label fw-semibold">{{ option.label }}</label>
+        <select v-model="form[option.key]" class="form-select">
+          <option value="tidak">Tidak</option>
+          <option value="ya">Ya</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <h6 class="mb-2 fw-semibold text-success">Riwayat Penyakit Pribadi</h6>
+        <div class="row g-2">
+          <div class="col-6" v-for="(item, index) in riwayatPenyakit" :key="index">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                :id="item.key"
+                v-model="form[item.key]"
+              />
+              <label class="form-check-label" :for="item.key">{{ item.label }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <h6 class="mb-2 fw-semibold text-success">Riwayat Penyakit Keluarga</h6>
+        <div class="row g-2">
+          <div class="col-6" v-for="(item, index) in riwayatKeluarga" :key="index">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                :id="item.key"
+                v-model="form[item.key]"
+              />
+              <label class="form-check-label" :for="item.key">{{ item.label }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <label class="form-label fw-semibold">Rekomendasi Tindak Lanjut</label>
+        <textarea
+          :value="form.rekomendasi"
+          class="form-control bg-light"
+          rows="3"
+          readonly
+        ></textarea>
+      </div>
+
+      <div class="col-md-12">
+        <label class="form-label fw-semibold">Catatan Tambahan</label>
+        <textarea
+          v-model="form.catatan"
+          class="form-control"
+          rows="3"
+          placeholder="Tuliskan catatan atau anjuran tambahan"
+        ></textarea>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-  import { reactive, watch } from 'vue';
-
-  defineProps({
-    DataPasien: Array,
+  const props = defineProps({
+    DataPasien: Object,
+    formData: Object,
+    tindakan: Array,
   });
 
-  const form = reactive({
-    tinggi_badan: '',
-    berat_badan: '',
-    imt: '',
-    interpretasi_imt: '',
-    lingkar_pinggang: '',
-    sistolik: '',
-    diastolik: '',
-    interpretasi_hipertensi: '',
-  });
+  const form = props.formData || {};
 
-  const getInterpretasiImt = (imt) => {
-    if (imt < 18.5) return 'Berat Badan Kurang';
-    if (imt <= 22.9) return 'Berat Badan Normal';
-    if (imt <= 24.9) return 'Kelebihan Berat Badan';
-    if (imt <= 29.9) return 'Obes I';
-    return 'Obes II';
-  };
+  const faktorRisiko = [
+    { key: 'merokok', label: 'Merokok' },
+    { key: 'alkohol', label: 'Konsumsi Alkohol' },
+    { key: 'aktivitas_fisik', label: 'Aktivitas Fisik Tidak Cukup' },
+    { key: 'konsumsi_gula', label: 'Konsumsi Gula Berlebih' },
+    { key: 'konsumsi_garam', label: 'Konsumsi Garam Berlebih' },
+    { key: 'stress', label: 'Stres / Tekanan Emosional' },
+  ];
 
-  const getInterpretasiHipertensi = (sistolik, diastolik) => {
-    if (sistolik >= 180 || diastolik >= 120) return 'Krisis Hipertensi';
-    if (sistolik >= 160 || diastolik >= 100) return 'Hipertensi Derajat 2';
-    if (sistolik >= 140 || diastolik >= 90) return 'Hipertensi Derajat 1';
-    if (sistolik >= 130 || diastolik >= 85) return 'Normal Tinggi';
-    if (sistolik >= 120 || diastolik >= 80) return 'Normal';
-    return 'Optimal';
-  };
+  const riwayatPenyakit = [
+    { key: 'riwayat_hipertensi', label: 'Hipertensi' },
+    { key: 'riwayat_diabetes', label: 'Diabetes Melitus' },
+    { key: 'riwayat_dislipidemia', label: 'Dislipidemia' },
+    { key: 'riwayat_kardiovaskular', label: 'Penyakit Kardiovaskular' },
+    { key: 'riwayat_stroke', label: 'Stroke' },
+    { key: 'riwayat_kanker', label: 'Kanker' },
+  ];
 
-  watch(
-    () => [form.tinggi_badan, form.berat_badan],
-    ([tinggiBadan, beratBadan]) => {
-      const tinggi = Number(tinggiBadan);
-      const berat = Number(beratBadan);
-
-      if (!tinggi || !berat) {
-        form.imt = '';
-        form.interpretasi_imt = '';
-        return;
-      }
-
-      const tinggiMeter = tinggi / 100;
-      const imt = berat / (tinggiMeter * tinggiMeter);
-
-      form.imt = imt.toFixed(2);
-      form.interpretasi_imt = getInterpretasiImt(imt);
-    }
-  );
-
-  watch(
-    () => [form.sistolik, form.diastolik],
-    ([sistolikValue, diastolikValue]) => {
-      const sistolik = Number(sistolikValue);
-      const diastolik = Number(diastolikValue);
-
-      if (!sistolik || !diastolik) {
-        form.interpretasi_hipertensi = '';
-        return;
-      }
-
-      form.interpretasi_hipertensi = getInterpretasiHipertensi(sistolik, diastolik);
-    }
-  );
+  const riwayatKeluarga = [
+    { key: 'riwayat_keluarga_hipertensi', label: 'Hipertensi' },
+    { key: 'riwayat_keluarga_diabetes', label: 'Diabetes Melitus' },
+    { key: 'riwayat_keluarga_kardiovaskular', label: 'Penyakit Kardiovaskular' },
+    { key: 'riwayat_keluarga_stroke', label: 'Stroke' },
+    { key: 'riwayat_keluarga_kanker', label: 'Kanker' },
+  ];
 </script>

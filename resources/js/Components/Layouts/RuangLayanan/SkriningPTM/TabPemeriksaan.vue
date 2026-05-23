@@ -22,13 +22,13 @@
 
       <!-- Dynamic Form -->
       <div class="card-body bg-white">
-        <component :is="currentForm" :DataPasien="DataPasien" />
+        <component :is="currentForm" :DataPasien="DataPasien" :formData="formPemeriksaan" :tindakan="props.tindakan" :DataTindakan="props.DataTindakan" />
       </div>
     </div>
   </div>
 </template>
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, reactive } from 'vue';
   import { Link } from '@inertiajs/vue3';
 
   // Import form components
@@ -41,7 +41,9 @@
 
   // Props
   const props = defineProps({
-    DataPasien: Array,
+    DataPasien: Object,
+    tindakan: Array,
+    DataTindakan: Array,
   });
 
   // Tabs list
@@ -55,11 +57,19 @@
 
   const selectedTab = ref('subjektif');
 
+  const formPemeriksaan = reactive({
+    subjektif: {},
+    objektif: {},
+    assessment: {},
+    planning: {},
+    status_pasien: {},
+  });
+
   const currentForm = computed(() => {
     const map = {
       subjektif: FormSubjektif,
       objektif: FormObjektif,
-      assessment: FormAssessment,   
+      assessment: FormAssessment,
       planning: FormPlanning,
       status_pasien: FormStatusPasien,
       kirim_satu_sehat: FormResumePasien,

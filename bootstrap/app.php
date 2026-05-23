@@ -22,9 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         // ⬇️ PENTING: tempelkan Inertia middleware ke group "web"
-        $middleware->web(append: [
+        $middleware->appendToGroup('web', [
             HandleInertiaRequests::class,
-            \App\Http\Middleware\BindUserToSession::class,
+           \App\Http\Middleware\BindUserToSession::class,
 
         ]);
 

@@ -2,6 +2,15 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Requests\SimpanTindakanRequest;
+
+Route::post('/test-form-request', function (SimpanTindakanRequest $request) {
+    dd([
+        'validated' => $request->validated(),
+        'all' => $request->all(),
+        'class' => get_class($request),
+    ]);
+});
 
 /*
 |--------------------------------------------------------------------------

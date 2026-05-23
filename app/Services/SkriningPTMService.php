@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\RuangLayanan\DataMasterUnitDetail;
 
-class SkriningPtmService
+class SkriningPTMService
 {
     public function getDataUnitByAuth()
     {

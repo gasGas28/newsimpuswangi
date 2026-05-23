@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Middleware;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Auth\User;
 
 class Group extends Model
 {
