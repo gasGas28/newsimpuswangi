@@ -25,8 +25,8 @@
       <Link
         :href="
           route('ruang-layanan.cppt', {
-            idPoli: DataPasien[0].kdPoli,
-            idPasien: DataPasien[0].ID,
+            idPoli: DataPasien.kdPoli,
+            idPasien: DataPasien.ID,
           })
         "
         class="action-card medical-action"
@@ -63,7 +63,7 @@
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-  DataPasien: Array,
+  DataPasien: Object,
   sudahMulai: Boolean,
 });
 

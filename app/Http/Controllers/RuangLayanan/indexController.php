@@ -221,7 +221,7 @@ class indexController extends Controller
         $jumlahPasienKluster2 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '003'])->whereHas('SimpusLoket', function ($query) {
             $query->where('umur', '<=', 17)->where('unitId', Auth()->user()->unit);
         })->where('tglPelayanan', now()->toDateString())->count();
-        $jumlahPasienKluster3 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '008'])->whereHas('SimpusLoket', function ($query) {
+        $jumlahPasienKluster3 = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['001', '008', '006'])->whereHas('SimpusLoket', function ($query) {
             $query->where('umur', '>=', 18)->where('unitId', Auth()->user()->unit);
         })->where('tglPelayanan', now()->toDateString())->count();
         $jumlahPasienLintasKluster = SimpusPelayanan::with('SimpusLoket')->whereIn('kdPoli', ['002', '004', '005', '098'])->whereHas('SimpusLoket', function ($query) {

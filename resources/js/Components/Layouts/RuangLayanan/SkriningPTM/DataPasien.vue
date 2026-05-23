@@ -8,8 +8,8 @@
           <i class="bi bi-person-fill text-primary fs-1"></i>
         </div>
         <div>
-          <h3 v-for="pasien in DataPasien" :key="pasien.ID" class="mb-1 fw-bold">
-            {{ pasien.NAMA_LGKP }}
+          <h3 class="mb-1 fw-bold">
+            {{ DataPasien.NAMA_LGKP }}
             <span class="text-muted">(-)</span>
           </h3>
         </div>
@@ -32,8 +32,8 @@
             <i class="bi bi-calendar3 text-primary me-2"></i>
             <h6 class="mb-0 text-muted">Jk / Umur</h6>
           </div>
-          <p v-for="pasien in DataPasien" :key="pasien.ID" class="mb-0 fw-semibold">
-            L {{ pasien.umur }} Tahun - {{ pasien.umur_bulan }} Bulan - {{ pasien.umur_hari }} Hari
+          <p class="mb-0 fw-semibold">
+            L {{ DataPasien.umur }} Tahun - {{ DataPasien.umur_bulan }} Bulan - {{ DataPasien.umur_hari }} Hari
           </p>
         </div>
       </div>
@@ -45,10 +45,10 @@
             <i class="bi bi-geo-alt-fill text-primary me-2"></i>
             <h6 class="mb-0 text-muted">Alamat</h6>
           </div>
-          <p v-for="address in DataPasien" :key="address.ID" class="mb-0 fw-semibold">
-            {{ address.alamat }} RT {{ address.no_rt }} RW {{ address.no_rw }} Kel.
-            {{ address.nama_kel }} Kec. {{ address.nama_kec }} <br />{{ address.nama_kab }} Prov.
-            {{ address.nama_prop }}
+          <p class="mb-0 fw-semibold">
+            {{ DataPasien.alamat }} RT {{ DataPasien.no_rt }} RW {{ DataPasien.no_rw }} Kel.
+            {{ DataPasien.nama_kel }} Kec. {{ DataPasien.nama_kec }} <br />{{ DataPasien.nama_kab }} Prov.
+            {{ DataPasien.nama_prop }}
           </p>
         </div>
       </div>
@@ -60,8 +60,8 @@
             <i class="bi bi-heart-pulse-fill text-success me-2"></i>
             <h6 class="mb-0 text-muted">Jenis/Poli</h6>
           </div>
-          <p v-for="poli in DataPasien" :key="poli.ID" class="mb-0 fw-semibold">
-            Kunjungan Sakit ({{ poli.nmPoli }})
+          <p class="mb-0 fw-semibold">
+            Kunjungan Sakit ({{ DataPasien.nmPoli }})
           </p>
         </div>
       </div>
@@ -73,8 +73,8 @@
             <i class="bi bi-calendar-check-fill text-info me-2"></i>
             <h6 class="mb-0 text-muted">Tanggal Kunjungan</h6>
           </div>
-          <p v-for="tanggal in DataPasien" :key="tanggal.ID" class="mb-0 fw-semibold">
-            {{ tanggal.tglKunjungan }}
+          <p class="mb-0 fw-semibold">
+            {{ DataPasien.tglKunjungan }}
           </p>
         </div>
       </div>
@@ -86,8 +86,8 @@
             <i class="bi bi-credit-card-fill text-warning me-2"></i>
             <h6 class="mb-0 text-muted">No. RM / NIK</h6>
           </div>
-          <p v-for="no in DataPasien" :key="no.ID" class="mb-0 fw-semibold">
-            {{ no.NO_MR }} / {{ no.NIK }}
+          <p class="mb-0 fw-semibold">
+            {{ DataPasien.NO_MR }} / {{ DataPasien.NIK }}
           </p>
         </div>
       </div>
@@ -99,7 +99,9 @@
             <i class="bi bi-credit-card-fill text-warning me-2"></i>
             <h6 class="mb-0 text-muted">No. BPJS/Provider</h6>
           </div>
-          <p class="mb-0 fw-semibold">BPJS-9876543210 / Klinik Sehat</p>
+          <p class="mb-0 fw-semibold">
+            {{ DataPasien.NO_BPJS }} / {{ DataPasien.PROVIDER }}
+          </p>
         </div>
       </div>
     </div>
@@ -114,7 +116,7 @@
 
   const props = defineProps({
     title: String,
-    DataPasien: Array,
+    DataPasien: Object,
     backRoute: String,
   });
 </script>

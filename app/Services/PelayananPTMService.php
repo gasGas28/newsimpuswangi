@@ -9,6 +9,7 @@ use App\Models\RuangLayanan\SimpusDataDiagnosa;
 use App\Models\RuangLayanan\SimpusDiagnosa;
 use App\Models\RuangLayanan\SimpusDiagnosaaa;
 use App\Models\RuangLayanan\tindakan;
+use App\Models\RuangLayanan\SimpusTindakan;
 
 class PelayananPTMService
 {
@@ -67,19 +68,18 @@ class PelayananPTMService
                 'pel.startTime',
                 'pel.progressTime'
             )
-            ->get();
+            ->first();
     }
 
     public function getMasterData()
     {
+        $SimpusTindakan = SimpusTindakan::select('kdTindakan', 'nmTindakan', 'nmTindakanInd')
+            ->where('deskripsi', 'icd9cm')
+            ->groupBy('kdTindakan', 'nmTindakan', 'nmTindakanInd')
+            ->get();
+        // dd($SimpusTindakan);
         return [
-            'diagnosa' => SimpusDiagnosaaa::whereNotNull('F3')->get(),
-            'diagnosaKeperawatan' => SimpusDiagnosa::where('kategori', 1)->get(),
-            'tindakan' => tindakan::where('kdPoli', 003)->get(),
-            'riwayat' => MasterRiwayat::all(),
-            'AlergiMakanan' => Alergi::where('category', 1)->get(),
-            'AlergiObat' => Alergi::where('category', 2)->get(),
-            'DataDiagnosa' => SimpusDataDiagnosa::all(),
+            'tindakan' => $SimpusTindakan,
         ];
     }
     public function updateStatusPelayanan($idPelayanan, $status)
@@ -91,4 +91,6 @@ class PelayananPTMService
                 'startTime' => now(),
             ]);
     }
+
+    
 }

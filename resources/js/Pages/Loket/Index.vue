@@ -337,6 +337,29 @@
           </div>
         </div>
 
+        <div
+          v-if="searchResultModal.show"
+          class="custom-modal d-flex justify-content-center align-items-center"
+          @click.self="closeSearchResultModal"
+        >
+          <div class="modal-content-custom text-center">
+            <template v-if="searchResultModal.status === 'success'">
+              <div class="success-icon mb-3">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+              <h5 class="fw-bold mt-3">Berhasil</h5>
+              <p class="text-muted mb-0">Pemeriksaan dimulai</p>
+            </template>
+            <template v-else>
+              <div class="error-icon mb-3">
+                <i class="bi bi-x-circle-fill"></i>
+              </div>
+              <h5 class="fw-bold mt-3">Gagal</h5>
+              <p class="text-muted mb-0">{{ searchResultModal.message }}</p>
+            </template>
+          </div>
+        </div>
+
         <div class="loket-card">
           <div class="loket-card-header table-header">
             <div>
@@ -396,7 +419,8 @@
                     </td>
                     <td>{{ item.noAntrian || `A${item.noUrut?.padStart(3, '0')}` }}</td>
                     <td>
-                      <strong>{{ item.NO_MR }}</strong><br />
+                      <strong>{{ item.NO_MR }}</strong
+                      ><br />
                       {{ item.NAMA_LGKP }} ({{ item.umur_tahun || '-' }} th)<br />
                       <span class="table-muted">{{ item.NIK }}</span>
                     </td>
@@ -513,6 +537,14 @@
     nik: '',
     no_bpjs: '',
   });
+
+  const searchResultModal = ref({
+    show: false,
+    status: '',
+    message: '',
+  });
+
+  const autoCloseTimer = ref(null);
 
   // Data pasien yang dipilih
   const selectedPasien = ref({
@@ -916,6 +948,11 @@
         NO_KEL: data.NO_KEL || '',
       };
 
+      showSearchResultModal(
+        'success',
+        `Pasien ditemukan: ${data.NAMA_LGKP || data.NO_MR || data.NIK}`
+      );
+
       if (data.NO_KEC && data.NO_KEL) {
         await loadKelurahanByKecamatan(data.NO_KEC);
       }
@@ -941,8 +978,8 @@
       await checkAutoStatus();
       await checkAutoWilayah();
     } catch (error) {
-      alert(error.message);
       console.error('Error:', error);
+      showSearchResultModal('error', error.message || 'Pasien tidak ditemukan');
 
       // Reset data pasien jika tidak ditemukan
       selectedPasien.value = {
@@ -968,6 +1005,33 @@
       form.pasienId = '';
       form.PHONE = '';
       form.TGL_LHR = '';
+    }
+  };
+
+  const showSearchResultModal = (status, message) => {
+    searchResultModal.value = {
+      show: true,
+      status,
+      message,
+    };
+
+    if (autoCloseTimer.value) {
+      clearTimeout(autoCloseTimer.value);
+      autoCloseTimer.value = null;
+    }
+
+    if (status === 'success') {
+      autoCloseTimer.value = setTimeout(() => {
+        closeSearchResultModal();
+      }, 1600);
+    }
+  };
+
+  const closeSearchResultModal = () => {
+    searchResultModal.value.show = false;
+    if (autoCloseTimer.value) {
+      clearTimeout(autoCloseTimer.value);
+      autoCloseTimer.value = null;
     }
   };
 
@@ -1604,5 +1668,42 @@
       align-items: stretch;
       flex-direction: column;
     }
+  }
+
+  .custom-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 24px;
+  }
+
+  .modal-content-custom {
+    width: min(95%, 360px);
+    padding: 28px 24px;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+  }
+
+  .success-icon,
+  .error-icon {
+    width: 78px;
+    height: 78px;
+    margin: 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 2.4rem;
+  }
+
+  .success-icon {
+    background: #d1fae5;
+    color: #16a34a;
+  }
+
+  .error-icon {
+    background: #fee2e2;
+    color: #dc2626;
   }
 </style>

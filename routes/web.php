@@ -41,6 +41,16 @@ use App\Http\Controllers\Farmasi\PengeluaranLangsungController;
 use App\Http\Controllers\Farmasi\PengeluaranLangsungDetailController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 
+use App\Http\Requests\SimpanTindakanRequest;
+
+Route::post('/test-form-request', function (SimpanTindakanRequest $request) {
+    dd([
+        'validated' => $request->validated(),
+        'all' => $request->all(),
+        'class' => get_class($request),
+    ]);
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])
         ->name('profile.index');
@@ -55,13 +65,6 @@ Route::get('/ping-google', function () {
         return response()->noContent(503); // dianggap offline
     }
 });
-
-
-
-
-
-
-
 
 Route::match(['GET', 'POST'], '/_csrf-debug', function (Request $r) {
     return response()->json([
@@ -127,16 +130,12 @@ Route::prefix('home')->group(function () {
         ->name('home.home');
 });
 
-// Skrining PTM
-Route::get('/simpus/skriningptm', [SkriningPTMController::class, 'index'])->name('ruang-layanan.ptm');
-Route::get('/simpus/skrining-ptm/pelayanan/{id}/{idPoli}/{idPelayanan}', [SkriningPTMController::class, 'pelayanan'])->name('ruang-layanan.skrining-ptm');
-Route::post('/simpus/skrining-ptm/update-status', [SkriningPTMController::class, 'updateStatus'])
-    ->name('pelayanan.update-status');
+
 
 Route::prefix('wilayah')->group(function () {
     Route::get('/kabupaten/{provinsi}', [PasienController::class, 'getKabupaten'])->name('wilayah.kabupaten');
     Route::get('/kecamatan/{provinsi}/{kabupaten}', [PasienController::class, 'getKecamatan'])->name('wilayah.kecamatan');
-    Route::get('/kelurahan/{provinsi}/{kabupaten}/{kecamatan}', [PasienController::class, 'getKelurahan'])->name('wilayah.kelurahan');  
+    Route::get('/kelurahan/{provinsi}/{kabupaten}/{kecamatan}', [PasienController::class, 'getKelurahan'])->name('wilayah.kelurahan');
 });
 // Route::inertia('/simpus/kia', 'Ruang_Layanan/KIA/index')->name('ruang-layanan.kia');
 Route::get('/simpus/kia', [PoliKIAController::class, 'index'])->name('ruang-layanan.kia');
@@ -445,6 +444,16 @@ Route::prefix('ruang_layanan/simpus/kunjungan-online')
 Route::prefix('ruang_layanan')->middleware(['auth'])
     ->group(function () {
         Route::get('simpus/popUpFormRujukLanjut', [PoliBpUmumController::class, 'popUpFormRujukLanjut'])->name('ruang-layanan.popUpFormRujukLanjut');
+
+        // Skrining PTM
+        Route::get('/simpus/skriningptm', [SkriningPTMController::class, 'index'])->name('ruang-layanan.ptm');
+        Route::get('/simpus/skrining-ptm/pelayanan/{id}/{idPoli}/{idPelayanan}', [SkriningPTMController::class, 'pelayanan'])->name('ruang-layanan.skrining-ptm');
+        Route::post('/simpus/skrining-ptm/update-status', [SkriningPTMController::class, 'updateStatus'])
+            ->name('pelayanan.update-status');
+        Route::post('/skrining-ptm/tindakan/simpan', [SkriningPTMController::class, 'simpanTindakan'])
+            ->name('ptm.tindakan-simpan');
+        Route::delete('/ptm/tindakan/{id}', [SkriningPTMController::class, 'tindakanHapus'])
+            ->name('ptm.tindakan-hapus');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
