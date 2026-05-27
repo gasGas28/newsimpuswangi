@@ -1,19 +1,20 @@
 <template>
   <div class="p-2 rounded-4 mt-2">
-    <!-- Komponen Data Pasien -->
-    <DataPasienCard
-      title="Pemeriksaan Skrining Penyakit Tidak Menukar"
-      :DataPasien="props.DataPasien"
-      :backRoute="backRoute"
-    />
-    <!-- Komponen Quick Actions -->
+    <!--  Data Pasien -->
+    <DataPasienCard :DataPasien="props.DataPasien" :backRoute="backRoute" />
+
+    <!--  Quick Actions -->
+
     <QuickActions
       :DataPasien="props.DataPasien"
       :sudahMulai="sudahMulai"
       @mulai-pemeriksaan="mulaiPemeriksaan"
     />
+
+    <!--  Title Section -->
+    <TitleSection title="Pemeriksaan Skrining Penyakit Tidak Menular" />
   </div>
-  <!-- Modal Success -->
+
   <div
     v-if="showSuccessModal"
     class="custom-modal d-flex justify-content-center align-items-center"
@@ -27,8 +28,12 @@
     </div>
   </div>
   <!-- Form Pemeriksaan -->
-  <div v-if="showFormPemeriksaan" class="bg-white rounded-4 shadow-sm p-4 mt-3">
-    <FormPemeriksaan :DataPasien="props.DataPasien" :tindakan="props.tindakan" :DataTindakan="props.DataTindakan" />
+  <div v-if="showFormPemeriksaan" class="bg-white rounded-4 shadow-sm p-4 mt-1">
+    <FormPemeriksaan
+      :DataPasien="props.DataPasien"
+      :tindakan="props.tindakan"
+      :DataTindakan="props.DataTindakan"
+    />
   </div>
 </template>
 
@@ -37,8 +42,9 @@
   import { ref, onMounted } from 'vue';
   import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
   import FormPemeriksaan from '../../../Components/Layouts/RuangLayanan/SkriningPTM/TabPemeriksaan.vue';
-  import DataPasienCard from '../../../Components/Layouts/RuangLayanan/SkriningPTM/DataPasien.vue';
-  import QuickActions from '../../../Components/Layouts/RuangLayanan/SkriningPTM/QuickActions.vue';
+  import DataPasienCard from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/DataPasien.vue';
+  import QuickActions from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/QuickActions.vue';
+  import TitleSection from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/Title.vue';
 
   defineOptions({ layout: AppLayouts });
 

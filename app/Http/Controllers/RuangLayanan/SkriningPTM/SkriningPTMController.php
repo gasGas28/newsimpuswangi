@@ -79,7 +79,7 @@ class SkriningPTMController extends Controller
         return redirect()->back();
     }
 
-    public function tindakanHapus(int $id)
+    public function tindakanHapus($id)
     {
         $result = $this->tindakanService->hapusTindakan($id);
 
