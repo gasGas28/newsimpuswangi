@@ -3,12 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use App\Models\RuangLayanan\MasterRiwayat;
-use App\Models\RuangLayanan\KIA\Alergi;
-use App\Models\RuangLayanan\SimpusDataDiagnosa;
-use App\Models\RuangLayanan\SimpusDiagnosa;
-use App\Models\RuangLayanan\SimpusDiagnosaaa;
-use App\Models\RuangLayanan\tindakan;
 use App\Models\RuangLayanan\SimpusTindakan;
 
 class PelayananPTMService
@@ -19,6 +13,7 @@ class PelayananPTMService
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
+            ->leftJoin('unit_profiles as up', 'up.unit_id', '=','l.unitId')
 
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -48,6 +43,7 @@ class PelayananPTMService
                 'p.NO_MR',
                 'p.NAMA_LGKP',
                 'p.NIK',
+                'p.IHS_NUMBER',
                 'kel.nama_kel',
                 'kec.nama_kec',
                 'kab.nama_kab',
@@ -63,10 +59,12 @@ class PelayananPTMService
                 'l.umur_hari',
                 'l.tglKunjungan',
                 'l.idLoket',
+                'l.kunjBaru',
                 'pel.idpelayanan',
                 'pel.sudahDilayani',
                 'pel.startTime',
-                'pel.progressTime'
+                'pel.progressTime',
+                'up.nama_unit',
             )
             ->first();
     }
@@ -90,7 +88,5 @@ class PelayananPTMService
                 'sudahDilayani' => $status,
                 'startTime' => now(),
             ]);
-    }
-
-    
+    }   
 }

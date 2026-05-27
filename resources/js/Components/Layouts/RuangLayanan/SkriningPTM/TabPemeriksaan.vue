@@ -32,10 +32,10 @@
   import { Link } from '@inertiajs/vue3';
 
   // Import form components
-  import FormSubjektif from './FormPemeriksaan/FormSubjektif.vue';
-  import FormObjektif from './FormPemeriksaan/FormObjektif.vue';
+  import FormSubjektif from './FormSubjektif.vue';
+  import FormObjektif from './FormObjektif.vue';
   import FormAssessment from './FormPemeriksaan/FormAssessment.vue';
-  import FormPlanning from './FormPemeriksaan/FormPlanning.vue';
+  import FormPlanning from './FormPlanning.vue';
   import FormStatusPasien from './FormPemeriksaan/FormStatusPasien.vue';
   import FormResumePasien from './FormPemeriksaan/FormResumePasien.vue';
 

@@ -9,7 +9,7 @@
           <p class="summary-kicker">Data pasien</p>
           <h1>{{ patientName }}</h1>
           <div class="identity-meta">
-            <span>{{ genderLabel }}</span>
+            <span>{{ ihsNumber }}</span>
             <span>{{ ageText }}</span>
             <span>MR {{ valueOrDash(patient.NO_MR) }}</span>
           </div>
@@ -24,7 +24,9 @@
 
     <div class="summary-grid">
       <article class="info-box highlight">
-        <div class="info-icon"><i class="bi bi-heart-pulse"></i></div>
+        <div class="info-icon">
+          <i class="bi bi-heart-pulse"></i>
+        </div>
         <div>
           <span>Jenis / Poli</span>
           <strong>{{ visitType }} ({{ valueOrDash(patient.nmPoli) }})</strong>
@@ -32,7 +34,9 @@
       </article>
 
       <article class="info-box">
-        <div class="info-icon"><i class="bi bi-calendar2-check"></i></div>
+        <div class="info-icon">
+          <i class="bi bi-calendar2-check"></i>
+        </div>
         <div>
           <span>Tanggal Kunjungan</span>
           <strong>{{ formatDate(patient.tglKunjungan) }}</strong>
@@ -40,7 +44,9 @@
       </article>
 
       <article class="info-box">
-        <div class="info-icon"><i class="bi bi-credit-card-2-front"></i></div>
+        <div class="info-icon">
+          <i class="bi bi-credit-card-2-front"></i>
+        </div>
         <div>
           <span>NIK</span>
           <strong>{{ valueOrDash(patient.NIK) }}</strong>
@@ -48,7 +54,9 @@
       </article>
 
       <article class="info-box">
-        <div class="info-icon"><i class="bi bi-shield-check"></i></div>
+        <div class="info-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
         <div>
           <span>No. BPJS / Provider</span>
           <strong>{{ bpjsText }}</strong>
@@ -56,18 +64,15 @@
       </article>
 
       <article class="info-box address-box">
-        <div class="info-icon"><i class="bi bi-geo-alt"></i></div>
+        <div class="info-icon">
+          <i class="bi bi-geo-alt"></i>
+        </div>
         <div>
           <span>Alamat</span>
           <strong>{{ addressText }}</strong>
         </div>
       </article>
     </div>
-  </section>
-
-  <section class="section-title">
-    <i class="bi bi-clipboard2-pulse"></i>
-    <h2>{{ title }}</h2>
   </section>
 </template>
 
@@ -77,16 +82,14 @@ import { computed } from 'vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps({
-  title: String,
-  DataPasien: {
-    type: Object,
-    default: () => ({}),
-  },
+  DataPasien: Object,
   backRoute: String,
 });
 
 const patient = computed(() => props.DataPasien || {});
+
 const patientName = computed(() => valueOrDash(patient.value.NAMA_LGKP));
+const ihsNumber = computed(() => valueOrDash(patient.value.IHS_NUMBER));
 
 const genderLabel = computed(() => {
   const gender =
@@ -113,12 +116,14 @@ const ageText = computed(() => {
   return `${years || 0} tahun ${months || 0} bulan ${days || 0} hari`;
 });
 
-const visitType = computed(() => (patient.value.poliSakit === 'TRUE' ? 'Kunjungan Sakit' : 'Kunjungan Sehat'));
+const visitType = computed(() => (patient.value.poliSakit === 'TRUE' ? 'Kunjungan Sehat' : 'Kunjungan Sakit'));
 
 const bpjsText = computed(() => {
   const bpjs = patient.value.NO_BPJS || patient.value.noKartu;
   const provider = patient.value.PROVIDER || patient.value.providerKartu || patient.value.kdProvider;
-  return [bpjs, provider].filter(Boolean).join(' / ') || '-';
+
+  if (!bpjs && !provider) return '-';
+  return [bpjs, provider].filter(Boolean).join(' / ');
 });
 
 const addressText = computed(() => {
@@ -147,10 +152,7 @@ function valueOrDash(value) {
 
 function formatDate(dateString) {
   if (!dateString) return '-';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return '-';
-
-  return date.toLocaleDateString('id-ID', {
+  return new Date(dateString).toLocaleDateString('id-ID', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -290,25 +292,6 @@ h1 {
   font-weight: 700;
   line-height: 1.45;
   overflow-wrap: anywhere;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-  margin-bottom: 12px;
-  padding: 14px 16px;
-  border: 1px solid #fee2e2;
-  border-radius: 8px;
-  background: #fff7f7;
-  color: #b91c1c;
-}
-
-.section-title h2 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 750;
 }
 
 @media (max-width: 992px) {

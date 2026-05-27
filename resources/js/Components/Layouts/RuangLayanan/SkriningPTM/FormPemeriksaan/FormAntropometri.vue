@@ -1,184 +1,499 @@
 <template>
-  <div class="p-3">
-    <h5 class="mb-4 fw-semibold text-success">Skrining PTM - Antropometri dan Data Risiko</h5>
-
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label fw-semibold">Tinggi Badan (cm)</label>
-        <div class="input-group">
-          <input
-            v-model.number="form.tinggi_badan"
-            type="number"
-            min="0"
-            step="0.1"
-            class="form-control"
-            placeholder="Masukkan tinggi badan"
-          />
-          <span class="input-group-text">cm</span>
+  <div class="metabolik-form">
+    <section class="metabolik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-speedometer2"></i> Obesitas</h4>
+          <p>Antropometri, IMT, dan lingkar pinggang.</p>
         </div>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label fw-semibold">Berat Badan (kg)</label>
-        <div class="input-group">
-          <input
-            v-model.number="form.berat_badan"
-            type="number"
-            min="0"
-            step="0.1"
-            class="form-control"
-            placeholder="Masukkan berat badan"
-          />
-          <span class="input-group-text">kg</span>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label fw-semibold">IMT</label>
-        <input v-model="form.imt" type="text" class="form-control bg-light" readonly />
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label fw-semibold">Interpretasi IMT</label>
-        <input v-model="form.interpretasi_imt" type="text" class="form-control bg-light" readonly />
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label fw-semibold">Lingkar Pinggang (cm)</label>
-        <div class="input-group">
-          <input
-            v-model.number="form.lingkar_pinggang"
-            type="number"
-            min="0"
-            step="0.1"
-            class="form-control"
-            placeholder="Masukkan lingkar pinggang"
-          />
-          <span class="input-group-text">cm</span>
-        </div>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label fw-semibold">Sistolik (mmHg)</label>
-        <input
-          v-model.number="form.sistolik"
-          type="number"
-          min="0"
-          class="form-control"
-          placeholder="Sistolik"
-        />
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label fw-semibold">Diastolik (mmHg)</label>
-        <input
-          v-model.number="form.diastolik"
-          type="number"
-          min="0"
-          class="form-control"
-          placeholder="Diastolik"
-        />
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label fw-semibold">Gula Darah Sewaktu (mg/dL)</label>
-        <input
-          v-model.number="form.gula_darah"
-          type="number"
-          min="0"
-          class="form-control"
-          placeholder="Masukkan gula darah"
-        />
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label fw-semibold">Kolesterol Total (mg/dL)</label>
-        <input
-          v-model.number="form.kolesterol_total"
-          type="number"
-          min="0"
-          class="form-control"
-          placeholder="Masukkan kolesterol total"
-        />
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label fw-semibold">Kategori Risiko PTM</label>
-        <input :value="form.kategori_risiko" type="text" class="form-control bg-light" readonly />
-      </div>
-
-      <div class="col-md-12">
-        <label class="form-label fw-semibold">Interpretasi Hipertensi</label>
-        <input
-          v-model="form.interpretasi_hipertensi"
-          type="text"
-          class="form-control bg-light"
-          readonly
-        />
-      </div>
-
-      <div class="col-md-4" v-for="(option, index) in faktorRisiko" :key="index">
-        <label class="form-label fw-semibold">{{ option.label }}</label>
-        <select v-model="form[option.key]" class="form-select">
-          <option value="tidak">Tidak</option>
-          <option value="ya">Ya</option>
-        </select>
-      </div>
-
-      <div class="col-md-6">
-        <h6 class="mb-2 fw-semibold text-success">Riwayat Penyakit Pribadi</h6>
-        <div class="row g-2">
-          <div class="col-6" v-for="(item, index) in riwayatPenyakit" :key="index">
-            <div class="form-check">
+      <div class="panel-body">
+        <div class="metric-grid">
+          <div class="form-field">
+            <label class="form-label" for="bb">Berat Badan</label>
+            <div class="input-with-addon">
               <input
-                class="form-check-input"
-                type="checkbox"
-                :id="item.key"
-                v-model="form[item.key]"
+                id="bb"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                v-model.number="form.bb"
+                placeholder="0.0"
+                @input="hitungIMT"
               />
-              <label class="form-check-label" :for="item.key">{{ item.label }}</label>
+              <span>kg</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="tb">Tinggi Badan</label>
+            <div class="input-with-addon">
+              <input
+                id="tb"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                v-model.number="form.tb"
+                placeholder="0.0"
+                @input="hitungIMT"
+              />
+              <span>cm</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="imt">IMT</label>
+            <div class="input-with-addon">
+              <input
+                id="imt"
+                class="form-control"
+                type="text"
+                v-model="form.imt"
+                readonly
+                placeholder="-"
+              />
+              <span>kg/m2</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="imt_interp">Interpretasi IMT</label>
+            <input
+              id="imt_interp"
+              class="form-control"
+              type="text"
+              v-model="form.imt_interp"
+              readonly
+              placeholder="-"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="lp">Lingkar Pinggang</label>
+            <div class="input-with-addon">
+              <input
+                id="lp"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                v-model.number="form.lp"
+                placeholder="0.0"
+                @input="interpretLP"
+              />
+              <span>cm</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="lp_interp">Interpretasi Lingkar Pinggang</label>
+            <input
+              id="lp_interp"
+              class="form-control"
+              type="text"
+              v-model="form.lp_interp"
+              readonly
+              placeholder="-"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="metabolik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-heart-pulse"></i> Hipertensi</h4>
+          <p>Tekanan darah, nadi, frekuensi napas, dan suhu tubuh.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="metric-grid">
+          <div class="form-field">
+            <label class="form-label" for="td_s">Tekanan Darah Sistolik</label>
+            <div class="input-with-addon">
+              <input
+                id="td_s"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.td_s"
+                placeholder="120"
+                @input="interpretTD"
+              />
+              <span>mmHg</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="td_d">Tekanan Darah Diastolik</label>
+            <div class="input-with-addon">
+              <input
+                id="td_d"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.td_d"
+                placeholder="80"
+                @input="interpretTD"
+              />
+              <span>mmHg</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="td_interp">Interpretasi Hipertensi</label>
+            <input
+              id="td_interp"
+              class="form-control"
+              type="text"
+              v-model="form.td_interp"
+              readonly
+              placeholder="-"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="nadi">Frekuensi Nadi</label>
+            <div class="input-with-addon">
+              <input
+                id="nadi"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.nadi"
+                placeholder="80"
+              />
+              <span>x/mnt</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="napas">Frekuensi Napas</label>
+            <div class="input-with-addon">
+              <input
+                id="napas"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.napas"
+                placeholder="18"
+              />
+              <span>x/mnt</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="suhu">Suhu Tubuh</label>
+            <div class="input-with-addon">
+              <input
+                id="suhu"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                v-model.number="form.suhu"
+                placeholder="36.5"
+              />
+              <span>C</span>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="col-md-6">
-        <h6 class="mb-2 fw-semibold text-success">Riwayat Penyakit Keluarga</h6>
-        <div class="row g-2">
-          <div class="col-6" v-for="(item, index) in riwayatKeluarga" :key="index">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                :id="item.key"
-                v-model="form[item.key]"
-              />
-              <label class="form-check-label" :for="item.key">{{ item.label }}</label>
-            </div>
-          </div>
+    <section class="metabolik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-droplet-half"></i> Diabetes Melitus</h4>
+          <p>Gula darah puasa, gula darah sewaktu, HbA1c, dan interpretasi diabetes.</p>
         </div>
       </div>
 
-      <div class="col-md-12">
-        <label class="form-label fw-semibold">Rekomendasi Tindak Lanjut</label>
-        <textarea
-          :value="form.rekomendasi"
-          class="form-control bg-light"
-          rows="3"
-          readonly
-        ></textarea>
+      <div class="panel-body">
+        <div class="metric-grid">
+          <div class="form-field">
+            <label class="form-label" for="gd_puasa">Gula Darah Puasa</label>
+            <div class="input-with-addon">
+              <input
+                id="gd_puasa"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.gd_puasa"
+                placeholder="0"
+                @input="interpretDM"
+              />
+              <span>mg/dL</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="gd_sewaktu">Gula Darah Sewaktu</label>
+            <div class="input-with-addon">
+              <input
+                id="gd_sewaktu"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.gd_sewaktu"
+                placeholder="0"
+                @input="interpretDM"
+              />
+              <span>mg/dL</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="hba1c">HbA1c</label>
+            <div class="input-with-addon">
+              <input
+                id="hba1c"
+                class="form-control"
+                type="number"
+                min="0"
+                step="0.1"
+                v-model.number="form.hba1c"
+                placeholder="0.0"
+                @input="interpretDM"
+              />
+              <span>%</span>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="gd2pp">Gula Darah 2 Jam Pasca Puasa</label>
+            <div class="input-with-addon">
+              <input
+                id="gd2pp"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.gd2pp"
+                placeholder="0.0"
+                @input="interpretDM"
+              />
+              <span>mg/dL</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="dm_interp">Interpretasi Diabetes</label>
+            <input
+              id="dm_interp"
+              class="form-control"
+              type="text"
+              v-model="form.dm_interp"
+              readonly
+              placeholder="-"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="metabolik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-droplet"></i> Asam Urat</h4>
+          <p>Asam urat serum dan interpretasi risiko hiperurisemia.</p>
+        </div>
       </div>
 
-      <div class="col-md-12">
-        <label class="form-label fw-semibold">Catatan Tambahan</label>
-        <textarea
-          v-model="form.catatan"
-          class="form-control"
-          rows="3"
-          placeholder="Tuliskan catatan atau anjuran tambahan"
-        ></textarea>
+      <div class="panel-body">
+        <div class="metric-grid">
+          <div class="form-field">
+            <label class="form-label" for="asam_urat">Asam Urat</label>
+            <div class="input-with-addon">
+              <input
+                id="asam_urat"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.asam_urat"
+                placeholder="0"
+                @input="interpretUrat"
+              />
+              <span>mg/dL</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="urat_interp">Interpretasi Asam Urat</label>
+            <input
+              id="urat_interp"
+              class="form-control"
+              type="text"
+              v-model="form.urat_interp"
+              readonly
+              placeholder="-"
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="metabolik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-capsule"></i> Profil Lipid</h4>
+          <p>Kolesterol total, HDL, LDL, trigliserida, dan prediksi risiko PTM.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="lab-grid">
+          <div class="form-field lab-field">
+            <label class="form-label" for="koltot">Kolesterol Total</label>
+            <div class="input-with-addon">
+              <input
+                id="koltot"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.koltot"
+                placeholder="0"
+                @input="interpretLipid"
+              />
+              <span>mg/dL</span>
+            </div>
+            <input
+              class="form-control interpretation-control"
+              type="text"
+              v-model="form.koltot_i"
+              readonly
+              placeholder="Interpretasi"
+            />
+            <small>LOINC 2093-3</small>
+          </div>
+
+          <div class="form-field lab-field">
+            <label class="form-label" for="hdl">HDL</label>
+            <div class="input-with-addon">
+              <input
+                id="hdl"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.hdl"
+                placeholder="0"
+                @input="interpretLipid"
+              />
+              <span>mg/dL</span>
+            </div>
+            <input
+              class="form-control interpretation-control"
+              type="text"
+              v-model="form.hdl_i"
+              readonly
+              placeholder="Interpretasi"
+            />
+            <small>LOINC 2085-9</small>
+          </div>
+
+          <div class="form-field lab-field">
+            <label class="form-label" for="ldl">LDL</label>
+            <div class="input-with-addon">
+              <input
+                id="ldl"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.ldl"
+                placeholder="0"
+                @input="interpretLipid"
+              />
+              <span>mg/dL</span>
+            </div>
+            <input
+              class="form-control interpretation-control"
+              type="text"
+              v-model="form.ldl_i"
+              readonly
+              placeholder="Interpretasi"
+            />
+            <small>LOINC 2089-1</small>
+          </div>
+
+          <div class="form-field lab-field">
+            <label class="form-label" for="tg">Trigliserida</label>
+            <div class="input-with-addon">
+              <input
+                id="tg"
+                class="form-control"
+                type="number"
+                min="0"
+                v-model.number="form.tg"
+                placeholder="0"
+                @input="interpretLipid"
+              />
+              <span>mg/dL</span>
+            </div>
+            <input
+              class="form-control interpretation-control"
+              type="text"
+              v-model="form.tg_i"
+              readonly
+              placeholder="Interpretasi"
+            />
+            <small>LOINC 2571-8</small>
+          </div>
+        </div>
+
+        <div class="section-title with-gap">
+          <h5>Prediksi Risiko PTM</h5>
+          <span>WHO/ISH risk chart</span>
+        </div>
+
+        <div class="risk-grid">
+          <div class="form-field">
+            <label class="form-label" for="risiko_lab">Risiko dengan Lab</label>
+            <div class="input-with-addon">
+              <input
+                id="risiko_lab"
+                class="form-control"
+                type="number"
+                min="0"
+                max="100"
+                v-model.number="form.risiko_lab"
+                placeholder="0"
+              />
+              <span>%</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="risiko_nolab">Risiko tanpa Lab</label>
+            <div class="input-with-addon">
+              <input
+                id="risiko_nolab"
+                class="form-control"
+                type="number"
+                min="0"
+                max="100"
+                v-model.number="form.risiko_nolab"
+                placeholder="0"
+              />
+              <span>%</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="kat_risiko">Interpretasi Risiko</label>
+            <select id="kat_risiko" class="form-select" v-model="form.kat_risiko">
+              <option value="">Pilih kategori</option>
+              <option value="rendah">&lt;10% (Rendah)</option>
+              <option value="sedang">10-20% (Sedang)</option>
+              <option value="tinggi">20-30% (Tinggi)</option>
+              <option value="sangat_tinggi">&gt;30% (Sangat Tinggi)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -189,31 +504,334 @@
     tindakan: Array,
   });
 
-  const form = props.formData || {};
+  const form = props.formData?.objektif || {};
 
-  const faktorRisiko = [
-    { key: 'merokok', label: 'Merokok' },
-    { key: 'alkohol', label: 'Konsumsi Alkohol' },
-    { key: 'aktivitas_fisik', label: 'Aktivitas Fisik Tidak Cukup' },
-    { key: 'konsumsi_gula', label: 'Konsumsi Gula Berlebih' },
-    { key: 'konsumsi_garam', label: 'Konsumsi Garam Berlebih' },
-    { key: 'stress', label: 'Stres / Tekanan Emosional' },
+  const numericFields = [
+    'bb',
+    'tb',
+    'lp',
+    'td_s',
+    'td_d',
+    'nadi',
+    'napas',
+    'suhu',
+    'gd_puasa',
+    'gd_sewaktu',
+    'gd2pp',
+    'hba1c',
+    'asam_urat',
+    'koltot',
+    'hdl',
+    'ldl',
+    'tg',
+    'risiko_lab',
+    'risiko_nolab',
   ];
 
-  const riwayatPenyakit = [
-    { key: 'riwayat_hipertensi', label: 'Hipertensi' },
-    { key: 'riwayat_diabetes', label: 'Diabetes Melitus' },
-    { key: 'riwayat_dislipidemia', label: 'Dislipidemia' },
-    { key: 'riwayat_kardiovaskular', label: 'Penyakit Kardiovaskular' },
-    { key: 'riwayat_stroke', label: 'Stroke' },
-    { key: 'riwayat_kanker', label: 'Kanker' },
+  const textFields = [
+    'imt',
+    'imt_interp',
+    'lp_interp',
+    'td_interp',
+    'dm_interp',
+    'urat_interp',
+    'koltot_i',
+    'hdl_i',
+    'ldl_i',
+    'tg_i',
+    'kat_risiko',
   ];
 
-  const riwayatKeluarga = [
-    { key: 'riwayat_keluarga_hipertensi', label: 'Hipertensi' },
-    { key: 'riwayat_keluarga_diabetes', label: 'Diabetes Melitus' },
-    { key: 'riwayat_keluarga_kardiovaskular', label: 'Penyakit Kardiovaskular' },
-    { key: 'riwayat_keluarga_stroke', label: 'Stroke' },
-    { key: 'riwayat_keluarga_kanker', label: 'Kanker' },
-  ];
+  numericFields.forEach((field) => {
+    form[field] = form[field] ?? '';
+  });
+
+  textFields.forEach((field) => {
+    form[field] = form[field] || '';
+  });
+
+  function toNumber(value) {
+    const number = parseFloat(value);
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  function hitungIMT() {
+    const bb = toNumber(form.bb);
+    const tb = toNumber(form.tb);
+
+    if (!bb || !tb) {
+      form.imt = '';
+      form.imt_interp = '';
+      return;
+    }
+
+    const imt = bb / (tb / 100) ** 2;
+    form.imt = imt.toFixed(1);
+
+    if (imt < 18.5) form.imt_interp = 'Kurus';
+    else if (imt < 23) form.imt_interp = 'Normal';
+    else if (imt < 27) form.imt_interp = 'Gemuk';
+    else form.imt_interp = 'Obesitas';
+  }
+
+  function interpretLP() {
+    const lp = toNumber(form.lp);
+
+    if (!lp) {
+      form.lp_interp = '';
+      return;
+    }
+
+    form.lp_interp = lp >= 90 ? 'Risiko meningkat' : 'Normal';
+  }
+
+  function interpretTD() {
+    const s = toNumber(form.td_s);
+    const d = toNumber(form.td_d);
+
+    if (!s || !d) {
+      form.td_interp = '';
+      return;
+    }
+
+    if (s < 120 && d < 80) form.td_interp = 'Normal';
+    else if (s < 130 && d < 80) form.td_interp = 'Elevated';
+    else if (s < 140 || d < 90) form.td_interp = 'Hipertensi Grade 1';
+    else if (s < 180 || d < 110) form.td_interp = 'Hipertensi Grade 2';
+    else form.td_interp = 'Krisis Hipertensi';
+  }
+
+  function interpretDM() {
+    const puasa = toNumber(form.gd_puasa);
+    const sewaktu = toNumber(form.gd_sewaktu);
+    const hba = toNumber(form.hba1c);
+
+    if (!puasa && !sewaktu && !hba) {
+      form.dm_interp = '';
+      return;
+    }
+
+    if (hba >= 6.5 || puasa >= 126 || sewaktu >= 200) {
+      form.dm_interp = 'Diabetes';
+    } else if (hba >= 5.7 || puasa >= 100 || sewaktu >= 140) {
+      form.dm_interp = 'Prediabetes';
+    } else {
+      form.dm_interp = 'Normal';
+    }
+  }
+
+  function interpretUrat() {
+    const urat = toNumber(form.asam_urat);
+
+    if (!urat) {
+      form.urat_interp = '';
+      return;
+    }
+
+    form.urat_interp = urat > 7 ? 'Hiperurisemia' : 'Normal';
+  }
+
+  function interpretLipid() {
+    form.koltot_i = interpretRange(form.koltot, 200, 'Normal', 'Tinggi');
+    form.hdl_i = form.hdl ? (toNumber(form.hdl) >= 40 ? 'Baik' : 'Rendah') : '';
+    form.ldl_i = interpretRange(form.ldl, 130, 'Optimal', 'Tinggi');
+    form.tg_i = interpretRange(form.tg, 150, 'Normal', 'Tinggi');
+  }
+
+  function interpretRange(value, threshold, normalLabel, highLabel) {
+    if (value === '' || value === null || value === undefined) return '';
+    return toNumber(value) >= threshold ? highLabel : normalLabel;
+  }
 </script>
+
+<style scoped>
+  .metabolik-form {
+    display: grid;
+    gap: 18px;
+  }
+
+  .metabolik-panel {
+    overflow: hidden;
+    border: 1px solid #d9e5df;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e5edf0;
+    background: #f8fafc;
+  }
+
+  .panel-header h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #0f3d2e;
+    font-size: 1rem;
+    font-weight: 750;
+  }
+
+  .panel-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 0.86rem;
+  }
+
+  .panel-body {
+    padding: 20px;
+  }
+
+  .metric-grid,
+  .lab-grid,
+  .risk-grid {
+    display: grid;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .metric-grid,
+  .risk-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lab-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .form-field {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .form-label {
+    margin-bottom: 6px;
+    color: #334155;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .form-control,
+  .form-select {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #cfd9e3;
+    border-radius: 8px;
+    color: #0f172a;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #16a36f;
+    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
+  }
+
+  .input-with-addon {
+    display: flex;
+  }
+
+  .input-with-addon .form-control {
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .input-with-addon span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid #cfd9e3;
+    border-left: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .interpretation-control {
+    margin-top: 10px;
+  }
+
+  .form-field small {
+    display: block;
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 650;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eef3f6;
+  }
+
+  .section-title.with-gap {
+    margin-top: 22px;
+  }
+
+  .section-title h5 {
+    margin: 0;
+    color: #0f3d2e;
+    font-size: 0.94rem;
+    font-weight: 750;
+  }
+
+  .section-title span {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-align: right;
+  }
+
+  @media (max-width: 1200px) {
+    .lab-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 992px) {
+    .metric-grid,
+    .risk-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 576px) {
+    .metric-grid,
+    .lab-grid,
+    .risk-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-title {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .section-title span {
+      text-align: left;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+  }
+</style>
