@@ -119,6 +119,7 @@
   const subjektif = computed(() => props.formData?.subjektif || {});
   const objektif = computed(() => props.formData?.objektif || {});
   const assessment = computed(() => props.formData?.assessment || {});
+  const statusPasien = computed(() => props.formData?.status_pasien || {});
   const planning = computed(() => props.formData?.planning || {});
   const pasien = computed(() => props.DataPasien || {});
   const form = props.formData?.resume || (props.formData.resume = {});
@@ -139,9 +140,9 @@
     { label: 'Tekanan Darah', value: formatBloodPressure(objektif.value.td_s, objektif.value.td_d) },
     { label: 'Gula Darah Sewaktu', value: formatUnit(objektif.value.gd_sewaktu || objektif.value.gds, 'mg/dL') },
     { label: 'Kolesterol Total', value: formatUnit(objektif.value.koltot, 'mg/dL') },
-    { label: 'Kategori Risiko PTM', value: labelize(assessment.value.kategori_risiko_ptm || objektif.value.kat_risiko) },
-    { label: 'Status Kasus', value: labelize(assessment.value.status_kasus) },
-    { label: 'Rencana Rujuk', value: labelize(assessment.value.rencana_rujuk) },
+    { label: 'Kategori Risiko PTM', value: labelize(statusPasien.value.kategori_risiko_ptm || objektif.value.kat_risiko) },
+    { label: 'Status Kasus', value: labelize(statusPasien.value.status_kasus) },
+    { label: 'Rencana Rujuk', value: labelize(statusPasien.value.rencana_rujuk) },
   ]);
 
   const completedItems = computed(() => summaryItems.value.filter((item) => hasValue(item.value)).length);
@@ -180,10 +181,10 @@
       description: `${subjektif.value.btg_rokok || 0} batang/hari selama ${subjektif.value.lama_rokok || 0} tahun.`,
     });
 
-    addFinding(items, assessment.value.rencana_rujuk && assessment.value.rencana_rujuk !== 'tidak', {
+    addFinding(items, statusPasien.value.rencana_rujuk && statusPasien.value.rencana_rujuk !== 'tidak', {
       icon: 'bi-hospital-fill info',
       title: 'Perlu tindak lanjut rujukan',
-      description: labelize(assessment.value.rencana_rujuk),
+      description: labelize(statusPasien.value.rencana_rujuk),
     });
 
     if (items.length === 0) {
