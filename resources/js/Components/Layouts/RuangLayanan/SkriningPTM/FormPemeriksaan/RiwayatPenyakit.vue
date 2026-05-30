@@ -212,6 +212,6 @@
 <style scoped>
   .radio-group {
     display: flex;
-    gap: 60px; /* atur jarak di sini */
+    gap: 60px;
   }
 </style>

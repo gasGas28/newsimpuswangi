@@ -32,64 +32,43 @@
       <section class="planning-panel">
         <div class="panel-header">
           <div>
-            <h4><i class="bi bi-plus-circle"></i> Tambah Tindakan</h4>
-            <p>Pilih tindakan dari master tindakan, lalu lengkapi keterangan bila diperlukan.</p>
+            <h4><i class="bi bi-plus-circle"></i> Rencana Tindakan Skrining PTM</h4>
+            <p>Pilih intervensi dan edukasi yang akan dilakukan pada pasien.</p>
           </div>
         </div>
 
         <div class="panel-body">
-          <div class="form-grid">
+          <div class="form-grid action-form-grid">
             <div class="form-field span-2">
-              <label class="form-label">Kode Tindakan</label>
-              <div class="input-action">
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="form.kode_tindakan"
-                  placeholder="Masukkan atau cari kode tindakan"
-                />
-                <button class="btn btn-outline-success" @click="showModal = true" type="button">
-                  <i class="bi bi-search"></i>
-                  <span>Cari</span>
-                </button>
-                <button
-                  class="btn btn-outline-danger btn-icon"
-                  @click="hapusForm"
-                  type="button"
-                  title="Bersihkan form"
+              <label class="form-label">Intervensi / Edukasi yang Diberikan</label>
+              <div class="action-check-grid">
+                <label
+                  v-for="item in daftarTindakanPtm"
+                  :key="item.kode"
+                  class="action-check-item"
+                  :class="{ checked: selectedTindakan.includes(item.kode) }"
                 >
-                  <i class="bi bi-x-lg"></i>
-                </button>
+                  <input
+                    v-model="selectedTindakan"
+                    type="checkbox"
+                    :value="item.kode"
+                  />
+                  <span>
+                    <strong>{{ item.nama }}</strong>
+                    <small>{{ item.keterangan }}</small>
+                  </span>
+                </label>
               </div>
             </div>
 
-            <div class="form-field">
-              <label class="form-label">Nama Tindakan</label>
-              <textarea
-                class="form-control"
-                rows="3"
-                v-model="form.nama_tindakan"
-                placeholder="Nama tindakan akan otomatis terisi"
-              ></textarea>
-            </div>
-
-            <div class="form-field">
-              <label class="form-label">Nama Tindakan (Ind)</label>
-              <textarea
-                class="form-control"
-                rows="3"
-                v-model="form.nama_tindakan_ind"
-                placeholder="Nama tindakan dalam bahasa Indonesia"
-              ></textarea>
-            </div>
-
             <div class="form-field span-2">
-              <label class="form-label">Keterangan</label>
+              <label class="form-label" for="keterangan_tindakan">Keterangan</label>
               <textarea
+                id="keterangan_tindakan"
+                v-model="form.keterangan"
                 class="form-control"
                 rows="3"
-                v-model="form.keterangan"
-                placeholder="Masukkan keterangan tindakan"
+                placeholder="Resep, anjuran, instruksi khusus, atau catatan tindak lanjut"
               ></textarea>
             </div>
           </div>
@@ -98,12 +77,21 @@
         <div class="panel-footer">
           <button
             type="button"
-            class="btn btn-success"
-            @click.prevent.stop="simpanData"
+            class="btn btn-outline-danger"
+            @click="hapusForm"
             :disabled="form.processing"
           >
+            <i class="bi bi-x-lg"></i>
+            <span>Bersihkan</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            @click.prevent.stop="simpanData"
+            :disabled="form.processing || selectedTindakan.length === 0"
+          >
             <i class="bi" :class="form.processing ? 'bi-arrow-repeat spinner' : 'bi-check-circle'"></i>
-            <span>{{ form.processing ? 'Menyimpan...' : 'Simpan Tindakan' }}</span>
+            <span>{{ form.processing ? 'Menyimpan...' : 'Simpan Tindakan Terpilih' }}</span>
           </button>
         </div>
       </section>
@@ -157,13 +145,6 @@
           </table>
         </div>
       </section>
-
-      <TindakanModal
-        :show="showModal"
-        :tindakan="tindakan"
-        @close="showModal = false"
-        @select="pilihTindakan"
-      />
 
       <ModalHapus
         :show="showDeleteModal"
@@ -355,7 +336,6 @@
 import { ref, computed, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import TindakanModal from './Card/TindakanModal.vue';
 import ModalHapus from '../../Modal/ModalHapus.vue';
 
 const activeFormPlanning = ref('tindakan');
@@ -368,6 +348,34 @@ const props = defineProps({
 });
 
 const dataTindakan = computed(() => props.DataTindakan || []);
+const selectedTindakan = ref([]);
+const daftarTindakanPtm = [
+  {
+    kode: 'eduk_gizi',
+    nama: 'Edukasi gizi seimbang',
+    keterangan: 'Anjuran pola makan sehat, pembatasan gula, garam, dan lemak.',
+  },
+  {
+    kode: 'eduk_aktfis',
+    nama: 'Edukasi aktivitas fisik',
+    keterangan: 'Anjuran aktivitas fisik rutin sesuai kondisi pasien.',
+  },
+  {
+    kode: 'eduk_rokok',
+    nama: 'Konseling berhenti merokok (UBM)',
+    keterangan: 'Upaya berhenti merokok dan pencegahan paparan asap rokok.',
+  },
+  {
+    kode: 'eduk_htn',
+    nama: 'Edukasi tatalaksana hipertensi',
+    keterangan: 'Pemantauan tekanan darah, gaya hidup, dan kepatuhan kontrol.',
+  },
+  {
+    kode: 'eduk_dm',
+    nama: 'Edukasi tatalaksana DM',
+    keterangan: 'Pemantauan gula darah, diet, aktivitas fisik, dan kontrol berkala.',
+  },
+];
 
 // Form Tindakan
 const form = useForm({
@@ -380,8 +388,6 @@ const form = useForm({
   keterangan: '',
 });
 
-// Modal state
-const showModal = ref(false);
 const showSuccessModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedDeleteId = ref(null);
@@ -402,14 +408,8 @@ const konfirmasiHapus = () => {
   });
 };
 
-const pilihTindakan = (item) => {
-  form.kode_tindakan = item.kdTindakan;
-  form.nama_tindakan = item.nmTindakan;
-  form.nama_tindakan_ind = item.nmTindakanInd;
-  showModal.value = false;
-};
-
 const hapusForm = () => {
+  selectedTindakan.value = [];
   form.kode_tindakan = '';
   form.nama_tindakan = '';
   form.nama_tindakan_ind = '';
@@ -417,10 +417,31 @@ const hapusForm = () => {
 };
 
 const simpanData = () => {
+  const tindakanTerpilih = daftarTindakanPtm.filter((item) =>
+    selectedTindakan.value.includes(item.kode)
+  );
+
+  if (tindakanTerpilih.length === 0) return;
+
+  simpanTindakanBerikutnya(tindakanTerpilih);
+};
+
+const simpanTindakanBerikutnya = (items, index = 0) => {
+  const item = items[index];
+
+  form.kode_tindakan = item.kode;
+  form.nama_tindakan = item.nama;
+  form.nama_tindakan_ind = item.nama;
+
   form.post(route('ptm.tindakan-simpan'), {
     preserveScroll: true,
     forceFormData: true,
     onSuccess: () => {
+      if (index + 1 < items.length) {
+        simpanTindakanBerikutnya(items, index + 1);
+        return;
+      }
+
       showSuccessModal.value = true;
       form.reset();
       hapusForm();
@@ -582,6 +603,10 @@ const hapusResep = (index) => {
   gap: 16px;
 }
 
+.action-form-grid {
+  grid-template-columns: 1fr;
+}
+
 .form-field {
   min-width: 0;
 }
@@ -619,6 +644,55 @@ textarea.form-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 8px;
+}
+
+.action-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.action-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 86px;
+  padding: 13px;
+  border: 1px solid #d9e5df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.action-check-item.checked {
+  border-color: #16a36f;
+  background: #effaf5;
+  color: #0f6b4c;
+}
+
+.action-check-item input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.action-check-item strong,
+.action-check-item small {
+  display: block;
+}
+
+.action-check-item strong {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.action-check-item small {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.4;
 }
 
 .btn {
@@ -857,7 +931,8 @@ textarea.form-control {
 
   .form-grid,
   .input-action,
-  .dose-grid {
+  .dose-grid,
+  .action-check-grid {
     grid-template-columns: 1fr;
   }
 
