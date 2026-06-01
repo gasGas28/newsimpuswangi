@@ -33,6 +33,7 @@
       :DataPasien="props.DataPasien"
       :tindakan="props.tindakan"
       :DataTindakan="props.DataTindakan"
+      :TenagaMedis="props.TenagaMedis"
     />
   </div>
 </template>
@@ -53,6 +54,7 @@
     pelayanan: Object,
     tindakan: Array,
     DataTindakan: Array,
+    TenagaMedis: Array,
   });
 
   const backRoute = 'ruang-layanan.ptm';

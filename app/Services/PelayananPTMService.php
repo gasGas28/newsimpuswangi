@@ -4,6 +4,10 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\RuangLayanan\SimpusTindakan;
+use App\Models\RuangLayanan\MasterDokter;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
+use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
+use Illuminate\Support\Str;
 
 class PelayananPTMService
 {
@@ -14,6 +18,7 @@ class PelayananPTMService
             ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
             ->leftJoin('unit_profiles as up', 'up.unit_id', '=','l.unitId')
+            ->leftJoin('master_dokter as dokter', 'up.unit_id', '=', 'dokter.pusk_id')
 
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -65,6 +70,8 @@ class PelayananPTMService
                 'pel.startTime',
                 'pel.progressTime',
                 'up.nama_unit',
+                'dokter.kdDokter',
+                'dokter.nmDokter'
             )
             ->first();
     }
@@ -75,9 +82,16 @@ class PelayananPTMService
             ->where('deskripsi', 'icd9cm')
             ->groupBy('kdTindakan', 'nmTindakan', 'nmTindakanInd')
             ->get();
+        
+        $TenagaMedis = MasterDokter::select('nmDokter', 'kdDokter')
+            ->where('profesi_id', [23, 24])
+            ->get();
+
+            // dd($TenagaMedis);
         // dd($SimpusTindakan);
         return [
             'tindakan' => $SimpusTindakan,
+            'TenagaMedis' => $TenagaMedis
         ];
     }
     public function updateStatusPelayanan($idPelayanan, $status)
@@ -88,5 +102,60 @@ class PelayananPTMService
                 'sudahDilayani' => $status,
                 'startTime' => now(),
             ]);
+    }
+    public function addKunjunganPTM($data)
+    {
+        return DB::transaction(function () use ($data) {
+            $kunjungan = KunjunganPTM::create([
+                'idSkrining' => (string) Str::uuid(),
+                'idPelayanan' => $data['idpelayanan'],
+                'idLoket' => $data['idLoket'],
+                'nikPasien' => $data['nikPasien'],
+                'tanggal_skrining' => $data['tanggal_skrining'],
+                'dokter' => $data['dokter'],
+                'fasyankes' => $data['fasyankes'],
+                'jenis_kunjungan' => $data['jenis_kunjungan'],
+                'keluhan_utama' => $data['keluhan_utama'],
+            ]);
+
+            FaktorRisiko::create([
+                'skriningID' => $kunjungan->idSkrining,
+                'pelayananId' => $data['idpelayanan'],
+                'merokok' => $data['merokok'] ?? null,
+                'status_merokok' => $data['status_merokok'] ?? null,
+                'btg_rokok' => $data['btg_rokok'] ?? null,
+                'lama_rokok' => $data['lama_rokok'] ?? null,
+                'paparan_rokok' => $data['paparan_rokok'] ?? null,
+                'gula' => $data['gula'] ?? null,
+                'garam' => $data['garam'] ?? null,
+                'minyak' => $data['minyak'] ?? null,
+                'sayur' => $data['sayur'] ?? null,
+                'aktivitas' => $data['aktivitas'] ?? null,
+                'alkohol' => $data['alkohol'] ?? null,
+                'r_pribadi_htn' => $data['r_pribadi_htn'] ?? false,
+                'r_pribadi_dm' => $data['r_pribadi_dm'] ?? false,
+                'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? false,
+                'r_pribadi_jantung' => $data['r_pribadi_jantung'] ?? false,
+                'r_keluarga_htn' => $data['r_keluarga_htn'] ?? false,
+                'r_keluarga_dm' => $data['r_keluarga_dm'] ?? false,
+                'r_keluarga_stroke' => $data['r_keluarga_stroke'] ?? false,
+                'r_keluarga_jantung' => $data['r_keluarga_jantung'] ?? false,
+                'obat' => $data['obat'] ?? null,
+                'kesiapan' => $data['kesiapan'] ?? null,
+                'dukung' => $data['dukung'] ?? null,
+                'skor_faktor_risiko' => $data['skor_faktor_risiko'] ?? null,
+                'kategori_faktor_risiko' => $data['kategori_faktor_risiko'] ?? null,
+                'detail_faktor_risiko' => $data['detail_faktor_risiko'] ?? null,
+            ]);
+
+            return $kunjungan;
+        });
     }   
+
+    public function kunjunganPTMExists($idPelayanan, $idLoket)
+    {
+        return KunjunganPTM::where('idPelayanan', $idPelayanan)
+            ->orWhere('idLoket', $idLoket)
+            ->exists();
+    }
 }

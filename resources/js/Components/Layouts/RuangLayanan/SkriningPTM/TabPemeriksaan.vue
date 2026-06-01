@@ -22,7 +22,7 @@
 
       <!-- Dynamic Form -->
       <div class="card-body bg-white">
-        <component :is="currentForm" :DataPasien="DataPasien" :formData="formPemeriksaan" :tindakan="props.tindakan" :DataTindakan="props.DataTindakan" />
+        <component :is="currentForm" :DataPasien="DataPasien" :formData="formPemeriksaan" :tindakan="props.tindakan" :DataTindakan="props.DataTindakan" :TenagaMedis="props.TenagaMedis" />
       </div>
     </div>
   </div>
@@ -44,6 +44,7 @@
     DataPasien: Object,
     tindakan: Array,
     DataTindakan: Array,
+    TenagaMedis: Array,
   });
 
   // Tabs list

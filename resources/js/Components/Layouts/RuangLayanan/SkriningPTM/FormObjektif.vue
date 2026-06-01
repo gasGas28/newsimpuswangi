@@ -45,6 +45,16 @@
     <div v-if="activeFormObjektif === 'genetik'" class="fade-in">
       <FormGenetik :DataPasien="props.DataPasien" :formData="props.formData" />
     </div>
+
+    <div class="form-actions">
+      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
+        {{ saveMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSaving" @click="saveObjektif">
+        <i class="bi" :class="isSaving ? 'bi-arrow-repeat' : 'bi-save'"></i>
+        <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Objektif' }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -55,6 +65,9 @@
   import FormGenetik from './FormPemeriksaan/FormGenetik.vue';
 
   const activeFormObjektif = ref('metabolik');
+  const isSaving = ref(false);
+  const saveStatus = ref('idle');
+
   const toggleForm = (form) => {
     activeFormObjektif.value = form;
   };
@@ -64,6 +77,30 @@
     formData: Object,
     tindakan: Array,
   });
+
+  const emit = defineEmits(['save-objektif']);
+
+  const saveMessage = computed(() => {
+    if (saveStatus.value === 'ready') {
+      return 'Data objektif siap disimpan.';
+    }
+
+    return 'Simpan setelah data metabolik, indera, dan genetik selesai diisi.';
+  });
+
+  const saveObjektif = () => {
+    isSaving.value = true;
+
+    emit('save-objektif', {
+      DataPasien: props.DataPasien,
+      objektif: props.formData?.objektif || {},
+    });
+
+    window.setTimeout(() => {
+      isSaving.value = false;
+      saveStatus.value = 'ready';
+    }, 400);
+  };
 </script>
 
 <style scoped>
@@ -134,5 +171,67 @@
 
   .fade-in {
     animation: fadeIn 0.3s ease;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    padding-top: 16px;
+    border-top: 1px solid #e5edf0;
+    flex-wrap: wrap;
+  }
+
+  .save-status {
+    color: #64748b;
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  .save-status.success {
+    color: #0f6b4c;
+  }
+
+  .save-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #0f6b4c;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 750;
+    box-shadow: 0 8px 18px rgba(15, 107, 76, 0.18);
+  }
+
+  .save-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+  }
+
+  .save-button .bi-arrow-repeat {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .form-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .save-button {
+      width: 100%;
+    }
   }
 </style>

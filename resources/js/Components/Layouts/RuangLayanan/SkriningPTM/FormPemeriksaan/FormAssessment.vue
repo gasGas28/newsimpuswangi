@@ -3,6 +3,67 @@
     <section class="assessment-panel">
       <div class="panel-header">
         <div>
+          <h4><i class="bi bi-activity"></i> Ringkasan Temuan</h4>
+          <p>
+            Temuan otomatis dari subjektif, objektif, dan status pasien sebagai bahan assessment.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="finding-list">
+          <div class="finding-item" v-for="finding in findings" :key="finding.title">
+            <i class="bi" :class="finding.icon"></i>
+            <div>
+              <strong>{{ finding.title }}</strong>
+              <span>{{ finding.description }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="assessment-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-clipboard2-check"></i> Masalah Teridentifikasi</h4>
+          <p>Konfirmasi masalah PTM dari hasil subjektif, objektif, dan pemeriksaan penunjang.</p>
+        </div>
+        <span class="status-pill" :class="{ complete: suggestedAssessmentKeys.length > 0 }">
+          {{ suggestedAssessmentKeys.length }} saran
+        </span>
+      </div>
+
+      <div class="panel-body">
+        <div class="diagnosis-grid">
+          <label
+            v-for="item in daftarAssessment"
+            :key="item.key"
+            class="diagnosis-option"
+            :class="{ checked: form[item.key] }"
+            :for="item.key"
+          >
+            <input
+              :id="item.key"
+              v-model="form[item.key]"
+              class="form-check-input"
+              type="checkbox"
+            />
+            <span>
+              <strong>{{ item.label }}</strong>
+              <small>{{ item.system }} - {{ item.code }}</small>
+              <small v-if="suggestedAssessmentKeys.includes(item.key)" class="suggestion-hint">
+                Disarankan dari temuan otomatis
+              </small>
+            </span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="assessment-panel">
+      <div class="panel-header">
+        <div>
           <h4><i class="bi bi-clipboard2-pulse"></i> Diagnosis Klinis</h4>
           <p>Condition FHIR - diagnosis utama, status klinis, dan diagnosis sekunder.</p>
         </div>
@@ -22,13 +83,11 @@
               placeholder="Misal: Z13.6 - Skrining PTM / E11 - DM Tipe 2"
             />
             <datalist id="diagnosis-utama-list">
-              <option
-                v-for="item in daftarDiagnosisUtama"
-                :key="item.value"
-                :value="item.value"
-              />
+              <option v-for="item in daftarDiagnosisUtama" :key="item.value" :value="item.value" />
             </datalist>
-            <span class="field-hint">Pilih dari saran atau tulis diagnosis dengan kode ICD-10.</span>
+            <span class="field-hint"
+              >Pilih dari saran atau tulis diagnosis dengan kode ICD-10.</span
+            >
           </div>
 
           <div class="form-field">
@@ -57,38 +116,6 @@
               placeholder="Diagnosis tambahan atau komorbid dengan kode ICD-10 bila ada"
             ></textarea>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="assessment-panel">
-      <div class="panel-header">
-        <div>
-          <h4><i class="bi bi-clipboard2-check"></i> Masalah Teridentifikasi</h4>
-          <p>Konfirmasi masalah PTM dari hasil subjektif, objektif, dan pemeriksaan penunjang.</p>
-        </div>
-      </div>
-
-      <div class="panel-body">
-        <div class="diagnosis-grid">
-          <label
-            v-for="item in daftarAssessment"
-            :key="item.key"
-            class="diagnosis-option"
-            :class="{ checked: form[item.key] }"
-            :for="item.key"
-          >
-            <input
-              :id="item.key"
-              v-model="form[item.key]"
-              class="form-check-input"
-              type="checkbox"
-            />
-            <span>
-              <strong>{{ item.label }}</strong>
-              <small>{{ item.system }} - {{ item.code }}</small>
-            </span>
-          </label>
         </div>
       </div>
     </section>
@@ -144,11 +171,21 @@
         </div>
       </div>
     </section>
+
+    <div class="form-actions">
+      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
+        {{ saveMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSaving" @click="saveAssessment">
+        <i class="bi" :class="isSaving ? 'bi-arrow-repeat' : 'bi-save'"></i>
+        <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Assessment' }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { computed, watchEffect } from 'vue';
+  import { computed, ref, watchEffect } from 'vue';
 
   const props = defineProps({
     DataPasien: Object,
@@ -156,7 +193,14 @@
     tindakan: Array,
   });
 
+  const emit = defineEmits(['save-assessment']);
+  const isSaving = ref(false);
+  const saveStatus = ref('idle');
   const form = props.formData?.assessment || {};
+  const autoSuggestedKeys = new Set();
+  const subjektif = computed(() => props.formData?.subjektif || {});
+  const objektif = computed(() => props.formData?.objektif || {});
+  const statusPasien = computed(() => props.formData?.status_pasien || {});
 
   const daftarDiagnosisUtama = [
     { value: 'Z13.6 - Skrining penyakit kardiovaskular' },
@@ -169,7 +213,12 @@
 
   const daftarAssessment = [
     { key: 'obesitas', label: 'Obesitas / berat badan lebih', system: 'ICD-10', code: 'E66' },
-    { key: 'hipertensi', label: 'Hipertensi / tekanan darah tinggi', system: 'ICD-10', code: 'I10' },
+    {
+      key: 'hipertensi',
+      label: 'Hipertensi / tekanan darah tinggi',
+      system: 'ICD-10',
+      code: 'I10',
+    },
     { key: 'risiko_diabetes', label: 'Risiko prediabetes', system: 'ICD-10', code: 'R73.0' },
     { key: 'diabetes_melitus', label: 'Diabetes melitus', system: 'ICD-10', code: 'E11' },
     { key: 'dislipidemia', label: 'Dislipidemia', system: 'ICD-10', code: 'E78.5' },
@@ -197,6 +246,121 @@
   form.ringkasan_klinis = form.ringkasan_klinis || '';
   form.catatan_assessment = form.catatan_assessment || '';
 
+  const lipidDescription = computed(() => {
+    const values = [
+      objektif.value.koltot_i ? `Kolesterol total ${objektif.value.koltot_i}` : '',
+      objektif.value.ldl_i ? `LDL ${objektif.value.ldl_i}` : '',
+      objektif.value.hdl_i ? `HDL ${objektif.value.hdl_i}` : '',
+      objektif.value.tg_i ? `Trigliserida ${objektif.value.tg_i}` : '',
+    ].filter(Boolean);
+
+    return values.length ? values.join(', ') : 'Assessment dislipidemia terpilih.';
+  });
+
+  const findings = computed(() => {
+    const items = [];
+
+    addFinding(items, objektif.value.td_interp?.includes('Hipertensi'), {
+      icon: 'bi-exclamation-triangle-fill warning',
+      title: 'Tekanan darah perlu perhatian',
+      description: objektif.value.td_interp,
+      suggests: ['hipertensi'],
+    });
+
+    addFinding(
+      items,
+      ['Gemuk', 'Obesitas'].some((label) => objektif.value.imt_interp?.includes(label)),
+      {
+        icon: 'bi-exclamation-circle-fill warning',
+        title: 'Status IMT meningkat',
+        description: `IMT ${objektif.value.imt || '-'} - ${objektif.value.imt_interp}`,
+        suggests: ['obesitas'],
+      }
+    );
+
+    addFinding(
+      items,
+      objektif.value.dm_interp === 'Diabetes' ||
+        objektif.value.gd_sewaktu >= 200 ||
+        objektif.value.gd_puasa >= 126 ||
+        objektif.value.hba1c >= 6.5,
+      {
+        icon: 'bi-droplet-fill danger',
+        title: 'Indikasi diabetes melitus',
+        description: objektif.value.dm_interp || 'Nilai gula darah memenuhi kriteria diabetes.',
+        suggests: ['diabetes_melitus'],
+      }
+    );
+
+    addFinding(
+      items,
+      objektif.value.dm_interp === 'Prediabetes' ||
+        between(objektif.value.gd_puasa, 100, 125) ||
+        between(objektif.value.hba1c, 5.7, 6.4),
+      {
+        icon: 'bi-droplet-half warning',
+        title: 'Risiko prediabetes',
+        description: objektif.value.dm_interp || 'Nilai gula darah berada pada rentang risiko.',
+        suggests: ['risiko_diabetes'],
+      }
+    );
+
+    addFinding(
+      items,
+      objektif.value.koltot_i === 'Tinggi' ||
+        objektif.value.ldl_i === 'Tinggi' ||
+        objektif.value.tg_i === 'Tinggi' ||
+        objektif.value.hdl_i === 'Rendah',
+      {
+        icon: 'bi-capsule warning',
+        title: 'Profil lipid abnormal',
+        description: lipidDescription.value,
+        suggests: ['dislipidemia', 'risiko_kardiovaskular'],
+      }
+    );
+
+    addFinding(
+      items,
+      subjektif.value.kategori_faktor_risiko === 'Risiko Tinggi' ||
+        subjektif.value.status_merokok === 'current',
+      {
+        icon: 'bi-exclamation-diamond-fill warning',
+        title: 'Perilaku berisiko PTM',
+        description:
+          subjektif.value.kategori_faktor_risiko ||
+          `${subjektif.value.btg_rokok || 0} batang/hari selama ${subjektif.value.lama_rokok || 0} tahun.`,
+        suggests: ['perilaku_berisiko'],
+      }
+    );
+
+    addFinding(
+      items,
+      statusPasien.value.rencana_rujuk && statusPasien.value.rencana_rujuk !== 'tidak',
+      {
+        icon: 'bi-hospital-fill info',
+        title: 'Perlu tindak lanjut rujukan',
+        description: labelize(statusPasien.value.rencana_rujuk),
+        suggests: ['risiko_kardiovaskular'],
+      }
+    );
+
+    if (items.length === 0) {
+      items.push({
+        icon: 'bi-check-circle-fill success',
+        title: 'Tidak ada temuan prioritas',
+        description:
+          'Belum ada temuan otomatis yang perlu dikonfirmasi sebagai masalah assessment.',
+        suggests: [],
+      });
+    }
+
+    return items;
+  });
+
+  const suggestedAssessmentKeys = computed(() => [
+    ...new Set(findings.value.flatMap((finding) => finding.suggests || [])),
+  ]);
+
   const selectedAssessments = computed(() => daftarAssessment.filter((item) => form[item.key]));
 
   const assessmentTerpilih = computed(() => {
@@ -220,207 +384,65 @@
     return 'Belum ada saran';
   });
 
+  const saveMessage = computed(() => {
+    if (saveStatus.value === 'ready') {
+      return 'Data assessment siap disimpan.';
+    }
+
+    return 'Simpan setelah diagnosis dan ringkasan assessment selesai diisi.';
+  });
+
   watchEffect(() => {
+    suggestedAssessmentKeys.value.forEach((key) => {
+      if (form[key] === false && !autoSuggestedKeys.has(key)) {
+        form[key] = true;
+        autoSuggestedKeys.add(key);
+      }
+    });
+
+    form.ringkasan_temuan = findings.value.map((finding) => ({
+      title: finding.title,
+      description: finding.description,
+      suggests: finding.suggests || [],
+    }));
     form.assessment_terpilih = assessmentTerpilih.value;
     form.diagnosis_utama_saran = diagnosisUtamaSaran.value;
     form.saran_kategori = saranKategori.value;
   });
+
+  const saveAssessment = () => {
+    isSaving.value = true;
+
+    emit('save-assessment', {
+      DataPasien: props.DataPasien,
+      assessment: props.formData?.assessment || {},
+    });
+
+    window.setTimeout(() => {
+      isSaving.value = false;
+      saveStatus.value = 'ready';
+    }, 400);
+  };
+
+  function addFinding(items, condition, finding) {
+    if (condition) items.push(finding);
+  }
+
+  function between(value, min, max) {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) && numericValue >= min && numericValue <= max;
+  }
+
+  function hasValue(value) {
+    return value !== undefined && value !== null && value !== '';
+  }
+
+  function labelize(value) {
+    if (!hasValue(value)) return '';
+    return String(value)
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
 </script>
 
-<style scoped>
-  .assessment-form {
-    display: grid;
-    gap: 18px;
-  }
-
-  .assessment-panel {
-    overflow: hidden;
-    border: 1px solid #d9e5df;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 18px 20px;
-    border-bottom: 1px solid #e5edf0;
-    background: #f8fafc;
-  }
-
-  .panel-header h4 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: #0f3d2e;
-    font-size: 1rem;
-    font-weight: 750;
-  }
-
-  .panel-header p {
-    margin: 5px 0 0;
-    color: #64748b;
-    font-size: 0.86rem;
-  }
-
-  .panel-body {
-    padding: 20px;
-  }
-
-  .diagnosis-form-grid,
-  .diagnosis-grid,
-  .summary-grid {
-    display: grid;
-    gap: 16px;
-    align-items: start;
-  }
-
-  .diagnosis-form-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .diagnosis-main-field {
-    grid-column: span 2;
-  }
-
-  .diagnosis-grid,
-  .summary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .form-field,
-  .diagnosis-option,
-  .summary-item {
-    min-width: 0;
-    padding: 14px;
-    border: 1px solid #edf2f7;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .diagnosis-option {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    min-height: 86px;
-    color: #334155;
-    cursor: pointer;
-  }
-
-  .diagnosis-option.checked {
-    border-color: #16a36f;
-    background: #effaf5;
-    color: #0f6b4c;
-  }
-
-  .diagnosis-option strong,
-  .diagnosis-option small,
-  .summary-item span,
-  .summary-item strong {
-    display: block;
-  }
-
-  .diagnosis-option strong,
-  .summary-item strong {
-    color: #0f172a;
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-
-  .diagnosis-option small {
-    margin-top: 6px;
-    color: #64748b;
-    font-size: 0.78rem;
-    font-weight: 700;
-  }
-
-  .summary-item {
-    min-height: 88px;
-    background: #f8fafc;
-  }
-
-  .summary-item span {
-    margin-bottom: 7px;
-    color: #64748b;
-    font-size: 0.76rem;
-    font-weight: 750;
-    text-transform: uppercase;
-  }
-
-  .form-check-input {
-    margin-top: 3px;
-  }
-
-  .note-field {
-    grid-column: 1 / -1;
-  }
-
-  .form-label {
-    margin-bottom: 6px;
-    color: #334155;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .field-hint {
-    display: block;
-    margin-top: 6px;
-    color: #64748b;
-    font-size: 0.78rem;
-    font-weight: 650;
-  }
-
-  .form-control,
-  .form-select {
-    width: 100%;
-    min-height: 42px;
-    border: 1px solid #cfd9e3;
-    border-radius: 8px;
-    color: #0f172a;
-  }
-
-  textarea.form-control {
-    min-height: 92px;
-    resize: vertical;
-  }
-
-  .form-control:focus,
-  .form-select:focus,
-  .form-check-input:focus {
-    border-color: #16a36f;
-    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
-  }
-
-  .form-check-input:checked {
-    border-color: #16a36f;
-    background-color: #16a36f;
-  }
-
-  @media (max-width: 992px) {
-    .diagnosis-form-grid,
-    .diagnosis-grid,
-    .summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .diagnosis-main-field {
-      grid-column: 1 / -1;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .diagnosis-form-grid,
-    .diagnosis-grid,
-    .summary-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .panel-body {
-      padding: 16px;
-    }
-  }
-</style>
+<style scoped src="./FormPemeriksaan.css"></style>

@@ -454,6 +454,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('ptm.tindakan-simpan');
         Route::delete('/ptm/tindakan/{id}', [SkriningPTMController::class, 'tindakanHapus'])
             ->name('ptm.tindakan-hapus');
+        Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
+            ->name('pelayanan.tambah-kunjungan-ptm');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
