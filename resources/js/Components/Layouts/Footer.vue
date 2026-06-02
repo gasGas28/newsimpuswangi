@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer-bg text-white py-4 mt-auto" >
+  <footer class="footer-bg text-dark py-4 mt-auto" >
     <div class="container">
       <div class="text-center">
         <small>&copy; {{ new Date().getFullYear() }} Simpuswangi. All rights reserved.</small>
@@ -18,6 +18,6 @@
     transition: color 0.3s ease;
   }
   .footer-bg {
-    background-color: rgba(0, 0, 0);
+    background-color: rgb(255, 255, 255);
   }
 </style>

@@ -24,6 +24,27 @@
     <section class="resume-panel">
       <div class="panel-header">
         <div>
+          <h4><i class="bi bi-activity"></i> Ringkasan Temuan</h4>
+          <p>Temuan otomatis dari subjektif, objektif, dan status pasien sebagai bahan resume.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="finding-list">
+          <div class="finding-item" v-for="finding in assessmentFindings" :key="finding.title">
+            <i class="bi" :class="finding.icon || 'bi-dot info'"></i>
+            <div>
+              <strong>{{ finding.title }}</strong>
+              <span>{{ finding.description }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="resume-panel">
+      <div class="panel-header">
+        <div>
           <h4><i class="bi bi-send-check"></i> Composition FHIR</h4>
           <p>Composition.type - LOINC 74213-0 untuk dokumen laporan skrining PTM.</p>
         </div>
@@ -156,7 +177,17 @@
   ]);
 
   const completedItems = computed(() => summaryItems.value.filter((item) => hasValue(item.value)).length);
-  const assessmentFindings = computed(() => assessment.value.ringkasan_temuan || []);
+  const assessmentFindings = computed(() => {
+    if (assessment.value.ringkasan_temuan?.length) return assessment.value.ringkasan_temuan;
+
+    return [
+      {
+        icon: 'bi-check-circle-fill success',
+        title: 'Tidak ada temuan prioritas',
+        description: 'Belum ada temuan otomatis yang perlu dikonfirmasi sebagai masalah assessment.',
+      },
+    ];
+  });
 
   const sendMessage = computed(() => {
     if (sendStatus.value === 'sent') {

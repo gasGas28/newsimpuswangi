@@ -130,6 +130,11 @@ Route::prefix('home')->group(function () {
         ->name('home.home');
 });
 
+// Protect home (wajib login)
+Route::get('/', function () {
+    return Inertia::render('Home/DashboardPTM');
+})->middleware('auth')->name('ptm.dashboard');;
+
 
 
 Route::prefix('wilayah')->group(function () {
@@ -337,6 +342,7 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // PTM
     Route::prefix('ptm')->name('ptm.')->group(function () {
         Route::inertia('/', 'MalSehat/PTM/Index')->name('index');
+        Route::inertia('dashboard', 'MalSehat/PTM/Dashboard')->name('dashboard');
         Route::inertia('konselingberhentimerokok', 'MalSehat/PTM/KonselingBerhentiMerokok')->name('konselingberhentimerokok');
         Route::inertia('skriningfaktorrisiko', 'MalSehat/PTM/SkriningFaktorRisiko')->name('skriningfaktorrisiko');
     });
@@ -456,6 +462,10 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('ptm.tindakan-hapus');
         Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
             ->name('pelayanan.tambah-kunjungan-ptm');
+        Route::post('/simpus/skrining-ptm/simpan-kunjungan', [SkriningPTMController::class, 'simpanKunjunganPTM'])
+            ->name('pelayanan.simpan-kunjungan-ptm');
+        Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
+            ->name('pelayanan.simpan-assessment-ptm');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');

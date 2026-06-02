@@ -1,10 +1,13 @@
-- [x] Create new FormAnamnesisRanap.vue component based on provided CI3 code
-- [x] Include comprehensive form fields: vital signs, physical examination (thorax, abdomen, extremities), allergies, etc.
-- [x] Add table for listing previous anamnesis entries with delete functionality
-- [x] Update DataRanapKeperawatanDetail.vue to use the new anamnesis component in the anamnesis tab
-- [x] Implement form validation and submission logic
-- [x] Add IMT calculation functionality
-- [x] Handle conditional fields (keterangan for abnormal findings)
-- [x] Integrate with backend API endpoints for save/load anamnesis data
-- [x] Ensure InpatientController.php has endpoints for save, list, delete anamnesis, and allergy reference.
-- [x] Add routes for new endpoints (listAnamnesis, deleteAnamnesis, refsAlergi) to routes/web.php in ruang_layanan prefix group.
+# TODO - Perbaikan Frontend Dashboard
+
+## Rencana
+
+- [ ] Review file dashboard terkait layout dan CSS (Home.vue)
+- [ ] Identifikasi ketidaksesuaian layout (spacing, alignment, komponen)
+- [ ] Sesuaikan struktur HTML/CSS agar konsisten dengan layout AppLayout
+- [ ] Periksa dependency ikon (bi) dan memastikan kelas ada
+- [ ] Build/cek ulang setelah perubahan
+
+## Selesai
+
+- [ ] (belum mulai)

@@ -128,6 +128,26 @@ class SkriningPTMController extends Controller
         return redirect()->back();
     }
 
+    public function addAssessmentPTM(Request $request){
+        $validated = Validator::make($request->all(), [
+            'skrining_ptm_id' => 'nullable|exists:skrining_ptm,id',
+            'idpelayanan' => 'required_without:skrining_ptm_id',
+            'masalah_hasil_skrining' => 'nullable|array',
+            'ringkasan_temuan' => 'nullable|array',
+            'diagnosis_utama' => 'nullable|string',
+            'diagnosis_utama_saran' => 'nullable|string',
+            'status_klinis' => 'nullable|string|max:50',
+            'catatan_diagnosis' => 'nullable|string',
+            'kategori_risiko' => 'nullable|string|max:50',
+            'ringkasan_klinis' => 'nullable|string',
+            'catatan_assessment' => 'nullable|string',
+        ])->validate();
+
+        $this->pelayananService->addAssessmentPTM($validated);
+
+        return redirect()->back();
+    }
+
     public function tindakanHapus($id)
     {
         $result = $this->tindakanService->hapusTindakan($id);

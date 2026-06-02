@@ -7,7 +7,9 @@ use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\MasterDokter;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
+use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class PelayananPTMService
 {
@@ -157,5 +159,32 @@ class PelayananPTMService
         return KunjunganPTM::where('idPelayanan', $idPelayanan)
             ->orWhere('idLoket', $idLoket)
             ->exists();
+    }
+
+    public function addAssessmentPTM($data)
+    {
+        $skriningPtmId = $data['skrining_ptm_id'] ?? DB::table('skrining_ptm')
+            ->where('idpelayanan', $data['idpelayanan'] ?? null)
+            ->value('id');
+
+        if (!$skriningPtmId) {
+            throw ValidationException::withMessages([
+                'skrining_ptm_id' => 'Data skrining PTM belum ditemukan. Simpan data kunjungan terlebih dahulu.',
+            ]);
+        }
+
+        return AssessmentPTM::updateOrCreate([
+            'skrining_ptm_id' => $skriningPtmId,
+        ], [
+            'masalah_hasil_skrining' => $data['masalah_hasil_skrining'] ?? null,
+            'ringkasan_temuan' => $data['ringkasan_temuan'] ?? null,
+            'diagnosis_utama' => $data['diagnosis_utama'] ?? null,
+            'diagnosis_utama_saran' => $data['diagnosis_utama_saran'] ?? null,
+            'status_klinis' => $data['status_klinis'] ?? null,
+            'catatan_diagnosis' => $data['catatan_diagnosis'] ?? null,
+            'kategori_risiko' => $data['kategori_risiko'] ?? null,
+            'ringkasan_klinis' => $data['ringkasan_klinis'] ?? null,
+            'catatan_assessment' => $data['catatan_assessment'] ?? null,
+        ]);
     }
 }
