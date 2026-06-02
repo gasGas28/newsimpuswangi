@@ -25,14 +25,14 @@
       <div class="panel-header">
         <div>
           <h4><i class="bi bi-activity"></i> Ringkasan Temuan</h4>
-          <p>Temuan otomatis dari hasil objektif, faktor risiko, dan assessment.</p>
+          <p>Temuan otomatis dari subjektif, objektif, dan status pasien sebagai bahan resume.</p>
         </div>
       </div>
 
       <div class="panel-body">
         <div class="finding-list">
-          <div class="finding-item" v-for="finding in findings" :key="finding.title">
-            <i class="bi" :class="finding.icon"></i>
+          <div class="finding-item" v-for="finding in assessmentFindings" :key="finding.title">
+            <i class="bi" :class="finding.icon || 'bi-dot info'"></i>
             <div>
               <strong>{{ finding.title }}</strong>
               <span>{{ finding.description }}</span>
@@ -103,11 +103,37 @@
         </div>
       </div>
     </section>
+
+    <div class="form-actions">
+      <div class="send-status" :class="{ success: sendStatus === 'sent' }">
+        {{ sendMessage }}
+      </div>
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="finish-button"
+          :disabled="isFinishing"
+          @click="finishPelayanan"
+        >
+          <i class="bi" :class="isFinishing ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
+          <span>{{ isFinishing ? 'Mengakhiri...' : 'Akhiri Pelayanan' }}</span>
+        </button>
+        <button
+          type="button"
+          class="send-button"
+          :disabled="isSending"
+          @click="sendSatuSehat"
+        >
+          <i class="bi" :class="isSending ? 'bi-arrow-repeat' : 'bi-send-check'"></i>
+          <span>{{ isSending ? 'Mengirim...' : 'Kirim Satu Sehat' }}</span>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
 
   const props = defineProps({
     DataPasien: Object,
@@ -116,6 +142,11 @@
     DataTindakan: Array,
   });
 
+
+  const emit = defineEmits(['send-satu-sehat', 'finish-pelayanan']);
+  const isSending = ref(false);
+  const isFinishing = ref(false);
+  const sendStatus = ref('idle');
   const subjektif = computed(() => props.formData?.subjektif || {});
   const objektif = computed(() => props.formData?.objektif || {});
   const assessment = computed(() => props.formData?.assessment || {});
@@ -132,11 +163,11 @@
 
   const summaryItems = computed(() => [
     { label: 'Nama Pasien', value: pasien.value.NAMA_LGKP || pasien.value.nama || pasien.value.nmPasien },
-    { label: 'NIK', value: pasien.value.nik || pasien.value.noKTP },
+    { label: 'NIK', value: pasien.value.NIK || pasien.value.noKTP },
     { label: 'Tanggal Skrining', value: subjektif.value.tanggal_skrining || pasien.value.tglKunjungan },
     { label: 'Fasyankes', value: subjektif.value.fasyankes || pasien.value.nama_unit },
     { label: 'Pemeriksa', value: subjektif.value.dokter || pasien.value.dokter },
-    { label: 'IMT', value: formatUnit(objektif.value.imt, 'kg/m2') },
+    { label: 'Status IMT', value: formatUnit(objektif.value.imt_interp, '') },
     { label: 'Tekanan Darah', value: formatBloodPressure(objektif.value.td_s, objektif.value.td_d) },
     { label: 'Gula Darah Sewaktu', value: formatUnit(objektif.value.gd_sewaktu || objektif.value.gds, 'mg/dL') },
     { label: 'Kolesterol Total', value: formatUnit(objektif.value.koltot, 'mg/dL') },
@@ -146,56 +177,24 @@
   ]);
 
   const completedItems = computed(() => summaryItems.value.filter((item) => hasValue(item.value)).length);
+  const assessmentFindings = computed(() => {
+    if (assessment.value.ringkasan_temuan?.length) return assessment.value.ringkasan_temuan;
 
-  const findings = computed(() => {
-    const items = [];
-
-    addFinding(items, objektif.value.td_interp?.includes('Hipertensi'), {
-      icon: 'bi-exclamation-triangle-fill warning',
-      title: 'Tekanan darah perlu perhatian',
-      description: objektif.value.td_interp,
-    });
-
-    addFinding(items, ['Gemuk', 'Obesitas'].some((label) => objektif.value.imt_interp?.includes(label)), {
-      icon: 'bi-exclamation-circle-fill warning',
-      title: 'Status IMT meningkat',
-      description: `IMT ${objektif.value.imt || '-'} - ${objektif.value.imt_interp}`,
-    });
-
-    const dmInterpretation = objektif.value.gd_sewaktu_i || objektif.value.gds_i || objektif.value.gd_puasa_i || objektif.value.hba1c_i;
-    addFinding(items, dmInterpretation?.includes('DM') || assessment.value.diabetes_melitus, {
-      icon: 'bi-droplet-fill danger',
-      title: 'Indikasi diabetes melitus',
-      description: dmInterpretation || 'Assessment diabetes melitus terpilih.',
-    });
-
-    addFinding(items, objektif.value.koltot_i === 'Tinggi' || assessment.value.dislipidemia, {
-      icon: 'bi-capsule warning',
-      title: 'Profil lipid abnormal',
-      description: objektif.value.koltot_i || 'Assessment dislipidemia terpilih.',
-    });
-
-    addFinding(items, subjektif.value.status_merokok === 'current', {
-      icon: 'bi-exclamation-diamond-fill warning',
-      title: 'Faktor risiko merokok',
-      description: `${subjektif.value.btg_rokok || 0} batang/hari selama ${subjektif.value.lama_rokok || 0} tahun.`,
-    });
-
-    addFinding(items, statusPasien.value.rencana_rujuk && statusPasien.value.rencana_rujuk !== 'tidak', {
-      icon: 'bi-hospital-fill info',
-      title: 'Perlu tindak lanjut rujukan',
-      description: labelize(statusPasien.value.rencana_rujuk),
-    });
-
-    if (items.length === 0) {
-      items.push({
+    return [
+      {
         icon: 'bi-check-circle-fill success',
-        title: 'Tidak ada temuan kritis',
-        description: 'Belum ada temuan prioritas berdasarkan data yang sudah diisi.',
-      });
+        title: 'Tidak ada temuan prioritas',
+        description: 'Belum ada temuan otomatis yang perlu dikonfirmasi sebagai masalah assessment.',
+      },
+    ];
+  });
+
+  const sendMessage = computed(() => {
+    if (sendStatus.value === 'sent') {
+      return 'Data siap dikirim ke Satu Sehat.';
     }
 
-    return items;
+    return `${completedItems.value}/${summaryItems.value.length} data utama lengkap sebelum pengiriman.`;
   });
 
   const compositionPreview = computed(() =>
@@ -225,7 +224,7 @@
           },
           {
             title: 'Ringkasan Temuan',
-            text: { status: 'generated', div: findings.value.map((item) => item.title).join('; ') },
+            text: { status: 'generated', div: assessmentFindings.value.map((item) => item.title).join('; ') },
           },
         ],
       },
@@ -234,8 +233,32 @@
     ),
   );
 
-  function addFinding(items, condition, finding) {
-    if (condition) items.push(finding);
+  function sendSatuSehat() {
+    isSending.value = true;
+
+    emit('send-satu-sehat', {
+      DataPasien: props.DataPasien,
+      formData: props.formData,
+      composition: JSON.parse(compositionPreview.value),
+    });
+
+    window.setTimeout(() => {
+      isSending.value = false;
+      sendStatus.value = 'sent';
+    }, 500);
+  }
+
+  function finishPelayanan() {
+    isFinishing.value = true;
+
+    emit('finish-pelayanan', {
+      DataPasien: props.DataPasien,
+      formData: props.formData,
+    });
+
+    window.setTimeout(() => {
+      isFinishing.value = false;
+    }, 500);
   }
 
   function formatBloodPressure(systolic, diastolic) {
@@ -272,229 +295,4 @@
   }
 </script>
 
-<style scoped>
-  .resume-form {
-    display: grid;
-    gap: 18px;
-  }
-
-  .resume-panel {
-    overflow: hidden;
-    border: 1px solid #d9e5df;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 18px 20px;
-    border-bottom: 1px solid #e5edf0;
-    background: #f8fafc;
-  }
-
-  .panel-header h4 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: #0f3d2e;
-    font-size: 1rem;
-    font-weight: 750;
-  }
-
-  .panel-header p {
-    margin: 5px 0 0;
-    color: #64748b;
-    font-size: 0.86rem;
-  }
-
-  .panel-body {
-    padding: 20px;
-  }
-
-  .status-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 30px;
-    padding: 5px 10px;
-    border: 1px solid #facc15;
-    border-radius: 999px;
-    background: #fefce8;
-    color: #854d0e;
-    font-size: 0.78rem;
-    font-weight: 750;
-  }
-
-  .status-pill.complete {
-    border-color: #86efac;
-    background: #f0fdf4;
-    color: #166534;
-  }
-
-  .summary-grid,
-  .composition-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .summary-item,
-  .form-field {
-    min-width: 0;
-    padding: 14px;
-    border: 1px solid #edf2f7;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .summary-label {
-    margin-bottom: 6px;
-    color: #64748b;
-    font-size: 0.76rem;
-    font-weight: 750;
-    text-transform: uppercase;
-  }
-
-  .summary-value {
-    color: #0f172a;
-    font-size: 0.94rem;
-    font-weight: 750;
-    overflow-wrap: anywhere;
-  }
-
-  .finding-list {
-    display: grid;
-    gap: 12px;
-  }
-
-  .finding-item {
-    display: flex;
-    gap: 12px;
-    padding: 14px;
-    border: 1px solid #edf2f7;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .finding-item i {
-    margin-top: 2px;
-    font-size: 1.1rem;
-  }
-
-  .finding-item strong,
-  .finding-item span {
-    display: block;
-  }
-
-  .finding-item strong {
-    color: #0f172a;
-    font-size: 0.92rem;
-  }
-
-  .finding-item span {
-    margin-top: 3px;
-    color: #64748b;
-    font-size: 0.84rem;
-  }
-
-  .success {
-    color: #16a34a;
-  }
-
-  .warning {
-    color: #d97706;
-  }
-
-  .danger {
-    color: #dc2626;
-  }
-
-  .info {
-    color: #2563eb;
-  }
-
-  .span-full {
-    grid-column: 1 / -1;
-  }
-
-  .form-label {
-    margin-bottom: 6px;
-    color: #334155;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .form-control,
-  .form-select {
-    width: 100%;
-    min-height: 42px;
-    border: 1px solid #cfd9e3;
-    border-radius: 8px;
-    color: #0f172a;
-  }
-
-  textarea.form-control {
-    resize: vertical;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #16a36f;
-    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
-  }
-
-  .fhir-preview {
-    margin-top: 18px;
-    overflow: hidden;
-    border: 1px solid #dbeafe;
-    border-radius: 8px;
-    background: #f8fafc;
-  }
-
-  .preview-header {
-    display: grid;
-    gap: 6px;
-    padding: 12px 14px;
-    border-bottom: 1px solid #dbeafe;
-    color: #1e3a8a;
-    font-size: 0.82rem;
-    font-weight: 750;
-  }
-
-  .preview-header code {
-    color: #334155;
-    font-size: 0.76rem;
-    white-space: normal;
-  }
-
-  pre {
-    max-height: 300px;
-    margin: 0;
-    padding: 14px;
-    color: #0f172a;
-    font-size: 0.78rem;
-    white-space: pre-wrap;
-  }
-
-  @media (max-width: 992px) {
-    .summary-grid,
-    .composition-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 576px) {
-    .summary-grid,
-    .composition-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .panel-body {
-      padding: 16px;
-    }
-  }
-</style>
+<style scoped src="./FormPemeriksaan.css"></style>

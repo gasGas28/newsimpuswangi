@@ -1,5 +1,29 @@
 <template>
   <div class="risk-form">
+    <section class="risk-score-panel" :class="scoreClass">
+      <div class="risk-score-main">
+        <div>
+          <p class="risk-score-label">Skor Faktor Risiko Perilaku</p>
+          <h4>{{ riskScore.total }} / {{ riskScore.maxScore }}</h4>
+          <span>{{ riskScore.category }}</span>
+        </div>
+        <div class="risk-score-meter" aria-hidden="true">
+          <div :style="{ width: riskScore.percentage + '%' }"></div>
+        </div>
+      </div>
+
+      <div class="risk-score-note">
+        <strong>{{ riskScore.recommendation }}</strong>
+        <span>{{ riskScore.summary }}</span>
+      </div>
+
+      <div v-if="riskScore.items.length" class="risk-score-factors">
+        <span v-for="item in riskScore.items" :key="item.key">
+          +{{ item.score }} {{ item.label }}
+        </span>
+      </div>
+    </section>
+
     <section class="risk-panel">
       <div class="panel-header">
         <div>
@@ -151,58 +175,24 @@
 
       <div class="panel-body">
         <div class="history-grid">
-          <div class="form-field">
-            <label class="form-label" for="r_htn">Riwayat Hipertensi</label>
-            <select id="r_htn" name="r_htn" class="form-select" v-model="form.r_htn">
-              <option value="tidak">Tidak</option>
-              <option value="aktif">Ya, sedang aktif</option>
-              <option value="dahulu">Ya, dahulu</option>
-              <option value="tidak_tahu">Tidak tahu</option>
-            </select>
+          <div class="form-field history-check-field">
+            <label class="form-label">Riwayat PTM Pribadi</label>
+            <div class="check-grid history-check-grid">
+              <label class="check-option" v-for="item in riwayatPribadiOptions" :key="item.model">
+                <input v-model="form[item.model]" type="checkbox" />
+                <span>{{ item.label }}</span>
+              </label>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="r_dm">Riwayat Diabetes Melitus</label>
-            <select id="r_dm" name="r_dm" class="form-select" v-model="form.r_dm">
-              <option value="tidak">Tidak</option>
-              <option value="aktif">Ya, sedang aktif</option>
-              <option value="dahulu">Ya, dahulu</option>
-              <option value="tidak_tahu">Tidak tahu</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="r_stroke">Riwayat Stroke / Penyakit Jantung</label>
-            <select id="r_stroke" name="r_stroke" class="form-select" v-model="form.r_stroke">
-              <option value="tidak">Tidak</option>
-              <option value="aktif">Ya, sedang aktif</option>
-              <option value="dahulu">Ya, dahulu</option>
-              <option value="tidak_tahu">Tidak tahu</option>
-            </select>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="r_pribadi_lain">Riwayat PTM Pribadi Lain</label>
-            <textarea
-              id="r_pribadi_lain"
-              name="r_pribadi_lain"
-              class="form-control"
-              rows="3"
-              v-model="form.r_pribadi_lain"
-              placeholder="Dislipidemia, kanker, ginjal kronis, dll."
-            ></textarea>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="r_keluarga">Riwayat PTM Keluarga</label>
-            <textarea
-              id="r_keluarga"
-              name="r_keluarga"
-              class="form-control"
-              rows="3"
-              v-model="form.r_keluarga"
-              placeholder="Hipertensi, DM, stroke, jantung, kanker, dll."
-            ></textarea>
+          <div class="form-field history-check-field">
+            <label class="form-label">Riwayat PTM Keluarga</label>
+            <div class="check-grid history-check-grid">
+              <label class="check-option" v-for="item in riwayatKeluargaOptions" :key="item.model">
+                <input v-model="form[item.model]" type="checkbox" />
+                <span>{{ item.label }}</span>
+              </label>
+            </div>
           </div>
 
           <div class="form-field note-field">
@@ -241,6 +231,8 @@
 </template>
 
 <script setup>
+  import { computed, watchEffect } from 'vue';
+
   const props = defineProps({
     DataPasien: Object,
     formData: Object,
@@ -260,221 +252,125 @@
   form.sayur = form.sayur || 'tidak';
   form.aktivitas = form.aktivitas || 'tidak';
   form.alkohol = form.alkohol || 'tidak';
-  form.r_htn = form.r_htn || 'tidak';
-  form.r_dm = form.r_dm || 'tidak';
-  form.r_stroke = form.r_stroke || 'tidak';
-  form.r_pribadi_lain = form.r_pribadi_lain || '';
-  form.r_keluarga = form.r_keluarga || '';
   form.obat = form.obat || '';
   form.kesiapan = form.kesiapan || 'tidak_siap';
   form.dukung = form.dukung || 'kurang';
+
+  const riwayatPribadiOptions = [
+    { model: 'r_pribadi_htn', legacy: 'r_htn', label: 'Hipertensi' },
+    { model: 'r_pribadi_dm', legacy: 'r_dm', label: 'Diabetes Melitus' },
+    { model: 'r_pribadi_stroke', legacy: 'r_stroke', label: 'Stroke' },
+    { model: 'r_pribadi_jantung', label: 'Penyakit Jantung' },
+  ];
+
+  const riwayatKeluargaOptions = [
+    { model: 'r_keluarga_htn', label: 'Hipertensi' },
+    { model: 'r_keluarga_dm', label: 'Diabetes Melitus' },
+    { model: 'r_keluarga_stroke', label: 'Stroke' },
+    { model: 'r_keluarga_jantung', label: 'Penyakit Jantung' },
+  ];
+
+  riwayatPribadiOptions.forEach((item) => {
+    form[item.model] = form[item.model] || ['aktif', 'dahulu'].includes(form[item.legacy]);
+  });
+
+  riwayatKeluargaOptions.forEach((item) => {
+    form[item.model] = form[item.model] || false;
+  });
+
+  const hasText = (value) => String(value || '').trim().length > 0;
+  const toNumber = (value) => Number(value || 0);
+
+  const addRisk = (items, condition, key, label, score) => {
+    if (condition) {
+      items.push({ key, label, score });
+    }
+  };
+
+  const riskScore = computed(() => {
+    const items = [];
+
+    addRisk(items, form.merokok === 'ya', 'merokok', 'Pernah merokok', 2);
+    addRisk(items, form.status_merokok === 'current', 'status_merokok', 'Merokok aktif', 2);
+    addRisk(items, form.status_merokok === 'ex', 'mantan_perokok', 'Mantan perokok', 1);
+    addRisk(items, toNumber(form.btg_rokok) >= 10, 'btg_rokok', 'Rokok >=10 batang/hari', 1);
+    addRisk(items, toNumber(form.lama_rokok) >= 10, 'lama_rokok', 'Lama merokok >=10 tahun', 1);
+    addRisk(items, form.paparan_rokok === 'kadang', 'paparan_kadang', 'Paparan asap rokok kadang', 1);
+    addRisk(items, form.paparan_rokok === 'setiap_hari', 'paparan_harian', 'Paparan asap rokok harian', 2);
+
+    addRisk(items, form.gula === 'kadang', 'gula_kadang', 'Gula berlebih kadang', 1);
+    addRisk(items, form.gula === 'setiap_hari', 'gula_harian', 'Gula berlebih harian', 2);
+    addRisk(items, form.garam === 'kadang', 'garam_kadang', 'Garam berlebih kadang', 1);
+    addRisk(items, form.garam === 'setiap_hari', 'garam_harian', 'Garam berlebih harian', 2);
+    addRisk(items, form.minyak === 'kadang', 'minyak_kadang', 'Minyak berlebih kadang', 1);
+    addRisk(items, form.minyak === 'setiap_hari', 'minyak_harian', 'Minyak berlebih harian', 2);
+    addRisk(items, form.sayur === 'kadang', 'sayur_kadang', 'Kurang sayur/buah kadang', 1);
+    addRisk(items, form.sayur === 'setiap_hari', 'sayur_harian', 'Kurang sayur/buah harian', 2);
+    addRisk(items, form.aktivitas === 'kadang', 'aktivitas_kadang', 'Aktivitas fisik kurang kadang', 1);
+    addRisk(items, form.aktivitas === 'setiap_hari', 'aktivitas_harian', 'Aktivitas fisik kurang harian', 2);
+    addRisk(items, form.alkohol === 'ya', 'alkohol', 'Konsumsi alkohol', 1);
+
+    addRisk(items, form.r_pribadi_htn, 'pribadi_htn', 'Riwayat pribadi hipertensi', 2);
+    addRisk(items, form.r_pribadi_dm, 'pribadi_dm', 'Riwayat pribadi diabetes', 2);
+    addRisk(items, form.r_pribadi_stroke, 'pribadi_stroke', 'Riwayat pribadi stroke', 3);
+    addRisk(items, form.r_pribadi_jantung, 'pribadi_jantung', 'Riwayat pribadi penyakit jantung', 3);
+    addRisk(items, form.r_keluarga_htn, 'keluarga_htn', 'Riwayat keluarga hipertensi', 1);
+    addRisk(items, form.r_keluarga_dm, 'keluarga_dm', 'Riwayat keluarga diabetes', 1);
+    addRisk(items, form.r_keluarga_stroke, 'keluarga_stroke', 'Riwayat keluarga stroke', 1);
+    addRisk(items, form.r_keluarga_jantung, 'keluarga_jantung', 'Riwayat keluarga penyakit jantung', 1);
+
+    addRisk(items, form.kesiapan === 'tidak_siap', 'tidak_siap', 'Belum siap berubah', 1);
+    addRisk(items, form.kesiapan === 'ragu', 'ragu', 'Masih ragu berubah', 1);
+    addRisk(items, form.dukung === 'kurang', 'dukungan_kurang', 'Dukungan keluarga kurang', 1);
+
+    const total = items.reduce((sum, item) => sum + item.score, 0);
+    const maxScore = 30;
+
+    if (total >= 12) {
+      return {
+        total,
+        maxScore,
+        items,
+        percentage: Math.min(100, Math.round((total / maxScore) * 100)),
+        level: 'high',
+        category: 'Risiko Tinggi',
+        recommendation: 'Prioritaskan konseling intensif dan evaluasi klinis.',
+        summary: 'Ada kombinasi faktor perilaku, riwayat PTM, atau hambatan perubahan yang cukup kuat.',
+      };
+    }
+
+    if (total >= 6) {
+      return {
+        total,
+        maxScore,
+        items,
+        percentage: Math.min(100, Math.round((total / maxScore) * 100)),
+        level: 'medium',
+        category: 'Risiko Sedang',
+        recommendation: 'Berikan edukasi terarah dan buat target perubahan kecil.',
+        summary: 'Beberapa faktor risiko sudah muncul dan perlu dipantau saat kontrol berikutnya.',
+      };
+    }
+
+    return {
+      total,
+      maxScore,
+      items,
+      percentage: Math.min(100, Math.round((total / maxScore) * 100)),
+      level: 'low',
+      category: 'Risiko Rendah',
+      recommendation: 'Pertahankan perilaku sehat dan lakukan edukasi pencegahan.',
+      summary: total === 0 ? 'Belum ada faktor risiko bermakna dari isian saat ini.' : 'Faktor risiko masih terbatas.',
+    };
+  });
+
+  const scoreClass = computed(() => `risk-score-${riskScore.value.level}`);
+
+  watchEffect(() => {
+    form.skor_faktor_risiko = riskScore.value.total;
+    form.kategori_faktor_risiko = riskScore.value.category;
+    form.detail_faktor_risiko = riskScore.value.items;
+  });
 </script>
 
-<style scoped>
-  .risk-form {
-    display: grid;
-    gap: 18px;
-  }
-
-  .risk-panel {
-    overflow: hidden;
-    border: 1px solid #d9e5df;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 18px 20px;
-    border-bottom: 1px solid #e5edf0;
-    background: #f8fafc;
-  }
-
-  .panel-header h4 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: #0f3d2e;
-    font-size: 1rem;
-    font-weight: 750;
-  }
-
-  .panel-header p {
-    margin: 5px 0 0;
-    color: #64748b;
-    font-size: 0.86rem;
-  }
-
-  .panel-body {
-    padding: 20px;
-  }
-
-  .smoking-grid,
-  .habit-grid,
-  .history-grid {
-    display: grid;
-    gap: 16px;
-    align-items: start;
-  }
-
-  .smoking-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .smoking-grid .form-field:nth-child(1),
-  .smoking-grid .form-field:nth-child(2) {
-    grid-column: span 3;
-  }
-
-  .smoking-grid .form-field:nth-child(3),
-  .smoking-grid .form-field:nth-child(4),
-  .smoking-grid .form-field:nth-child(5) {
-    grid-column: span 2;
-  }
-
-  .habit-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .history-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .history-grid .form-field:nth-child(1),
-  .history-grid .form-field:nth-child(2),
-  .history-grid .form-field:nth-child(3) {
-    grid-column: span 2;
-  }
-
-  .history-grid .note-field {
-    grid-column: span 2;
-  }
-
-  .history-grid .form-field:nth-last-child(2),
-  .history-grid .form-field:nth-last-child(1) {
-    grid-column: span 3;
-  }
-
-  .form-field {
-    min-width: 0;
-    padding: 14px;
-    border: 1px solid #edf2f7;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .form-label {
-    margin-bottom: 6px;
-    color: #334155;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .form-control,
-  .form-select {
-    width: 100%;
-    min-height: 42px;
-    border: 1px solid #cfd9e3;
-    border-radius: 8px;
-    color: #0f172a;
-  }
-
-  textarea.form-control {
-    min-height: 92px;
-    resize: vertical;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #16a36f;
-    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
-  }
-
-  .radio-group {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 42px;
-    padding: 9px 12px;
-    border: 1px solid #cfd9e3;
-    border-radius: 8px;
-    color: #334155;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .radio-option.checked {
-    border-color: #16a36f;
-    background: #effaf5;
-    color: #0f6b4c;
-  }
-
-  .input-with-addon {
-    display: flex;
-  }
-
-  .input-with-addon .form-control {
-    min-width: 0;
-  }
-
-  .input-with-addon .form-control {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .input-with-addon span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 42px;
-    padding: 0 12px;
-    border: 1px solid #cfd9e3;
-    border-left: 0;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    background: #f8fafc;
-    color: #475569;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  @media (max-width: 992px) {
-    .smoking-grid,
-    .habit-grid,
-    .history-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .smoking-grid .form-field:nth-child(n),
-    .history-grid .form-field:nth-child(n),
-    .history-grid .note-field,
-    .history-grid .form-field:nth-last-child(2),
-    .history-grid .form-field:nth-last-child(1) {
-      grid-column: auto;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .smoking-grid,
-    .habit-grid,
-    .history-grid,
-    .radio-group {
-      grid-template-columns: 1fr;
-    }
-
-    .panel-body {
-      padding: 16px;
-    }
-  }
-</style>
+<style scoped src="./FormPemeriksaan.css"></style>

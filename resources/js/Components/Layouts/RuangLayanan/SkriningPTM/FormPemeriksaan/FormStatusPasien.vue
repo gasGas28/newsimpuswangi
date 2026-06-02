@@ -170,11 +170,21 @@
         </div>
       </div>
     </section>
+
+    <div class="form-actions">
+      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
+        {{ saveMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSaving" @click="saveStatusPasien">
+        <i class="bi" :class="isSaving ? 'bi-arrow-repeat' : 'bi-save'"></i>
+        <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Status Pasien' }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { computed, watchEffect } from 'vue';
+  import { computed, ref, watchEffect } from 'vue';
 
   const props = defineProps({
     DataPasien: Object,
@@ -182,6 +192,9 @@
     tindakan: Array,
   });
 
+  const emit = defineEmits(['save-status-pasien']);
+  const isSaving = ref(false);
+  const saveStatus = ref('idle');
   const form = props.formData?.status_pasien || (props.formData.status_pasien = {});
   const assessment = computed(() => props.formData?.assessment || {});
 
@@ -215,6 +228,28 @@
     form.saran_tindak_lanjut = saranTindakLanjut.value;
   });
 
+  const saveMessage = computed(() => {
+    if (saveStatus.value === 'ready') {
+      return 'Data status pasien siap disimpan.';
+    }
+
+    return 'Simpan setelah kesimpulan klinis dan status keluar selesai diisi.';
+  });
+
+  const saveStatusPasien = () => {
+    isSaving.value = true;
+
+    emit('save-status-pasien', {
+      DataPasien: props.DataPasien,
+      status_pasien: props.formData?.status_pasien || {},
+    });
+
+    window.setTimeout(() => {
+      isSaving.value = false;
+      saveStatus.value = 'ready';
+    }, 400);
+  };
+
   function labelize(value) {
     if (!value) return '-';
     return String(value)
@@ -223,120 +258,4 @@
   }
 </script>
 
-<style scoped>
-  .status-form {
-    display: grid;
-    gap: 18px;
-  }
-
-  .status-panel {
-    overflow: hidden;
-    border: 1px solid #d9e5df;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    padding: 18px 20px;
-    border-bottom: 1px solid #e5edf0;
-    background: #f8fafc;
-  }
-
-  .panel-header h4 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: #0f3d2e;
-    font-size: 1rem;
-    font-weight: 750;
-  }
-
-  .panel-header p {
-    margin: 5px 0 0;
-    color: #64748b;
-    font-size: 0.86rem;
-  }
-
-  .panel-body {
-    padding: 20px;
-  }
-
-  .status-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
-
-  .form-field {
-    min-width: 0;
-    padding: 14px;
-    border: 1px solid #edf2f7;
-    border-radius: 8px;
-    background: #ffffff;
-  }
-
-  .note-field {
-    grid-column: 1 / -1;
-  }
-
-  .form-label {
-    margin-bottom: 6px;
-    color: #334155;
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .form-control,
-  .form-select {
-    width: 100%;
-    min-height: 42px;
-    border: 1px solid #cfd9e3;
-    border-radius: 8px;
-    color: #0f172a;
-  }
-
-  .form-select:disabled {
-    background: #f8fafc;
-    color: #94a3b8;
-  }
-
-  textarea.form-control {
-    min-height: 92px;
-    resize: vertical;
-  }
-
-  .readonly-field {
-    background: #f8fafc;
-    color: #475569;
-    font-weight: 700;
-  }
-
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #16a36f;
-    box-shadow: 0 0 0 0.2rem rgba(22, 163, 111, 0.14);
-  }
-
-  @media (max-width: 992px) {
-    .status-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 576px) {
-    .status-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .panel-body {
-      padding: 16px;
-    }
-  }
-</style>
+<style scoped src="./FormPemeriksaan.css"></style>
