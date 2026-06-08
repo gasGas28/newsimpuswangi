@@ -26,3 +26,10 @@ Route::post('/test-form-request', function (SimpanTindakanRequest $request) {
 Route::get('/test', function () {
     return response()->json(['message' => 'API is working']);
 });
+
+// Satusehat FHIR - submit pelayanan (Encounter + Observation/ServiceRequest)
+Route::post('/satusehat/fhir/submit-pelayanan', [
+    \App\Http\Controllers\Satusehat\SatusehatFhirController::class,
+    'submitPelayanan'
+]);
+

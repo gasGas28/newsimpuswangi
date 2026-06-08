@@ -54,7 +54,13 @@
         <div class="composition-grid">
           <div class="form-field">
             <label class="form-label" for="doc_num">Nomor Dokumen</label>
-            <input id="doc_num" class="form-control bg-light" type="text" v-model="form.doc_num" readonly />
+            <input
+              id="doc_num"
+              class="form-control bg-light"
+              type="text"
+              v-model="form.doc_num"
+              readonly
+            />
           </div>
 
           <div class="form-field">
@@ -97,7 +103,10 @@
         <div class="fhir-preview">
           <div class="preview-header">
             <span>Resource yang dirangkum</span>
-            <code>Encounter, QuestionnaireResponse, Observation, Condition, Procedure, CarePlan, Composition</code>
+            <code
+              >Encounter, QuestionnaireResponse, Observation, Condition, Procedure, CarePlan,
+              Composition</code
+            >
           </div>
           <pre>{{ compositionPreview }}</pre>
         </div>
@@ -107,6 +116,9 @@
     <div class="form-actions">
       <div class="send-status" :class="{ success: sendStatus === 'sent' }">
         {{ sendMessage }}
+      </div>
+      <div v-if="sendError" class="send-error text-danger mt-2">
+        {{ sendError }}
       </div>
       <div class="action-buttons">
         <button
@@ -118,12 +130,7 @@
           <i class="bi" :class="isFinishing ? 'bi-arrow-repeat' : 'bi-check2-circle'"></i>
           <span>{{ isFinishing ? 'Mengakhiri...' : 'Akhiri Pelayanan' }}</span>
         </button>
-        <button
-          type="button"
-          class="send-button"
-          :disabled="isSending"
-          @click="sendSatuSehat"
-        >
+        <button type="button" class="send-button" :disabled="isSending" @click="sendSatuSehat">
           <i class="bi" :class="isSending ? 'bi-arrow-repeat' : 'bi-send-check'"></i>
           <span>{{ isSending ? 'Mengirim...' : 'Kirim Satu Sehat' }}</span>
         </button>
@@ -134,6 +141,7 @@
 
 <script setup>
   import { computed, ref } from 'vue';
+  import { router } from '@inertiajs/vue3';
 
   const props = defineProps({
     DataPasien: Object,
@@ -142,11 +150,11 @@
     DataTindakan: Array,
   });
 
-
-  const emit = defineEmits(['send-satu-sehat', 'finish-pelayanan']);
+  const emit = defineEmits(['finish-pelayanan']);
   const isSending = ref(false);
   const isFinishing = ref(false);
   const sendStatus = ref('idle');
+  const sendError = ref(null);
   const subjektif = computed(() => props.formData?.subjektif || {});
   const objektif = computed(() => props.formData?.objektif || {});
   const assessment = computed(() => props.formData?.assessment || {});
@@ -162,21 +170,38 @@
   form.catatan_penutup = form.catatan_penutup || '';
 
   const summaryItems = computed(() => [
-    { label: 'Nama Pasien', value: pasien.value.NAMA_LGKP || pasien.value.nama || pasien.value.nmPasien },
+    {
+      label: 'Nama Pasien',
+      value: pasien.value.NAMA_LGKP || pasien.value.nama || pasien.value.nmPasien,
+    },
     { label: 'NIK', value: pasien.value.NIK || pasien.value.noKTP },
-    { label: 'Tanggal Skrining', value: subjektif.value.tanggal_skrining || pasien.value.tglKunjungan },
+    {
+      label: 'Tanggal Skrining',
+      value: subjektif.value.tanggal_skrining || pasien.value.tglKunjungan,
+    },
     { label: 'Fasyankes', value: subjektif.value.fasyankes || pasien.value.nama_unit },
     { label: 'Pemeriksa', value: subjektif.value.dokter || pasien.value.dokter },
     { label: 'Status IMT', value: formatUnit(objektif.value.imt_interp, '') },
-    { label: 'Tekanan Darah', value: formatBloodPressure(objektif.value.td_s, objektif.value.td_d) },
-    { label: 'Gula Darah Sewaktu', value: formatUnit(objektif.value.gd_sewaktu || objektif.value.gds, 'mg/dL') },
+    {
+      label: 'Tekanan Darah',
+      value: formatBloodPressure(objektif.value.td_s, objektif.value.td_d),
+    },
+    {
+      label: 'Gula Darah Sewaktu',
+      value: formatUnit(objektif.value.gd_sewaktu || objektif.value.gds, 'mg/dL'),
+    },
     { label: 'Kolesterol Total', value: formatUnit(objektif.value.koltot, 'mg/dL') },
-    { label: 'Kategori Risiko PTM', value: labelize(statusPasien.value.kategori_risiko_ptm || objektif.value.kat_risiko) },
+    {
+      label: 'Kategori Risiko PTM',
+      value: labelize(statusPasien.value.kategori_risiko_ptm || objektif.value.kat_risiko),
+    },
     { label: 'Status Kasus', value: labelize(statusPasien.value.status_kasus) },
     { label: 'Rencana Rujuk', value: labelize(statusPasien.value.rencana_rujuk) },
   ]);
 
-  const completedItems = computed(() => summaryItems.value.filter((item) => hasValue(item.value)).length);
+  const completedItems = computed(
+    () => summaryItems.value.filter((item) => hasValue(item.value)).length
+  );
   const assessmentFindings = computed(() => {
     if (assessment.value.ringkasan_temuan?.length) return assessment.value.ringkasan_temuan;
 
@@ -184,14 +209,23 @@
       {
         icon: 'bi-check-circle-fill success',
         title: 'Tidak ada temuan prioritas',
-        description: 'Belum ada temuan otomatis yang perlu dikonfirmasi sebagai masalah assessment.',
+        description:
+          'Belum ada temuan otomatis yang perlu dikonfirmasi sebagai masalah assessment.',
       },
     ];
   });
 
   const sendMessage = computed(() => {
     if (sendStatus.value === 'sent') {
-      return 'Data siap dikirim ke Satu Sehat.';
+      return 'Data berhasil dikirim ke Satu Sehat.';
+    }
+
+    if (sendStatus.value === 'sending') {
+      return 'Mengirim data ke Satu Sehat...';
+    }
+
+    if (sendStatus.value === 'error') {
+      return 'Gagal mengirim data ke Satu Sehat. Periksa koneksi atau konfigurasi backend.';
     }
 
     return `${completedItems.value}/${summaryItems.value.length} data utama lengkap sebelum pengiriman.`;
@@ -220,32 +254,58 @@
         section: [
           {
             title: 'Ringkasan Skrining PTM',
-            text: { status: 'generated', div: `${completedItems.value}/${summaryItems.value.length} data utama lengkap` },
+            text: {
+              status: 'generated',
+              div: `${completedItems.value}/${summaryItems.value.length} data utama lengkap`,
+            },
           },
           {
             title: 'Ringkasan Temuan',
-            text: { status: 'generated', div: assessmentFindings.value.map((item) => item.title).join('; ') },
+            text: {
+              status: 'generated',
+              div: assessmentFindings.value.map((item) => item.title).join('; '),
+            },
           },
         ],
       },
       null,
-      2,
-    ),
+      2
+    )
   );
 
-  function sendSatuSehat() {
+  async function sendSatuSehat() {
     isSending.value = true;
+    sendError.value = null;
+    sendStatus.value = 'sending';
 
-    emit('send-satu-sehat', {
-      DataPasien: props.DataPasien,
-      formData: props.formData,
-      composition: JSON.parse(compositionPreview.value),
-    });
+    const submitUrl =
+      typeof route === 'function'
+        ? route('satusehat.submit-ptm')
+        : '/ruang_layanan/simpus/skrining-ptm/satusehat';
 
-    window.setTimeout(() => {
-      isSending.value = false;
-      sendStatus.value = 'sent';
-    }, 500);
+    await router.post(
+      submitUrl,
+      {
+        DataPasien: pasien.value,
+        formData: JSON.parse(JSON.stringify(props.formData || {})),
+        composition: JSON.parse(compositionPreview.value),
+      },
+      {
+        preserveState: true,
+        onSuccess: () => {
+          sendStatus.value = 'sent';
+        },
+        onError: (errors) => {
+          sendStatus.value = 'error';
+          sendError.value =
+            errors?.message ||
+            (typeof errors === 'string' ? errors : JSON.stringify(errors, null, 2));
+        },
+        onFinish: () => {
+          isSending.value = false;
+        },
+      }
+    );
   }
 
   function finishPelayanan() {
