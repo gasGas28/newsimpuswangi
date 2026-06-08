@@ -10,8 +10,8 @@ use App\Services\TindakanService;
 use App\Http\Requests\SimpanTindakanRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
-
+use App\Http\Requests\StoreKunjunganPTMRequest;
+use App\Http\Requests\AssessmentPTMRequest;
 
 class SkriningPTMController extends Controller
 {
@@ -79,43 +79,10 @@ class SkriningPTMController extends Controller
         return redirect()->back();
     }
 
-    public function tambahKunjunganPTM(Request $request)
+
+    public function tambahKunjunganPTM(StoreKunjunganPTMRequest $request)
     {
-        $validated = Validator::make($request->all(), [
-            'idpelayanan' => 'required',
-            'idLoket' => 'required',
-            'nikPasien' => 'required',
-            'tanggal_skrining' => 'required|date',
-            'dokter' => 'required',
-            'fasyankes' => 'required',
-            'jenis_kunjungan' => 'required',
-            'keluhan_utama' => 'required',
-            'merokok' => 'required|string',
-            'status_merokok' => 'required|string',
-            'btg_rokok' => 'nullable|integer|min:0',
-            'lama_rokok' => 'nullable|integer|min:0',
-            'paparan_rokok' => 'nullable|string',
-            'gula' => 'nullable|string',
-            'garam' => 'nullable|string',
-            'minyak' => 'nullable|string',
-            'sayur' => 'nullable|string',
-            'aktivitas' => 'nullable|string',
-            'alkohol' => 'nullable|string',
-            'r_pribadi_htn' => 'nullable|boolean',
-            'r_pribadi_dm' => 'nullable|boolean',
-            'r_pribadi_stroke' => 'nullable|boolean',
-            'r_pribadi_jantung' => 'nullable|boolean',
-            'r_keluarga_htn' => 'nullable|boolean',
-            'r_keluarga_dm' => 'nullable|boolean',
-            'r_keluarga_stroke' => 'nullable|boolean',
-            'r_keluarga_jantung' => 'nullable|boolean',
-            'obat' => 'nullable|string',
-            'kesiapan' => 'nullable|string',
-            'dukung' => 'nullable|string',
-            'skor_faktor_risiko' => 'nullable|integer|min:0',
-            'kategori_faktor_risiko' => 'nullable|string',
-            'detail_faktor_risiko' => 'nullable|array',
-        ])->validate();
+        $validated = $request->validated();
 
         if ($this->pelayananService->kunjunganPTMExists($validated['idpelayanan'], $validated['idLoket'])) {
             return redirect()->back()->withErrors([
@@ -127,21 +94,9 @@ class SkriningPTMController extends Controller
 
         return redirect()->back();
     }
-
-    public function addAssessmentPTM(Request $request){
-        $validated = Validator::make($request->all(), [
-            'skrining_ptm_id' => 'nullable|exists:skrining_ptm,id',
-            'idpelayanan' => 'required_without:skrining_ptm_id',
-            'masalah_hasil_skrining' => 'nullable|array',
-            'ringkasan_temuan' => 'nullable|array',
-            'diagnosis_utama' => 'nullable|string',
-            'diagnosis_utama_saran' => 'nullable|string',
-            'status_klinis' => 'nullable|string|max:50',
-            'catatan_diagnosis' => 'nullable|string',
-            'kategori_risiko' => 'nullable|string|max:50',
-            'ringkasan_klinis' => 'nullable|string',
-            'catatan_assessment' => 'nullable|string',
-        ])->validate();
+    public function addAssessmentPTM(AssessmentPTMRequest $request)
+    {
+        $validated = $request->validated();
 
         $this->pelayananService->addAssessmentPTM($validated);
 

@@ -40,8 +40,61 @@ use App\Http\Controllers\Farmasi\PelayananResepController;
 use App\Http\Controllers\Farmasi\PengeluaranLangsungController;
 use App\Http\Controllers\Farmasi\PengeluaranLangsungDetailController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
-
+use App\Http\Controllers\Satusehat\SatusehatFhirController;
 use App\Http\Requests\SimpanTindakanRequest;
+
+use App\Http\Requests\StoreKunjunganPTMRequest;
+
+Route::get('/test-request-object', function () {
+    $request = app(StoreKunjunganPTMRequest::class);
+
+    dd([
+        'class' => get_class($request),
+        'container' => $request->getContainer(),
+        'redirector' => $request->getRedirector(),
+    ]);
+});
+
+Route::get('/cek-validator', function () {
+    $request = app(StoreKunjunganPTMRequest::class);
+
+    $ref = new ReflectionClass($request);
+
+    $property = $ref->getProperty('validator');
+    $property->setAccessible(true);
+
+    dd([
+        'validator' => $property->getValue($request),
+    ]);
+});
+
+Route::get('/cek-provider', function () {
+    dd(
+        app()->getLoadedProviders()[
+            \Illuminate\Foundation\Providers\FormRequestServiceProvider::class
+        ] ?? false
+    );
+});
+
+Route::get('/cek-formrequest', function () {
+    $reflection = new ReflectionClass(StoreKunjunganPTMRequest::class);
+
+    dd([
+        'parent' => get_parent_class(StoreKunjunganPTMRequest::class),
+        'methods' => collect($reflection->getMethods())
+            ->pluck('name')
+            ->contains('validated'),
+    ]);
+});
+
+
+Route::get('/debug-request', function (Request $request) {
+    $reflection = new ReflectionClass($request);
+
+    dd(
+        $reflection->getStaticProperties()['macros'] ?? []
+    );
+});
 
 Route::post('/test-form-request', function (SimpanTindakanRequest $request) {
     dd([
@@ -466,6 +519,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-kunjungan-ptm');
         Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
             ->name('pelayanan.simpan-assessment-ptm');
+        Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
+            ->name('satusehat.submit-ptm');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
