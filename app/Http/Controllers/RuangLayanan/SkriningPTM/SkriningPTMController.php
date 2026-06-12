@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreKunjunganPTMRequest;
 use App\Http\Requests\AssessmentPTMRequest;
+use App\Http\Requests\FaktorRisikoRequest;
+use App\Http\Requests\PemeriksaanPTMRequest;
 
 class SkriningPTMController extends Controller
 {
@@ -57,6 +59,7 @@ class SkriningPTMController extends Controller
     {
         $this->pelayananService->updateStatusPelayanan(
             $request->idpelayanan,
+            $request->idloket,
             $request->status
         );
 
@@ -84,16 +87,31 @@ class SkriningPTMController extends Controller
     {
         $validated = $request->validated();
 
-        if ($this->pelayananService->kunjunganPTMExists($validated['idpelayanan'], $validated['idLoket'])) {
-            return redirect()->back()->withErrors([
-                'kunjungan_ptm' => 'Data kunjungan PTM pasien ini sudah tersimpan sebelumnya.',
-            ]);
-        }
-
         $this->pelayananService->addKunjunganPTM($validated);
 
         return redirect()->back();
     }
+
+    public function addFaktorRisiko(FaktorRisikoRequest $request)
+    {
+
+        $validated = $request->validated();
+        $this->pelayananService->addFaktorRisiko($validated);
+        return redirect()->back();
+    }
+
+    public function addPemeriksaanPTM(PemeriksaanPTMRequest $request)
+    {
+        $validated = $request->validated();
+
+        // dd($validated);
+
+        $this->pelayananService->savePemeriksaanMetabolik($validated);
+
+        return redirect()->back();
+    }
+
+
     public function addAssessmentPTM(AssessmentPTMRequest $request)
     {
         $validated = $request->validated();

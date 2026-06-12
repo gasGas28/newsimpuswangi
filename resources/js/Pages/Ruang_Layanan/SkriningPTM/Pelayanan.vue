@@ -76,6 +76,7 @@
       route('pelayanan.update-status'),
       {
         idpelayanan: props.DataPasien.idpelayanan,
+        idloket: props.DataPasien.idLoket,
         status: 2,
       },
       {

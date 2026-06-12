@@ -70,9 +70,7 @@ Route::get('/cek-validator', function () {
 
 Route::get('/cek-provider', function () {
     dd(
-        app()->getLoadedProviders()[
-            \Illuminate\Foundation\Providers\FormRequestServiceProvider::class
-        ] ?? false
+        app()->getLoadedProviders()[\Illuminate\Foundation\Providers\FormRequestServiceProvider::class] ?? false
     );
 });
 
@@ -515,10 +513,11 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('ptm.tindakan-hapus');
         Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
             ->name('pelayanan.tambah-kunjungan-ptm');
-        Route::post('/simpus/skrining-ptm/simpan-kunjungan', [SkriningPTMController::class, 'simpanKunjunganPTM'])
-            ->name('pelayanan.simpan-kunjungan-ptm');
+        Route::post('/simpus/skrining-ptm/simpan-risiko', [SkriningPTMController::class, 'addFaktorRisiko'])->name('pelayanan.simpan-risiko-ptm');
         Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
             ->name('pelayanan.simpan-assessment-ptm');
+        Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanPTM'])
+            ->name('pelayanan.simpan-pemeriksaan-metabolik');
         Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
             ->name('satusehat.submit-ptm');
 
