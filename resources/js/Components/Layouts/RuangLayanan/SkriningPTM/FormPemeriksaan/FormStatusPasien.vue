@@ -3,79 +3,6 @@
     <section class="status-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-clipboard2-check"></i> Kesimpulan Klinis</h4>
-          <p>Keputusan akhir encounter setelah assessment, planning, dan tindakan selesai.</p>
-        </div>
-      </div>
-
-      <div class="panel-body">
-        <div class="status-grid">
-          <div class="form-field">
-            <label class="form-label" for="kategori_risiko_ptm">Kategori Risiko PTM</label>
-            <select
-              id="kategori_risiko_ptm"
-              v-model="form.kategori_risiko_ptm"
-              name="kategori_risiko_ptm"
-              class="form-select"
-            >
-              <option value="">Pilih kategori</option>
-              <option value="rendah">Rendah</option>
-              <option value="sedang">Sedang</option>
-              <option value="tinggi">Tinggi</option>
-              <option value="sangat_tinggi">Sangat tinggi / perlu evaluasi dokter</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="status_kasus">Status Kasus</label>
-            <select
-              id="status_kasus"
-              v-model="form.status_kasus"
-              name="status_kasus"
-              class="form-select"
-            >
-              <option value="skrining_normal">Skrining dalam batas normal</option>
-              <option value="suspek">Suspek / perlu konfirmasi</option>
-              <option value="terdiagnosis">Sudah terdiagnosis</option>
-              <option value="kontrol">Kontrol penyakit kronis</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="keputusan_klinis">Keputusan Klinis</label>
-            <select
-              id="keputusan_klinis"
-              v-model="form.keputusan_klinis"
-              name="keputusan_klinis"
-              class="form-select"
-            >
-              <option value="">Pilih keputusan</option>
-              <option value="edukasi">Edukasi dan modifikasi gaya hidup</option>
-              <option value="kontrol_berkala">Kontrol berkala</option>
-              <option value="konfirmasi_dokter">Perlu konfirmasi dokter</option>
-              <option value="rujuk">Perlu rujukan</option>
-              <option value="observasi">Observasi / pemantauan</option>
-            </select>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="catatan_kesimpulan">Catatan Kesimpulan Klinis</label>
-            <textarea
-              id="catatan_kesimpulan"
-              v-model="form.catatan_kesimpulan"
-              name="catatan_kesimpulan"
-              class="form-control"
-              rows="3"
-              placeholder="Kesimpulan akhir, instruksi utama, atau alasan keputusan klinis"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="status-panel">
-      <div class="panel-header">
-        <div>
           <h4><i class="bi bi-door-open"></i> Status Keluar Pasien</h4>
           <p>Encounter discharge disposition, cara keluar, rujukan, dan jadwal kontrol.</p>
         </div>
@@ -84,7 +11,9 @@
       <div class="panel-body">
         <div class="status-grid">
           <div class="form-field">
-            <label class="form-label" for="kondisi_keluar">Kondisi Saat Meninggalkan Fasyankes</label>
+            <label class="form-label" for="kondisi_keluar"
+              >Kondisi Saat Meninggalkan Fasyankes</label
+            >
             <select
               id="kondisi_keluar"
               v-model="form.kondisi_keluar"
@@ -198,10 +127,6 @@
   const form = props.formData?.status_pasien || (props.formData.status_pasien = {});
   const assessment = computed(() => props.formData?.assessment || {});
 
-  form.kategori_risiko_ptm = form.kategori_risiko_ptm || '';
-  form.status_kasus = form.status_kasus || 'skrining_normal';
-  form.keputusan_klinis = form.keputusan_klinis || '';
-  form.catatan_kesimpulan = form.catatan_kesimpulan || '';
   form.kondisi_keluar = form.kondisi_keluar || '';
   form.cara_keluar = form.cara_keluar || '';
   form.jadwal_kontrol = form.jadwal_kontrol || '';
@@ -210,11 +135,14 @@
 
   const saranTindakLanjut = computed(() => {
     if (form.rencana_rujuk && form.rencana_rujuk !== 'tidak') return labelize(form.rencana_rujuk);
-    if (form.keputusan_klinis) return labelize(form.keputusan_klinis);
     if (assessment.value.diabetes_melitus || assessment.value.risiko_kardiovaskular) {
       return 'Konsultasi internal puskesmas';
     }
-    if (assessment.value.hipertensi || assessment.value.dislipidemia || assessment.value.risiko_diabetes) {
+    if (
+      assessment.value.hipertensi ||
+      assessment.value.dislipidemia ||
+      assessment.value.risiko_diabetes
+    ) {
       return 'Edukasi dan kontrol berkala';
     }
     if (assessment.value.obesitas || assessment.value.perilaku_berisiko) {
@@ -233,7 +161,7 @@
       return 'Data status pasien siap disimpan.';
     }
 
-    return 'Simpan setelah kesimpulan klinis dan status keluar selesai diisi.';
+    return 'Simpan setelah status keluar selesai diisi.';
   });
 
   const saveStatusPasien = () => {

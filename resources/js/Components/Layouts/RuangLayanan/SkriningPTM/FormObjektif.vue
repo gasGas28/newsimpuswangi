@@ -45,16 +45,6 @@
     <div v-if="activeFormObjektif === 'genetik'" class="fade-in">
       <FormGenetik :DataPasien="props.DataPasien" :formData="props.formData" />
     </div>
-
-    <div class="form-actions">
-      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
-        {{ saveMessage }}
-      </div>
-      <button type="button" class="save-button" :disabled="isSaving" @click="saveObjektif">
-        <i class="bi" :class="isSaving ? 'bi-arrow-repeat' : 'bi-save'"></i>
-        <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Objektif' }}</span>
-      </button>
-    </div>
   </div>
 </template>
 
@@ -79,28 +69,6 @@
   });
 
   const emit = defineEmits(['save-objektif']);
-
-  const saveMessage = computed(() => {
-    if (saveStatus.value === 'ready') {
-      return 'Data objektif siap disimpan.';
-    }
-
-    return 'Simpan setelah data metabolik, indera, dan genetik selesai diisi.';
-  });
-
-  const saveObjektif = () => {
-    isSaving.value = true;
-
-    emit('save-objektif', {
-      DataPasien: props.DataPasien,
-      objektif: props.formData?.objektif || {},
-    });
-
-    window.setTimeout(() => {
-      isSaving.value = false;
-      saveStatus.value = 'ready';
-    }, 400);
-  };
 </script>
 
 <style scoped>

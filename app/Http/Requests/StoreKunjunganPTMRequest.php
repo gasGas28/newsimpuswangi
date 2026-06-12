@@ -14,45 +14,35 @@ class StoreKunjunganPTMRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'idpelayanan' => 'required',
-            'idLoket' => 'required',
-            'nikPasien' => 'required',
+            'idSkrining' => 'required|uuid',
+            'idPelayanan' => 'required|uuid',
+            'idLoket' => 'required|uuid',
+            'nik_pasien' => 'required|string|max:16',
             'tanggal_skrining' => 'required|date',
-            'dokter' => 'required',
-            'fasyankes' => 'required',
-            'jenis_kunjungan' => 'required',
-            'keluhan_utama' => 'required',
+            'id_petugas' => 'required|string|max:50',
+            'fasyankes' => 'required|string|max:50',
+            'jenis_kunjungan' => 'required|string|max:50',
+            'keluhan_utama' => 'required|string|max:200'
+        ];
+    }
 
-            'merokok' => 'required|string',
-            'status_merokok' => 'required|string',
-            'btg_rokok' => 'nullable|integer|min:0',
-            'lama_rokok' => 'nullable|integer|min:0',
-            'paparan_rokok' => 'nullable|string',
+    public function messages(): array
+    {
+        return [
+            'tanggal_skrining.required' => 'Tanggal skrining wajib diisi.',
+            'id_petugas.required' => 'Dokter atau petugas wajib dipilih.',
+            'fasyankes.required' => 'Fasyankes wajib diisi.',
+            'jenis_kunjungan.required' => 'Jenis kunjungan wajib diisi.',
+            'keluhan_utama.required' => 'Keluhan utama wajib diisi.',
+        ];
+    }
 
-            'gula' => 'nullable|string',
-            'garam' => 'nullable|string',
-            'minyak' => 'nullable|string',
-            'sayur' => 'nullable|string',
-            'aktivitas' => 'nullable|string',
-            'alkohol' => 'nullable|string',
-
-            'r_pribadi_htn' => 'nullable|boolean',
-            'r_pribadi_dm' => 'nullable|boolean',
-            'r_pribadi_stroke' => 'nullable|boolean',
-            'r_pribadi_jantung' => 'nullable|boolean',
-
-            'r_keluarga_htn' => 'nullable|boolean',
-            'r_keluarga_dm' => 'nullable|boolean',
-            'r_keluarga_stroke' => 'nullable|boolean',
-            'r_keluarga_jantung' => 'nullable|boolean',
-
-            'obat' => 'nullable|string',
-            'kesiapan' => 'nullable|string',
-            'dukung' => 'nullable|string',
-
-            'skor_faktor_risiko' => 'nullable|integer|min:0',
-            'kategori_faktor_risiko' => 'nullable|string',
-            'detail_faktor_risiko' => 'nullable|array',
+    public function attributes(): array
+    {
+        return [
+            'id_petugas' => 'dokter/petugas',
+            'tanggal_skrining' => 'tanggal skrining',
+            'keluhan_utama' => 'keluhan utama',
         ];
     }
 }

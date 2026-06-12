@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class KunjunganPTM extends Model
 {
-    protected $table = 'tabel_kunjungan_ptm';
+    protected $table = 'simpus_kunjungan_ptm';
     protected $primaryKey = 'id';
     //
     protected $fillable = [
         'idSkrining',
         'idPelayanan',
         'idLoket',
-        'nikPasien',
+        'nik_pasien',
         'tanggal_skrining',
-        'dokter',
+        'id_petugas',
         'fasyankes',
         'jenis_kunjungan',
         'keluhan_utama'

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('skriningID')->unique();
             $table->foreign('skriningID')
                 ->references('idSkrining')
-                ->on('tabel_kunjungan_ptm')
+                ->on('simpus_kunjungan_ptm')
                 ->cascadeOnDelete();
             $table->uuid('pelayananId')->unique();
             // Merokok
