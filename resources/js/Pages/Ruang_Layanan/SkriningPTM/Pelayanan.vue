@@ -34,15 +34,16 @@
       :tindakan="props.tindakan"
       :DataTindakan="props.DataTindakan"
       :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
     />
   </div>
 </template>
 
 <script setup>
   import { router } from '@inertiajs/vue3';
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
-  import FormPemeriksaan from '../../../Components/Layouts/RuangLayanan/SkriningPTM/TabPemeriksaan.vue';
+  import FormPemeriksaan from './TabPemeriksaan.vue';
   import DataPasienCard from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/DataPasien.vue';
   import QuickActions from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/QuickActions.vue';
   import TitleSection from '../../../Components/Layouts/RuangLayanan/SkriningPTM/Card/Title.vue';
@@ -55,7 +56,12 @@
     tindakan: Array,
     DataTindakan: Array,
     TenagaMedis: Array,
+    DataSkrining: Object,
   });
+
+  const hipertensi = computed(() => props.DataSkrining?.kategori_tekanan_darah);
+
+  console.log('data ', hipertensi);
 
   const backRoute = 'ruang-layanan.ptm';
   const showSuccessModal = ref(false);

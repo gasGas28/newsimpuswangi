@@ -3,7 +3,7 @@
 namespace App\Models\RuangLayanan\SkriningPTM;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPemeriksaanPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
 class SimpusAsamUrat extends Model
 {
     protected $table = 'simpus_asam_urat';
@@ -17,7 +17,7 @@ class SimpusAsamUrat extends Model
 
     public function pemeriksaanPTM()
     {
-        return $this->belongsTo(SimpusPemeriksaanPTM::class);
+        return $this->belongsTo(SimpusPelayananPTM::class);
     }
     //
 }

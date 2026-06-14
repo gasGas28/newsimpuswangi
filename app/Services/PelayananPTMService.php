@@ -9,10 +9,10 @@ use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPemeriksaanPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
+use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -29,6 +29,8 @@ class PelayananPTMService
             ->leftJoin('unit_profiles as up', 'up.unit_id', '=', 'l.unitId')
             ->leftJoin('master_dokter as dokter', 'up.unit_id', '=', 'dokter.pusk_id')
             ->leftJoin('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
+            ->leftJoin('simpus_pemeriksaan_ptm as ptm', 'skrining.idSkrining', '=', 'ptm.idSkrining')
+
 
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -60,23 +62,23 @@ class PelayananPTMService
                 'p.NAMA_LGKP',
                 'p.NIK',
                 'p.IHS_NUMBER',
+                'p.alamat',
+                'p.no_rt',
+                'p.no_rw',
+                'p.jenis_klmin',
+                'l.kdPoli',
+                'l.umur',
+                'l.umur_bulan',
+                'l.umur_hari',
+                'l.idLoket',
+                'l.tglKunjungan',
+                'l.kunjBaru',
+                'l.idLoket',
                 'kel.nama_kel',
                 'kec.nama_kec',
                 'kab.nama_kab',
                 'prop.nama_prop',
                 'poli.nmPoli',
-                'l.kdPoli',
-                'p.alamat',
-                'p.no_rt',
-                'p.no_rw',
-                'p.jenis_klmin',
-                'l.umur',
-                'l.umur_bulan',
-                'l.umur_hari',
-                'l.tglKunjungan',
-                'l.idLoket',
-                'l.kunjBaru',
-                'l.idLoket',
                 'pel.idpelayanan',
                 'pel.sudahDilayani',
                 'pel.startTime',
@@ -85,9 +87,9 @@ class PelayananPTMService
                 'dokter.kdDokter',
                 'dokter.nmDokter',
                 'skrining.idSkrining',
+                'ptm.id'
             )
             ->first();
-
 
         return $DataPasien;
     }
@@ -103,12 +105,19 @@ class PelayananPTMService
             ->where('profesi_id', [23, 24])
             ->get();
 
+        $DataSkrining = DB::table('simpus_skrining_ptm as skrining')
+            ->join('simpus_pelayanan_ptm as ptm', 'ptm.idSkrining', '=', 'skrining.idSkrining')
+            ->leftJoin('faktor_risiko_ptm as faktor', 'faktor.skriningID', '=', 'skrining.idSkrining')
+            ->leftJoin('simpus_kunjungan_ptm as k', 'k.idSkrining', '=', 'skrining.idSkrining')
+            ->leftJoin('simpus_hipertensi as ht', 'ht.pemeriksaan_ptm_id', '=', 'ptm.id')
+            ->leftJoin('simpus_diabetes as dm', 'dm.pemeriksaan_ptm_id', '=', 'ptm.id')
 
-        // dd($TenagaMedis);
-        // dd($SimpusTindakan);
+            ->first();
+        // dd($DataSkrining);
         return [
             'tindakan' => $SimpusTindakan,
-            'TenagaMedis' => $TenagaMedis
+            'TenagaMedis' => $TenagaMedis,
+            'DataSkrining' => $DataSkrining
         ];
     }
     public function updateStatusPelayanan($idPelayanan, $idLoket, $status)
@@ -184,7 +193,7 @@ class PelayananPTMService
     public function savePemeriksaanMetabolik(array $data): void
     {
         DB::transaction(function () use ($data) {
-            $pemeriksaan = SimpusPemeriksaanPTM::firstOrCreate(
+            $pemeriksaan = SimpusPelayananPTM::firstOrCreate(
                 [
                     'idSkrining' => $data['skriningId'],
                 ]

@@ -1,71 +1,9 @@
-<template>
-  <div class="resume-form">
-    <section class="resume-panel">
-      <div class="panel-header">
-        <div>
-          <h4><i class="bi bi-clipboard2-check"></i> Ringkasan Skrining PTM</h4>
-          <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
-        </div>
-        <span class="status-pill complete">10/12 lengkap</span>
-      </div>
+<template> 
+<div class="resume-form">
 
-      <div class="panel-body">
-        <div class="summary-grid">
-          <div class="summary-item">
-            <div class="summary-label">Nama Pasien</div>
-            <div class="summary-value">Siti Rahayu</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">NIK</div>
-            <div class="summary-value">3509012345670001</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Tanggal Skrining</div>
-            <div class="summary-value">2026-06-10</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Fasyankes</div>
-            <div class="summary-value">Puskesmas Sumbersari</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Pemeriksa</div>
-            <div class="summary-value">dr. Andi Kurniawan</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Status IMT</div>
-            <div class="summary-value">Obesitas I</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Tekanan Darah</div>
-            <div class="summary-value">140/90 mmHg</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Gula Darah Sewaktu</div>
-            <div class="summary-value">198 mg/dL</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Kolesterol Total</div>
-            <div class="summary-value">215 mg/dL</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Kategori Risiko PTM</div>
-            <div class="summary-value">Risiko Tinggi</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Status Kasus</div>
-            <div class="summary-value">Kasus Baru</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Rencana Rujuk</div>
-            <div class="summary-value">-</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="resume-panel">
-      <div class="panel-header">
-        <div>
+  <section class="resume-panel">
+    <div class="panel-header">
+      <div>
           <h4><i class="bi bi-activity"></i> Ringkasan Temuan</h4>
           <p>Temuan otomatis dari subjektif, objektif, dan status pasien sebagai bahan resume.</p>
         </div>
@@ -76,7 +14,7 @@
           <div class="finding-item">
             <i class="bi bi-exclamation-triangle-fill warning"></i>
             <div>
-              <strong>Hipertensi Grade 1</strong>
+              <strong>{{ hipertensi }}</strong>
               <span>Tekanan darah 140/90 mmHg, melampaui batas normal.</span>
             </div>
           </div>
@@ -158,24 +96,27 @@
               class="form-control"
               rows="4"
               placeholder="Catatan tambahan dokter/perawat sebelum pengiriman"
-            >Pasien disarankan kontrol ulang 2 minggu, edukasi gizi, dan pemeriksaan HbA1c lanjutan.</textarea>
+            >
+Pasien disarankan kontrol ulang 2 minggu, edukasi gizi, dan pemeriksaan HbA1c lanjutan.</textarea
+            >
           </div>
         </div>
 
         <div class="fhir-preview">
           <div class="preview-header">
             <span>Resource yang dirangkum</span>
-            <code>Encounter, QuestionnaireResponse, Observation, Condition, Procedure, CarePlan, Composition</code>
+            <code
+              >Encounter, QuestionnaireResponse, Observation, Condition, Procedure, CarePlan,
+              Composition</code
+            >
           </div>
-          <pre>{{ compositionPreview }}</pre>
+          <pre></pre>
         </div>
       </div>
     </section>
 
     <div class="form-actions">
-      <div class="send-status">
-        10/12 data utama lengkap sebelum pengiriman.
-      </div>
+      <div class="send-status">10/12 data utama lengkap sebelum pengiriman.</div>
       <div class="action-buttons">
         <button type="button" class="finish-button">
           <i class="bi bi-check2-circle"></i>
@@ -189,50 +130,10 @@
     </div>
   </div>
 </template>
-
 <script setup>
-const props = defineProps({
-  DataPasien: Object,
-  formData: Object,
-  tindakan: Array,
-  DataTindakan: Array,
-});
-
-const compositionPreview = `{
-  "resourceType": "Composition",
-  "status": "preliminary",
-  "type": {
-    "coding": [
-      {
-        "system": "http://loinc.org",
-        "code": "74213-0",
-        "display": "Skrining PTM"
-      }
-    ]
-  },
-  "title": "Ringkasan Skrining PTM",
-  "date": "2026-06-10",
-  "subject": {
-    "display": "Siti Rahayu",
-    "identifier": "3509012345670001"
-  },
-  "section": [
-    {
-      "title": "Ringkasan Skrining PTM",
-      "text": {
-        "status": "generated",
-        "div": "10/12 data utama lengkap"
-      }
-    },
-    {
-      "title": "Ringkasan Temuan",
-      "text": {
-        "status": "generated",
-        "div": "Hipertensi Grade 1; Gula Darah Tinggi; Dislipidemia; Tidak Merokok"
-      }
-    }
-  ]
-}`;
+  const props = defineProps({
+    DataPasien: Object,
+    TenagaMedis: Array,
+    DataSkrining: Object
+  });
 </script>
-
-<style scoped src="./FormPemeriksaan.css"></style>

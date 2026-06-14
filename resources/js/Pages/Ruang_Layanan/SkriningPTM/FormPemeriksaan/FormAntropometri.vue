@@ -567,7 +567,7 @@
   import { ref, computed } from 'vue';
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   // --- Props ---
   const props = defineProps({

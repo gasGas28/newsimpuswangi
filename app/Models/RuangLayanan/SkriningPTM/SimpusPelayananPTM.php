@@ -10,16 +10,14 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
-class SimpusPemeriksaanPTM extends Model
+class SimpusPelayananPTM extends Model
 {
-    protected $table = 'simpus_pemeriksaan_ptm';
+    protected $table = 'simpus_pelayanan_ptm';
     protected $primaryKey = 'id';
 
     protected $fillable = [
         'idSkrining',
     ];
-
-    // SimpusPemeriksaanPTM.php
 
     public function hipertensi()
     {

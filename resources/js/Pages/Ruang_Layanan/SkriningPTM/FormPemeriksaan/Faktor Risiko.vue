@@ -289,7 +289,7 @@
   import { ref, computed, watchEffect } from 'vue';
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   // --- Props ---
   const props = defineProps({
@@ -299,7 +299,7 @@
   // --- Modal state ---
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false); // ← tambahkan jika memang dipakai
+  const showDuplicateModal = ref(false); 
   const validationMessages = ref([]);
 
   // --- Form ---

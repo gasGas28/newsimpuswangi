@@ -215,7 +215,7 @@ const props = defineProps({
 });
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>
 
 <style scoped>
   .verification-hint {
