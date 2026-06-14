@@ -41,4 +41,16 @@ return [
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
 
+    'satusehat' => [
+        'auth_url'        => env('SATUSEHAT_AUTH_URL'),
+        'fhir_url'        => env('SATUSEHAT_FHIR_URL'),
+        'client_id'       => env('SATUSEHAT_CLIENT_ID'),
+        'client_secret'   => env('SATUSEHAT_CLIENT_SECRET'),
+        'organization_id' => env('SATUSEHAT_ORGANIZATION_ID'),
+        'location_id'     => env('SATUSEHAT_LOCATION_ID'),
+        'practitioner_id' => env('SATUSEHAT_PRACTITIONER_ID'),
+        'practitioner_name' => env('SATUSEHAT_PRACTITIONER_NAME'),
+        'location_name'   => env('SATUSEHAT_LOCATION_NAME'),
+    ],
+
 ];

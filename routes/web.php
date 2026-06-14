@@ -42,6 +42,7 @@ use App\Http\Controllers\Farmasi\PengeluaranLangsungDetailController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 use App\Http\Controllers\Satusehat\SatusehatFhirController;
 use App\Http\Requests\SimpanTindakanRequest;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\SatuSehatController;
 
 use App\Http\Requests\StoreKunjunganPTMRequest;
 
@@ -53,6 +54,43 @@ Route::get('/test-request-object', function () {
         'container' => $request->getContainer(),
         'redirector' => $request->getRedirector(),
     ]);
+});
+
+Route::get('/test-token', function () {
+
+    $response = Http::asForm()->post(
+        'https://api-satusehat-stg.dto.kemkes.go.id/oauth2/v1/accesstoken',
+        [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'uEsVwq1Q72nypypRgwpAw3RZAhWsk5LVIMjvxTip8Y2kAGqq',
+            'client_secret' => 'nADFUIufwpzAHduGo9nNFTRQm9ukgGvaDVNVHzpKaAkS4JftVC8f3Cv8lNLo2bJW',
+        ]
+    );
+
+    return [
+        'status' => $response->status(),
+        'body' => $response->body(),
+    ];
+});
+
+Route::get('/satusehat-test', function () {
+
+    $clientId = 'uEsVwq1Q72nypypRgwpAw3RZAhWsk5LVIMjvxTip8Y2kAGqq';
+    $clientSecret = 'nADFUIufwpzAHduGo9nNFTRQm9ukgGvaDVNVHzpKaAkS4JftVC8f3Cv8lNLo2bJW';
+
+    $response = Http::asForm()->post(
+        'https://api-satusehat-stg.dto.kemkes.go.id/oauth2/v1/accesstoken',
+        [
+            'grant_type' => 'client_credentials',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+        ]
+    );
+
+    return [
+        'status' => $response->status(),
+        'body' => $response->body(),
+    ];
 });
 
 Route::get('/cek-validator', function () {
@@ -520,6 +558,9 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
         Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
             ->name('satusehat.submit-ptm');
+
+        Route::post('/satusehat/encounter/{idSkrining}', [SatuSehatController::class, 'testEncounter'])
+            ->name('satusehat.encounter');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');

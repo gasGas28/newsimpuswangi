@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->uuid('idSkrining')->unique();
+            $table->uuid('encounter_id');
 
             $table->timestamps();
 

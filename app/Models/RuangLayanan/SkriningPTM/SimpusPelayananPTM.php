@@ -17,6 +17,7 @@ class SimpusPelayananPTM extends Model
 
     protected $fillable = [
         'idSkrining',
+        'encounter_id',
     ];
 
     public function hipertensi()

@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import path from 'path';
 import ziggy from 'vite-plugin-ziggy';
+import { fileURLToPath, URL } from 'node:url'
+
 
 export default defineConfig({
   plugins: [

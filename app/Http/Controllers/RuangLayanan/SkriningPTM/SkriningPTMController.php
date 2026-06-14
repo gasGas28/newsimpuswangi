@@ -96,6 +96,7 @@ class SkriningPTMController extends Controller
     {
 
         $validated = $request->validated();
+        // dd($validated);
         $this->pelayananService->addFaktorRisiko($validated);
         return redirect()->back();
     }

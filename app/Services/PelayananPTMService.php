@@ -176,6 +176,10 @@ class PelayananPTMService
             'aktivitas' => $data['aktivitas'] ?? null,
             'alkohol' => $data['alkohol'] ?? null,
 
+            'obat' => $data['obat'] ?? null,
+            'kesiapan' => $data['kesiapan'] ?? null,
+            'dukung' => $data['dukung'] ?? null,
+
             'r_pribadi_htn' => $data['r_pribadi_htn'] ?? null,
             'r_pribadi_dm' => $data['r_pribadi_dm'] ?? null,
             'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? null,
@@ -185,6 +189,10 @@ class PelayananPTMService
             'r_keluarga_dm' => $data['r_keluarga_dm'] ?? null,
             'r_keluarga_stroke' => $data['r_keluarga_stroke'] ?? null,
             'r_keluarga_jantung' => $data['r_keluarga_jantung'] ?? null,
+
+            'skor_faktor_risiko' => $data['skor_faktor_risiko'] ?? null,
+            'kategori_faktor_risiko' => $data['kategori_faktor_risiko'] ?? null,
+            'detail_faktor_risiko' => $data['detail_faktor_risiko'] ?? null,
         ]);
 
         return $fakorRisiko;
