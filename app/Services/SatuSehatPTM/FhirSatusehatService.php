@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Satusehat;
+namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

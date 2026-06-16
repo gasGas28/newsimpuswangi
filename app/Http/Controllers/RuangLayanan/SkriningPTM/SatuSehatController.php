@@ -4,29 +4,68 @@ namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\Satusehat\SatuSehatService;
+use App\Services\SatuSehatPTM\EncounterService;
+use App\Services\SatuSehatPTM\ObservationService;
+use App\Services\SatuSehatPTM\QuestionnaireResponseService;
+use App\Services\SatuSehatPTM\RiwayatPTMService;
+
 class SatuSehatController extends Controller
 {
-    protected $satusehatService;
-    public function __construct(SatuSehatService $satusehatService)
-    {
-       $this->satusehatService = $satusehatService;
-    }
-    public function testEncounter(string $idSkrining, SatuSehatService $satusehatService)
-{
-    try {
-        $encounterId = $satusehatService->kirimEncounter($idSkrining);
+    public function __construct(
+        private EncounterService $encounterService,
+        private ObservationService $observationService,
+        private QuestionnaireResponseService $questionnaireResponseService,
+        private RiwayatPTMService $riwayatPTMService,
+    ) {}
 
-        return response()->json([
-            'success' => true,
-            'encounter_id' => $encounterId,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
+    public function testEncounter(string $idSkrining)
+    {
+        try {
+            $encounterId = $this->encounterService->kirimEncounter($idSkrining);
+            return redirect()->back()->with([
+                'success'      => true,
+                'encounter_id' => $encounterId,
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
-}
-    //
+
+    public function sendRiskFactor(string $idSkrining)
+    {
+        try {
+            $observationId   = $this->observationService->sendSmokingStatus($idSkrining);
+            $this->questionnaireResponseService->sendFaktorRisiko($idSkrining, $observationId);
+            $conditionResult = $this->riwayatPTMService->sendRiwayat($idSkrining);
+
+            $formatCondition = fn(array $items) => collect($items)
+                ->map(fn($v, $k) => [
+                    'field'        => $k,
+                    'condition_id' => $v['condition_id'] ?? null,
+                    'status'       => isset($v['error']) 
+                                        ? 'gagal' 
+                                        : ($v['status'] === 'already_exists' ? 'sudah_ada' : 'berhasil'),
+                    'error'        => $v['error'] ?? null,
+                    'clinical_sts' => $v['clinical_status'] ?? null,
+                ])
+                ->values();
+
+            return redirect()->back()->with([
+                'success' => true,
+                'message' => 'Faktor risiko berhasil dikirim',
+                'data'    => [
+                    'riwayat_ptm' => $formatCondition($conditionResult['riwayat_ptm'] ?? [])->toArray(),
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }

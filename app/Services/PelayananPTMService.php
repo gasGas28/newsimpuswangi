@@ -132,7 +132,7 @@ class PelayananPTMService
             'idSkrining' => (string) Str::uuid(),
             'idPelayanan' => $idPelayanan,
             'idLoket' => $idLoket,
-            'status' => 'draft',
+            'status' => 'arrived',
         ]);
 
         // dd($idLoket);

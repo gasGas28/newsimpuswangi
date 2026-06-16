@@ -57,9 +57,9 @@
               v-model="form.status_merokok"
             >
               <option value="">Pilih status merokok</option>
-              <option value="Tidak Pernah">Tidak pernah merokok</option>
-              <option value="Perokok Aktif">Merokok aktif</option>
-              <option value="Mantan Perokok">Mantan perokok</option>
+              <option value="tidak_pernah">Tidak pernah merokok</option>
+              <option value="perokok_aktif">Merokok aktif</option>
+              <option value="mantan_perokok">Mantan perokok</option>
             </select>
           </div>
 
@@ -338,6 +338,10 @@
     kategori_faktor_risiko: '',
     detail_faktor_risiko: [],
   });
+
+    console.log('Form initialized with:', form);
+
+
 
   // --- Options untuk v-for di template ---       ← INI YANG HILANG
   const riwayatPribadiOptions = [

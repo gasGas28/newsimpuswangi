@@ -48,12 +48,20 @@
         <i class="bi" :class="dataKunjungan.processing ? 'bi-arrow-repeat' : 'bi-save'"></i>
         <span>{{ dataKunjungan.processing ? 'Menyimpan...' : 'Kirim Satu Sehat' }}</span>
       </button> -->
-       <button
-        type="button"
-        @click="kirimEncounter"
-    >
-        Kirim Kunjungan SATUSEHAT
-    </button>
+      <button type="button" @click="kirimEncounter">Kirim Kunjungan SATUSEHAT</button>
+
+      <pre
+        v-if="flash?.data"
+        style="
+          background: #1e1e1e;
+          color: #d4d4d4;
+          padding: 16px;
+          border-radius: 8px;
+          overflow: auto;
+        "
+        >{{ JSON.stringify(flash, null, 2) }}
+    </pre
+      >
     </div>
   </section>
 
@@ -78,8 +86,8 @@
 </template>
 
 <script setup>
-  import { ref, watchEffect, computed } from 'vue';
-  import { useForm, router } from '@inertiajs/vue3';
+  import { ref, watchEffect, computed, watch } from 'vue';
+  import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../../Components/Layouts/Modal/ModalAlert.vue';
 
@@ -88,6 +96,9 @@
     TenagaMedis: Array,
     DataSkrining: Object,
   });
+
+  const page = usePage();
+  const flash = computed(() => page.props.flash);
 
   const data = computed(() => props.DataSkrining || {});
   const patient = computed(() => props.DataPasien || {});
@@ -133,6 +144,8 @@
     kunjungan: kunjungan || '',
   });
 
+  console.log('Form initialized with:', dataKunjungan);
+
   const saveStatus = ref('idle');
   const saveError = ref('');
 
@@ -162,8 +175,10 @@
   }
 
   const kirimEncounter = () => {
+    console.log('props.DataSkrining:', props.DataSkrining);
+    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
     router.post(
-      route('satusehat.encounter', props.DataSkrining?.idSkrining),
+      route('satusehat.encounter', props.DataPasien?.idSkrining),
       {},
       {
         preserveScroll: true,
@@ -176,8 +191,6 @@
       }
     );
   };
-
-  
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>

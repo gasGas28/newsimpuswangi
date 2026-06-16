@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Services\Satusehat;
+namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
-use App\Models\SimpusSkriningPtm;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
-class SatuSehatService
+class EncounterService
 {
     public function getAccessToken(): string
     {
@@ -51,12 +50,22 @@ class SatuSehatService
 
     public function kirimEncounter(string $idSkrining): string
     {
-        $skrining = KunjunganPTM::where('idSkrining', $idSkrining)
+        $skrining = KunjunganPTM::select(
+            'simpus_kunjungan_ptm.*',
+            'simpus_pasien.NAMA_LGKP',
+            'simpus_pasien.NIK',
+            'simpus_pasien.IHS_NUMBER'
+        )
+            ->join(
+                'simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien'
+            )
+            ->where('simpus_kunjungan_ptm.idSkrining', $idSkrining)
             ->firstOrFail();
 
-        // sementara pakai Patient sandbox
-        $patientId = 'P02478375538';
-        $patientName = 'Nama Test';
+        $patientId = $skrining->IHS_NUMBER;
+        $patientName = $skrining->NAMA_LGKP;
+
+        // dd($patientName, $patientId);
 
         $payload = [
             'resourceType' => 'Encounter',
@@ -121,12 +130,14 @@ class SatuSehatService
 
         $encounterId = $this->createEncounter($payload);
 
-        SimpusPelayananPTM::updateOrCreate(
+        SimpusSkriningPTM::updateOrCreate(
             [
                 'idSkrining' => $idSkrining,
             ],
             [
                 'encounter_id' => $encounterId,
+                'status' => 'in-progress',
+                'patient_id' => $patientId,
             ]
         );
 

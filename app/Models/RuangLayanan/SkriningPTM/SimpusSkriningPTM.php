@@ -13,6 +13,8 @@ class SimpusSkriningPTM extends Model
         'idSkrining',
         'idPelayanan',
         'idLoket',
+        'encounter_id',
+        'patient_id',
         'status',
         'sync_status',
         'sync_time',

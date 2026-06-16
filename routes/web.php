@@ -561,6 +561,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
 
         Route::post('/satusehat/encounter/{idSkrining}', [SatuSehatController::class, 'testEncounter'])
             ->name('satusehat.encounter');
+        Route::post('/satusehat/observation/{idSkrining}', [SatuSehatController::class, 'sendRiskFactor'])
+            ->name('satusehat.observation');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');

@@ -1,55 +1,72 @@
 <template>
-    <section class="resume-panel">
-      <div class="panel-header">
-        <div>
-          <h4><i class="bi bi-clipboard2-check"></i> Data Kunjungan</h4>
-          <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
-        </div>
+  <section class="resume-panel">
+    <div class="panel-header">
+      <div>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Kunjungan</h4>
+        <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
+    </div>
 
-      <div class="panel-body">
-        <div class="summary-grid">
-          <div class="summary-item">
-            <div class="summary-label">Nama Pasien</div>
-            <div class="summary-value">{{ patientName }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">NIK</div>
-            <div class="summary-value">{{ NIK }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Tanggal Skrining</div>
-            <div class="summary-value">{{ tglSkrining }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Fasyankes</div>
-            <div class="summary-value">{{ fasyankes }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Pemeriksa</div>
-            <div class="summary-value">{{ petugas }}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Jenis Kunjungan</div>
-            <div class="summary-value">{{ kunjungan }}</div>
-          </div>
+    <div class="panel-body">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Nama Pasien</div>
+          <div class="summary-value">{{ patientName }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">NIK</div>
+          <div class="summary-value">{{ NIK }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Tanggal Skrining</div>
+          <div class="summary-value">{{ tglSkrining }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Fasyankes</div>
+          <div class="summary-value">{{ fasyankes }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Pemeriksa</div>
+          <div class="summary-value">{{ petugas }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Jenis Kunjungan</div>
+          <div class="summary-value">{{ kunjungan }}</div>
         </div>
       </div>
-      <div class="form-actions">
-        <div class="save-status" :class="{ success: saveStatus === 'ready' }">
-          {{ saveMessage }}
-        </div>
-        <button
-          type="button"
-          class="save-button"
-          :disabled="dataKunjungan.processing"
-          @click="kirimDataKunjungan"
-        >
-          <i class="bi" :class="dataKunjungan.processing ? 'bi-arrow-repeat' : 'bi-save'"></i>
-          <span>{{ dataKunjungan.processing ? 'Menyimpan...' : 'Kirim Satu Sehat' }}</span>
-        </button>
+    </div>
+    <div class="form-actions">
+      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
+        {{ saveMessage }}
       </div>
-    </section>
+      <button
+        type="button"
+        class="save-button"
+        :disabled="dataKunjungan.processing"
+        @click="kirimDataKunjungan"
+      >
+        <i class="bi" :class="dataKunjungan.processing ? 'bi-arrow-repeat' : 'bi-save'"></i>
+        <span>{{ dataKunjungan.processing ? 'Menyimpan...' : 'Kirim Satu Sehat' }}</span>
+      </button>
+
+      <button type="button" class="btn-btn-outline-success" @click="createObservation">
+        Kirim Faktor Risiko SATUSEHAT
+      </button>
+
+      <pre
+        v-if="flash?.data"
+        style="
+          background: #1e1e1e;
+          color: #d4d4d4;
+          padding: 16px;
+          border-radius: 8px;
+          overflow: auto;
+        "
+        >{{ JSON.stringify(flash, null, 2) }}
+    </pre
+      >
+    </div>
+  </section>
 
   <!-- ✅ Modal di dalam root element -->
   <ModalAlert
@@ -72,8 +89,8 @@
 </template>
 
 <script setup>
-  import { ref, watchEffect, computed } from 'vue';
-  import { useForm } from '@inertiajs/vue3';
+  import { ref, watchEffect, computed, watch } from 'vue';
+  import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../../Components/Layouts/Modal/ModalAlert.vue';
 
@@ -82,6 +99,9 @@
     TenagaMedis: Array,
     DataSkrining: Object,
   });
+
+  const page = usePage();
+  const flash = computed(() => page.props.flash);
 
   const data = computed(() => props.DataSkrining || {});
   const patient = computed(() => props.DataPasien || {});
@@ -111,10 +131,9 @@
   // console.log(hipertensi);
   // console.log(data);
 
-
-   const showSuccessModal = ref(false);
+  const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false); 
+  const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
   // --- Form ---
@@ -125,7 +144,7 @@
     nama_pasien: patientName || '',
     fasyankes: fasyankes || '',
     nik: NIK || '',
-    kunjungan: kunjungan || ''
+    kunjungan: kunjungan || '',
   });
 
   const saveStatus = ref('idle');
@@ -137,7 +156,7 @@
     return 'Simpan setelah data kunjungan selesai diisi.';
   });
 
-   function extractMessage(errors) {
+  function extractMessage(errors) {
     return (
       Object.values(errors || {})
         .flat()
@@ -156,39 +175,66 @@
     showDuplicateModal.value = false;
   }
 
-  function saveFaktorRisiko() {
-  saveStatus.value = 'idle'
-  saveError.value  = ''
-  showSuccessModal.value    = false
-  showValidationModal.value = false
-  validationMessages.value  = []
-
-  dataKunjungan.post(route('pelayanan.simpan-risiko-ptm'), {
-    preserveScroll: true,
-
-    onSuccess: () => {
-      saveStatus.value = 'ready'
-      saveError.value  = ''
-      validationMessages.value = []
-      dataKunjungan.clearErrors()
-      dataKunjungan.defaults(dataKunjungan.data())
-      showSuccessModal.value = true
-    },
-
-    onError: (errors) => {
-      saveStatus.value = 'error'
-      const message = extractMessage(errors)
-      validationMessages.value = Object.values(errors).flat()
-      saveError.value = message
-
-      if (isDuplicateError(message)) {
-        showDuplicateModal.value = true
-      } else {
-        showValidationModal.value = true
+  const createObservation = () => {
+    console.log('props.DataSkrining:', props.DataSkrining);
+    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
+    router.post(
+      route('satusehat.observation', props.DataPasien?.idSkrining),
+      {},
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          console.log('Observation berhasil dikirim');
+        },
+        onError: (errors) => {
+          console.error(errors);
+        },
       }
-    },
-  })
-}
+    );
+  };
+
+  watch(flash, (val) => {
+    if (val.success) {
+      console.log('Berhasil:', val.message);
+      console.log('Data PTM:', val.data?.riwayat_ptm);
+    } else {
+      console.error('Gagal:', val.message);
+    }
+  });
+
+  function saveFaktorRisiko() {
+    saveStatus.value = 'idle';
+    saveError.value = '';
+    showSuccessModal.value = false;
+    showValidationModal.value = false;
+    validationMessages.value = [];
+
+    dataKunjungan.post(route('pelayanan.simpan-risiko-ptm'), {
+      preserveScroll: true,
+
+      onSuccess: () => {
+        saveStatus.value = 'ready';
+        saveError.value = '';
+        validationMessages.value = [];
+        dataKunjungan.clearErrors();
+        dataKunjungan.defaults(dataKunjungan.data());
+        showSuccessModal.value = true;
+      },
+
+      onError: (errors) => {
+        saveStatus.value = 'error';
+        const message = extractMessage(errors);
+        validationMessages.value = Object.values(errors).flat();
+        saveError.value = message;
+
+        if (isDuplicateError(message)) {
+          showDuplicateModal.value = true;
+        } else {
+          showValidationModal.value = true;
+        }
+      },
+    });
+  }
 
   const compositionPreview = `{
   "resourceType": "Composition",
