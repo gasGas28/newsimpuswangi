@@ -186,4 +186,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>

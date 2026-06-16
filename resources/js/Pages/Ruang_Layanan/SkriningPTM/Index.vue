@@ -22,7 +22,7 @@
   import { route } from 'ziggy-js';
   import { usePage, router } from '@inertiajs/vue3';
 
-  import FormAnamnesa from '../../../Components/Layouts/RuangLayanan/SkriningPTM/UnitPelayanan.vue';
+  import FormAnamnesa from './UnitPelayanan.vue';
   import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 
   const page = usePage();

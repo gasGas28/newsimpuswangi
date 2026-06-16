@@ -25,6 +25,7 @@ class PemeriksaanPTMRequest extends FormRequest
             'skriningId' => [
                 'required',
             ],
+            'encounter_id' => ['nullable'],
 
             // Hipertensi
             'hipertensi.sistolik' => ['nullable', 'integer'],

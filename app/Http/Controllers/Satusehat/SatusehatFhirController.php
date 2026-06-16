@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Satusehat;
 
 use App\Http\Controllers\Controller;
 use App\Models\SatusehatSubmission;
-use App\Services\Satusehat\FhirSatusehatService;
-use App\Services\Satusehat\PtmPelayananToFhirMapper;
+use App\Services\SatuSehatPTM\FhirSatusehatService;
+use App\Services\SatuSehatPTM\PtmPelayananToFhirMapper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;

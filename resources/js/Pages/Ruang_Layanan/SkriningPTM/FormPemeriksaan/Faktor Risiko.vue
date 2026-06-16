@@ -57,9 +57,9 @@
               v-model="form.status_merokok"
             >
               <option value="">Pilih status merokok</option>
-              <option value="Tidak Pernah">Tidak pernah merokok</option>
-              <option value="Perokok Aktif">Merokok aktif</option>
-              <option value="Mantan Perokok">Mantan perokok</option>
+              <option value="tidak_pernah">Tidak pernah merokok</option>
+              <option value="perokok_aktif">Merokok aktif</option>
+              <option value="mantan_perokok">Mantan perokok</option>
             </select>
           </div>
 
@@ -289,7 +289,7 @@
   import { ref, computed, watchEffect } from 'vue';
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   // --- Props ---
   const props = defineProps({
@@ -299,7 +299,7 @@
   // --- Modal state ---
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false); // ← tambahkan jika memang dipakai
+  const showDuplicateModal = ref(false); 
   const validationMessages = ref([]);
 
   // --- Form ---
@@ -338,6 +338,10 @@
     kategori_faktor_risiko: '',
     detail_faktor_risiko: [],
   });
+
+    console.log('Form initialized with:', form);
+
+
 
   // --- Options untuk v-for di template ---       ← INI YANG HILANG
   const riwayatPribadiOptions = [

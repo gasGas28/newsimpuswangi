@@ -19,7 +19,11 @@ return new class extends Migration
             $table->string('idPelayanan')->unique();
             $table->string('idLoket');
 
-            $table->string('status')->default('draft');
+            $table->enum('status', [
+                'arrived',
+                'in-progress',
+                'finished'
+            ])->default('draft');
 
             $table->enum('sync_status', [
                 'pending',

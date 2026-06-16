@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('simpus_pemeriksaan_ptm', function (Blueprint $table) {
+        Schema::create('simpus_pelayanan_ptm', function (Blueprint $table) {
             $table->id();
 
             $table->uuid('idSkrining')->unique();
+            $table->uuid('encounter_id');
 
             $table->timestamps();
 
@@ -31,6 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('simpus_pemeriksaan_ptm');
         //
     }
 };

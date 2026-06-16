@@ -22,7 +22,15 @@
 
       <!-- Dynamic Form -->
       <div class="card-body bg-white">
-        <component :is="currentForm" :DataPasien="DataPasien" :formData="formPemeriksaan" :tindakan="props.tindakan" :DataTindakan="props.DataTindakan" :TenagaMedis="props.TenagaMedis" />
+        <component
+          :is="currentForm"
+          :DataPasien="DataPasien"
+          :formData="formPemeriksaan"
+          :tindakan="props.tindakan"
+          :DataTindakan="props.DataTindakan"
+          :TenagaMedis="props.TenagaMedis"
+          :DataSkrining="props.DataSkrining"
+        />
       </div>
     </div>
   </div>
@@ -34,10 +42,10 @@
   // Import form components
   import FormSubjektif from './FormSubjektif.vue';
   import FormObjektif from './FormObjektif.vue';
-  import FormAssessment from './FormPemeriksaan/FormAssessment.vue';
+  import FormAssessment from './FormAssessment.vue';
   import FormPlanning from './FormPlanning.vue';
-  import FormStatusPasien from './FormPemeriksaan/FormStatusPasien.vue';
-  import FormResumePasien from './FormPemeriksaan/FormResumePasien.vue';
+  import FormStatusPasien from './FormStatusPasien.vue';
+  import FormResumePasien from './FormKirimSatuSehat.vue';
 
   // Props
   const props = defineProps({
@@ -45,6 +53,7 @@
     tindakan: Array,
     DataTindakan: Array,
     TenagaMedis: Array,
+    DataSkrining: Object,
   });
 
   // Tabs list

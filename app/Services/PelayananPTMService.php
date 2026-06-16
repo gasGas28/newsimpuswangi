@@ -9,10 +9,10 @@ use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPemeriksaanPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
+use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,15 +20,19 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
 class PelayananPTMService
 {
-    public function getData($id, $idPoli)
+    public function getDataPasien($id, $idPoli)
     {
         $DataPasien = DB::table('simpus_loket as l')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
             ->leftJoin('unit_profiles as up', 'up.unit_id', '=', 'l.unitId')
-            ->leftJoin('master_dokter as dokter', 'up.unit_id', '=', 'dokter.pusk_id')
             ->leftJoin('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
+            ->leftJoin('simpus_kunjungan_ptm as kunjungan', 'kunjungan.idSkrining', '=', 'skrining.idSkrining')
+            ->leftJoin('master_dokter as dokter', 'dokter.ihs_nakes', '=', 'kunjungan.id_petugas')
+            ->leftJoin('simpus_pemeriksaan_ptm as ptm', 'skrining.idSkrining', '=', 'ptm.idSkrining')
+            ->leftJoin('faktor_risiko_ptm as frisiko', 'skrining.idSkrining', '=', 'frisiko.skriningID')
+
 
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -60,34 +64,35 @@ class PelayananPTMService
                 'p.NAMA_LGKP',
                 'p.NIK',
                 'p.IHS_NUMBER',
+                'p.alamat',
+                'p.no_rt',
+                'p.no_rw',
+                'p.jenis_klmin',
+                'l.kdPoli',
+                'l.umur',
+                'l.umur_bulan',
+                'l.umur_hari',
+                'l.idLoket',
+                'l.tglKunjungan',
+                'l.kunjBaru',
+                'l.idLoket',
                 'kel.nama_kel',
                 'kec.nama_kec',
                 'kab.nama_kab',
                 'prop.nama_prop',
                 'poli.nmPoli',
-                'l.kdPoli',
-                'p.alamat',
-                'p.no_rt',
-                'p.no_rw',
-                'p.jenis_klmin',
-                'l.umur',
-                'l.umur_bulan',
-                'l.umur_hari',
-                'l.tglKunjungan',
-                'l.idLoket',
-                'l.kunjBaru',
-                'l.idLoket',
                 'pel.idpelayanan',
                 'pel.sudahDilayani',
                 'pel.startTime',
                 'pel.progressTime',
                 'up.nama_unit',
-                'dokter.kdDokter',
                 'dokter.nmDokter',
-                'skrining.idSkrining',
+                'kunjungan.*',
+                'skrining.*',
+                'frisiko.*',
+                'ptm.id'
             )
             ->first();
-
 
         return $DataPasien;
     }
@@ -99,16 +104,14 @@ class PelayananPTMService
             ->groupBy('kdTindakan', 'nmTindakan', 'nmTindakanInd')
             ->get();
 
-        $TenagaMedis = MasterDokter::select('nmDokter', 'kdDokter')
-            ->where('profesi_id', [23, 24])
+        $TenagaMedis = MasterDokter::select('nmDokter', 'ihs_nakes', 'kdDokter')
+            ->where('profesi_id', [19])
             ->get();
 
-
-        // dd($TenagaMedis);
-        // dd($SimpusTindakan);
+        // dd($DataSkrining);
         return [
             'tindakan' => $SimpusTindakan,
-            'TenagaMedis' => $TenagaMedis
+            'TenagaMedis' => $TenagaMedis,
         ];
     }
     public function updateStatusPelayanan($idPelayanan, $idLoket, $status)
@@ -123,7 +126,7 @@ class PelayananPTMService
             'idSkrining' => (string) Str::uuid(),
             'idPelayanan' => $idPelayanan,
             'idLoket' => $idLoket,
-            'status' => 'draft',
+            'status' => 'arrived',
         ]);
 
         // dd($idLoket);
@@ -167,6 +170,10 @@ class PelayananPTMService
             'aktivitas' => $data['aktivitas'] ?? null,
             'alkohol' => $data['alkohol'] ?? null,
 
+            'obat' => $data['obat'] ?? null,
+            'kesiapan' => $data['kesiapan'] ?? null,
+            'dukung' => $data['dukung'] ?? null,
+
             'r_pribadi_htn' => $data['r_pribadi_htn'] ?? null,
             'r_pribadi_dm' => $data['r_pribadi_dm'] ?? null,
             'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? null,
@@ -176,6 +183,10 @@ class PelayananPTMService
             'r_keluarga_dm' => $data['r_keluarga_dm'] ?? null,
             'r_keluarga_stroke' => $data['r_keluarga_stroke'] ?? null,
             'r_keluarga_jantung' => $data['r_keluarga_jantung'] ?? null,
+
+            'skor_faktor_risiko' => $data['skor_faktor_risiko'] ?? null,
+            'kategori_faktor_risiko' => $data['kategori_faktor_risiko'] ?? null,
+            'detail_faktor_risiko' => $data['detail_faktor_risiko'] ?? null,
         ]);
 
         return $fakorRisiko;
@@ -184,7 +195,7 @@ class PelayananPTMService
     public function savePemeriksaanMetabolik(array $data): void
     {
         DB::transaction(function () use ($data) {
-            $pemeriksaan = SimpusPemeriksaanPTM::firstOrCreate(
+            $pemeriksaan = SimpusPelayananPTM::firstOrCreate(
                 [
                     'idSkrining' => $data['skriningId'],
                 ]
@@ -326,4 +337,5 @@ class PelayananPTMService
             'catatan_assessment' => $data['catatan_assessment'] ?? null,
         ]);
     }
+
 }
