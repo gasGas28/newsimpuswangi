@@ -36,53 +36,13 @@
       </div>
     </div>
     <div class="form-actions">
-      <!-- <div class="save-status" :class="{ success: saveStatus === 'ready' }">
-        {{ saveMessage }}
-      </div>
-      <button
-        type="button"
-        class="save-button"
-        :disabled="dataKunjungan.processing"
-        @click="kirimDataKunjungan"
-      >
-        <i class="bi" :class="dataKunjungan.processing ? 'bi-arrow-repeat' : 'bi-save'"></i>
-        <span>{{ dataKunjungan.processing ? 'Menyimpan...' : 'Kirim Satu Sehat' }}</span>
-      </button> -->
-      <button type="button" @click="kirimEncounter">Kirim Kunjungan SATUSEHAT</button>
-
-      <pre
-        v-if="flash?.data"
-        style="
-          background: #1e1e1e;
-          color: #d4d4d4;
-          padding: 16px;
-          border-radius: 8px;
-          overflow: auto;
-        "
-        >{{ JSON.stringify(flash, null, 2) }}
-    </pre
-      >
+      <div class="save-status"></div>
+      <button type="button" class="save-button" @click="kirimEncounter">
+        <i class="bi bi-save"></i>
+        <span>Kirim Satu Sehat</span>
+      </button>
     </div>
   </section>
-
-  <!-- ✅ Modal di dalam root element -->
-  <!-- <ModalAlert
-    :show="showSuccessModal"
-    type="success"
-    title="Data Berhasil Disimpan"
-    message="Data faktor risiko berhasil disimpan."
-    button-text="Tutup"
-    @close="showSuccessModal = false"
-  />
-
-  <ModalAlert
-    :show="showValidationModal"
-    type="warning"
-    title="Data Belum Lengkap"
-    message="Mohon lengkapi data berikut:"
-    :items="validationMessages"
-    @close="showValidationModal = false"
-  /> -->
 </template>
 
 <script setup>
@@ -106,12 +66,8 @@
   const NIK = computed(() => valueOrDash(patient.value.NIK));
   const fasyankes = computed(() => valueOrDash(patient.value.nama_unit));
   const patientName = computed(() => valueOrDash(patient.value.NAMA_LGKP));
-  const hipertensi = computed(() => valueOrDash(data.value.kategori_tekanan_darah));
-  const sistolik = computed(() => valueOrDash(data.value.sistolik));
-  const diastolik = computed(() => valueOrDash(data.value.tekanan_diastolik));
-  const gds = computed(() => valueOrDash(data.value.gula_darah_sewaktu));
-  const petugas = computed(() => valueOrDash(data.value.id_petugas));
-  const kunjungan = computed(() => valueOrDash(data.value.jenis_kunjungan));
+  const petugas = computed(() => valueOrDash(patient.value.nmDokter));
+  const kunjungan = computed(() => valueOrDash(patient.value.jenis_kunjungan));
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
@@ -125,54 +81,11 @@
 
   const tglSkrining =
     toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
-  // console.log(hipertensi);
-  // console.log(data);
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
-
-  // --- Form ---
-  const dataKunjungan = useForm({
-    idSkrining: props.DataPasien?.idSkrining,
-    idpelayanan: props.DataPasien?.idpelayanan,
-
-    nama_pasien: patientName || '',
-    fasyankes: fasyankes || '',
-    nik: NIK || '',
-    kunjungan: kunjungan || '',
-  });
-
-  console.log('Form initialized with:', dataKunjungan);
-
-  const saveStatus = ref('idle');
-  const saveError = ref('');
-
-  const saveMessage = computed(() => {
-    if (saveStatus.value === 'ready') return 'Data Berhasil Dikirim.';
-    if (saveError.value) return saveError.value;
-    return 'Simpan setelah data kunjungan selesai diisi.';
-  });
-
-  function extractMessage(errors) {
-    return (
-      Object.values(errors || {})
-        .flat()
-        .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
-    );
-  }
-
-  function isDuplicateError(message) {
-    const lower = message.toLowerCase();
-    return ['sudah', 'tersimpan', 'duplikat', 'duplicate', 'already', 'exists'].some((kw) =>
-      lower.includes(kw)
-    );
-  }
-
-  function closeDuplicateModal() {
-    showDuplicateModal.value = false;
-  }
 
   const kirimEncounter = () => {
     console.log('props.DataSkrining:', props.DataSkrining);

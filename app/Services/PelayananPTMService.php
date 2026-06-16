@@ -20,16 +20,18 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
 class PelayananPTMService
 {
-    public function getData($id, $idPoli)
+    public function getDataPasien($id, $idPoli)
     {
         $DataPasien = DB::table('simpus_loket as l')
             ->join('simpus_pasien as p', 'l.pasienId', '=', 'p.ID')
             ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
             ->join('simpus_poli_fktp as poli', 'poli.kdPoli', '=', 'l.kdPoli')
             ->leftJoin('unit_profiles as up', 'up.unit_id', '=', 'l.unitId')
-            ->leftJoin('master_dokter as dokter', 'up.unit_id', '=', 'dokter.pusk_id')
             ->leftJoin('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
+            ->leftJoin('simpus_kunjungan_ptm as kunjungan', 'kunjungan.idSkrining', '=', 'skrining.idSkrining')
+            ->leftJoin('master_dokter as dokter', 'dokter.ihs_nakes', '=', 'kunjungan.id_petugas')
             ->leftJoin('simpus_pemeriksaan_ptm as ptm', 'skrining.idSkrining', '=', 'ptm.idSkrining')
+            ->leftJoin('faktor_risiko_ptm as frisiko', 'skrining.idSkrining', '=', 'frisiko.skriningID')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -84,9 +86,10 @@ class PelayananPTMService
                 'pel.startTime',
                 'pel.progressTime',
                 'up.nama_unit',
-                'dokter.kdDokter',
                 'dokter.nmDokter',
-                'skrining.idSkrining',
+                'kunjungan.*',
+                'skrining.*',
+                'frisiko.*',
                 'ptm.id'
             )
             ->first();
@@ -101,23 +104,14 @@ class PelayananPTMService
             ->groupBy('kdTindakan', 'nmTindakan', 'nmTindakanInd')
             ->get();
 
-        $TenagaMedis = MasterDokter::select('nmDokter', 'kdDokter')
-            ->where('profesi_id', [23, 24])
+        $TenagaMedis = MasterDokter::select('nmDokter', 'ihs_nakes', 'kdDokter')
+            ->where('profesi_id', [19])
             ->get();
 
-        $DataSkrining = DB::table('simpus_skrining_ptm as skrining')
-            ->join('simpus_pelayanan_ptm as ptm', 'ptm.idSkrining', '=', 'skrining.idSkrining')
-            ->leftJoin('faktor_risiko_ptm as faktor', 'faktor.skriningID', '=', 'skrining.idSkrining')
-            ->leftJoin('simpus_kunjungan_ptm as k', 'k.idSkrining', '=', 'skrining.idSkrining')
-            ->leftJoin('simpus_hipertensi as ht', 'ht.pemeriksaan_ptm_id', '=', 'ptm.id')
-            ->leftJoin('simpus_diabetes as dm', 'dm.pemeriksaan_ptm_id', '=', 'ptm.id')
-
-            ->first();
         // dd($DataSkrining);
         return [
             'tindakan' => $SimpusTindakan,
             'TenagaMedis' => $TenagaMedis,
-            'DataSkrining' => $DataSkrining
         ];
     }
     public function updateStatusPelayanan($idPelayanan, $idLoket, $status)
@@ -343,4 +337,5 @@ class PelayananPTMService
             'catatan_assessment' => $data['catatan_assessment'] ?? null,
         ]);
     }
+
 }

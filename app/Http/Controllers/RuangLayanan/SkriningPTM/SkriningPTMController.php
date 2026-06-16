@@ -40,7 +40,7 @@ class SkriningPTMController extends Controller
 
     public function pelayanan($id, $idPoli, $idPelayanan)
     {
-        $DataPasien = $this->pelayananService->getData($id, $idPoli);
+        $DataPasien = $this->pelayananService->getDataPasien($id, $idPoli);
         $masterData = $this->pelayananService->getMasterData();
         $DataTindakan = $this->tindakanService->getTindakanPelayanan($idPelayanan);
 

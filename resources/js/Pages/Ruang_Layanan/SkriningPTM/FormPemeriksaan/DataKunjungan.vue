@@ -34,14 +34,15 @@
           <div class="form-field">
             <label class="form-label" for="dokter">Dokter</label>
             <div class="field-with-icon">
-              <i class="bi bi-person-badge"></i>
-              <input
-                type="text"
-                id="dokter"
-                class="form-control"
-                v-model="form.id_petugas"
-                placeholder="Masukkan nama dokter"
-              />
+              <select v-model="form.id_petugas" class="form-select">
+                <option
+                  v-for="dokter in props.TenagaMedis"
+                  :key="dokter.ihs_nakes"
+                  :value="dokter.ihs_nakes"
+                >
+                  {{ dokter.nmDokter }}
+                </option>
+              </select>
             </div>
           </div>
 
@@ -112,6 +113,7 @@
 
   const props = defineProps({
     DataPasien: Object,
+    TenagaMedis: Array,
   });
 
   const showSuccessModal = ref(false);
@@ -189,40 +191,40 @@
     validationMessages.value = [];
 
     form.post(route('pelayanan.tambah-kunjungan-ptm'), {
-        preserveScroll: true,
+      preserveScroll: true,
 
-        onBefore: () => {
-            console.log('Mulai request');
-        },
+      onBefore: () => {
+        console.log('Mulai request');
+      },
 
-        onSuccess: () => {
-            saveStatus.value = 'ready';
+      onSuccess: () => {
+        saveStatus.value = 'ready';
 
-            saveError.value = '';
-            validationMessages.value = [];
+        saveError.value = '';
+        validationMessages.value = [];
 
-            form.clearErrors();
-            form.defaults(form.data());
+        form.clearErrors();
+        form.defaults(form.data());
 
-            showSuccessModal.value = true;
-        },
+        showSuccessModal.value = true;
+      },
 
-        onError: (errors) => {
-            saveStatus.value = 'error';
+      onError: (errors) => {
+        saveStatus.value = 'error';
 
-            validationMessages.value = Object.values(errors).flat();
+        validationMessages.value = Object.values(errors).flat();
 
-            saveError.value = extractMessage(errors);
+        saveError.value = extractMessage(errors);
 
-            showValidationModal.value = true;
-        },
+        showValidationModal.value = true;
+      },
 
-        onFinish: () => {
-            console.log('Request selesai');
-            isSaving.value = false;
-        },
+      onFinish: () => {
+        console.log('Request selesai');
+        isSaving.value = false;
+      },
     });
-}
+  }
 
   function closeDuplicateModal() {
     showDuplicateModal.value = false;
