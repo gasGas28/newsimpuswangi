@@ -571,7 +571,9 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('satusehat.asam-urat');
         Route::post('/satusehat/diabetes/{idSkrining}', [SatuSehatController::class, 'sendDiabetes'])
             ->name('satusehat.diabetes');
-
+        Route::post('/satusehat/profil-lipid/{idSkrining}', [SatuSehatController::class, 'sendProfilLipid'])
+            ->name('satusehat.profil-lipid');
+ 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
         Route::get('simpus/get-pelayanan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'getPelayanan'])->name('ruang-layanan.ambilPelayanan');

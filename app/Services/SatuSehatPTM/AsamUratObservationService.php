@@ -139,7 +139,7 @@ class AsamUratObservationService
                 'effectiveDateTime' => now()->toIso8601String(),
                 'performer'         => [[
                     'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
-                ]],
+                ]], 
                 'valueQuantity'     => [
                     'value'  => (float) $asamUrat->asam_urat,
                     'unit'   => 'mg/dL',

@@ -697,55 +697,55 @@
   }
 
   function interpretDM() {
-  const gdp   = toNumber(form.diabetes.gdp)
-  const gds   = toNumber(form.diabetes.gds)
-  const hba1c = toNumber(form.diabetes.hba1c)
-  const gd2pp = toNumber(form.diabetes.gd2pp)
+    const gdp = toNumber(form.diabetes.gdp);
+    const gds = toNumber(form.diabetes.gds);
+    const hba1c = toNumber(form.diabetes.hba1c);
+    const gd2pp = toNumber(form.diabetes.gd2pp);
 
-  // --- GDP ---
-  if (!gdp) {
-    form.diabetes.interpretasi_gdp = ''
-  } else if (gdp >= 126) {
-    form.diabetes.interpretasi_gdp = 'Diabetes'
-  } else if (gdp >= 100) {
-    form.diabetes.interpretasi_gdp = 'Prediabetes'
-  } else {
-    form.diabetes.interpretasi_gdp = 'Normal'
-  }
+    // --- GDP ---
+    if (!gdp) {
+      form.diabetes.interpretasi_gdp = '';
+    } else if (gdp >= 126) {
+      form.diabetes.interpretasi_gdp = 'Diabetes';
+    } else if (gdp >= 100) {
+      form.diabetes.interpretasi_gdp = 'Prediabetes';
+    } else {
+      form.diabetes.interpretasi_gdp = 'Normal';
+    }
 
-  // --- GDS ---
-  if (!gds) {
-    form.diabetes.interpretasi_gds = ''
-  } else if (gds >= 200) {
-    form.diabetes.interpretasi_gds = 'Diabetes'
-  } else if (gds >= 140) {
-    form.diabetes.interpretasi_gds = 'Prediabetes'
-  } else {
-    form.diabetes.interpretasi_gds = 'Normal'
-  }
+    // --- GDS ---
+    if (!gds) {
+      form.diabetes.interpretasi_gds = '';
+    } else if (gds >= 200) {
+      form.diabetes.interpretasi_gds = 'Diabetes';
+    } else if (gds >= 140) {
+      form.diabetes.interpretasi_gds = 'Prediabetes';
+    } else {
+      form.diabetes.interpretasi_gds = 'Normal';
+    }
 
-  // --- GD2PP ---
-  if (!gd2pp) {
-    form.diabetes.interpretasi_gd2pp = ''
-  } else if (gd2pp >= 200) {
-    form.diabetes.interpretasi_gd2pp = 'Diabetes'
-  } else if (gd2pp >= 140) {
-    form.diabetes.interpretasi_gd2pp = 'Prediabetes'
-  } else {
-    form.diabetes.interpretasi_gd2pp = 'Normal'
-  }
+    // --- GD2PP ---
+    if (!gd2pp) {
+      form.diabetes.interpretasi_gd2pp = '';
+    } else if (gd2pp >= 200) {
+      form.diabetes.interpretasi_gd2pp = 'Diabetes';
+    } else if (gd2pp >= 140) {
+      form.diabetes.interpretasi_gd2pp = 'Prediabetes';
+    } else {
+      form.diabetes.interpretasi_gd2pp = 'Normal';
+    }
 
-  // --- HbA1c ---
-  if (!hba1c) {
-    form.diabetes.interpretasi_hba1c = ''
-  } else if (hba1c >= 6.5) {
-    form.diabetes.interpretasi_hba1c = 'Diabetes'
-  } else if (hba1c >= 5.7) {
-    form.diabetes.interpretasi_hba1c = 'Prediabetes'
-  } else {
-    form.diabetes.interpretasi_hba1c = 'Normal'
+    // --- HbA1c ---
+    if (!hba1c) {
+      form.diabetes.interpretasi_hba1c = '';
+    } else if (hba1c >= 6.5) {
+      form.diabetes.interpretasi_hba1c = 'Diabetes';
+    } else if (hba1c >= 5.7) {
+      form.diabetes.interpretasi_hba1c = 'Prediabetes';
+    } else {
+      form.diabetes.interpretasi_hba1c = 'Normal';
+    }
   }
-}
 
   function interpretUrat() {
     const urat = toNumber(form.asam_urat.asam_urat);
@@ -759,29 +759,54 @@
   }
 
   function interpretLipid() {
-    form.profil_lipid.interpretasi_kolesterol_total = interpretRange(
-      form.profil_lipid.kolesterol_total,
-      200,
-      'Normal',
-      'Tinggi'
-    );
-    form.profil_lipid.interpretasi_hdl = form.profil_lipid.hdl
-      ? toNumber(form.profil_lipid.hdl) >= 40
-        ? 'Baik'
-        : 'Rendah'
-      : '';
-    form.profil_lipid.interpretasi_ldl = interpretRange(
-      form.profil_lipid.ldl,
-      130,
-      'Optimal',
-      'Tinggi'
-    );
-    form.profil_lipid.interpretasi_trigliserida = interpretRange(
-      form.profil_lipid.trigliserida,
-      150,
-      'Normal',
-      'Tinggi'
-    );
+    // Kolesterol Total
+    const kolesterol = toNumber(form.profil_lipid.kolesterol_total);
+    const hdl = toNumber(form.profil_lipid.hdl);
+    const ldl = toNumber(form.profil_lipid.ldl);
+    const trigliserida = toNumber(form.profil_lipid.trigliserida);
+
+    if (kolesterol < 200) {
+      form.profil_lipid.interpretasi_kolesterol_total = 'Normal';
+    } else if (kolesterol >= 200 && kolesterol < 240) {
+      form.profil_lipid.interpretasi_kolesterol_total = 'Borderline Tinggi';
+    } else if (kolesterol >= 240) {
+      form.profil_lipid.interpretasi_kolesterol_total = 'Tinggi';
+    } else {
+      form.profil_lipid.interpretasi_kolesterol_total = 'Data Tidak Tersedia';
+    }
+
+    // HDL
+    if (hdl < 40) {
+      form.profil_lipid.interpretasi_hdl = 'Rendah';
+    } else if (hdl >= 40 && hdl < 59) {
+      form.profil_lipid.interpretasi_hdl = 'Sedang';
+    } else if (hdl >= 60) {
+      form.profil_lipid.interpretasi_hdl = 'Protektif';
+    } else {
+      form.profil_lipid.interpretasi_hdl = 'Data Tidak Tersedia';
+    }
+
+    // LDL
+    if (ldl < 100) {
+      form.profil_lipid.interpretasi_ldl = 'Optimal';
+    } else if (ldl >= 100 && ldl < 160) {
+      form.profil_lipid.interpretasi_ldl = 'Borderline Tinggi';
+    } else if (ldl >= 160) {
+      form.profil_lipid.interpretasi_ldl = 'Tinggi';
+    } else {
+      form.profil_lipid.interpretasi_ldl = 'Data Tidak Tersedia';
+    }
+
+    // Trigliserida
+    if (trigliserida < 150) {
+      form.profil_lipid.interpretasi_trigliserida = 'Normal';
+    } else if (trigliserida >= 160 && trigliserida < 199) {
+      form.profil_lipid.interpretasi_trigliserida = 'Borderline Tinggi';
+    } else if (trigliserida >= 200) {
+      form.profil_lipid.interpretasi_trigliserida = 'Tinggi';
+    } else {
+      form.profil_lipid.interpretasi_trigliserida = 'Data Tidak Tersedia';
+    }
   }
 
   const saveStatus = ref('idle');

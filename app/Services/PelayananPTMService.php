@@ -30,8 +30,12 @@ class PelayananPTMService
             ->leftJoin('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
             ->leftJoin('simpus_kunjungan_ptm as kunjungan', 'kunjungan.idSkrining', '=', 'skrining.idSkrining')
             ->leftJoin('master_dokter as dokter', 'dokter.ihs_nakes', '=', 'kunjungan.id_petugas')
-            ->leftJoin('simpus_pemeriksaan_ptm as ptm', 'skrining.idSkrining', '=', 'ptm.idSkrining')
             ->leftJoin('faktor_risiko_ptm as frisiko', 'skrining.idSkrining', '=', 'frisiko.skriningID')
+            ->leftJoin('simpus_hipertensi as hipertensi', 'skrining.idSkrining', '=', 'hipertensi.skriningID')
+            ->leftJoin('simpus_diabetes as diabetes', 'skrining.idSkrining', '=', 'diabetes.skriningID')
+            ->leftJoin('simpus_obesitas as obesitas', 'skrining.idSkrining', '=', 'obesitas.skriningID')
+            ->leftJoin('simpus_asam_urat as asam_urat', 'skrining.idSkrining', '=', 'asam_urat.skriningID')
+            ->leftJoin('simpus_profil_lipid as profil_lipid', 'skrining.idSkrining', '=', 'profil_lipid.skriningID')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -90,7 +94,11 @@ class PelayananPTMService
                 'kunjungan.*',
                 'skrining.*',
                 'frisiko.*',
-                'ptm.id'
+                'hipertensi.*',
+                'diabetes.*',
+                'obesitas.*',
+                'asam_urat.*',
+                'profil_lipid.*',
             )
             ->first();
 
@@ -337,5 +345,4 @@ class PelayananPTMService
             'catatan_assessment' => $data['catatan_assessment'] ?? null,
         ]);
     }
-
 }

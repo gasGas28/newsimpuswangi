@@ -14,6 +14,7 @@ use App\Services\SatuSehatPTM\ObesitasObservationService;
 use App\Services\SatuSehatPTM\ObesitasConditionService;
 use App\Services\SatuSehatPTM\DiabetesObservationService;
 use App\Services\SatuSehatPTM\AsamUratObservationService;
+use App\Services\SatuSehatPTM\ProfilLipidObservationService;
 
 class SatuSehatController extends Controller
 {
@@ -28,6 +29,7 @@ class SatuSehatController extends Controller
         private ObesitasConditionService $obesitasConditionService,
         private DiabetesObservationService $diabetesObservationService,
         private AsamUratObservationService $asamUratObservationService,
+        private ProfilLipidObservationService $profilLipidObservationService,
 
     ) {}
 
@@ -130,9 +132,21 @@ class SatuSehatController extends Controller
             $asamUrat = $this->asamUratObservationService->sendAsamUrat($idSkrining);
 
             return response()->json([
-                'message'          => 'Data obesitas berhasil dikirim',
+                'message'          => 'Data Asam Urat berhasil dikirim',
                 'observation_id'   => $asamUrat['observation_id'],
                 'condition_id' => $asamUrat['condition_id'],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendProfilLipid(string $idSkrining)
+    {
+        try {
+            $this->profilLipidObservationService->sendProfilLipid($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Profil Lipid berhasil dikirim',
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);

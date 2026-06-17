@@ -18,7 +18,8 @@ class SimpusProfilLipid extends Model
         'interpretasi_kolesterol_total',
         'interpretasi_hdl',
         'interpretasi_ldl',
-        'interpretasi_trigliserida'
+        'interpretasi_trigliserida',
+        'sent_at',
     ];
 
     public function pemeriksaanPTM(){

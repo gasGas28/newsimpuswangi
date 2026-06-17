@@ -20,6 +20,11 @@
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"
     />
+    <SendProfilLipid
+      :DataPasien="props.DataPasien"
+      :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
+    />
   </div>
 </template>
 
@@ -28,6 +33,7 @@
   import SendObesitas from './KirimSatuSehat/KirimObesitas.vue';
   import SendDiabetes from './KirimSatuSehat/KirimDiabetes.vue';
   import SendAsamUrat from './KirimSatuSehat/KirimAsamUrat.vue';
+  import SendProfilLipid from './KirimSatuSehat/KirimProfilLipid.vue';
   const props = defineProps({
     DataPasien: Object,
     TenagaMedis: Array,

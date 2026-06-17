@@ -2,7 +2,7 @@
   <section class="resume-panel">
     <div class="panel-header">
       <div>
-        <h4><i class="bi bi-clipboard2-check"></i> Data Obesitas</h4>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Diabetes</h4>
         <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
     </div>
@@ -10,28 +10,36 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Nama Pasien</div>
-          <div class="summary-value">{{ patientName }}</div>
+          <div class="summary-label">Gula Darah Sewaktu (GDS)</div>
+          <div class="summary-value">{{ gds }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">NIK</div>
-          <div class="summary-value">{{ NIK }}</div>
+          <div class="summary-label">Interpretasi GDS</div>
+          <div class="summary-value">{{ kategori_gds }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Tanggal Skrining</div>
-          <div class="summary-value">{{ tglSkrining }}</div>
+          <div class="summary-label">Gula Darah Puasa (GDP)</div>
+          <div class="summary-value">{{ gdp }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Fasyankes</div>
-          <div class="summary-value">{{ fasyankes }}</div>
+          <div class="summary-label">Interpretasi GDP</div>
+          <div class="summary-value">{{ kategori_gdp }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Pemeriksa</div>
-          <div class="summary-value">{{ petugas }}</div>
+          <div class="summary-label">Gula Darah 2 Jam Pasca Puasa (GD2PP)</div>
+          <div class="summary-value">{{ gd2pp }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Jenis Kunjungan</div>
-          <div class="summary-value">{{ kunjungan }}</div>
+          <div class="summary-label">Interpretasi GD2PP</div>
+          <div class="summary-value">{{ kategori_gd2pp }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">hbA1C</div>
+          <div class="summary-value">{{ hba1c }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kategori hbA1c</div>
+          <div class="summary-value">{{ kategori_hba1c }}</div>
         </div>
       </div>
     </div>
@@ -54,20 +62,21 @@
   const props = defineProps({
     DataPasien: Object,
     TenagaMedis: Array,
-    DataSkrining: Object,
   });
 
   const page = usePage();
   const flash = computed(() => page.props.flash);
 
-  const data = computed(() => props.DataSkrining || {});
   const patient = computed(() => props.DataPasien || {});
 
-  const NIK = computed(() => valueOrDash(patient.value.NIK));
-  const fasyankes = computed(() => valueOrDash(patient.value.nama_unit));
-  const patientName = computed(() => valueOrDash(patient.value.NAMA_LGKP));
-  const petugas = computed(() => valueOrDash(patient.value.nmDokter));
-  const kunjungan = computed(() => valueOrDash(patient.value.jenis_kunjungan));
+  const gdp = computed(() => valueOrDash(patient.value.gula_darah_puasa));
+  const gds = computed(() => valueOrDash(patient.value.gula_darah_sewaktu));
+  const gd2pp = computed(() => valueOrDash(patient.value.gula_darah_2_jam_pp));
+  const hba1c = computed(() => valueOrDash(patient.value.hba1c));
+  const kategori_gdp = computed(() => valueOrDash(patient.value.kategori_gula_darah_puasa));
+  const kategori_gds = computed(() => valueOrDash(patient.value.kategori_gula_darah_sewaktu));
+  const kategori_gd2pp = computed(() => valueOrDash(patient.value.kategori_gula_darah_2_jam_pp));
+  const kategori_hba1c = computed(() => valueOrDash(patient.value.kategori_hba1c));
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
