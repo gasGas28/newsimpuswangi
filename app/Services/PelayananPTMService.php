@@ -195,20 +195,20 @@ class PelayananPTMService
     public function savePemeriksaanMetabolik(array $data): void
     {
         DB::transaction(function () use ($data) {
-            $pemeriksaan = SimpusPelayananPTM::firstOrCreate(
+            $pemeriksaan = SimpusSkriningPTM::updateOrCreate(
                 [
                     'idSkrining' => $data['skriningId'],
                 ]
             );
-            $this->saveHipertensi($pemeriksaan->id, $data['hipertensi'] ?? []);
-            $this->saveDiabetes($pemeriksaan->id, $data['diabetes'] ?? []);
-            $this->saveObesitas($pemeriksaan->id, $data['obesitas'] ?? []);
-            $this->saveAsamUrat($pemeriksaan->id, $data['obesitas'] ?? []);
-            $this->saveProfilLipid($pemeriksaan->id, $data['obesitas'] ?? []);
+            $this->saveHipertensi($pemeriksaan->idSkrining, $data['hipertensi'] ?? []);
+            $this->saveDiabetes($pemeriksaan->idSkrining, $data['diabetes'] ?? []);
+            $this->saveObesitas($pemeriksaan->idSkrining, $data['obesitas'] ?? []);
+            $this->saveAsamUrat($pemeriksaan->idSkrining, $data['asam_urat'] ?? []);
+            $this->saveProfilLipid($pemeriksaan->idSkrining, $data['profil_lipid'] ?? []);
         });
     }
 
-    private function saveObesitas(int $pemeriksaanPTMId, array $data): void
+    private function saveObesitas(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -216,20 +216,20 @@ class PelayananPTMService
 
         SimpusObesitas::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'berat_badan' => $data['berat_badan'] ?? null,
                 'tinggi_badan' => $data['tinggi_badan'] ?? null,
                 'imt' => $data['imt'] ?? null,
-                'interpretasi_imt' => $data['interpretasi_imt'] ?? null,
+                'interpretasi_ptm' => $data['interpretasi_imt'] ?? null,
                 'lingkar_pinggang' => $data['lingkar_pinggang'] ?? null,
-                'interpretasi_lp' => $data['interpretasi_lp'] ?? null,
+                'interpretasi_lp' => $data['interpretasi_lingkar_pinggang'] ?? null,
             ]
         );
     }
 
-    private function saveDiabetes(int $pemeriksaanPTMId, array $data): void
+    private function saveDiabetes(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -237,7 +237,7 @@ class PelayananPTMService
 
         SimpusDiabetes::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'gula_darah_puasa' => $data['gdp'] ?? null,
@@ -252,7 +252,7 @@ class PelayananPTMService
         );
     }
 
-    private function saveHipertensi(int $pemeriksaanPTMId, array $data): void
+    private function saveHipertensi(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -260,7 +260,7 @@ class PelayananPTMService
 
         SimpusHipertensi::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'sistolik' => $data['sistolik'] ?? null,
@@ -272,7 +272,7 @@ class PelayananPTMService
             ]
         );
     }
-    private function saveAsamUrat(int $pemeriksaanPTMId, array $data): void
+    private function saveAsamUrat(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -280,15 +280,15 @@ class PelayananPTMService
 
         SimpusAsamUrat::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'asam_urat' => $data['asam_urat'] ?? null,
-                'kategori_asam_urat' => $data['kategori_asam_urat'] ?? null,
+                'kategori_asam_urat' => $data['interpretasi_asam_urat'] ?? null,
             ]
         );
     }
-    private function saveProfilLipid(int $pemeriksaanPTMId, array $data): void
+    private function saveProfilLipid(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -296,7 +296,7 @@ class PelayananPTMService
 
         SimpusProfilLipid::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'kolesterol_total' => $data['kolesterol_total'] ?? null,

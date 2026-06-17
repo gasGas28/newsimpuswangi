@@ -3,14 +3,14 @@
 namespace App\Models\RuangLayanan\SkriningPTM;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 class SimpusProfilLipid extends Model
 {
     protected $table = 'simpus_profil_lipid';
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'pemeriksaan_ptm_id',
+        'skriningID',
         'kolesterol_total',
         'hdl',
         'ldl',
@@ -22,7 +22,7 @@ class SimpusProfilLipid extends Model
     ];
 
     public function pemeriksaanPTM(){
-        return $this->belongsTo(SimpusPelayananPTM::class);
+        return $this->belongsTo(SimpusSkriningPTM::class);
     }
 
 }

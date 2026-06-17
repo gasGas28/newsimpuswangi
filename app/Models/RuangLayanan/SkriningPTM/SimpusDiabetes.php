@@ -3,7 +3,7 @@
 namespace App\Models\RuangLayanan\SkriningPTM;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
 class SimpusDiabetes extends Model
 {
@@ -11,7 +11,7 @@ class SimpusDiabetes extends Model
     protected $primariKey = 'id';
 
     protected $fillable = [
-        'pemeriksaan_ptm_id',
+        'skriningID',
         'gula_darah_puasa',
         'gula_darah_2_jam_pp',
         'gula_darah_sewaktu',
@@ -20,11 +20,13 @@ class SimpusDiabetes extends Model
         'kategori_gula_darah_2_jam_pp',
         'kategori_gula_darah_sewaktu',
         'kategori_hba1c',
+        'condition_id',
+        'sent_at'
     ];
 
     public function pemeriksaanPTM()
     {
-        return $this->belongsTo(SimpusPelayananPTM::class);
+        return $this->belongsTo(SimpusSkriningPTM::class);
     }
     //
 }

@@ -13,14 +13,13 @@ class QuestionnaireResponseService
         'tidak'       => ['code' => 'QRI000014', 'display' => 'Tidak'],
         'kadang'      => ['code' => 'QRI000015', 'display' => 'Ya, tidak setiap hari'],
         'setiap_hari' => ['code' => 'QRI000016', 'display' => 'Ya, setiap hari'],
+        'ya'          => ['code' => 'QRI000015', 'display' => 'Ya, setiap hari']
     ];
 
-    // ✅ Hapus ObservationService — tidak dipakai
     public function __construct(
         private EncounterService $encounterService,
     ) {}
 
-    // ✅ Cache token
     private ?string $cachedToken = null;
 
     private function getToken(): string
@@ -67,22 +66,20 @@ class QuestionnaireResponseService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    // ✅ Fallback kalau value tidak ada di map
     private function resolveCoding(string $value): array
     {
         $normalized = strtolower(trim($value));
 
-        if (!isset($this->codingMap[$normalized])) {
-            Log::warning('resolveCoding: value tidak dikenali, fallback ke tidak', [
-                'value' => $value,
-            ]);
-            return $this->codingMap['tidak'];
-        }
-
+         if (!isset($this->codingMap[$normalized])) {
+        Log::warning('resolveCoding: value tidak dikenali, fallback ke tidak', [
+            'original_value'    => $value,
+            'normalized_value'  => $normalized,
+        ]);
+        return $this->codingMap['tidak'];
+    }
         return $this->codingMap[$normalized];
     }
 
-    // ✅ Guard null untuk integer/quantity
     private function resolveInteger(?int $value): int
     {
         return $value ?? 0;
@@ -237,6 +234,7 @@ class QuestionnaireResponseService
             // ✅ Payload tidak ikut log
             Log::info('QuestionnaireResponse berhasil', [
                 'questionnaire_response_id' => $id,
+                'payload' => $payload,
             ]);
         } catch (\Exception $e) {
             Log::error('QuestionnaireResponse gagal', [

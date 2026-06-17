@@ -556,13 +556,21 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-assessment-ptm');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanPTM'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
-        Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
-            ->name('satusehat.submit-ptm');
+        // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
+        //     ->name('satusehat.submit-ptm');
 
         Route::post('/satusehat/encounter/{idSkrining}', [SatuSehatController::class, 'testEncounter'])
             ->name('satusehat.encounter');
         Route::post('/satusehat/observation/{idSkrining}', [SatuSehatController::class, 'sendRiskFactor'])
             ->name('satusehat.observation');
+        Route::post('/satusehat/hipertensi/{idSkrining}', [SatuSehatController::class, 'sendHipertensi'])
+            ->name('satusehat.hipertensi');
+        Route::post('/satusehat/obesitas/{idSkrining}', [SatuSehatController::class, 'sendObesitas'])
+            ->name('satusehat.obesitas');
+        Route::post('/satusehat/asam-urat/{idSkrining}', [SatuSehatController::class, 'sendAsamUrat'])
+            ->name('satusehat.asam-urat');
+        Route::post('/satusehat/diabetes/{idSkrining}', [SatuSehatController::class, 'sendDiabetes'])
+            ->name('satusehat.diabetes');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');

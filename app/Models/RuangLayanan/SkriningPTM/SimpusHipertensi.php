@@ -3,7 +3,7 @@
 namespace App\Models\RuangLayanan\SkriningPTM;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 
 class SimpusHipertensi extends Model
 {
@@ -11,18 +11,20 @@ class SimpusHipertensi extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'pemeriksaan_ptm_id',
+        'skriningID',
         'sistolik',
         'tekanan_diastolik',
         'kategori_tekanan_darah',
         'suhu',
         'nadi',
-        'pernapasan'
+        'pernapasan',
+        'condition_id',
+        'sent_at',
     ];
 
     public function pemeriksaanPTM()
     {
-        return $this->belongsTo(SimpusPelayananPTM::class);
+        return $this->belongsTo(SimpusSkriningPTM::class);
     }
     //
 }

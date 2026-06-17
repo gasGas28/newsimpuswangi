@@ -301,7 +301,6 @@
   const props = defineProps({
     DataPasien: Object,
     formData: Object,
-    tindakan: Array,
   });
 
   const form = props.formData?.objektif || {};
