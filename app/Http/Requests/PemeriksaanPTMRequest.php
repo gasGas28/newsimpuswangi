@@ -22,9 +22,7 @@ class PemeriksaanPTMRequest extends FormRequest
      */ public function rules(): array
     {
         return [
-            'skriningId' => [
-                'required',
-            ],
+            'skriningId' => ['required'],
             'encounter_id' => ['nullable'],
             'patient_id' => ['nullable'],
 

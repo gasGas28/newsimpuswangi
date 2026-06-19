@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreKunjunganPTMRequest;
 use App\Http\Requests\AssessmentPTMRequest;
 use App\Http\Requests\FaktorRisikoRequest;
+use App\Http\Requests\GangguanInderaRequest;
 use App\Http\Requests\PemeriksaanPTMRequest;
 
 class SkriningPTMController extends Controller
@@ -104,10 +105,16 @@ class SkriningPTMController extends Controller
     public function addPemeriksaanPTM(PemeriksaanPTMRequest $request)
     {
         $validated = $request->validated();
-
-        // dd($validated);
-
+        
         $this->pelayananService->savePemeriksaanMetabolik($validated);
+
+        return redirect()->back();
+    }
+    public function addPemeriksaanIndera(GangguanInderaRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveGangguanIndera($validated);
 
         return redirect()->back();
     }
@@ -132,4 +139,6 @@ class SkriningPTMController extends Controller
 
         return back();
     }
+
+    
 }

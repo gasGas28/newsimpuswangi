@@ -14,6 +14,8 @@ use App\Services\SatuSehatPTM\ObesitasObservationService;
 use App\Services\SatuSehatPTM\ObesitasConditionService;
 use App\Services\SatuSehatPTM\DiabetesObservationService;
 use App\Services\SatuSehatPTM\AsamUratObservationService;
+use App\Services\SatuSehatPTM\GangguanPendengaranObservationService;
+use App\Services\SatuSehatPTM\GangguanPenglihatanObservationService;
 use App\Services\SatuSehatPTM\ProfilLipidObservationService;
 
 class SatuSehatController extends Controller
@@ -30,7 +32,8 @@ class SatuSehatController extends Controller
         private DiabetesObservationService $diabetesObservationService,
         private AsamUratObservationService $asamUratObservationService,
         private ProfilLipidObservationService $profilLipidObservationService,
-
+        private GangguanPendengaranObservationService $gangguanPendengaranObservationService,
+        private GangguanPenglihatanObservationService $gangguanPenglihatanObservationService,
     ) {}
 
     public function testEncounter(string $idSkrining)
@@ -144,6 +147,30 @@ class SatuSehatController extends Controller
     {
         try {
             $this->profilLipidObservationService->sendProfilLipid($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Profil Lipid berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendGangguanPendengaran(string $idSkrining)
+    {
+        try {
+            $this->gangguanPendengaranObservationService->sendGangguanPendengaran($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Profil Lipid berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendGangguanPenglihatan(string $idSkrining)
+    {
+        try {
+            $this->gangguanPenglihatanObservationService->sendGangguanPenglihatan($idSkrining);
 
             return response()->json([
                 'message' => 'Data Profil Lipid berhasil dikirim',

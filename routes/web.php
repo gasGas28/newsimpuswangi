@@ -43,6 +43,7 @@ use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 use App\Http\Controllers\Satusehat\SatusehatFhirController;
 use App\Http\Requests\SimpanTindakanRequest;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SatuSehatController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\DashboardPTMController;
 
 use App\Http\Requests\StoreKunjunganPTMRequest;
 
@@ -219,10 +220,15 @@ Route::prefix('home')->group(function () {
         ->name('home.home');
 });
 
-// Protect home (wajib login)
-Route::get('/', function () {
-    return Inertia::render('Home/DashboardPTM');
-})->middleware('auth')->name('ptm.dashboard');;
+// routes/web.php
+
+
+Route::get('/dashboard-ptm', [DashboardPTMController::class, 'index'])
+    ->name('ptm.dashboard')
+    ->middleware('auth');// Protect home (wajib login)
+// Route::get('/', function () {
+//     return Inertia::render('Home/DashboardPTM');
+// });;
 
 
 
@@ -556,6 +562,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-assessment-ptm');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanPTM'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
+        Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
+            ->name('pelayanan.simpan-gangguan-indera');
         // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
         //     ->name('satusehat.submit-ptm');
 
@@ -573,7 +581,11 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('satusehat.diabetes');
         Route::post('/satusehat/profil-lipid/{idSkrining}', [SatuSehatController::class, 'sendProfilLipid'])
             ->name('satusehat.profil-lipid');
- 
+        Route::post('/satusehat/pendengaran/{idSkrining}', [SatuSehatController::class, 'sendGangguanPendengaran'])
+            ->name('satusehat.gangguan-pendengaran');
+        Route::post('/satusehat/penglihatan/{idSkrining}', [SatuSehatController::class, 'sendGangguanPenglihatan'])
+            ->name('satusehat.gangguan-penglihatan');
+
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
         Route::get('simpus/get-pelayanan/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'getPelayanan'])->name('ruang-layanan.ambilPelayanan');

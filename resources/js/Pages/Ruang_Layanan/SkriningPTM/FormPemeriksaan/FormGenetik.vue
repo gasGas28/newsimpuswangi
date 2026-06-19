@@ -175,7 +175,9 @@
 
         <div class="kolorektal-grid">
           <div class="form-field">
-            <label class="form-label" for="kkr1">Riwayat keluarga generasi pertama kanker kolorektal?</label>
+            <label class="form-label" for="kkr1"
+              >Riwayat keluarga generasi pertama kanker kolorektal?</label
+            >
             <select id="kkr1" name="kkr1" class="form-select" v-model="form.kkr1">
               <option value="">Pilih jawaban</option>
               <option value="tidak">Tidak</option>
@@ -203,7 +205,12 @@
 
           <div class="form-field">
             <label class="form-label" for="colok_dubur">Pemeriksaan Colok Dubur</label>
-            <select id="colok_dubur" name="colok_dubur" class="form-select" v-model="form.colok_dubur">
+            <select
+              id="colok_dubur"
+              name="colok_dubur"
+              class="form-select"
+              v-model="form.colok_dubur"
+            >
               <option value="">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="curiga">Curiga</option>
@@ -212,7 +219,12 @@
 
           <div class="form-field">
             <label class="form-label" for="darah_samar">Darah Samar Feses</label>
-            <select id="darah_samar" name="darah_samar" class="form-select" v-model="form.darah_samar">
+            <select
+              id="darah_samar"
+              name="darah_samar"
+              class="form-select"
+              v-model="form.darah_samar"
+            >
               <option value="">Tidak dilakukan</option>
               <option value="negatif">Negatif</option>
               <option value="positif">Positif</option>
@@ -319,11 +331,110 @@
 
           <div class="form-field">
             <label class="form-label" for="hasil_thalasemia">Kesimpulan Skrining</label>
-            <select id="hasil_thalasemia" name="hasil_thalasemia" class="form-select" v-model="form.hasil_thalasemia">
+            <select
+              id="hasil_thalasemia"
+              name="hasil_thalasemia"
+              class="form-select"
+              v-model="form.hasil_thalasemia"
+            >
               <option value="">Belum dinilai</option>
               <option value="normal">Normal</option>
               <option value="curiga_carrier">Curiga carrier thalasemia</option>
               <option value="rujuk">Perlu rujukan lanjutan</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="genetik-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-heart-pulse"></i> Jantung</h4>
+          <p>Procedure dan Observation pemeriksaan EKG untuk deteksi dini penyakit jantung.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="follow-up-panel">
+          <div class="follow-up-alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>
+              Pemeriksaan EKG hanya dilakukan pada peserta dengan riwayat
+              <strong>Diabetes Melitus</strong> dan/atau <strong>Hipertensi</strong>.
+            </span>
+          </div>
+        </div>
+
+        <div class="section-title with-gap">
+          <h5>Pemeriksaan EKG</h5>
+          <span>Procedure &amp; Observation Elektrokardiografi</span>
+        </div>
+
+        <div class="hematologi-grid">
+          <div class="form-field">
+            <label class="form-label" for="ekg_hr">Heart Rate</label>
+            <div class="input-with-addon">
+              <input
+                id="ekg_hr"
+                name="ekg_hr"
+                type="number"
+                step="1"
+                class="form-control"
+                v-model.number="form.ekg_hr"
+                placeholder="0"
+              />
+              <span>bpm</span>
+            </div>
+            <small>Normal 60-100 bpm</small>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ekg_irama">Irama</label>
+            <select id="ekg_irama" name="ekg_irama" class="form-select" v-model="form.ekg_irama">
+              <option value="">Tidak dilakukan</option>
+              <option value="sinus">Sinus Rhythm</option>
+              <option value="aritmia">Aritmia</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ekg_axis">Axis</label>
+            <select id="ekg_axis" name="ekg_axis" class="form-select" v-model="form.ekg_axis">
+              <option value="">Tidak dilakukan</option>
+              <option value="normal">Normal</option>
+              <option value="lad">Left Axis Deviation</option>
+              <option value="rad">Right Axis Deviation</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ekg_st">Segmen ST</label>
+            <select id="ekg_st" name="ekg_st" class="form-select" v-model="form.ekg_st">
+              <option value="">Tidak dilakukan</option>
+              <option value="normal">Normal</option>
+              <option value="elevasi">ST Elevasi</option>
+              <option value="depresi">ST Depresi</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ekg_qrs">Kompleks QRS</label>
+            <select id="ekg_qrs" name="ekg_qrs" class="form-select" v-model="form.ekg_qrs">
+              <option value="">Tidak dilakukan</option>
+              <option value="normal">Normal</option>
+              <option value="abnormal">Abnormal</option>
+            </select>
+          </div>
+
+          <div class="form-field result-field">
+            <label class="form-label" for="hasil_ekg">Kesimpulan EKG</label>
+            <select id="hasil_ekg" name="hasil_ekg" class="form-select" v-model="form.hasil_ekg">
+              <option value="">Pilih hasil</option>
+              <option value="normal">Normal</option>
+              <option value="abnormal_ringan">Abnormal Ringan</option>
+              <option value="abnormal_signifikan">Abnormal Signifikan</option>
+              <option value="rujuk">Perlu Rujukan Lanjutan</option>
             </select>
           </div>
         </div>
@@ -369,6 +480,13 @@
   form.rbc = form.rbc ?? '';
   form.rdw = form.rdw ?? '';
   form.hasil_thalasemia = form.hasil_thalasemia || '';
+
+  form.ekg_hr = form.ekg_hr ?? '';
+  form.ekg_irama = form.ekg_irama || '';
+  form.ekg_axis = form.ekg_axis || '';
+  form.ekg_st = form.ekg_st || '';
+  form.ekg_qrs = form.ekg_qrs || '';
+  form.hasil_ekg = form.hasil_ekg || '';
 </script>
 
 <style scoped src="./FormPemeriksaan.css"></style>

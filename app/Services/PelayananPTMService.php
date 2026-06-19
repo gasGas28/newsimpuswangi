@@ -8,6 +8,8 @@ use App\Models\RuangLayanan\MasterDokter;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
+use App\Models\RuangLayanan\SkriningPTM\GangguanPendengaran;
+use App\Models\RuangLayanan\SkriningPTM\GangguanPenglihatan;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
@@ -216,6 +218,72 @@ class PelayananPTMService
         });
     }
 
+    public function saveGangguanIndera(array $data): void
+    {
+        DB::transaction(function () use ($data) {
+            $pemeriksaan = SimpusSkriningPTM::updateOrCreate(
+                [
+                    'idSkrining' => $data['skriningId'],
+                ]
+            );
+            $this->savePenglihatan($pemeriksaan->idSkrining, $data['penglihatan'] ?? []);
+            $this->savePendengaran($pemeriksaan->idSkrining, $data['pendengaran'] ?? []);
+        });
+    }
+
+    private function savePenglihatan(string $skriningID, array $data): void
+    {
+        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+            return;
+        }
+
+       GangguanPenglihatan::updateOrCreate(
+            [
+                'skriningID' => $skriningID,
+            ],
+            [
+                'visus_od' => $data['visus_od'] ?? null,
+                'visus_os' => $data['visus_os'] ?? null,
+                'pinhole_od' => $data['pinhole_od'] ?? null,
+                'pinhole_os' => $data['pinhole_os'] ?? null,
+                'anterior_os' => $data['sa_os'] ?? null,
+                'anterior_od' => $data['sa_od'] ?? null,
+                'shadow_os' => $data['st_os'] ?? null,
+                'shadow_od' => $data['st_od'] ?? null,
+                'refleks_os' => $data['rf_os'] ?? null,
+                'refleks_od' => $data['rf_od'] ?? null,
+                'glaukoma_os' => $data['gio_os'] ?? null,
+                'glaukoma_od' => $data['gio_od'] ?? null,
+                'retinopati_os' => $data['retino_os'] ?? null,
+                'retinopati_od' => $data['retino_od'] ?? null,
+            ]
+        );
+        // dd($data);
+    }
+    private function savePendengaran(string $skriningID, array $data): void
+    {
+        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+            return;
+        }
+
+       GangguanPendengaran::updateOrCreate(
+            [
+                'skriningID' => $skriningID,
+            ],
+            [
+                'tuli_kiri' => $data['tuli_kiri'] ?? null,
+                'tuli_kanan' => $data['tuli_kanan'] ?? null,
+                'omsk_kiri' => $data['omsk_kiri'] ?? null,
+                'omsk_kanan' => $data['omsk_kanan'] ?? null,
+                'serumen_kiri' => $data['serumen_kiri'] ?? null,
+                'serumen_kanan' => $data['serumen_kanan'] ?? null,
+                'presbi_kiri' => $data['presbi_kiri'] ?? null,
+                'presbi_kanan' => $data['presbi_kanan'] ?? null,
+                'bisik_kiri' => $data['bisik_kiri'] ?? null,
+                'bisik_kanan' => $data['bisik_kanan'] ?? null,
+            ]
+        );
+    }
     private function saveObesitas(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
