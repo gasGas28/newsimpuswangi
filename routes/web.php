@@ -40,7 +40,6 @@ use App\Http\Controllers\Farmasi\PelayananResepController;
 use App\Http\Controllers\Farmasi\PengeluaranLangsungController;
 use App\Http\Controllers\Farmasi\PengeluaranLangsungDetailController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
-use App\Http\Controllers\Satusehat\SatusehatFhirController;
 use App\Http\Requests\SimpanTindakanRequest;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SatuSehatController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\DashboardPTMController;
@@ -225,7 +224,7 @@ Route::prefix('home')->group(function () {
 
 Route::get('/dashboard-ptm', [DashboardPTMController::class, 'index'])
     ->name('ptm.dashboard')
-    ->middleware('auth');// Protect home (wajib login)
+    ->middleware('auth'); // Protect home (wajib login)
 // Route::get('/', function () {
 //     return Inertia::render('Home/DashboardPTM');
 // });;
@@ -564,6 +563,19 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');
+
+        Route::post('/simpus/skrining-ptm/simpan-serviks', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
+            ->name('pelayanan.simpan-serviks');
+
+        Route::post('/simpus/skrining-ptm/simpan-paru', [SkriningPTMController::class, 'addPemeriksaanParu'])
+            ->name('pelayanan.simpan-paru');
+        Route::post('/simpus/skrining-ptm/simpan-thalasemia', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
+            ->name('pelayanan.simpan-thalasemia');
+
+        Route::post('/simpus/skrining-ptm/simpan-kolorektal', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
+            ->name('pelayanan.simpan-kolorektal');
+        Route::post('/simpus/skrining-ptm/simpan-ekg', [SkriningPTMController::class, 'addPemeriksaanEKG'])
+            ->name('pelayanan.simpan-ekg');
         // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
         //     ->name('satusehat.submit-ptm');
 

@@ -2,7 +2,7 @@
   <section class="resume-panel">
     <div class="panel-header">
       <div>
-        <h4><i class="bi bi-clipboard2-check"></i> Data Asam Urat</h4>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Gangguan Pendengaran</h4>
         <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
     </div>
@@ -10,12 +10,12 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Asam Urat</div>
-          <div class="summary-value">{{ asam_urat }}</div>
+          <div class="summary-label">Curiga Tuli Kongenital Kanan</div>
+          <div class="summary-value">{{ tuli_kn }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Kategori Asam Urat</div>
-          <div class="summary-value">{{ kategori }}</div>
+          <div class="summary-label">Curiga Tuli Kongenital Kiri</div>
+          <div class="summary-value">{{ tuli_kr }}</div>
         </div>
       </div>
     </div>
@@ -44,6 +44,9 @@
   const flash = computed(() => page.props.flash);
 
   const patient = computed(() => props.DataPasien || {});
+
+  const tuli_kr = computed(() => valueOrDash(patient.value.tuli_kiri));
+  const tuli_kn = computed(() => valueOrDash(patient.value.tuli_kanan));
 
   const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
   const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));

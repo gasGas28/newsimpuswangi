@@ -13,9 +13,11 @@ use App\Models\RuangLayanan\SkriningPTM\GangguanPenglihatan;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
+use App\Models\RuangLayanan\SkriningPTM\SimpusEKG;
+use App\Models\RuangLayanan\SkriningPTM\SimpusKankerParu;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
+use App\Models\RuangLayanan\SkriningPTM\SimpusThalasemia;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
@@ -38,6 +40,8 @@ class PelayananPTMService
             ->leftJoin('simpus_obesitas as obesitas', 'skrining.idSkrining', '=', 'obesitas.skriningID')
             ->leftJoin('simpus_asam_urat as asam_urat', 'skrining.idSkrining', '=', 'asam_urat.skriningID')
             ->leftJoin('simpus_profil_lipid as profil_lipid', 'skrining.idSkrining', '=', 'profil_lipid.skriningID')
+            ->leftJoin('simpus_gangguan_pendengaran as pendengaran', 'skrining.idSkrining', '=', 'pendengaran.skriningID')
+            ->leftJoin('simpus_gangguan_penglihatan as penglihatan', 'skrining.idSkrining', '=', 'penglihatan.skriningID')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -101,8 +105,11 @@ class PelayananPTMService
                 'obesitas.*',
                 'asam_urat.*',
                 'profil_lipid.*',
+                'pendengaran.*',
+                'penglihatan.*',
             )
             ->first();
+        // dd($DataPasien);
 
         return $DataPasien;
     }
@@ -229,6 +236,50 @@ class PelayananPTMService
             $this->savePenglihatan($pemeriksaan->idSkrining, $data['penglihatan'] ?? []);
             $this->savePendengaran($pemeriksaan->idSkrining, $data['pendengaran'] ?? []);
         });
+    }
+
+    public function saveThalasemia($data){
+        $thalasemia = SimpusThalasemia::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'hemoglobin' => $data['hb'],
+            'mcv' => $data['mcv'],
+            'mch' => $data['mch'],
+            'eritrosit' => $data['rbc'],
+            'rdw' => $data['rdw'],
+        ]
+        );
+        return $thalasemia;
+    }
+    public function saveKankerParu($data){
+        $kankerParu = SimpusKankerParu::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'kuesioner1' => $data['kp1'],
+            'kuesioner2' => $data['kp2'],
+            'kuesioner3' => $data['kp3'],
+            'kuesioner4' => $data['kp4'],
+            'kuesioner5' => $data['kp5'],
+            'kuesioner6' => $data['kp6'],
+            'kuesioner7' => $data['kp7'],
+            'hasil_kuesioner' => $data['hasil_kkp'],
+        ]
+        );
+        return $kankerParu;
+    }
+    public function saveEKG($data){
+        $ekg = SimpusEKG::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'hr' => $data['hr'],
+            'irama' => $data['irama'],
+            'axis' => $data['axis'],
+            'segmen_st' => $data['st'],
+            'qrs' => $data['qrs'],
+            'kesimpulan_ekg' => $data['hasil_ekg'],
+        ]
+        );
+        return $ekg;
     }
 
     private function savePenglihatan(string $skriningID, array $data): void
