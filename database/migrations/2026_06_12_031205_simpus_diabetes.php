@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('simpus_diabetes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('pemeriksaan_ptm_id')
-                ->constrained('simpus_pemeriksaan_ptm')
+
+            $table->foreignId('skriningID')
+                ->constrained('simpus_skrining_ptm')
                 ->cascadeOnDelete();
 
             $table->decimal('gula_darah_puasa', 5, 2)->nullable();
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->string('kategori_gula_darah_sewaktu', 30)->nullable();
             $table->string('kategori_hba1c', 30)->nullable();
 
-            $table->unique('pemeriksaan_ptm_id');
+            $table->unique('simpus_skrining_ptm');
 
             $table->timestamps();
         });

@@ -52,7 +52,7 @@
   import { ref, computed } from 'vue';
   import FormMetabolik from './FormPemeriksaan/FormAntropometri.vue';
   import FormIndera from './FormPemeriksaan/FormIndera.vue';
-  import FormGenetik from './FormPemeriksaan/FormGenetik.vue';
+  import FormGenetik from './FormPemeriksaan/FormKanker.vue';
 
   const activeFormObjektif = ref('metabolik');
   const isSaving = ref(false);

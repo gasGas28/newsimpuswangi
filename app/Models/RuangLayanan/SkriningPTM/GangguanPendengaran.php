@@ -4,18 +4,21 @@ namespace App\Models\RuangLayanan\SkriningPTM;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
-class SimpusAsamUrat extends Model
-{
-    protected $table = 'simpus_asam_urat';
-    protected $primaryKey = 'id';
 
+class GangguanPendengaran extends Model
+{
+    protected $table = 'simpus_gangguan_pendengaran';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'skriningID',
-        'asam_urat',
-        'kategori_asam_urat',
-        'observation_id',
-        'condition_id',
-        'sent_at',
+        'tuli_kiri',
+        'tuli_kanan',
+        'omsk_kiri',
+        'omsk_kanan',
+        'presbi_kiri',
+        'presbi_kanan',
+        'bisik_kiri',
+        'bisik_kanan',
     ];
 
     public function pemeriksaanPTM()

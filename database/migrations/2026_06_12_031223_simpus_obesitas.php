@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('simpus_obesitas', function (Blueprint $table){
+        Schema::create('simpus_obesitas', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('pemeriksaan_ptm_id')
-                ->constrained('simpus_pemeriksaan_ptm')
+
+            $table->foreignId('skriningID')
+                ->constrained('simpus_skrining_ptm')
                 ->cascadeOnDelete();
-    
+
             $table->unsignedSmallInteger('berat_badan')->nullable();
             $table->unsignedSmallInteger('tinggi_badan')->nullable();
             $table->decimal('imt', 5, 2)->nullable();
@@ -26,10 +27,10 @@ return new class extends Migration
             $table->string('interpretasi_ptm', 30)->nullable();
             $table->string('interpretasi_lp', 30)->nullable();
 
-            $table->unique('pemeriksaan_ptm_id');
+            $table->unique('simpus_skrining_ptm');
+
 
             $table->timestamps();
-            
         });
         //
     }

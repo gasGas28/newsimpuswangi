@@ -8,12 +8,16 @@ use App\Models\RuangLayanan\MasterDokter;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
+use App\Models\RuangLayanan\SkriningPTM\GangguanPendengaran;
+use App\Models\RuangLayanan\SkriningPTM\GangguanPenglihatan;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
+use App\Models\RuangLayanan\SkriningPTM\SimpusEKG;
+use App\Models\RuangLayanan\SkriningPTM\SimpusKankerParu;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
-use App\Models\RuangLayanan\SkriningPTM\SimpusPelayananPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
+use App\Models\RuangLayanan\SkriningPTM\SimpusThalasemia;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
@@ -30,8 +34,14 @@ class PelayananPTMService
             ->leftJoin('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
             ->leftJoin('simpus_kunjungan_ptm as kunjungan', 'kunjungan.idSkrining', '=', 'skrining.idSkrining')
             ->leftJoin('master_dokter as dokter', 'dokter.ihs_nakes', '=', 'kunjungan.id_petugas')
-            ->leftJoin('simpus_pemeriksaan_ptm as ptm', 'skrining.idSkrining', '=', 'ptm.idSkrining')
             ->leftJoin('faktor_risiko_ptm as frisiko', 'skrining.idSkrining', '=', 'frisiko.skriningID')
+            ->leftJoin('simpus_hipertensi as hipertensi', 'skrining.idSkrining', '=', 'hipertensi.skriningID')
+            ->leftJoin('simpus_diabetes as diabetes', 'skrining.idSkrining', '=', 'diabetes.skriningID')
+            ->leftJoin('simpus_obesitas as obesitas', 'skrining.idSkrining', '=', 'obesitas.skriningID')
+            ->leftJoin('simpus_asam_urat as asam_urat', 'skrining.idSkrining', '=', 'asam_urat.skriningID')
+            ->leftJoin('simpus_profil_lipid as profil_lipid', 'skrining.idSkrining', '=', 'profil_lipid.skriningID')
+            ->leftJoin('simpus_gangguan_pendengaran as pendengaran', 'skrining.idSkrining', '=', 'pendengaran.skriningID')
+            ->leftJoin('simpus_gangguan_penglihatan as penglihatan', 'skrining.idSkrining', '=', 'penglihatan.skriningID')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -90,9 +100,16 @@ class PelayananPTMService
                 'kunjungan.*',
                 'skrining.*',
                 'frisiko.*',
-                'ptm.id'
+                'hipertensi.*',
+                'diabetes.*',
+                'obesitas.*',
+                'asam_urat.*',
+                'profil_lipid.*',
+                'pendengaran.*',
+                'penglihatan.*',
             )
             ->first();
+        // dd($DataPasien);
 
         return $DataPasien;
     }
@@ -195,20 +212,130 @@ class PelayananPTMService
     public function savePemeriksaanMetabolik(array $data): void
     {
         DB::transaction(function () use ($data) {
-            $pemeriksaan = SimpusPelayananPTM::firstOrCreate(
+            $pemeriksaan = SimpusSkriningPTM::updateOrCreate(
                 [
                     'idSkrining' => $data['skriningId'],
                 ]
             );
-            $this->saveHipertensi($pemeriksaan->id, $data['hipertensi'] ?? []);
-            $this->saveDiabetes($pemeriksaan->id, $data['diabetes'] ?? []);
-            $this->saveObesitas($pemeriksaan->id, $data['obesitas'] ?? []);
-            $this->saveAsamUrat($pemeriksaan->id, $data['obesitas'] ?? []);
-            $this->saveProfilLipid($pemeriksaan->id, $data['obesitas'] ?? []);
+            $this->saveHipertensi($pemeriksaan->idSkrining, $data['hipertensi'] ?? []);
+            $this->saveDiabetes($pemeriksaan->idSkrining, $data['diabetes'] ?? []);
+            $this->saveObesitas($pemeriksaan->idSkrining, $data['obesitas'] ?? []);
+            $this->saveAsamUrat($pemeriksaan->idSkrining, $data['asam_urat'] ?? []);
+            $this->saveProfilLipid($pemeriksaan->idSkrining, $data['profil_lipid'] ?? []);
         });
     }
 
-    private function saveObesitas(int $pemeriksaanPTMId, array $data): void
+    public function saveGangguanIndera(array $data): void
+    {
+        DB::transaction(function () use ($data) {
+            $pemeriksaan = SimpusSkriningPTM::updateOrCreate(
+                [
+                    'idSkrining' => $data['skriningId'],
+                ]
+            );
+            $this->savePenglihatan($pemeriksaan->idSkrining, $data['penglihatan'] ?? []);
+            $this->savePendengaran($pemeriksaan->idSkrining, $data['pendengaran'] ?? []);
+        });
+    }
+
+    public function saveThalasemia($data){
+        $thalasemia = SimpusThalasemia::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'hemoglobin' => $data['hb'],
+            'mcv' => $data['mcv'],
+            'mch' => $data['mch'],
+            'eritrosit' => $data['rbc'],
+            'rdw' => $data['rdw'],
+        ]
+        );
+        return $thalasemia;
+    }
+    public function saveKankerParu($data){
+        $kankerParu = SimpusKankerParu::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'kuesioner1' => $data['kp1'],
+            'kuesioner2' => $data['kp2'],
+            'kuesioner3' => $data['kp3'],
+            'kuesioner4' => $data['kp4'],
+            'kuesioner5' => $data['kp5'],
+            'kuesioner6' => $data['kp6'],
+            'kuesioner7' => $data['kp7'],
+            'hasil_kuesioner' => $data['hasil_kkp'],
+        ]
+        );
+        return $kankerParu;
+    }
+    public function saveEKG($data){
+        $ekg = SimpusEKG::updateOrCreate([
+            'skriningID' => $data['skriningId']
+        ], [
+            'hr' => $data['hr'],
+            'irama' => $data['irama'],
+            'axis' => $data['axis'],
+            'segmen_st' => $data['st'],
+            'qrs' => $data['qrs'],
+            'kesimpulan_ekg' => $data['hasil_ekg'],
+        ]
+        );
+        return $ekg;
+    }
+
+    private function savePenglihatan(string $skriningID, array $data): void
+    {
+        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+            return;
+        }
+
+       GangguanPenglihatan::updateOrCreate(
+            [
+                'skriningID' => $skriningID,
+            ],
+            [
+                'visus_od' => $data['visus_od'] ?? null,
+                'visus_os' => $data['visus_os'] ?? null,
+                'pinhole_od' => $data['pinhole_od'] ?? null,
+                'pinhole_os' => $data['pinhole_os'] ?? null,
+                'anterior_os' => $data['sa_os'] ?? null,
+                'anterior_od' => $data['sa_od'] ?? null,
+                'shadow_os' => $data['st_os'] ?? null,
+                'shadow_od' => $data['st_od'] ?? null,
+                'refleks_os' => $data['rf_os'] ?? null,
+                'refleks_od' => $data['rf_od'] ?? null,
+                'glaukoma_os' => $data['gio_os'] ?? null,
+                'glaukoma_od' => $data['gio_od'] ?? null,
+                'retinopati_os' => $data['retino_os'] ?? null,
+                'retinopati_od' => $data['retino_od'] ?? null,
+            ]
+        );
+        // dd($data);
+    }
+    private function savePendengaran(string $skriningID, array $data): void
+    {
+        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+            return;
+        }
+
+       GangguanPendengaran::updateOrCreate(
+            [
+                'skriningID' => $skriningID,
+            ],
+            [
+                'tuli_kiri' => $data['tuli_kiri'] ?? null,
+                'tuli_kanan' => $data['tuli_kanan'] ?? null,
+                'omsk_kiri' => $data['omsk_kiri'] ?? null,
+                'omsk_kanan' => $data['omsk_kanan'] ?? null,
+                'serumen_kiri' => $data['serumen_kiri'] ?? null,
+                'serumen_kanan' => $data['serumen_kanan'] ?? null,
+                'presbi_kiri' => $data['presbi_kiri'] ?? null,
+                'presbi_kanan' => $data['presbi_kanan'] ?? null,
+                'bisik_kiri' => $data['bisik_kiri'] ?? null,
+                'bisik_kanan' => $data['bisik_kanan'] ?? null,
+            ]
+        );
+    }
+    private function saveObesitas(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -216,20 +343,20 @@ class PelayananPTMService
 
         SimpusObesitas::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'berat_badan' => $data['berat_badan'] ?? null,
                 'tinggi_badan' => $data['tinggi_badan'] ?? null,
                 'imt' => $data['imt'] ?? null,
-                'interpretasi_imt' => $data['interpretasi_imt'] ?? null,
+                'interpretasi_ptm' => $data['interpretasi_imt'] ?? null,
                 'lingkar_pinggang' => $data['lingkar_pinggang'] ?? null,
-                'interpretasi_lp' => $data['interpretasi_lp'] ?? null,
+                'interpretasi_lp' => $data['interpretasi_lingkar_pinggang'] ?? null,
             ]
         );
     }
 
-    private function saveDiabetes(int $pemeriksaanPTMId, array $data): void
+    private function saveDiabetes(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -237,7 +364,7 @@ class PelayananPTMService
 
         SimpusDiabetes::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'gula_darah_puasa' => $data['gdp'] ?? null,
@@ -252,7 +379,7 @@ class PelayananPTMService
         );
     }
 
-    private function saveHipertensi(int $pemeriksaanPTMId, array $data): void
+    private function saveHipertensi(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -260,7 +387,7 @@ class PelayananPTMService
 
         SimpusHipertensi::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'sistolik' => $data['sistolik'] ?? null,
@@ -272,7 +399,7 @@ class PelayananPTMService
             ]
         );
     }
-    private function saveAsamUrat(int $pemeriksaanPTMId, array $data): void
+    private function saveAsamUrat(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -280,15 +407,15 @@ class PelayananPTMService
 
         SimpusAsamUrat::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'asam_urat' => $data['asam_urat'] ?? null,
-                'kategori_asam_urat' => $data['kategori_asam_urat'] ?? null,
+                'kategori_asam_urat' => $data['interpretasi_asam_urat'] ?? null,
             ]
         );
     }
-    private function saveProfilLipid(int $pemeriksaanPTMId, array $data): void
+    private function saveProfilLipid(string $skriningID, array $data): void
     {
         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
@@ -296,7 +423,7 @@ class PelayananPTMService
 
         SimpusProfilLipid::updateOrCreate(
             [
-                'pemeriksaan_ptm_id' => $pemeriksaanPTMId,
+                'skriningID' => $skriningID,
             ],
             [
                 'kolesterol_total' => $data['kolesterol_total'] ?? null,
@@ -337,5 +464,4 @@ class PelayananPTMService
             'catatan_assessment' => $data['catatan_assessment'] ?? null,
         ]);
     }
-
 }

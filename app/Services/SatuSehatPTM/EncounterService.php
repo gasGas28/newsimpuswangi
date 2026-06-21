@@ -21,7 +21,7 @@ class EncounterService
                 'application/x-www-form-urlencoded'
             )
             ->post(
-                'https://api-satusehat-stg.dto.kemkes.go.id/oauth2/v1/accesstoken?grant_type=client_credentials'
+                config('services.satusehat.auth_url'),
             );
 
         // dd(
@@ -54,7 +54,7 @@ class EncounterService
             'simpus_kunjungan_ptm.*',
             'simpus_pasien.NAMA_LGKP',
             'simpus_pasien.NIK',
-            'simpus_pasien.IHS_NUMBER'
+            'simpus_pasien.IHS_NUMBER',
         )
             ->join(
                 'simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien'
@@ -64,6 +64,7 @@ class EncounterService
 
         $patientId = $skrining->IHS_NUMBER;
         $patientName = $skrining->NAMA_LGKP;
+        $practitionerId = $skrining->id_petugas;
 
         // dd($patientName, $patientId);
 

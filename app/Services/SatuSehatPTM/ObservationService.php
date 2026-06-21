@@ -54,9 +54,7 @@ class ObservationService
 
         $patientId      = $skrining->patient_id;
         $encounterId    = $skrining->encounter_id;
-        // $practitionerId = $skrining->practitioner_id;
-
-        // Cek apakah Observation sudah ada di SATUSEHAT
+        
         $existingId = $this->findExistingObservation($encounterId);
         if ($existingId) {
             Log::info('Observation sudah ada, skip kirim', [

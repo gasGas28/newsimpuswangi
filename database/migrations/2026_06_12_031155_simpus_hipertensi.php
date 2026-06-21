@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('simpus_hipertensi', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('pemeriksaan_ptm_id')
-                ->constrained('simpus_pemeriksaan_ptm')
+            $table->foreignId('skriningID')
+                ->constrained('simpus_skrining_ptm')
                 ->cascadeOnDelete();
 
             $table->unsignedSmallInteger('sistolik')->nullable();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('nadi')->nullable();
             $table->unsignedSmallInteger('pernapasan')->nullable();
 
-            $table->unique('pemeriksaan_ptm_id');
+            $table->unique('simpus_skrining_ptm');
 
             $table->timestamps();
         });

@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('simpus_profil_lipid', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('pemeriksaan_ptm_id')
-                ->constrained('simpus_pemeriksaan_ptm')
+
+            $table->foreignId('skriningID')
+                ->constrained('simpus_skrining_ptm')
                 ->cascadeOnDelete();
 
             $table->decimal('kolesterol_total', 5, 2)->nullable();
@@ -28,8 +29,7 @@ return new class extends Migration
             $table->string('interpretasi_hdl', 30)->nullable();
             $table->string('interpretasi_trigliserida', 30)->nullable();
 
-            $table->unique('pemeriksaan_ptm_id');
-
+            $table->unique('simpus_skrining_ptm');
             $table->timestamps();
         });
     }
