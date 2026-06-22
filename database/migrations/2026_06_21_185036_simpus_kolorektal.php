@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('simpus_kanker_iva', function (Blueprint $table) {
+        Schema::create('simpus_kolorektal', function (Blueprint $table) {
             $table->id();
             $table->uuid('skriningID');
 
@@ -20,17 +20,11 @@ return new class extends Migration
                 ->on('simpus_skrining_ptm')
                 ->cascadeOnDelete();
 
-            $table->string('inspekulo', 50);
-            $table->string('iva', 50);
-            $table->string('hpv_dna', 50);
-            $table->string('sadanis', 50);
-            $table->string('usg', 50);
-
-            // Tindak lanjut, hanya relevan kalau iva === 'positif'
-            $table->boolean('krioterapi')->default(false);
-            $table->boolean('thermal')->default(false);
-            $table->boolean('tca')->default(false);
-            $table->boolean('rujuk_serviks')->default(false);
+            $table->string('kuesioner1', 50);
+            $table->string('kuesioner2', 50);
+            $table->string('hasil_kuesioner', 50);
+            $table->string('colok_dbr', 50);
+            $table->string('darah_samar', 50);
 
             $table->unique('skriningID');
             $table->timestamps();

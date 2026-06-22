@@ -14,7 +14,9 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
 use App\Models\RuangLayanan\SkriningPTM\SimpusEKG;
+use App\Models\RuangLayanan\SkriningPTM\SimpusKankerIva;
 use App\Models\RuangLayanan\SkriningPTM\SimpusKankerParu;
+use App\Models\RuangLayanan\SkriningPTM\SimpusKolorektal;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
 use App\Models\RuangLayanan\SkriningPTM\SimpusThalasemia;
@@ -238,46 +240,97 @@ class PelayananPTMService
         });
     }
 
-    public function saveThalasemia($data){
-        $thalasemia = SimpusThalasemia::updateOrCreate([
-            'skriningID' => $data['skriningId']
-        ], [
-            'hemoglobin' => $data['hb'],
-            'mcv' => $data['mcv'],
-            'mch' => $data['mch'],
-            'eritrosit' => $data['rbc'],
-            'rdw' => $data['rdw'],
-        ]
+    public function saveThalasemia($data)
+    {
+        $thalasemia = SimpusThalasemia::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId']
+            ],
+            [
+                'hemoglobin' => $data['hb'],
+                'mcv' => $data['mcv'],
+                'mch' => $data['mch'],
+                'eritrosit' => $data['rbc'],
+                'rdw' => $data['rdw'],
+            ]
         );
         return $thalasemia;
     }
-    public function saveKankerParu($data){
-        $kankerParu = SimpusKankerParu::updateOrCreate([
-            'skriningID' => $data['skriningId']
-        ], [
-            'kuesioner1' => $data['kp1'],
-            'kuesioner2' => $data['kp2'],
-            'kuesioner3' => $data['kp3'],
-            'kuesioner4' => $data['kp4'],
-            'kuesioner5' => $data['kp5'],
-            'kuesioner6' => $data['kp6'],
-            'kuesioner7' => $data['kp7'],
-            'hasil_kuesioner' => $data['hasil_kkp'],
-        ]
+    public function saveKankerParu($data)
+    {
+        $kankerParu = SimpusKankerParu::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId']
+            ],
+            [
+                'kuesioner1' => $data['kp1'],
+                'kuesioner2' => $data['kp2'],
+                'kuesioner3' => $data['kp3'],
+                'kuesioner4' => $data['kp4'],
+                'kuesioner5' => $data['kp5'],
+                'kuesioner6' => $data['kp6'],
+                'kuesioner7' => $data['kp7'],
+                'hasil_kuesioner' => $data['hasil_kkp'],
+            ]
         );
         return $kankerParu;
     }
-    public function saveEKG($data){
-        $ekg = SimpusEKG::updateOrCreate([
-            'skriningID' => $data['skriningId']
-        ], [
-            'hr' => $data['hr'],
-            'irama' => $data['irama'],
-            'axis' => $data['axis'],
-            'segmen_st' => $data['st'],
-            'qrs' => $data['qrs'],
-            'kesimpulan_ekg' => $data['hasil_ekg'],
-        ]
+    public function saveKolorektal($data)
+    {
+        $kolorektal = SimpusKolorektal::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId']
+            ],
+            [
+                'kuesioner1' => $data['kkr1'],
+                'kuesioner2' => $data['kkr2'],
+                'hasil_kuesioner' => $data['hasil_kkr'],
+                'colok_dbr' => $data['colok_dubur'],
+                'darah_samar' => $data['darah_samar'],
+            ]
+        );
+        return $kolorektal;
+    }
+    public function saveKankerServiks(array $data)
+    {
+        // Kalau IVA bukan positif, kosongkan tindak lanjut
+        if (($data['iva'] ?? null) !== 'positif') {
+            $data['krioterapi'] = false;
+            $data['thermal'] = false;
+            $data['tca'] = false;
+            $data['rujuk_serviks'] = false;
+        }
+
+        $kanker = SimpusKankerIva::updateOrCreate(
+            ['skriningID' => $data['skriningId']],
+            [
+                'inspekulo' => $data['inspekulo'] ?? null,
+                'iva' => $data['iva'] ?? null,
+                'hpv_dna' => $data['hpv'] ?? null,
+                'sadanis' => $data['sadanis'] ?? null,
+                'usg' => $data['usg_py'] ?? null,
+                'krioterapi' => $data['krioterapi'] ?? false,
+                'thermal' => $data['thermal'] ?? false,
+                'tca' => $data['tca'] ?? false,
+                'rujuk_serviks' => $data['rujuk_serviks'] ?? false,
+            ]
+        );
+        return $kanker;
+    }
+    public function saveEKG($data)
+    {
+        $ekg = SimpusEKG::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId']
+            ],
+            [
+                'hr' => $data['hr'],
+                'irama' => $data['irama'],
+                'axis' => $data['axis'],
+                'segmen_st' => $data['st'],
+                'qrs' => $data['qrs'],
+                'kesimpulan_ekg' => $data['hasil_ekg'],
+            ]
         );
         return $ekg;
     }
@@ -288,7 +341,7 @@ class PelayananPTMService
             return;
         }
 
-       GangguanPenglihatan::updateOrCreate(
+        GangguanPenglihatan::updateOrCreate(
             [
                 'skriningID' => $skriningID,
             ],
@@ -317,7 +370,7 @@ class PelayananPTMService
             return;
         }
 
-       GangguanPendengaran::updateOrCreate(
+        GangguanPendengaran::updateOrCreate(
             [
                 'skriningID' => $skriningID,
             ],

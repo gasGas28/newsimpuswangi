@@ -22,6 +22,20 @@
           +{{ item.score }} {{ item.label }}
         </span>
       </div>
+      <div v-if="riskScore.items.length" class="risk-score-factors">
+        <span v-for="item in riskScore.items" :key="item.key">
+          +{{ item.score }} {{ item.label }}
+        </span>
+      </div>
+
+      <div class="risk-score-disclaimer">
+        <i class="bi bi-info-circle"></i>
+        <span>
+          Skor ini adalah <strong>indikator internal</strong> untuk membantu triase di fasyankes,
+          bukan instrumen skoring klinis yang dibakukan Kemenkes atau dipersyaratkan SATUSEHAT.
+          Keputusan klinis tetap mengacu pada penilaian tenaga kesehatan.
+        </span>
+      </div>
     </section>
 
     <section class="risk-panel">
@@ -274,7 +288,6 @@
       button-text="Tutup"
       @close="showSuccessModal = false"
     />
-
     <ModalAlert
       :show="showValidationModal"
       type="warning"
@@ -299,7 +312,6 @@
   // --- Modal state ---
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false); 
   const validationMessages = ref([]);
 
   // --- Form ---
@@ -339,9 +351,7 @@
     detail_faktor_risiko: [],
   });
 
-    console.log('Form initialized with:', form);
-
-
+  console.log('Form initialized with:', form);
 
   // --- Options untuk v-for di template ---       ← INI YANG HILANG
   const riwayatPribadiOptions = [
@@ -384,10 +394,6 @@
     );
   }
 
-  function closeDuplicateModal() {
-    showDuplicateModal.value = false;
-  }
-
   // ============================================================
   // HELPER
   // ============================================================
@@ -398,90 +404,265 @@
   };
 
   // ============================================================
+  // DEFINISI RULE SKOR
+  // Setiap "group" berisi opsi yang saling eksklusif (hanya satu
+  // yang bisa aktif dalam satu waktu). maxScore dihitung otomatis
+  // dengan mengambil skor tertinggi tiap group lalu dijumlahkan,
+  // jadi tidak perlu diupdate manual kalau bobot/rule berubah.
+  // ============================================================
+
+  const riskRuleGroups = computed(() => [
+    {
+      rules: [{ test: form.merokok === 'ya', key: 'merokok', label: 'Pernah merokok', score: 2 }],
+    },
+    {
+      rules: [
+        {
+          test: form.status_merokok === 'perokok_aktif',
+          key: 'status_merokok_aktif',
+          label: 'Merokok aktif',
+          score: 2,
+        },
+        {
+          test: form.status_merokok === 'mantan_perokok',
+          key: 'status_merokok_mantan',
+          label: 'Mantan perokok',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: toNumber(form.btg_rokok) >= 10,
+          key: 'btg_rokok',
+          label: 'Rokok >=10 batang/hari',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: toNumber(form.lama_rokok) >= 10,
+          key: 'lama_rokok',
+          label: 'Lama merokok >=10 tahun',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.paparan_rokok === 'kadang',
+          key: 'paparan_kadang',
+          label: 'Paparan asap rokok kadang',
+          score: 1,
+        },
+        {
+          test: form.paparan_rokok === 'setiap_hari',
+          key: 'paparan_harian',
+          label: 'Paparan asap rokok harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.gula === 'kadang',
+          key: 'gula_kadang',
+          label: 'Gula berlebih kadang',
+          score: 1,
+        },
+        {
+          test: form.gula === 'setiap_hari',
+          key: 'gula_harian',
+          label: 'Gula berlebih harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.garam === 'kadang',
+          key: 'garam_kadang',
+          label: 'Garam berlebih kadang',
+          score: 1,
+        },
+        {
+          test: form.garam === 'setiap_hari',
+          key: 'garam_harian',
+          label: 'Garam berlebih harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.minyak === 'kadang',
+          key: 'minyak_kadang',
+          label: 'Minyak berlebih kadang',
+          score: 1,
+        },
+        {
+          test: form.minyak === 'setiap_hari',
+          key: 'minyak_harian',
+          label: 'Minyak berlebih harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.sayur === 'kadang',
+          key: 'sayur_kadang',
+          label: 'Kurang sayur/buah kadang',
+          score: 1,
+        },
+        {
+          test: form.sayur === 'setiap_hari',
+          key: 'sayur_harian',
+          label: 'Kurang sayur/buah harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.aktivitas === 'kadang',
+          key: 'aktivitas_kadang',
+          label: 'Aktivitas fisik kurang kadang',
+          score: 1,
+        },
+        {
+          test: form.aktivitas === 'setiap_hari',
+          key: 'aktivitas_harian',
+          label: 'Aktivitas fisik kurang harian',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [{ test: form.alkohol === 'ya', key: 'alkohol', label: 'Konsumsi alkohol', score: 1 }],
+    },
+    {
+      rules: [
+        {
+          test: form.r_pribadi_htn,
+          key: 'pribadi_htn',
+          label: 'Riwayat pribadi hipertensi',
+          score: 2,
+        },
+      ],
+    },
+    {
+      rules: [
+        { test: form.r_pribadi_dm, key: 'pribadi_dm', label: 'Riwayat pribadi diabetes', score: 2 },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_pribadi_stroke,
+          key: 'pribadi_stroke',
+          label: 'Riwayat pribadi stroke',
+          score: 3,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_pribadi_jantung,
+          key: 'pribadi_jantung',
+          label: 'Riwayat pribadi penyakit jantung',
+          score: 3,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_keluarga_htn,
+          key: 'keluarga_htn',
+          label: 'Riwayat keluarga hipertensi',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_keluarga_dm,
+          key: 'keluarga_dm',
+          label: 'Riwayat keluarga diabetes',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_keluarga_stroke,
+          key: 'keluarga_stroke',
+          label: 'Riwayat keluarga stroke',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.r_keluarga_jantung,
+          key: 'keluarga_jantung',
+          label: 'Riwayat keluarga penyakit jantung',
+          score: 1,
+        },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.kesiapan === 'tidak_siap',
+          key: 'tidak_siap',
+          label: 'Belum siap berubah',
+          score: 1,
+        },
+        { test: form.kesiapan === 'ragu', key: 'ragu', label: 'Masih ragu berubah', score: 1 },
+      ],
+    },
+    {
+      rules: [
+        {
+          test: form.dukung === 'kurang',
+          key: 'dukungan_kurang',
+          label: 'Dukungan keluarga kurang',
+          score: 1,
+        },
+      ],
+    },
+  ]);
+
+  // ============================================================
   // KALKULASI SKOR RISIKO (computed)
   // ============================================================
   const riskScore = computed(() => {
     const items = [];
+    let maxScore = 0;
 
-    // — Merokok
-    addRisk(items, form.merokok === 'ya', 'merokok', 'Pernah merokok', 2);
-    addRisk(items, form.status_merokok === 'current', 'status_merokok', 'Merokok aktif', 2);
-    addRisk(items, form.status_merokok === 'ex', 'mantan_perokok', 'Mantan perokok', 1);
-    addRisk(items, toNumber(form.btg_rokok) >= 10, 'btg_rokok', 'Rokok >=10 batang/hari', 1);
-    addRisk(items, toNumber(form.lama_rokok) >= 10, 'lama_rokok', 'Lama merokok >=10 tahun', 1);
-    addRisk(
-      items,
-      form.paparan_rokok === 'kadang',
-      'paparan_kadang',
-      'Paparan asap rokok kadang',
-      1
-    );
-    addRisk(
-      items,
-      form.paparan_rokok === 'setiap_hari',
-      'paparan_harian',
-      'Paparan asap rokok harian',
-      2
-    );
-
-    // — Pola makan
-    addRisk(items, form.gula === 'kadang', 'gula_kadang', 'Gula berlebih kadang', 1);
-    addRisk(items, form.gula === 'setiap_hari', 'gula_harian', 'Gula berlebih harian', 2);
-    addRisk(items, form.garam === 'kadang', 'garam_kadang', 'Garam berlebih kadang', 1);
-    addRisk(items, form.garam === 'setiap_hari', 'garam_harian', 'Garam berlebih harian', 2);
-    addRisk(items, form.minyak === 'kadang', 'minyak_kadang', 'Minyak berlebih kadang', 1);
-    addRisk(items, form.minyak === 'setiap_hari', 'minyak_harian', 'Minyak berlebih harian', 2);
-    addRisk(items, form.sayur === 'kadang', 'sayur_kadang', 'Kurang sayur/buah kadang', 1);
-    addRisk(items, form.sayur === 'setiap_hari', 'sayur_harian', 'Kurang sayur/buah harian', 2);
-
-    // — Aktivitas & alkohol
-    addRisk(
-      items,
-      form.aktivitas === 'kadang',
-      'aktivitas_kadang',
-      'Aktivitas fisik kurang kadang',
-      1
-    );
-    addRisk(
-      items,
-      form.aktivitas === 'setiap_hari',
-      'aktivitas_harian',
-      'Aktivitas fisik kurang harian',
-      2
-    );
-    addRisk(items, form.alkohol === 'ya', 'alkohol', 'Konsumsi alkohol', 1);
-
-    // — Riwayat pribadi
-    addRisk(items, form.r_pribadi_htn, 'pribadi_htn', 'Riwayat pribadi hipertensi', 2);
-    addRisk(items, form.r_pribadi_dm, 'pribadi_dm', 'Riwayat pribadi diabetes', 2);
-    addRisk(items, form.r_pribadi_stroke, 'pribadi_stroke', 'Riwayat pribadi stroke', 3);
-    addRisk(
-      items,
-      form.r_pribadi_jantung,
-      'pribadi_jantung',
-      'Riwayat pribadi penyakit jantung',
-      3
-    );
-
-    // — Riwayat keluarga
-    addRisk(items, form.r_keluarga_htn, 'keluarga_htn', 'Riwayat keluarga hipertensi', 1);
-    addRisk(items, form.r_keluarga_dm, 'keluarga_dm', 'Riwayat keluarga diabetes', 1);
-    addRisk(items, form.r_keluarga_stroke, 'keluarga_stroke', 'Riwayat keluarga stroke', 1);
-    addRisk(
-      items,
-      form.r_keluarga_jantung,
-      'keluarga_jantung',
-      'Riwayat keluarga penyakit jantung',
-      1
-    );
-
-    // — Kesiapan & dukungan
-    addRisk(items, form.kesiapan === 'tidak_siap', 'tidak_siap', 'Belum siap berubah', 1);
-    addRisk(items, form.kesiapan === 'ragu', 'ragu', 'Masih ragu berubah', 1);
-    addRisk(items, form.dukung === 'kurang', 'dukungan_kurang', 'Dukungan keluarga kurang', 1);
+    for (const { rules } of riskRuleGroups.value) {
+      maxScore += Math.max(...rules.map((r) => r.score));
+      for (const rule of rules) {
+        if (rule.test) items.push({ key: rule.key, label: rule.label, score: rule.score });
+      }
+    }
 
     const total = items.reduce((sum, i) => sum + i.score, 0);
-    const maxScore = 30;
     const percentage = Math.min(100, Math.round((total / maxScore) * 100));
 
     if (total >= 12)
@@ -524,7 +705,6 @@
     };
   });
 
-  // Computed helper untuk class CSS
   const scoreClass = computed(() => `risk-score-${riskScore.value.level}`);
 
   // ============================================================
@@ -538,38 +718,32 @@
   });
 
   function saveFaktorRisiko() {
-  saveStatus.value = 'idle'
-  saveError.value  = ''
-  showSuccessModal.value    = false
-  showValidationModal.value = false
-  validationMessages.value  = []
+    saveStatus.value = 'idle';
+    saveError.value = '';
+    showSuccessModal.value = false;
+    showValidationModal.value = false;
+    validationMessages.value = [];
 
-  form.post(route('pelayanan.simpan-risiko-ptm'), {
-    preserveScroll: true,
+    form.post(route('pelayanan.simpan-risiko-ptm'), {
+      preserveScroll: true,
 
-    onSuccess: () => {
-      saveStatus.value = 'ready'
-      saveError.value  = ''
-      validationMessages.value = []
-      form.clearErrors()
-      form.defaults(form.data())
-      showSuccessModal.value = true
-    },
+      onSuccess: () => {
+        saveStatus.value = 'ready';
+        saveError.value = '';
+        validationMessages.value = [];
+        form.clearErrors();
+        form.defaults(form.data());
+        showSuccessModal.value = true;
+      },
 
-    onError: (errors) => {
-      saveStatus.value = 'error'
-      const message = extractMessage(errors)
-      validationMessages.value = Object.values(errors).flat()
-      saveError.value = message
-
-      if (isDuplicateError(message)) {
-        showDuplicateModal.value = true
-      } else {
-        showValidationModal.value = true
-      }
-    },
-  })
-}
+      onError: (errors) => {
+        saveStatus.value = 'error';
+        const message = extractMessage(errors);
+        validationMessages.value = Object.values(errors).flat();
+        saveError.value = message;
+      },
+    });
+  }
 </script>
 
 <style scoped src="./FormPemeriksaan.css"></style>

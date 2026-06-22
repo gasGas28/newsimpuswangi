@@ -15,6 +15,8 @@ use App\Http\Requests\AssessmentPTMRequest;
 use App\Http\Requests\FaktorRisikoRequest;
 use App\Http\Requests\GangguanInderaRequest;
 use App\Http\Requests\PemeriksaanEKGRequest;
+use App\Http\Requests\PemeriksaanKankerIvaRequest;
+use App\Http\Requests\PemeriksaanKolorektalRequest;
 use App\Http\Requests\PemeriksaanParuRequest;
 use App\Http\Requests\PemeriksaanPTMRequest;
 use App\Http\Requests\ThalasemiaRequest;
@@ -132,15 +134,29 @@ class SkriningPTMController extends Controller
     public function addPemeriksaanParu(PemeriksaanParuRequest $request){
         $validated = $request->validated();
 
-        dd($validated);
+        // dd($validated);
         $this->pelayananService->saveKankerParu($validated);
         return redirect()->back();
     }   
     public function addPemeriksaanEKG(PemeriksaanEKGRequest $request){
         $validated = $request->validated();
 
-        dd($validated);
+        // dd($validated);
         $this->pelayananService->saveEKG($validated);
+        return redirect()->back();
+    }   
+    public function addPemeriksaanKolorektal(PemeriksaanKolorektalRequest $request){
+        $validated = $request->validated();
+
+        // dd($validated);
+        $this->pelayananService->saveKolorektal($validated);
+        return redirect()->back();
+    }   
+    public function addPemeriksaanKanker(PemeriksaanKankerIvaRequest $request){
+        $validated = $request->validated();
+
+        // dd($validated);
+        $this->pelayananService->saveKankerServiks($validated);
         return redirect()->back();
     }   
 

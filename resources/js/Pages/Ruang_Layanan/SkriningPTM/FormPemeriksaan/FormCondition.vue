@@ -35,6 +35,26 @@
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"
     />
+    <SendEKG
+      :DataPasien="props.DataPasien"
+      :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
+    />
+    <SendKankerParu
+      :DataPasien="props.DataPasien"
+      :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
+    />
+    <SendKolorektal
+      :DataPasien="props.DataPasien"
+      :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
+    />
+    <SendKankerServiks
+      :DataPasien="props.DataPasien"
+      :TenagaMedis="props.TenagaMedis"
+      :DataSkrining="props.DataSkrining"
+    />
   </div>
 </template>
 
@@ -46,6 +66,11 @@
   import SendProfilLipid from './KirimSatuSehat/KirimProfilLipid.vue';
   import SendPendengaran from './KirimSatuSehat/KirimGangguanPendengaran.vue';
   import SendPenglihatan from './KirimSatuSehat/KirimGangguanPenglihatan.vue';
+  import SendEKG from './KirimSatuSehat/KirimEKG.vue';
+  import SendKankerParu from './KirimSatuSehat/KirimKankerParu.vue';
+  import SendKolorektal from './KirimSatuSehat/KirimKolorektal.vue';
+  import SendKankerServiks from './KirimSatuSehat/KirimKankerServiks.vue';
+
   const props = defineProps({
     DataPasien: Object,
     TenagaMedis: Array,

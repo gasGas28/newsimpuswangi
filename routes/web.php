@@ -564,7 +564,7 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');
 
-        Route::post('/simpus/skrining-ptm/simpan-serviks', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
+        Route::post('/simpus/skrining-ptm/simpan-serviks', [SkriningPTMController::class, 'addPemeriksaanKanker'])
             ->name('pelayanan.simpan-serviks');
 
         Route::post('/simpus/skrining-ptm/simpan-paru', [SkriningPTMController::class, 'addPemeriksaanParu'])
@@ -572,7 +572,7 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         Route::post('/simpus/skrining-ptm/simpan-thalasemia', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
             ->name('pelayanan.simpan-thalasemia');
 
-        Route::post('/simpus/skrining-ptm/simpan-kolorektal', [SkriningPTMController::class, 'addPemeriksaanThalasemia'])
+        Route::post('/simpus/skrining-ptm/simpan-kolorektal', [SkriningPTMController::class, 'addPemeriksaanKolorektal'])
             ->name('pelayanan.simpan-kolorektal');
         Route::post('/simpus/skrining-ptm/simpan-ekg', [SkriningPTMController::class, 'addPemeriksaanEKG'])
             ->name('pelayanan.simpan-ekg');
@@ -597,6 +597,14 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('satusehat.gangguan-pendengaran');
         Route::post('/satusehat/penglihatan/{idSkrining}', [SatuSehatController::class, 'sendGangguanPenglihatan'])
             ->name('satusehat.gangguan-penglihatan');
+        Route::post('/satusehat/ekg/{idSkrining}', [SatuSehatController::class, 'sendEKG'])
+            ->name('satusehat.send-ekg');
+        Route::post('/satusehat/paru/{idSkrining}', [SatuSehatController::class, 'sendKankerParu'])
+            ->name('satusehat.send-paru');
+        Route::post('/satusehat/kolorektal/{idSkrining}', [SatuSehatController::class, 'sendKolorektal'])
+            ->name('satusehat.send-kolorektal');
+        Route::post('/satusehat/serviks/{idSkrining}', [SatuSehatController::class, 'sendKankerServiks'])
+            ->name('satusehat.kanker-serviks');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
