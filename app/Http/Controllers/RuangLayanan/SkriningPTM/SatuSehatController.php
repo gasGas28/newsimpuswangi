@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
+use App\Services\SatuSehatPTM\KankerServiksObservationService;
 use Illuminate\Http\Request;
 use App\Services\SatuSehatPTM\EncounterService;
 use App\Services\SatuSehatPTM\ObservationService;
@@ -14,8 +15,11 @@ use App\Services\SatuSehatPTM\ObesitasObservationService;
 use App\Services\SatuSehatPTM\ObesitasConditionService;
 use App\Services\SatuSehatPTM\DiabetesObservationService;
 use App\Services\SatuSehatPTM\AsamUratObservationService;
+use App\Services\SatuSehatPTM\EkgObservationService;
 use App\Services\SatuSehatPTM\GangguanPendengaranObservationService;
 use App\Services\SatuSehatPTM\GangguanPenglihatanObservationService;
+use App\Services\SatuSehatPTM\KankerParuQuestionnaireService;
+use App\Services\SatuSehatPTM\KolorektalQuestionnaireService;
 use App\Services\SatuSehatPTM\ProfilLipidObservationService;
 
 class SatuSehatController extends Controller
@@ -34,6 +38,10 @@ class SatuSehatController extends Controller
         private ProfilLipidObservationService $profilLipidObservationService,
         private GangguanPendengaranObservationService $gangguanPendengaranObservationService,
         private GangguanPenglihatanObservationService $gangguanPenglihatanObservationService,
+        private EkgObservationService $ekgObservationService,
+        private KankerParuQuestionnaireService $kankerParuQuestionnaireService,
+        private KolorektalQuestionnaireService $kolorektalQuestionnaireService,
+        private KankerServiksObservationService $kankerServiksObservationService
     ) {}
 
     public function testEncounter(string $idSkrining)
@@ -171,6 +179,54 @@ class SatuSehatController extends Controller
     {
         try {
             $this->gangguanPenglihatanObservationService->sendGangguanPenglihatan($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Profil Lipid berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendKankerParu(string $idSkrining)
+    {
+        try {
+            $this->kankerParuQuestionnaireService->sendKankerParu($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Kanker Paru berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendKolorektal(string $idSkrining)
+    {
+        try {
+            $this->kolorektalQuestionnaireService->sendKolorektal($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Kolorektal berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendEKG(string $idSkrining)
+    {
+        try {
+            $this->ekgObservationService->sendEkg($idSkrining);
+
+            return response()->json([
+                'message' => 'Data Profil Lipid berhasil dikirim',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function sendKankerServiks(string $idSkrining)
+    {
+        try {
+            $this->kankerServiksObservationService->sendIvaServiks($idSkrining);
 
             return response()->json([
                 'message' => 'Data Profil Lipid berhasil dikirim',

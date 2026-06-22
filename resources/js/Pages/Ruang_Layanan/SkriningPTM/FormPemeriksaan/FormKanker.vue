@@ -25,7 +25,7 @@
               class="form-select"
               v-model="formServiks.inspekulo"
             >
-              <option value="">Tidak dilakukan</option>
+              <option value="Tidak Dilakukan">Tidak dilakukan</option>
               <option value="Suspected cervical cancer">Curiga Kanker</option>
               <option value="No evidence of cancer found">Tidak curiga kanker</option>
             </select>
@@ -34,7 +34,7 @@
           <div class="form-field">
             <label class="form-label" for="iva">Hasil IVA</label>
             <select id="iva" name="iva" class="form-select" v-model="formServiks.iva">
-              <option value="">Tidak dilakukan</option>
+              <option value="Tidak Dilakukan">Tidak dilakukan</option>
               <option value="negatif">IVA Negatif</option>
               <option value="positif">IVA Positif</option>
               <option value="curiga_kanker">Curiga Kanker Serviks</option>
@@ -44,7 +44,7 @@
           <div class="form-field">
             <label class="form-label" for="hpv">HPV-DNA</label>
             <select id="hpv" name="hpv" class="form-select" v-model="formServiks.hpv">
-              <option value="">Tidak dilakukan</option>
+              <option value="Tidak Dilakukan">Tidak dilakukan</option>
               <option value="negatif">Negatif</option>
               <option value="positif">Positif</option>
             </select>
@@ -53,7 +53,7 @@
           <div class="form-field">
             <label class="form-label" for="sadanis">SADANIS (Payudara)</label>
             <select id="sadanis" name="sadanis" class="form-select" v-model="formServiks.sadanis">
-              <option value="">Tidak dilakukan</option>
+              <option value="Tidak Dilakukan">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="curiga">Curiga kelainan</option>
             </select>
@@ -62,7 +62,7 @@
           <div class="form-field">
             <label class="form-label" for="usg_py">USG Payudara</label>
             <select id="usg_py" name="usg_py" class="form-select" v-model="formServiks.usg_py">
-              <option value="">Tidak dilakukan</option>
+              <option value="Tidak Dilakukan">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="curiga">Curiga kelainan</option>
             </select>
@@ -233,9 +233,9 @@
               v-model="formParu.hasil_kkp"
             >
               <option value="">Pilih jawaban</option>
-              <option value="Low risk">Risiko Ringan Kanker Paru</option>
-              <option value="Moderate risk of">Risiko Sedang Kanker Paru</option>
-              <option value="High risk">Risiko Berat Kanker Paru</option>
+              <option value="Low Risk">Risiko Ringan Kanker Paru</option>
+              <option value="Moderate Risk Of">Risiko Sedang Kanker Paru</option>
+              <option value="High Risk">Risiko Berat Kanker Paru</option>
             </select>
           </div>
         </div>
@@ -263,8 +263,12 @@
             >
             <select id="kkr1" name="kkr1" class="form-select" v-model="formKolorektal.kkr1">
               <option value="">Pilih jawaban</option>
-              <option value="tidak">Tidak</option>
-              <option value="ya">Ya</option>
+              <option value="false">
+                Tidak memiliki riwayat keluarga kanker kolorektal generasi pertama
+              </option>
+              <option value="true">
+                Memiliki riwayat keluarga kanker kolorektal generasi pertama
+              </option>
             </select>
           </div>
 
@@ -272,8 +276,8 @@
             <label class="form-label" for="kkr2">Apakah peserta merokok?</label>
             <select id="kkr2" name="kkr2" class="form-select" v-model="formKolorektal.kkr2">
               <option value="">Pilih jawaban</option>
-              <option value="tidak">Tidak</option>
-              <option value="ya">Ya</option>
+              <option value="false">Tidak</option>
+              <option value="true">Ya</option>
             </select>
           </div>
 
@@ -284,39 +288,46 @@
               name="hasil_kkr"
               class="form-select"
               v-model="formKolorektal.hasil_kkr"
+              disabled
             >
-              <option value="">Pilih hasil</option>
-              <option value="rendah">Risiko Rendah</option>
-              <option value="tinggi">Risiko Tinggi</option>
+              <option value="">Belum ada hasil</option>
+              <option value="Low">Risiko Ringan (Skor 0-1)</option>
+              <option value="Moderate">Risiko Sedang (Skor 2-3)</option>
+              <option value="High">Risiko Tinggi (Skor 4-7)</option>
             </select>
+            <small class="form-hint"
+              >Skor saat ini: {{ skorKolorektal }} — {{ interpretasiKolorektal.label }}</small
+            >
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="colok_dubur">Pemeriksaan Colok Dubur</label>
-            <select
-              id="colok_dubur"
-              name="colok_dubur"
-              class="form-select"
-              v-model="formKolorektal.colok_dubur"
-            >
-              <option value="">Tidak dilakukan</option>
-              <option value="normal">Normal</option>
-              <option value="curiga">Curiga</option>
-            </select>
-          </div>
+          <div v-if="interpretasiKolorektal.value === 'tinggi'">
+            <div class="form-field">
+              <label class="form-label" for="colok_dubur">Pemeriksaan Colok Dubur</label>
+              <select
+                id="colok_dubur"
+                name="colok_dubur"
+                class="form-select"
+                v-model="formKolorektal.colok_dubur"
+              >
+                <option value="">Tidak dilakukan</option>
+                <option value="normal">Normal</option>
+                <option value="curiga">Curiga</option>
+              </select>
+            </div>
 
-          <div class="form-field">
-            <label class="form-label" for="darah_samar">Darah Samar Feses</label>
-            <select
-              id="darah_samar"
-              name="darah_samar"
-              class="form-select"
-              v-model="formKolorektal.darah_samar"
-            >
-              <option value="">Tidak dilakukan</option>
-              <option value="negatif">Negatif</option>
-              <option value="positif">Positif</option>
-            </select>
+            <div class="form-field">
+              <label class="form-label" for="darah_samar">Darah Samar Feses</label>
+              <select
+                id="darah_samar"
+                name="darah_samar"
+                class="form-select"
+                v-model="formKolorektal.darah_samar"
+              >
+                <option value="">Tidak dilakukan</option>
+                <option value="negatif">Negatif</option>
+                <option value="positif">Positif</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -578,7 +589,7 @@
 
 <script setup>
   import { useForm } from '@inertiajs/vue3';
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
@@ -622,8 +633,8 @@
     kkr1: '',
     kkr2: '',
     hasil_kkr: '',
-    colok_dubur: '',
-    darah_samar: '',
+    colok_dubur: 'Tidak Dilakukan',
+    darah_samar: 'Tidak Dilakukan',
   });
 
   const formThalasemia = useForm({
@@ -644,6 +655,51 @@
     qrs: '',
     hasil_ekg: '',
   });
+
+  // Skoring Kuesioner Kanker Kolorektal (APCS Score)
+  const skorKolorektal = computed(() => {
+    let skor = 0;
+
+    const umur = props.DataPasien?.umur ?? 0;
+    if (umur >= 70) {
+      skor += 3;
+    } else if (umur >= 50) {
+      skor += 2;
+    }
+
+    if (props.DataPasien?.jenis_klmin === 1) {
+      skor += 1;
+    }
+
+    if (formKolorektal.kkr1 === 'true') {
+      skor += 2;
+    }
+
+    if (formKolorektal.kkr2 === 'true') {
+      skor += 1;
+    }
+
+    return skor;
+  });
+
+  const interpretasiKolorektal = computed(() => {
+    const skor = skorKolorektal.value;
+    if (skor <= 1) {
+      return { value: 'Low', label: 'Risiko Ringan', kelas: 'risk-low' };
+    } else if (skor <= 3) {
+      return { value: 'Moderate', label: 'Risiko Sedang', kelas: 'risk-medium' };
+    } else {
+      return { value: 'High', label: 'Risiko Tinggi', kelas: 'risk-high' };
+    }
+  });
+
+  watch(
+    () => [formKolorektal.kkr1, formKolorektal.kkr2],
+    () => {
+      formKolorektal.hasil_kkr = interpretasiKolorektal.value.value;
+    },
+    { immediate: true }
+  );
 
   // ── UI State ──────────────────────────────────────────────────────────────────
 
