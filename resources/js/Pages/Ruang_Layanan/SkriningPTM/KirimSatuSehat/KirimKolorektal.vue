@@ -2,7 +2,7 @@
   <section class="resume-panel">
     <div class="panel-header">
       <div>
-        <h4><i class="bi bi-clipboard2-check"></i> Pemeriksaan EKG</h4>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Kolorektal</h4>
         <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
     </div>
@@ -10,7 +10,7 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Pemeriksaan EKG</div>
+          <div class="summary-label">Asam Urat</div>
           <div class="summary-value">{{ asam_urat }}</div>
         </div>
         <div class="summary-item">
@@ -21,7 +21,7 @@
     </div>
     <div class="form-actions">
       <div class="save-status"></div>
-      <button type="button" class="save-button" @click="kirimEKG">
+      <button type="button" class="save-button" @click="kirimKolorektal">
         <i class="bi bi-save"></i>
         <span>Kirim Satu Sehat</span>
       </button>
@@ -33,7 +33,7 @@
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   const props = defineProps({
     DataPasien: Object,
@@ -67,11 +67,11 @@
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  const kirimEKG = () => {
+  const kirimKolorektal = () => {
     console.log('props.DataSkrining:', props.DataSkrining);
     console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
     router.post(
-      route('satusehat.send-ekg', props.DataPasien?.idSkrining),
+      route('satusehat.send-kolorektal', props.DataPasien?.idSkrining),
       {},
       {
         preserveScroll: true,

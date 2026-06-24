@@ -84,18 +84,6 @@
               <option value="ojek">Ojek/taksi</option>
             </select>
           </div>
-
-          <div class="form-field">
-            <label class="form-label" for="saran_tindak_lanjut">Saran Tindak Lanjut</label>
-            <input
-              id="saran_tindak_lanjut"
-              :value="saranTindakLanjut"
-              name="saran_tindak_lanjut"
-              type="text"
-              class="form-control readonly-field"
-              readonly
-            />
-          </div>
         </div>
       </div>
     </section>

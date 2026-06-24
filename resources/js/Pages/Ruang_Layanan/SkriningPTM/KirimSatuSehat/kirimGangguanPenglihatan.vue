@@ -2,7 +2,7 @@
   <section class="resume-panel">
     <div class="panel-header">
       <div>
-        <h4><i class="bi bi-clipboard2-check"></i> Data Kolorektal</h4>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Asam Urat</h4>
         <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
     </div>
@@ -21,7 +21,7 @@
     </div>
     <div class="form-actions">
       <div class="save-status"></div>
-      <button type="button" class="save-button" @click="kirimKolorektal">
+      <button type="button" class="save-button" @click="sendSatusehat">
         <i class="bi bi-save"></i>
         <span>Kirim Satu Sehat</span>
       </button>
@@ -33,7 +33,7 @@
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   const props = defineProps({
     DataPasien: Object,
@@ -67,11 +67,11 @@
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  const kirimKolorektal = () => {
+  const sendSatusehat = () => {
     console.log('props.DataSkrining:', props.DataSkrining);
     console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
     router.post(
-      route('satusehat.send-kolorektal', props.DataPasien?.idSkrining),
+      route('satusehat.gangguan-penglihatan', props.DataPasien?.idSkrining),
       {},
       {
         preserveScroll: true,

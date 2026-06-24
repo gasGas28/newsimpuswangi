@@ -11,7 +11,7 @@
     </div>
 
     <div class="action-grid">
-      <button type="button" class="action-item">
+      <!-- <button type="button" class="action-item">
         <span class="action-icon">
           <i class="bi bi-file-earmark-text"></i>
         </span>
@@ -39,15 +39,15 @@
           <strong>Riwayat Pasien</strong>
           <small>Kunjungan dan pelayanan</small>
         </span>
-      </button>
+      </button> -->
 
       <Link :href="cpptHref" class="action-item">
         <span class="action-icon">
           <i class="bi bi-file-text"></i>
         </span>
         <span class="action-copy">
-          <strong>CPPT</strong>
-          <small>Catatan perkembangan pasien</small>
+          <strong>Riwayat Pasien</strong>
+          <small>Catatan Riwayat pasien</small>
         </span>
       </Link>
 

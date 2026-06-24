@@ -44,6 +44,7 @@ class PelayananPTMService
             ->leftJoin('simpus_profil_lipid as profil_lipid', 'skrining.idSkrining', '=', 'profil_lipid.skriningID')
             ->leftJoin('simpus_gangguan_pendengaran as pendengaran', 'skrining.idSkrining', '=', 'pendengaran.skriningID')
             ->leftJoin('simpus_gangguan_penglihatan as penglihatan', 'skrining.idSkrining', '=', 'penglihatan.skriningID')
+            ->leftJoin('assessment_ptm as assessment', 'skrining.id', '=', 'assessment.skrining_ptm_id')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -109,6 +110,7 @@ class PelayananPTMService
                 'profil_lipid.*',
                 'pendengaran.*',
                 'penglihatan.*',
+                'assessment.*',
             )
             ->first();
         // dd($DataPasien);
@@ -493,8 +495,8 @@ class PelayananPTMService
 
     public function addAssessmentPTM($data)
     {
-        $skriningPtmId = $data['skrining_ptm_id'] ?? DB::table('skrining_ptm')
-            ->where('idpelayanan', $data['idpelayanan'] ?? null)
+        $skriningPtmId = $data['skrining_ptm_id'] ?? DB::table('simpus_skrining_ptm')
+            ->where('idPelayanan', $data['idpelayanan'] ?? null)
             ->value('id');
 
         if (!$skriningPtmId) {

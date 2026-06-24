@@ -57,7 +57,7 @@
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
   const props = defineProps({
     DataPasien: Object,

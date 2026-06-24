@@ -59,17 +59,17 @@
 </template>
 
 <script setup>
-  import SendHipertensi from './KirimSatuSehat/KirimHipertensi.vue';
-  import SendObesitas from './KirimSatuSehat/KirimObesitas.vue';
-  import SendDiabetes from './KirimSatuSehat/KirimDiabetes.vue';
-  import SendAsamUrat from './KirimSatuSehat/KirimAsamUrat.vue';
-  import SendProfilLipid from './KirimSatuSehat/KirimProfilLipid.vue';
-  import SendPendengaran from './KirimSatuSehat/KirimGangguanPendengaran.vue';
-  import SendPenglihatan from './KirimSatuSehat/KirimGangguanPenglihatan.vue';
-  import SendEKG from './KirimSatuSehat/KirimEKG.vue';
-  import SendKankerParu from './KirimSatuSehat/KirimKankerParu.vue';
-  import SendKolorektal from './KirimSatuSehat/KirimKolorektal.vue';
-  import SendKankerServiks from './KirimSatuSehat/KirimKankerServiks.vue';
+  import SendHipertensi from '../KirimSatuSehat/KirimHipertensi.vue';
+  import SendObesitas from '../KirimSatuSehat/KirimObesitas.vue';
+  import SendDiabetes from '../KirimSatuSehat/KirimDiabetes.vue';
+  import SendAsamUrat from '../KirimSatuSehat/KirimAsamUrat.vue';
+  import SendProfilLipid from '../KirimSatuSehat/KirimProfilLipid.vue';
+  import SendPendengaran from '../KirimSatuSehat/KirimGangguanPendengaran.vue';
+  import SendPenglihatan from '../KirimSatuSehat/KirimGangguanPenglihatan.vue';
+  import SendEKG from '../KirimSatuSehat/KirimEKG.vue';
+  import SendKankerParu from '../KirimSatuSehat/KirimKankerParu.vue';
+  import SendKolorektal from '../KirimSatuSehat/KirimKolorektal.vue';
+  import SendKankerServiks from '../KirimSatuSehat/KirimKankerServiks.vue';
 
   const props = defineProps({
     DataPasien: Object,

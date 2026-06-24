@@ -559,7 +559,7 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         Route::post('/simpus/skrining-ptm/simpan-risiko', [SkriningPTMController::class, 'addFaktorRisiko'])->name('pelayanan.simpan-risiko-ptm');
         Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
             ->name('pelayanan.simpan-assessment-ptm');
-        Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanPTM'])
+        Route::post('/simpus/skrining-ptm/simpan-metabolik', [SkriningPTMController::class, 'addPemeriksaanPTM'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');

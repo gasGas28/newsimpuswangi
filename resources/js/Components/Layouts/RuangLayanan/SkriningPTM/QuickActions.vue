@@ -2,7 +2,7 @@
   <section class="quick-actions">
     <div class="quick-header">
       <div>
-        <p class="quick-kicker">Aksi cepat</p>
+        <p class="quick-kicker">Aksi</p>
         <h2>Dokumen dan Pemeriksaan</h2>
       </div>
       <span class="status-pill" :class="{ active: sudahMulai }">
@@ -11,7 +11,7 @@
     </div>
 
     <div class="action-grid">
-      <button type="button" class="action-item">
+      <!-- <button type="button" class="action-item">
         <span class="action-icon"><i class="bi bi-file-earmark-text"></i></span>
         <span class="action-copy">
           <strong>Surat Keterangan</strong>
@@ -33,13 +33,13 @@
           <strong>Riwayat Pasien</strong>
           <small>Kunjungan dan pelayanan</small>
         </span>
-      </button>
+      </button> -->
 
       <Link :href="cpptHref" class="action-item">
         <span class="action-icon"><i class="bi bi-file-text"></i></span>
         <span class="action-copy">
-          <strong>CPPT</strong>
-          <small>Catatan perkembangan pasien</small>
+          <strong>Data Riwayat Pasien</strong>
+          <small>Catatan Riwayat pasien</small>
         </span>
       </Link>
 
