@@ -16,7 +16,6 @@ class DiabetesObservationService
         'diabetes'   => ['code' => 'E11.9', 'display' => 'Type 2 diabetes mellitus without complications'],
     ];
 
-    // ✅ LOINC map per kolom
     private array $loincMap = [
         'gula_darah_puasa'     => ['code' => '76629-5', 'display' => 'Fasting glucose [Moles/volume] in Blood', 'unit' => 'mg/dL', 'ucum' => 'mg/dL'],
         'gula_darah_2_jam_pp'  => ['code' => '14743-9', 'display' => 'Glucose [Moles/volume] in Capillary blood --2 hours post meal', 'unit' => 'mg/dL', 'ucum' => 'mg/dL'],

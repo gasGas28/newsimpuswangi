@@ -15,6 +15,8 @@ class GangguanPendengaran extends Model
         'tuli_kanan',
         'omsk_kiri',
         'omsk_kanan',
+        'serumen_kiri',
+        'serumen_kanan',
         'presbi_kiri',
         'presbi_kanan',
         'bisik_kiri',

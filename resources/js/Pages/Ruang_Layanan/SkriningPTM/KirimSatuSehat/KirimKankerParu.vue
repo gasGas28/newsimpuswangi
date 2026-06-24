@@ -2,7 +2,7 @@
   <section class="resume-panel">
     <div class="panel-header">
       <div>
-        <h4><i class="bi bi-clipboard2-check"></i> Data Asam Urat</h4>
+        <h4><i class="bi bi-clipboard2-check"></i> Data Kuesioner Kanker Paru</h4>
         <p>Status pengisian dan rangkuman data utama sebelum dikirim ke SATUSEHAT.</p>
       </div>
     </div>
@@ -10,12 +10,36 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Asam Urat</div>
-          <div class="summary-value">{{ asam_urat }}</div>
+          <div class="summary-label">Kuesioner 1</div>
+          <div class="summary-value">{{ answer1 }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Kategori Asam Urat</div>
-          <div class="summary-value">{{ kategori }}</div>
+          <div class="summary-label">Kuesioner 2</div>
+          <div class="summary-value">{{ answer2 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kuesioner 3</div>
+          <div class="summary-value">{{ answer3 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kuesioner 4</div>
+          <div class="summary-value">{{ answer3 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kuesioner 5</div>
+          <div class="summary-value">{{ answer5 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kuesioner 6</div>
+          <div class="summary-value">{{ answer6 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kuesioner 7</div>
+          <div class="summary-value">{{ answer7 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Hasil Kuesioner</div>
+          <div class="summary-value">{{ hasil }}</div>
         </div>
       </div>
     </div>
@@ -37,17 +61,18 @@
 
   const props = defineProps({
     DataPasien: Object,
-    TenagaMedis: Array,
   });
-
-  const page = usePage();
-  const flash = computed(() => page.props.flash);
 
   const patient = computed(() => props.DataPasien || {});
 
-  const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
-  const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
+  const answer1 = computed(() => valueOrDash(patient.value.kuesioner1));  
+  const answer2 = computed(() => valueOrDash(patient.value.kuesioner2));  
+  const answer3 = computed(() => valueOrDash(patient.value.kuesioner3));  
+  const answer4 = computed(() => valueOrDash(patient.value.kuesioner4));  
+  const answer5 = computed(() => valueOrDash(patient.value.kuesioner5));  
+  const answer6 = computed(() => valueOrDash(patient.value.kuesioner6));  
+  const answer7 = computed(() => valueOrDash(patient.value.kuesioner7));  
+  const hasil = computed(() => valueOrDash(patient.value.hasil_kuesioner));  
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;

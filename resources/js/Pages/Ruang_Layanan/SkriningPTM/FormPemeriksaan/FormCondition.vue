@@ -35,22 +35,22 @@
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"
     />
-    <SendEKG
-      :DataPasien="props.DataPasien"
-      :TenagaMedis="props.TenagaMedis"
-      :DataSkrining="props.DataSkrining"
-    />
     <SendKankerParu
-      :DataPasien="props.DataPasien"
-      :TenagaMedis="props.TenagaMedis"
-      :DataSkrining="props.DataSkrining"
+    :DataPasien="props.DataPasien"
+    :TenagaMedis="props.TenagaMedis"
+    :DataSkrining="props.DataSkrining"
     />
     <SendKolorektal
-      :DataPasien="props.DataPasien"
-      :TenagaMedis="props.TenagaMedis"
-      :DataSkrining="props.DataSkrining"
+    :DataPasien="props.DataPasien"
+    :TenagaMedis="props.TenagaMedis"
+    :DataSkrining="props.DataSkrining"
     />
     <SendKankerServiks
+    :DataPasien="props.DataPasien"
+    :TenagaMedis="props.TenagaMedis"
+    :DataSkrining="props.DataSkrining"
+    />
+    <SendEKG
       :DataPasien="props.DataPasien"
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"

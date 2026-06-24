@@ -13,7 +13,7 @@
           @click="toggleForm('encounter')"
         >
           <i class="bi bi-person-check"></i>
-          <span>Encounter</span>
+          <span>Subjective</span>
         </button>
         <button
           type="button"
@@ -22,7 +22,7 @@
           @click="toggleForm('condition')"
         >
           <i class="bi bi-exclamation-triangle"></i>
-          <span>Condition</span>
+          <span>Objective</span>
         </button>
       </div>
     </div>

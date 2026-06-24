@@ -10,12 +10,40 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Pemeriksaan EKG</div>
-          <div class="summary-value">{{ asam_urat }}</div>
+          <div class="summary-label">Inspekulo</div>
+          <div class="summary-value">{{ inspekulo }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Kategori Asam Urat</div>
-          <div class="summary-value">{{ kategori }}</div>
+          <div class="summary-label">IVA</div>
+          <div class="summary-value">{{ iva }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Sadanis</div>
+          <div class="summary-value">{{ sadanis }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">HPV / DNA</div>
+          <div class="summary-value">{{ hpv }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">USG Payudara</div>
+          <div class="summary-value">{{ usg }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Krioterapi</div>
+          <div class="summary-value">{{ krioterapi }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Thermal</div>
+          <div class="summary-value">{{ thermal }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">TCA</div>
+          <div class="summary-value">{{ tca }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Rujukan</div>
+          <div class="summary-value">{{ rujuk }}</div>
         </div>
       </div>
     </div>
@@ -40,27 +68,33 @@
     TenagaMedis: Array,
   });
 
-  const page = usePage();
-  const flash = computed(() => page.props.flash);
+  //  'inspekulo',
+  //       'iva',
+  //       'hpv_dna',
+  //       'sadanis',
+  //       'usg',
+  //       'krioterapi',
+  //       'thermal',
+  //       'tca',
+  //       'rujuk_serviks',
 
   const patient = computed(() => props.DataPasien || {});
 
-  const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
-  const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
+  const inspekulo = computed(() => valueOrDash(patient.value.inspekulo));
+  const iva = computed(() => valueOrDash(patient.value.iva));
+  const hpv = computed(() => valueOrDash(patient.value.hpv_dna));
+  const sadanis = computed(() => valueOrDash(patient.value.sadanis));
+  const usg = computed(() => valueOrDash(patient.value.usg));
+  const krioterapi = computed(() => valueOrDash(patient.value.krioterapi));
+  const thermal = computed(() => valueOrDash(patient.value.thermal));
+  const tca = computed(() => valueOrDash(patient.value.tca));
+  const rujuk = computed(() => valueOrDash(patient.value.rujuk_serviks));
+
+
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
   }
-
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);

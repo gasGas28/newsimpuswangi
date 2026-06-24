@@ -108,8 +108,8 @@ class EncounterService
                         ],
                     ],
                     'individual' => [
-                        'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
-                        'display' => config('services.satusehat.practitioner_name'),
+                        'reference' => 'Practitioner/' . $practitionerId,
+                        'display' => 'Practitioner 1',
                     ],
                 ],
             ],

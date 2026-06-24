@@ -10,9 +10,9 @@ class SimpusKolorektal extends Model
     protected $primaryKey = 'id';
     protected $fillable = [
         'skriningID',
-        'kuesioner1',
-        'kuesioner2',
-        'hasil_kuesioner',
+        'question1',
+        'question2',
+        'result',
         'colok_dbr',
         'darah_samar',
     ];

@@ -10,12 +10,16 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Asam Urat</div>
-          <div class="summary-value">{{ asam_urat }}</div>
+          <div class="summary-label">Jawaban Kuesioner 1</div>
+          <div class="summary-value">{{ answer1 }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Kategori Asam Urat</div>
-          <div class="summary-value">{{ kategori }}</div>
+          <div class="summary-label">Jawaban Kuesioner 2</div>
+          <div class="summary-value">{{ answer1 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Hasil Kuesioner</div>
+          <div class="summary-value">{{ hasil_kuesioner }}</div>
         </div>
       </div>
     </div>
@@ -30,60 +34,66 @@
 </template>
 
 <script setup>
-  import { ref, watchEffect, computed, watch } from 'vue';
-  import { useForm, router, usePage } from '@inertiajs/vue3';
-  import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+    import { ref, watchEffect, computed, watch } from 'vue';
+    import { useForm, router, usePage } from '@inertiajs/vue3';
+    import { route } from 'ziggy-js';
+    import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
-  const props = defineProps({
-    DataPasien: Object,
-    TenagaMedis: Array,
-  });
+    const props = defineProps({
+      DataPasien: Object,
+      TenagaMedis: Array,
+    });
 
-  const page = usePage();
-  const flash = computed(() => page.props.flash);
+    const patient = computed(() => props.DataPasien || {});
+    const hasil_kuesioner = computed(() => patient.value.result)
 
-  const patient = computed(() => props.DataPasien || {});
+    // const answer1 = computed(() => valueOrDash(patient.value.kuesioner1));
 
-  const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
-  const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
-
-  function valueOrDash(value) {
-    return value === undefined || value === null || value === '' ? '-' : value;
-  }
-
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
-
-  const showSuccessModal = ref(false);
-  const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false);
-  const validationMessages = ref([]);
-
-  const kirimKolorektal = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.send-kolorektal', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Encounter berhasil dikirim');
-        },
-        onError: (errors) => {
-          console.error(errors);
-        },
+    const answer1 = computed(() => {
+      if (patient.value.question1 === 'false') {
+        return 'Tidak memiliki riwayat keluarga kanker kolorektal generasi pertama';
+      } else if (patient.value.question1 === 'true') {
+        return 'Memiliki riwayat keluarga kanker kolorektal generasi pertama';
+      } else {
+        return 'Data belum tersedia';
       }
-    );
-  };
+    });
+
+    function valueOrDash(value) {
+      return value === undefined || value === null || value === '' ? '-' : value;
+    }
+
+    function toDateInput(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+    }
+
+    const tglSkrining =
+      toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
+
+    const showSuccessModal = ref(false);
+    const showValidationModal = ref(false);
+    const showDuplicateModal = ref(false);
+    const validationMessages = ref([]);
+
+    const kirimKolorektal = () => {
+      console.log('props.DataSkrining:', props.DataSkrining);
+      console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
+      router.post(
+        route('satusehat.send-kolorektal', props.DataPasien?.idSkrining),
+        {},
+        {
+          preserveScroll: true,
+          onSuccess: () => {
+            console.log('Encounter berhasil dikirim');
+          },
+          onError: (errors) => {
+            console.error(errors);
+          },
+        }
+      );
+    };
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>

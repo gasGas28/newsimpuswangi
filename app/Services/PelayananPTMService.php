@@ -44,7 +44,11 @@ class PelayananPTMService
             ->leftJoin('simpus_profil_lipid as profil_lipid', 'skrining.idSkrining', '=', 'profil_lipid.skriningID')
             ->leftJoin('simpus_gangguan_pendengaran as pendengaran', 'skrining.idSkrining', '=', 'pendengaran.skriningID')
             ->leftJoin('simpus_gangguan_penglihatan as penglihatan', 'skrining.idSkrining', '=', 'penglihatan.skriningID')
+            ->leftJoin('simpus_kolorektal as kolorektal', 'skrining.idSkrining', '=', 'kolorektal.skriningID')
+            ->leftJoin('simpus_kanker_paru as paru', 'skrining.idSkrining', '=', 'paru.skriningID')
             ->leftJoin('assessment_ptm as assessment', 'skrining.id', '=', 'assessment.skrining_ptm_id')
+            ->leftJoin('simpus_ekg as ekg', 'skrining.idSkrining', '=', 'ekg.skriningID')
+            ->leftJoin('simpus_kanker_iva as serviks', 'skrining.idSkrining', '=', 'serviks.skriningID')
 
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -111,6 +115,10 @@ class PelayananPTMService
                 'pendengaran.*',
                 'penglihatan.*',
                 'assessment.*',
+                'kolorektal.*',
+                'paru.*',
+                'ekg.*',
+                'serviks.*',
             )
             ->first();
         // dd($DataPasien);
@@ -284,9 +292,9 @@ class PelayananPTMService
                 'skriningID' => $data['skriningId']
             ],
             [
-                'kuesioner1' => $data['kkr1'],
-                'kuesioner2' => $data['kkr2'],
-                'hasil_kuesioner' => $data['hasil_kkr'],
+                'question1' => $data['kkr1'],
+                'question2' => $data['kkr2'],
+                'result' => $data['hasil_kkr'],
                 'colok_dbr' => $data['colok_dubur'],
                 'darah_samar' => $data['darah_samar'],
             ]

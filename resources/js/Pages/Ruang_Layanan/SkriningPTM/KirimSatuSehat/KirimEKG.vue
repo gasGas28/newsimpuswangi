@@ -10,12 +10,28 @@
     <div class="panel-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <div class="summary-label">Pemeriksaan EKG</div>
-          <div class="summary-value">{{ asam_urat }}</div>
+          <div class="summary-label">Heart Rate</div>
+          <div class="summary-value">{{ hr }}</div>
         </div>
         <div class="summary-item">
-          <div class="summary-label">Kategori Asam Urat</div>
-          <div class="summary-value">{{ kategori }}</div>
+          <div class="summary-label">Irama</div>
+          <div class="summary-value">{{ irama }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Axis</div>
+          <div class="summary-value">{{ axis }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Segmen ST</div>
+          <div class="summary-value">{{ segmen_st }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kompleks QRS</div>
+          <div class="summary-value">{{ qrs }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Kesimpulan EKG</div>
+          <div class="summary-value">{{ hasil }}</div>
         </div>
       </div>
     </div>
@@ -37,30 +53,20 @@
 
   const props = defineProps({
     DataPasien: Object,
-    TenagaMedis: Array,
   });
-
-  const page = usePage();
-  const flash = computed(() => page.props.flash);
 
   const patient = computed(() => props.DataPasien || {});
 
-  const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
-  const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
+  const hr = computed(() => valueOrDash(patient.value.hr));
+  const irama = computed(() => valueOrDash(patient.value.irama));
+  const axis = computed(() => valueOrDash(patient.value.axis));
+  const segmen_st = computed(() => valueOrDash(patient.value.segmen_st));
+  const qrs = computed(() => valueOrDash(patient.value.qrs));
+  const hasil = computed(() => valueOrDash(patient.value.kesimpulan_ekg));
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
   }
-
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);

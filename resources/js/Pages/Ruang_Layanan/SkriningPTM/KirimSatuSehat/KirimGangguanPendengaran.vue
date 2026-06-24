@@ -17,6 +17,38 @@
           <div class="summary-label">Curiga Tuli Kongenital Kiri</div>
           <div class="summary-value">{{ tuli_kr }}</div>
         </div>
+        <div class="summary-item">
+          <div class="summary-label">OMSK / Congek Kanan</div>
+          <div class="summary-value">{{ omsk_kn }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">OMSK / Congek Kiri</div>
+          <div class="summary-value">{{ omsk_kr }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Presbikusis Kanan</div>
+          <div class="summary-value">{{ presbi_kn }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Presbikusis Kiri</div>
+          <div class="summary-value">{{ presbi_kr }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Serumen Kiri</div>
+          <div class="summary-value">{{ serumen_kr }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Serumen Kanan</div>
+          <div class="summary-value">{{ serumen_kn }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Bisik Kanan</div>
+          <div class="summary-value">{{ bisik_kn }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Bisik Kiri</div>
+          <div class="summary-value">{{ bisik_kr }}</div>
+        </div>
       </div>
     </div>
     <div class="form-actions">
@@ -40,30 +72,22 @@
     TenagaMedis: Array,
   });
 
-  const page = usePage();
-  const flash = computed(() => page.props.flash);
-
   const patient = computed(() => props.DataPasien || {});
 
-  const tuli_kr = computed(() => valueOrDash(patient.value.tuli_kiri));
-  const tuli_kn = computed(() => valueOrDash(patient.value.tuli_kanan));
+  const data_helper = (field) =>
+    computed(() => (patient.value[field] === 'true' ? 'TRUE' : 'FALSE'));
 
-  const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
-  const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
+  const tuli_kr = data_helper('tuli_kiri');
+  const tuli_kn = data_helper('tuli_kanan');
+  const omsk_kr = data_helper('omsk_kiri');
+  const omsk_kn = data_helper('omsk_kanan');
+  const presbi_kr = data_helper('presbi_kiri');
+  const presbi_kn = data_helper('presbi_kanan');
+  const serumen_kr = data_helper('serumen_kiri');
+  const serumen_kn = data_helper('serumen_kanan');
 
-  function valueOrDash(value) {
-    return value === undefined || value === null || value === '' ? '-' : value;
-  }
-
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
+  const bisik_kn = computed(() => patient.value.bisik_kanan);
+  const bisik_kr = computed(() => patient.value.bisik_kiri);
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
