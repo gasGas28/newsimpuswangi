@@ -23,6 +23,7 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusThalasemia;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\SimpusStatusPTM;
 
 class PelayananPTMService
 {
@@ -93,6 +94,7 @@ class PelayananPTMService
                 'l.tglKunjungan',
                 'l.kunjBaru',
                 'l.idLoket',
+                'l.puskId',
                 'kel.nama_kel',
                 'kec.nama_kec',
                 'kab.nama_kab',
@@ -143,7 +145,7 @@ class PelayananPTMService
             'TenagaMedis' => $TenagaMedis,
         ];
     }
-    public function updateStatusPelayanan($idPelayanan, $idLoket, $status)
+    public function updateStatusPelayanan($idPelayanan, $status)
     {
         DB::table('simpus_pelayanan')
             ->where('idpelayanan', $idPelayanan)
@@ -154,10 +156,8 @@ class PelayananPTMService
         SimpusSkriningPTM::firstOrCreate([
             'idSkrining' => (string) Str::uuid(),
             'idPelayanan' => $idPelayanan,
-            'idLoket' => $idLoket,
             'status' => 'arrived',
         ]);
-
         // dd($idLoket);
     }
 
@@ -168,13 +168,13 @@ class PelayananPTMService
             'idSkrining' => $data['idSkrining'],
         ], [
             'idPelayanan' => $data['idPelayanan'],
-            'idLoket' => $data['idLoket'],
             'nik_pasien' => $data['nik_pasien'],
             'tanggal_skrining' => $data['tanggal_skrining'],
             'id_petugas' => $data['id_petugas'],
             'fasyankes' => $data['fasyankes'],
             'jenis_kunjungan' => $data['jenis_kunjungan'],
             'keluhan_utama' => $data['keluhan_utama'],
+            'patient_id' => $data['patient_id']
         ]);
 
         return $kunjungan;
@@ -229,11 +229,11 @@ class PelayananPTMService
                     'idSkrining' => $data['skriningId'],
                 ]
             );
-            $this->saveHipertensi($pemeriksaan->idSkrining, $data['hipertensi'] ?? []);
-            $this->saveDiabetes($pemeriksaan->idSkrining, $data['diabetes'] ?? []);
-            $this->saveObesitas($pemeriksaan->idSkrining, $data['obesitas'] ?? []);
-            $this->saveAsamUrat($pemeriksaan->idSkrining, $data['asam_urat'] ?? []);
-            $this->saveProfilLipid($pemeriksaan->idSkrining, $data['profil_lipid'] ?? []);
+            // $this->saveHipertensi($pemeriksaan->idSkrining, $data['hipertensi'] ?? []);
+            // $this->saveDiabetes($pemeriksaan->idSkrining, $data['diabetes'] ?? []);
+            // $this->saveObesitas($pemeriksaan->idSkrining, $data['obesitas'] ?? []);
+            // $this->saveAsamUrat($pemeriksaan->idSkrining, $data['asam_urat'] ?? []);
+            // $this->saveProfilLipid($pemeriksaan->idSkrining, $data['profil_lipid'] ?? []);
         });
     }
 
@@ -265,6 +265,22 @@ class PelayananPTMService
             ]
         );
         return $thalasemia;
+    }
+
+    public function saveObesitas($data){
+         SimpusObesitas::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId'],
+            ],
+            [
+                'berat_badan' => $data['berat_badan'] ?? null,
+                'tinggi_badan' => $data['tinggi_badan'] ?? null,
+                'imt' => $data['imt'] ?? null,
+                'interpretasi_ptm' => $data['interpretasi_imt'] ?? null,
+                'lingkar_pinggang' => $data['lingkar_perut'] ?? null,
+                'interpretasi_lp' => $data['interpretasi_lp'] ?? null,
+            ]
+        );
     }
     public function saveKankerParu($data)
     {
@@ -398,36 +414,14 @@ class PelayananPTMService
             ]
         );
     }
-    private function saveObesitas(string $skriningID, array $data): void
-    {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
 
-        SimpusObesitas::updateOrCreate(
-            [
-                'skriningID' => $skriningID,
-            ],
-            [
-                'berat_badan' => $data['berat_badan'] ?? null,
-                'tinggi_badan' => $data['tinggi_badan'] ?? null,
-                'imt' => $data['imt'] ?? null,
-                'interpretasi_ptm' => $data['interpretasi_imt'] ?? null,
-                'lingkar_pinggang' => $data['lingkar_pinggang'] ?? null,
-                'interpretasi_lp' => $data['interpretasi_lingkar_pinggang'] ?? null,
-            ]
-        );
-    }
 
-    private function saveDiabetes(string $skriningID, array $data): void
+    public function saveDiabetes(array $data): void
     {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
 
         SimpusDiabetes::updateOrCreate(
             [
-                'skriningID' => $skriningID,
+                'skriningID' => $data['skriningId'],
             ],
             [
                 'gula_darah_puasa' => $data['gdp'] ?? null,
@@ -442,35 +436,29 @@ class PelayananPTMService
         );
     }
 
-    private function saveHipertensi(string $skriningID, array $data): void
+    public function saveHipertensi(array $data): void
     {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
 
         SimpusHipertensi::updateOrCreate(
             [
-                'skriningID' => $skriningID,
+                'skriningID' => $data['skriningId'],
             ],
             [
                 'sistolik' => $data['sistolik'] ?? null,
-                'tekanan_diastolik' => $data['tekanan_diastolik'] ?? null,
-                'kategori_tekanan_darah' => $data['kategori_tekanan_darah'] ?? null,
+                'tekanan_diastolik' => $data['diastolik'] ?? null,
+                'kategori_tekanan_darah' => $data['kategori_hipertensi'] ?? null,
                 'suhu' => $data['suhu'] ?? null,
                 'nadi' => $data['nadi'] ?? null,
                 'pernapasan' => $data['pernapasan'] ?? null,
             ]
         );
     }
-    private function saveAsamUrat(string $skriningID, array $data): void
+    public function saveAsamUrat(array $data): void
     {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
 
         SimpusAsamUrat::updateOrCreate(
             [
-                'skriningID' => $skriningID,
+                'skriningID' => $data['skriningId'],
             ],
             [
                 'asam_urat' => $data['asam_urat'] ?? null,
@@ -478,15 +466,12 @@ class PelayananPTMService
             ]
         );
     }
-    private function saveProfilLipid(string $skriningID, array $data): void
+    public function saveProfilLipid(array $data): void
     {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
 
         SimpusProfilLipid::updateOrCreate(
             [
-                'skriningID' => $skriningID,
+                'skriningID' => $data['skriningId'],
             ],
             [
                 'kolesterol_total' => $data['kolesterol_total'] ?? null,
@@ -499,6 +484,24 @@ class PelayananPTMService
                 'interpretasi_trigliserida' => $data['interpretasi_trigliserida'] ?? null,
             ]
         );
+    }
+
+    public function saveStatusPasien($data)
+    {
+         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+            return;
+        }
+        $status = SimpusStatusPTM::updateOrCreate(
+            [
+                'skriningID' => $data['skriningId'],
+                'cara_keluar' => $data['cara_keluar'],
+                'kondisi_pasien' => $data['kondisi_keluar'],
+                'jadwal_kontrol' => $data['jadwal_kontrol'],
+                'rujukan' => $data['rencana_rujuk'],
+                'transportasi' => $data['transport'],
+            ]
+        );
+        return $status;
     }
 
     public function addAssessmentPTM($data)

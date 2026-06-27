@@ -78,7 +78,7 @@
               class="form-select"
               :disabled="form.rencana_rujuk === 'tidak'"
             >
-              <option value="">Tidak berlaku</option>
+              <option value="Tidak Berlaku">Tidak berlaku</option>
               <option value="ambulan">Ambulans</option>
               <option value="kendaraan_pribadi">Kendaraan pribadi</option>
               <option value="ojek">Ojek/taksi</option>
@@ -97,81 +97,133 @@
         <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Status Pasien' }}</span>
       </button>
     </div>
+
+    <ModalAlert
+      :show="showSuccessModal"
+      type="success"
+      title="Status Pasien Berhasil Disimpan"
+      message="Silakan lanjutkan pengiriman satu sehat."
+      button-text="Tutup"
+      secondary-button-text="Close"
+      @close="showSuccessModal = false"
+    />
+
+    <ModalAlert
+      :show="showValidationModal"
+      type="warning"
+      title="Data Belum Lengkap"
+      message="Mohon lengkapi data berikut:"
+      :items="validationMessages"
+      @close="showValidationModal = false"
+    />
   </div>
 </template>
 
 <script setup>
-  import { computed, ref, watchEffect } from 'vue';
+   import { useForm } from '@inertiajs/vue3';
+   import { computed, ref, watchEffect } from 'vue';
+  import ModalAlert from '../../../Components/Layouts/Modal/ModalAlert.vue';
 
-  const props = defineProps({
-    DataPasien: Object,
-    formData: Object,
-    tindakan: Array,
-  });
 
-  const emit = defineEmits(['save-status-pasien']);
-  const isSaving = ref(false);
-  const saveStatus = ref('idle');
-  const form = props.formData?.status_pasien || (props.formData.status_pasien = {});
-  const assessment = computed(() => props.formData?.assessment || {});
+   const props = defineProps({
+     DataPasien: Object,
+   });
 
-  form.kondisi_keluar = form.kondisi_keluar || '';
-  form.cara_keluar = form.cara_keluar || '';
-  form.jadwal_kontrol = form.jadwal_kontrol || '';
-  form.rencana_rujuk = form.rencana_rujuk || 'tidak';
-  form.transport = form.transport || '';
+   const emit = defineEmits(['save-status-pasien']);
+   const isSaving = ref(false);
+   const saveStatus = ref('idle');
+   const saveError = ref('');
+   const showSuccessModal = ref(false);
+   const showValidationModal = ref(false);
+   const validationMessages = ref([]);
 
-  const saranTindakLanjut = computed(() => {
-    if (form.rencana_rujuk && form.rencana_rujuk !== 'tidak') return labelize(form.rencana_rujuk);
-    if (assessment.value.diabetes_melitus || assessment.value.risiko_kardiovaskular) {
-      return 'Konsultasi internal puskesmas';
-    }
-    if (
-      assessment.value.hipertensi ||
-      assessment.value.dislipidemia ||
-      assessment.value.risiko_diabetes
-    ) {
-      return 'Edukasi dan kontrol berkala';
-    }
-    if (assessment.value.obesitas || assessment.value.perilaku_berisiko) {
-      return 'Edukasi perubahan gaya hidup';
-    }
-    return 'Tidak ada tindak lanjut khusus';
-  });
+   const form = useForm({
+     skriningId: props.DataPasien?.idSkrining || '',
+     kondisi_keluar: '',
+     cara_keluar: '',
+     jadwal_kontrol: '',
+     rencana_rujuk: 'tidak',
+     transport: 'Tidak Berlaku'
+   });
 
-  watchEffect(() => {
-    if (form.rencana_rujuk === 'tidak') form.transport = '';
-    form.saran_tindak_lanjut = saranTindakLanjut.value;
-  });
+    console.log('Form initialized with:', form);
 
-  const saveMessage = computed(() => {
-    if (saveStatus.value === 'ready') {
-      return 'Data status pasien siap disimpan.';
-    }
+   const saveMessage = computed(() => {
+     if (saveStatus.value === 'ready') {
+       return 'Data status pasien siap disimpan.';
+     }
+     return 'Simpan setelah status keluar selesai diisi.';
+   });
 
-    return 'Simpan setelah status keluar selesai diisi.';
-  });
+  function saveStatusPasien() {
+     console.log('Data yang akan dikirim:', form.data());
 
-  const saveStatusPasien = () => {
-    isSaving.value = true;
+     isSaving.value = true;
+     saveStatus.value = 'idle';
+     saveError.value = '';
 
-    emit('save-status-pasien', {
-      DataPasien: props.DataPasien,
-      status_pasien: props.formData?.status_pasien || {},
-    });
+     showSuccessModal.value = false;
+     showValidationModal.value = false;
 
-    window.setTimeout(() => {
-      isSaving.value = false;
-      saveStatus.value = 'ready';
-    }, 400);
-  };
+     validationMessages.value = [];
 
-  function labelize(value) {
-    if (!value) return '-';
-    return String(value)
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-  }
+     form.post(route('pelayanan.status-pasien-ptm'), {
+       preserveScroll: true,
+
+       onBefore: () => {
+         console.log('Mulai request');
+       },
+
+       onSuccess: () => {
+         saveStatus.value = 'ready';
+
+         saveError.value = '';
+         validationMessages.value = [];
+
+         form.clearErrors();
+         form.defaults(form.data());
+
+         showSuccessModal.value = true;
+       },
+
+       onError: (errors) => {
+         saveStatus.value = 'error';
+
+         validationMessages.value = Object.values(errors).flat();
+
+         saveError.value = extractMessage(errors);
+
+         showValidationModal.value = true;
+       },
+
+       onFinish: () => {
+         console.log('Request selesai');
+         isSaving.value = false;
+       },
+     });
+   }
+
+   function extractMessage(errors) {
+     return (
+       Object.values(errors || {})
+         .flat()
+         .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
+     );
+   }
+
+   function isDuplicateError(message) {
+     const lower = message.toLowerCase();
+     return ['sudah', 'tersimpan', 'duplikat', 'duplicate', 'already', 'exists'].some((kw) =>
+       lower.includes(kw)
+     );
+   }
+
+   function labelize(value) {
+     if (!value) return '-';
+     return String(value)
+       .replace(/_/g, ' ')
+       .replace(/\b\w/g, (char) => char.toUpperCase());
+   }
 </script>
 
 <style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>

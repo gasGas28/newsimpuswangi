@@ -12,12 +12,13 @@ class KunjunganPTM extends Model
     protected $fillable = [
         'idSkrining',
         'idPelayanan',
-        'idLoket',
         'nik_pasien',
         'tanggal_skrining',
         'id_petugas',
         'fasyankes',
         'jenis_kunjungan',
-        'keluhan_utama'
+        'keluhan_utama',
+        'patient_id',
+        'encounter_id',
     ];
 }

@@ -36,7 +36,8 @@ class FaktorRisiko extends Model
         'r_keluarga_jantung',
         'skor_faktor_risiko',
         'kategori_faktor_risiko',
-        'detail_faktor_risiko'
+        'detail_faktor_risiko',
+        'observation_id',
     ];
 
     protected $casts = [

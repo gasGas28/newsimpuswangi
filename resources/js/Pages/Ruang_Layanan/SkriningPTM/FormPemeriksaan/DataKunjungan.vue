@@ -143,6 +143,7 @@
   })();
 
   const defaultFasyankes = props.DataPasien?.nama_unit || '-';
+  const ihsSatusehat = props.DataPasien?.IHS_NUMBER || '-';
 
   // --- Form ---
 
@@ -156,6 +157,7 @@
     id_petugas: '',
     fasyankes: defaultFasyankes,
     keluhan_utama: '',
+    patient_id: ihsSatusehat || ''
   });
 
   console.log('Form initialized with:', form);

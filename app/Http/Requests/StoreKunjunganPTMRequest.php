@@ -16,13 +16,14 @@ class StoreKunjunganPTMRequest extends FormRequest
         return [
             'idSkrining' => 'required|uuid',
             'idPelayanan' => 'required|uuid',
-            'idLoket' => 'required|uuid',
             'nik_pasien' => 'required|string|max:16',
             'tanggal_skrining' => 'required|date',
             'id_petugas' => 'required|string|max:50',
             'fasyankes' => 'required|string|max:50',
             'jenis_kunjungan' => 'required|string|max:50',
-            'keluhan_utama' => 'required|string|max:200'
+            'keluhan_utama' => 'required|string|max:200',
+            'patient_id' => 'required',
+            'encounter_id' => 'nullable'
         ];
     }
 

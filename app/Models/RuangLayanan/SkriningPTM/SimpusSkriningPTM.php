@@ -17,7 +17,6 @@ class SimpusSkriningPTM extends Model
     protected $fillable = [
         'idSkrining',
         'idPelayanan',
-        'idLoket',
         'encounter_id',
         'patient_id',
         'status',

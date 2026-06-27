@@ -265,7 +265,6 @@
   const saveStatus = ref('idle');
   const saveError = ref('');
 
-  // Initializing state with existing values from database if available
   const initialDiagnosisUtama = props.DataPasien?.diagnosis_utama || '';
   const initialStatusKlinis = props.DataPasien?.status_klinis || 'active';
   const initialVerificationStatus = props.DataPasien?.verification_status || 'provisional';
@@ -319,25 +318,20 @@
     const list = [];
     const dp = props.DataPasien || {};
 
-    // 1. Obesitas
     if (dp.interpretasi_ptm === 'Gemuk' || dp.interpretasi_ptm === 'Obesitas' || dp.interpretasi_lp === 'Risiko meningkat') {
       list.push('obesitas');
     }
-    // 2. Hipertensi
     if (dp.kategori_tekanan_darah && dp.kategori_tekanan_darah !== 'Normal' && dp.kategori_tekanan_darah !== 'Elevated') {
       list.push('hipertensi');
     }
-    // 3. Diabetes / Prediabetes
     if (dp.kategori_gula_darah_puasa === 'Diabetes' || dp.kategori_gula_darah_sewaktu === 'Diabetes' || dp.kategori_hba1c === 'Diabetes' || dp.kategori_gula_darah_2_jam_pp === 'Diabetes') {
       list.push('diabetes_melitus');
     } else if (dp.kategori_gula_darah_puasa === 'Prediabetes' || dp.kategori_gula_darah_sewaktu === 'Prediabetes' || dp.kategori_hba1c === 'Prediabetes' || dp.kategori_gula_darah_2_jam_pp === 'Prediabetes') {
       list.push('risiko_diabetes');
     }
-    // 4. Dislipidemia
     if (dp.interpretasi_kolesterol_total === 'Borderline Tinggi' || dp.interpretasi_kolesterol_total === 'Tinggi' || dp.interpretasi_ldl === 'Tinggi' || dp.interpretasi_trigliserida === 'Tinggi') {
       list.push('dislipidemia');
     }
-    // 5. Risiko Penyakit Kardiovaskular
     if (dp.kat_risiko === 'tinggi' || dp.kat_risiko === 'sangat_tinggi') {
       list.push('risiko_kardiovaskular');
     }

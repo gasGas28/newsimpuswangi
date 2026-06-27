@@ -4,8 +4,10 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use Illuminate\Support\Facades\Auth;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class DiabetesObservationService
 {
@@ -35,6 +37,40 @@ class DiabetesObservationService
             $this->cachedToken = $this->encounterService->getAccessToken();
         }
         return $this->cachedToken;
+    }
+
+    /**
+     * ✅ Helper untuk menyimpan log kirim/terima ke SatuSehatLog
+     */
+    private function logSatuSehat(
+        string $idPelayanan,
+        ?string $puskId,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        array|string|null $kirim,
+        array|string|null $terima,
+        ?string $userId,
+    ): void {
+        try {
+            SatuSehatLog::updateOrCreate([
+                'idPelayanan' => $idPelayanan,
+                'tanggal'     => now(),
+                'puskId'      => $puskId,
+                'resource'    => $resource,
+                'idResponse'  => $idResponse,
+                'method'      => $method,
+                'kirim'       => is_array($kirim) ? json_encode($kirim) : $kirim,
+                'terima'      => is_array($terima) ? json_encode($terima) : $terima,
+                'userId'      => $userId,
+            ]);
+        } catch (\Throwable $e) {
+            // Jangan sampai gagal logging menggagalkan proses utama
+            Log::error('Gagal menyimpan SatuSehatLog (Diabetes)', [
+                'message'  => $e->getMessage(),
+                'resource' => $resource,
+            ]);
+        }
     }
 
     private function findExistingObservation(string $encounterId, string $loincCode): ?string
@@ -67,24 +103,27 @@ class DiabetesObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function sendBundle(array $entries): array
+
+    private function sendBundle(array $entries)
     {
+        $payload = [
+            'resourceType' => 'Bundle',
+            'type'         => 'transaction',
+            'entry'        => $entries,
+        ];
+
         $response = Http::withToken($this->getToken())
             ->acceptJson()
-            ->post(config('services.satusehat.fhir_url'), [
-                'resourceType' => 'Bundle',
-                'type'         => 'transaction',
-                'entry'        => $entries,
-            ]);
+            ->post(config('services.satusehat.fhir_url'), $payload);
 
         if (!$response->successful()) {
             throw new \Exception('Gagal mengirim Bundle Diabetes: ' . $response->body());
         }
 
-        return $response->json();
+        return $response;
     }
 
-    private function createCondition(array $payload): string
+    private function createCondition(array $payload)
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
@@ -94,7 +133,7 @@ class DiabetesObservationService
             throw new \Exception('Gagal membuat Condition Diabetes: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $response;
     }
 
     private function resolveCategory(string $kategori): array
@@ -120,6 +159,7 @@ class DiabetesObservationService
         string $patientId,
         string $encounterId,
         string $effectiveAt,
+        string $practitionerId,
     ): array {
         return [
             'fullUrl'  => 'urn:uuid:' . \Str::uuid(),
@@ -144,7 +184,7 @@ class DiabetesObservationService
                 'encounter'         => ['reference' => "Encounter/{$encounterId}"],
                 'effectiveDateTime' => $effectiveAt,
                 'performer'         => [[
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ]],
                 'valueQuantity'     => [
                     'value'  => $value,
@@ -160,7 +200,7 @@ class DiabetesObservationService
         ];
     }
 
-    private function buildConditionPayload(array $icd, string $patientId, string $encounterId): array
+    private function buildConditionPayload(array $icd, string $patientId, string $encounterId, string $practitionerId): array
     {
         return [
             'resourceType'       => 'Condition',
@@ -196,21 +236,25 @@ class DiabetesObservationService
             'encounter'          => ['reference' => "Encounter/{$encounterId}"],
             'onsetDateTime'      => now()->toIso8601String(),
             'recorder'           => [
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ],
         ];
     }
 
     public function sendDiabetes(string $idSkrining): array
     {
-        $skrining  = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining  = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $diabetes  = SimpusDiabetes::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
         $effectiveAt = now()->toIso8601String();
+        $practitionerId = $skrining->id_petugas;
 
-        // ─── Observation Bundle ──────────────────────────────────────
+        $puskId      = Auth::id();
+        // dd($practitionerId);
+
+        // Observation Bundle
         $fields = [
             'gula_darah_puasa'    => $diabetes->gula_darah_puasa,
             'gula_darah_2_jam_pp' => $diabetes->gula_darah_2_jam_pp,
@@ -219,13 +263,14 @@ class DiabetesObservationService
         ];
 
         $entries = [];
+        $entryKeys = []; // ✅ simpan urutan key sejajar dengan $entries, untuk keperluan logging per-resource
         foreach ($fields as $key => $value) {
-            // ✅ Skip jika nilai null/kosong
+            // Skip jika nilai null/kosong
             if (is_null($value)) continue;
 
             $loinc = $this->loincMap[$key];
 
-            // ✅ Cek duplikat per LOINC
+            // Cek duplikat per LOINC
             $existingId = $this->findExistingObservation($encounterId, $loinc['code']);
             if ($existingId) {
                 Log::info("Observation {$key} sudah ada, skip", ['observation_id' => $existingId]);
@@ -233,20 +278,61 @@ class DiabetesObservationService
             }
 
             $entries[] = $this->buildObservationEntry(
-                loincCode:   $loinc['code'],
+                loincCode: $loinc['code'],
                 loincDisplay: $loinc['display'],
-                value:       (float) $value,
-                unit:        $loinc['unit'],
-                ucumCode:    $loinc['ucum'],
-                patientId:   $patientId,
+                value: (float) $value,
+                unit: $loinc['unit'],
+                ucumCode: $loinc['ucum'],
+                patientId: $patientId,
                 encounterId: $encounterId,
                 effectiveAt: $effectiveAt,
+                practitionerId: $practitionerId,
             );
+            $entryKeys[] = $key;
         }
 
         if (!empty($entries)) {
-            $this->sendBundle($entries);
+            $bundlePayload = [
+                'resourceType' => 'Bundle',
+                'type'         => 'transaction',
+                'entry'        => $entries,
+            ];
+
+            $response = $this->sendBundle($entries);
+            $responseJson = $response->json();
+
             Log::info('Bundle Observation Diabetes berhasil', ['total' => count($entries)]);
+
+            // ✅ Ambil observationId dari setiap entry hasil response bundle
+            $bundleResourceIds = [];
+            foreach (($responseJson['entry'] ?? []) as $i => $respEntry) {
+                // SatuSehat biasanya mengembalikan response.location, contoh: "Observation/abcd-1234/_history/1"
+                $location = $respEntry['response']['location'] ?? null;
+                $resourceId = $respEntry['resource']['id'] ?? null;
+
+                if (!$resourceId && $location) {
+                    // fallback: ambil id dari location, format "Observation/{id}/_history/{versionId}"
+                    $parts = explode('/', $location);
+                    $resourceId = $parts[1] ?? null;
+                }
+
+                if ($resourceId) {
+                    $bundleResourceIds[] = $resourceId;
+                }
+            }
+
+            $observationId = !empty($bundleResourceIds) ? implode(',', $bundleResourceIds) : null;
+
+            $this->logSatuSehat(
+                idPelayanan: $idSkrining,
+                puskId: $puskId,
+                resource: 'Observation',
+                idResponse: $observationId,
+                method: 'POST',
+                kirim: $bundlePayload,
+                terima: $responseJson,
+                userId: $puskId,
+            );
         }
 
         // ─── Condition ───────────────────────────────────────────────
@@ -268,10 +354,23 @@ class DiabetesObservationService
                 Log::info('Condition Diabetes sudah ada, skip', ['condition_id' => $existingConditionId]);
                 $conditionId = $existingConditionId;
             } else {
-                $conditionId = $this->createCondition(
-                    $this->buildConditionPayload($icd, $patientId, $encounterId)
-                );
+                $conditionPayload = $this->buildConditionPayload($icd, $patientId, $encounterId, $practitionerId);
+                $conditionResponse = $this->createCondition($conditionPayload);
+                $conditionResponseJson = $conditionResponse->json();
+                $conditionId = $conditionResponseJson['id'] ?? null;
+
                 Log::info('Condition Diabetes berhasil', ['condition_id' => $conditionId]);
+
+                $this->logSatuSehat(
+                    idPelayanan: $idSkrining,
+                    puskId: $puskId,
+                    resource: 'Condition',
+                    idResponse: $conditionId,
+                    method: 'POST',
+                    kirim: $conditionPayload,
+                    terima: $conditionResponseJson,
+                    userId: $puskId,
+                );
             }
         } else {
             Log::info('Condition Diabetes skip, semua kategori normal');
@@ -285,7 +384,7 @@ class DiabetesObservationService
         return ['condition_id' => $conditionId];
     }
 
-    // ✅ Prioritas: diabetes > prediabetes > normal
+    // Prioritas: diabetes > prediabetes > normal
     private function resolveKategoriUtama(array $kategoriList): string
     {
         $priority = ['diabetes' => 2, 'prediabetes' => 1, 'normal' => 0];

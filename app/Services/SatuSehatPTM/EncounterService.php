@@ -2,9 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class EncounterService
 {
@@ -24,14 +27,30 @@ class EncounterService
                 config('services.satusehat.auth_url'),
             );
 
+        if (! $response->successful()) {
+            Log::error('SatuSehat: gagal mendapatkan access token', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'auth_url' => config('services.satusehat.auth_url'),
+            ]);
+        }
+
+        $token = $response->json('access_token');
+
+        if (empty($token)) {
+            Log::warning('SatuSehat: access_token kosong/null dari response auth', [
+                'response' => $response->json(),
+            ]);
+        }
+
         // dd(
         //     $response->status(),
         //     $response->body()
         // );
-        return $response->json('access_token');
+        return $token;
     }
 
-    public function createEncounter(array $payload): string
+    public function createEncounter(array $payload, ?string $idPelayanan, ?string $idEncounter = null): string
     {
         $token = $this->getAccessToken();
 
@@ -41,30 +60,114 @@ class EncounterService
                 $payload
             );
 
+        Log::info('SatuSehat: response createEncounter', [
+            'idSkrining' => $idPelayanan,
+            'status' => $response->status(),
+            'successful' => $response->successful(),
+        ]);
+
+        $terima = $response->json() ?? $response->body();
+
+        // idEncounter dari FHIR (root 'id') menang jika ada; kalau tidak, pakai yang dikirim caller.
+        $encounterId = (is_array($terima) ? ($terima['id'] ?? null) : null) ?? $idEncounter;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Encounter',
+            idResponse: $encounterId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (! $response->successful()) {
+            Log::error('SatuSehat: gagal createEncounter', [
+                'idSkrining' => $idPelayanan,
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'payload' => $payload,
+            ]);
+
             throw new \Exception($response->body());
         }
 
-        return $response->json('id');
+        return $encounterId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal' => now(),
+            'puskId' => '3',
+            'resource' => $resource,
+            'idResponse' => $idResponse,
+            'method' => $method,
+            'kirim' => json_encode($kirim),
+            'terima' => json_encode($terima),
+            'userId' => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id' => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource' => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            // Penyebab paling umum data tidak tersimpan:
+            // - kolom 'kirim'/'terima' terlalu pendek (VARCHAR) untuk menampung JSON besar
+            // - koneksi DB terputus / timeout
+            // - constraint/foreign key gagal
+            // - Auth::id() null padahal kolom userId NOT NULL
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message' => $e->getMessage(),
+                'idPelayanan' => $idPelayanan,
+                'resource' => $resource,
+                'userId' => Auth::id(),
+                'panjang_kirim' => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     public function kirimEncounter(string $idSkrining): string
     {
-        $skrining = KunjunganPTM::select(
-            'simpus_kunjungan_ptm.*',
-            'simpus_pasien.NAMA_LGKP',
-            'simpus_pasien.NIK',
-            'simpus_pasien.IHS_NUMBER',
-        )
-            ->join(
-                'simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien'
+        Log::info('SatuSehat: mulai kirimEncounter', ['idSkrining' => $idSkrining]);
+
+        try {
+            $skrining = KunjunganPTM::select(
+                'simpus_kunjungan_ptm.*',
+                'simpus_pasien.NAMA_LGKP',
+                'simpus_pasien.NIK',
+                'simpus_pasien.IHS_NUMBER',
             )
-            ->where('simpus_kunjungan_ptm.idSkrining', $idSkrining)
-            ->firstOrFail();
+                ->join(
+                    'simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien'
+                )
+                ->where('simpus_kunjungan_ptm.idSkrining', $idSkrining)
+                ->firstOrFail();
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: data skrining/pasien tidak ditemukan', [
+                'idSkrining' => $idSkrining,
+                'message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
 
         $patientId = $skrining->IHS_NUMBER;
         $patientName = $skrining->NAMA_LGKP;
         $practitionerId = $skrining->id_petugas;
+        $idPelayanan = $skrining->idPelayanan;
 
         // dd($patientName, $patientId);
 
@@ -129,18 +232,30 @@ class EncounterService
             ],
         ];
 
-        $encounterId = $this->createEncounter($payload);
+        $encounterId = $this->createEncounter($payload, $idPelayanan);
 
-        SimpusSkriningPTM::updateOrCreate(
-            [
+        try {
+            KunjunganPTM::updateOrCreate(
+                [
+                    'idSkrining' => $idSkrining,
+                ],
+                [
+                    'encounter_id' => $encounterId,
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: gagal updateOrCreate SimpusSkriningPTM', [
                 'idSkrining' => $idSkrining,
-            ],
-            [
-                'encounter_id' => $encounterId,
-                'status' => 'in-progress',
-                'patient_id' => $patientId,
-            ]
-        );
+                'encounterId' => $encounterId,
+                'message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+
+        Log::info('SatuSehat: kirimEncounter sukses', [
+            'idSkrining' => $idSkrining,
+            'encounterId' => $encounterId,
+        ]);
 
         return $encounterId;
     }

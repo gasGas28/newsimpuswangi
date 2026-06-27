@@ -95,7 +95,7 @@
 .panel-header {
   padding: 18px 20px;
   border-bottom: 1px solid #e5edf0;
-  background: #f8fafc;
+  background: #16a36f;
 }
 
 .panel-header h4 {
@@ -103,14 +103,14 @@
   align-items: center;
   gap: 10px;
   margin: 0;
-  color: #0f3d2e;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 750;
 }
 
 .panel-header p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #ffffff;
   font-size: 0.86rem;
 }
 

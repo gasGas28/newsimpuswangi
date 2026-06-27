@@ -601,8 +601,6 @@
 
   const skriningId = props.DataPasien?.idSkrining || null;
 
-  // ── Form per seksi ────────────────────────────────────────────────────────────
-
   const formServiks = useForm({
     skriningId,
     inspekulo: '',

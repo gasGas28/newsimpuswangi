@@ -561,8 +561,20 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-assessment-ptm');
         Route::post('/simpus/skrining-ptm/simpan-metabolik', [SkriningPTMController::class, 'addPemeriksaanPTM'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
+        Route::post('/simpus/skrining-ptm/simpan-obesitas', [SkriningPTMController::class, 'addPemeriksaanObesitas'])
+            ->name('pelayanan.simpan-obesitas');
+        Route::post('/simpus/skrining-ptm/simpan-hipertensi', [SkriningPTMController::class, 'addPemeriksaanHipertensi'])
+            ->name('pelayanan.simpan-hipertensi');
+        Route::post('/simpus/skrining-ptm/simpan-diabetes', [SkriningPTMController::class, 'addPemeriksaanDiabetes'])
+            ->name('pelayanan.simpan-diabetes');
+        Route::post('/simpus/skrining-ptm/simpan-profilLipid', [SkriningPTMController::class, 'addPemeriksaanLipid'])
+            ->name('pelayanan.simpan-profilLipid');
+        Route::post('/simpus/skrining-ptm/simpan-asamUrat', [SkriningPTMController::class, 'addPemeriksaanAsamUrat'])
+            ->name('pelayanan.simpan-asamUrat');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');
+        Route::post('/simpus/skrining-ptm/simpan-status', [SkriningPTMController::class, 'addStatusPasien'])
+            ->name('pelayanan.status-pasien-ptm');
 
         Route::post('/simpus/skrining-ptm/simpan-serviks', [SkriningPTMController::class, 'addPemeriksaanKanker'])
             ->name('pelayanan.simpan-serviks');
