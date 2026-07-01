@@ -88,21 +88,33 @@
       </div>
     </div>
     <div class="form-actions">
-      <div class="save-status"></div>
-      <button type="button" class="save-button" @click="createObservation">
-        <i class="bi bi-save"></i>
-        <span>Kirim Satu Sehat</span>
+      <div
+        class="save-status"
+        :class="{ success: lastStatus === 'success', danger: lastStatus === 'error' }"
+      >
+        {{ statusMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSending" @click="createObservation">
+        <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
+        <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
     </div>
   </section>
+
+  <!-- ── Panel: Log Pengiriman ── -->
+  <SubmitLogPanel
+    :logs="logs"
+    description="Riwayat percobaan pengiriman data ke platform SATUSEHAT."
+    @clear="clearLogs"
+  />
 </template>
 
 <script setup>
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
-
+  import SubmitLogPanel from '@/Components/Layouts/RuangLayanan/SkriningPTM/SubmitLogPanel.vue';
+  import { useSubmitLog } from '@/composables/useSubmitLog.js';
   const props = defineProps({
     DataPasien: Object,
     TenagaMedis: Array,
@@ -186,30 +198,46 @@
     );
   };
 
+  const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
+    `faktor-risiko_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+  );
+
+  // ─── Kirim ───────────────────────────────────────────────────
   const createObservation = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.observation', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Observation berhasil dikirim');
+    submit({
+      routerPost: router.post.bind(router),
+      getFlash: () => page.props.flash,
+      successMessage: 'Data Faktor Risiko (Observation + Condition) berhasil dikirim.',
+
+      steps: [
+        {
+          logTitle: 'Pengiriman Faktor Risiko (Observation)',
+          routeFn: () => route('satusehat.observation', props.DataPasien?.idSkrining),
+          idField: 'condition_id',
         },
-        onError: (errors) => {
-          console.error(errors);
+        {
+          logTitle: 'Pengiriman Questionnaire Response Faktor Risiko (Questionnaire Response)',
+          routeFn: () => route('satusehat.observation', props.DataPasien?.idSkrining),
+          idField: 'condition_id',
         },
-      }
-    );
+        {
+          logTitle: 'Pengiriman Diagnosis Faktor Risiko (Condition)',
+          routeFn: () => route('satusehat.observation', props.DataPasien?.idSkrining),
+          idField: 'condition_id',
+        },
+      ],
+    });
   };
 
+  // Hanya update status bar jika submit() belum menanganinya
   watch(flash, (val) => {
-    if (val.success) {
-      console.log('Berhasil:', val.message);
-      console.log('Data PTM:', val.data?.riwayat_ptm);
-    } else {
-      console.error('Gagal:', val.message);
+    if (!val) return;
+    if (val.success && lastStatus.value !== 'success') {
+      lastStatus.value = 'success';
+      statusMessage.value = val.message ?? 'Berhasil dikirim.';
+    } else if (val.error && lastStatus.value !== 'error') {
+      lastStatus.value = 'error';
+      statusMessage.value = val.message ?? 'Pengiriman gagal.';
     }
   });
 </script>

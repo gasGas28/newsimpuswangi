@@ -35,6 +35,7 @@
             <label class="form-label" for="dokter">Dokter</label>
             <div class="field-with-icon">
               <select v-model="form.id_petugas" class="form-select">
+                <option value="">Pilih Dokter</option>
                 <option
                   v-for="dokter in props.TenagaMedis"
                   :key="dokter.ihs_nakes"

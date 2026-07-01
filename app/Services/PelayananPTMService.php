@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\RuangLayanan\KIA\Alergi;
 use Illuminate\Support\Facades\DB;
 use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\MasterDokter;
+use App\Models\RuangLayanan\SimpusDataDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosa;
+use App\Models\RuangLayanan\SimpusDiagnosaaa;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\AssessmentPTM;
@@ -128,7 +132,7 @@ class PelayananPTMService
         return $DataPasien;
     }
 
-    public function getMasterData()
+    public function getMasterData(string $idPelayanan)
     {
         $SimpusTindakan = SimpusTindakan::select('kdTindakan', 'nmTindakan', 'nmTindakanInd')
             ->where('deskripsi', 'icd9cm')
@@ -138,14 +142,24 @@ class PelayananPTMService
         $TenagaMedis = MasterDokter::select('nmDokter', 'ihs_nakes', 'kdDokter')
             ->where('profesi_id', [19])
             ->get();
+        $diagnosa = SimpusDiagnosaaa::whereNotNull('F3')->get();
+        $AlergiMakanan = Alergi::where('category', 1)->get();
+        $AlergiObat = Alergi::where('category', 2)->get();
+        $DataDiagnosa = SimpusDataDiagnosa::where('pelayananId', $idPelayanan)->get();
+
+        // dd($diagnosa);
 
         // dd($DataSkrining);
         return [
             'tindakan' => $SimpusTindakan,
             'TenagaMedis' => $TenagaMedis,
+            'Diagnosa' => $diagnosa,
+            'AlergiMakanan' => $AlergiMakanan,
+            'AlergiObat' => $AlergiObat,
+            'DataDiagnosa' => $DataDiagnosa,
         ];
     }
-    public function updateStatusPelayanan($idPelayanan, $status)
+    public function updateStatusPelayanan(string $idPelayanan, string $status)
     {
         DB::table('simpus_pelayanan')
             ->where('idpelayanan', $idPelayanan)
@@ -267,8 +281,9 @@ class PelayananPTMService
         return $thalasemia;
     }
 
-    public function saveObesitas($data){
-         SimpusObesitas::updateOrCreate(
+    public function saveObesitas($data)
+    {
+        SimpusObesitas::updateOrCreate(
             [
                 'skriningID' => $data['skriningId'],
             ],
@@ -488,7 +503,7 @@ class PelayananPTMService
 
     public function saveStatusPasien($data)
     {
-         if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
+        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
             return;
         }
         $status = SimpusStatusPTM::updateOrCreate(

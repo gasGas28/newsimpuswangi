@@ -44,71 +44,88 @@
       </div>
     </div>
     <div class="form-actions">
-      <div class="save-status"></div>
-      <button type="button" class="save-button" @click="kirimAsamUrat">
-        <i class="bi bi-save"></i>
-        <span>Kirim Satu Sehat</span>
+      <div
+        class="save-status"
+        :class="{ success: lastStatus === 'success', danger: lastStatus === 'error' }"
+      >
+        {{ statusMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSending" @click="sendSatuSehat">
+        <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
+        <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
     </div>
   </section>
+  <SubmitLogPanel
+    :logs="logs"
+    description="Riwayat percobaan pengiriman data ke platform SATUSEHAT."
+    @clear="clearLogs"
+  />
 </template>
 
 <script setup>
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import SubmitLogPanel from '@/Components/Layouts/RuangLayanan/SkriningPTM/SubmitLogPanel.vue';
+  import { useSubmitLog } from '@/composables/useSubmitLog.js';
 
   const props = defineProps({
     DataPasien: Object,
   });
 
   const patient = computed(() => props.DataPasien || {});
+  const page = usePage();
+  const flash = computed(() => page.props.flash);
 
-  const answer1 = computed(() => valueOrDash(patient.value.kuesioner1));  
-  const answer2 = computed(() => valueOrDash(patient.value.kuesioner2));  
-  const answer3 = computed(() => valueOrDash(patient.value.kuesioner3));  
-  const answer4 = computed(() => valueOrDash(patient.value.kuesioner4));  
-  const answer5 = computed(() => valueOrDash(patient.value.kuesioner5));  
-  const answer6 = computed(() => valueOrDash(patient.value.kuesioner6));  
-  const answer7 = computed(() => valueOrDash(patient.value.kuesioner7));  
-  const hasil = computed(() => valueOrDash(patient.value.hasil_kuesioner));  
+  const answer1 = computed(() => valueOrDash(patient.value.kuesioner1));
+  const answer2 = computed(() => valueOrDash(patient.value.kuesioner2));
+  const answer3 = computed(() => valueOrDash(patient.value.kuesioner3));
+  const answer4 = computed(() => valueOrDash(patient.value.kuesioner4));
+  const answer5 = computed(() => valueOrDash(patient.value.kuesioner5));
+  const answer6 = computed(() => valueOrDash(patient.value.kuesioner6));
+  const answer7 = computed(() => valueOrDash(patient.value.kuesioner7));
+  const hasil = computed(() => valueOrDash(patient.value.hasil_kuesioner));
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
   }
 
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
-
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  const kirimAsamUrat = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.send-paru', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Encounter berhasil dikirim');
+  const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
+    `kanker-paru_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+  );
+
+  const sendSatuSehat = () => {
+    submit({
+      routerPost: router.post.bind(router),
+      getFlash: () => page.props.flash,
+      successMessage: 'Data Observation Kanker Paru berhasil dikirim ke SATUSEHAT.',
+
+      steps: [
+        {
+          logTitle: 'Pengiriman Data Kanker Paru (Observation)',
+          routeFn: () => route('satusehat.send-paru', props.DataPasien?.idSkrining),
+          idField: 'observationId',
         },
-        onError: (errors) => {
-          console.error(errors);
-        },
-      }
-    );
+      ],
+    });
   };
+
+  // Hanya update status bar jika submit() belum menanganinya
+  watch(flash, (val) => {
+    if (!val) return;
+    if (val.success && lastStatus.value !== 'success') {
+      lastStatus.value = 'success';
+      statusMessage.value = val.message ?? 'Berhasil dikirim.';
+    } else if (val.error && lastStatus.value !== 'error') {
+      lastStatus.value = 'error';
+      statusMessage.value = val.message ?? 'Pengiriman gagal.';
+    }
+  });
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>

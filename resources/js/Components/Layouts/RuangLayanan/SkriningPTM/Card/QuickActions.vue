@@ -41,13 +41,23 @@
         </span>
       </button> -->
 
-      <Link :href="cpptHref" class="action-item">
+      <Link :href="riwayatPasien" class="action-item">
         <span class="action-icon">
           <i class="bi bi-file-text"></i>
         </span>
         <span class="action-copy">
           <strong>Riwayat Pasien</strong>
           <small>Catatan Riwayat pasien</small>
+        </span>
+      </Link>
+
+      <Link :href="cpptHref" class="action-item">
+        <span class="action-icon">
+          <i class="bi bi-file-text"></i>
+        </span>
+        <span class="action-copy">
+          <strong>CPPT</strong>
+          <small>Catatan Pengembangan Pasien Terintegrasi</small>
         </span>
       </Link>
 
@@ -95,6 +105,12 @@
 
   defineEmits(['mulai-pemeriksaan']);
 
+  const riwayatPasien = computed(() => {
+    return route('ruang-layanan.riwayat-pasien', {
+      idPoli: props.DataPasien?.kdPoli,
+      idPasien: props.DataPasien?.ID,
+    });
+  });
   const cpptHref = computed(() => {
     return route('ruang-layanan.cppt', {
       idPoli: props.DataPasien?.kdPoli,

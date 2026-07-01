@@ -32,7 +32,7 @@ class KankerServiksObservationService
     // ────────────────────────────────────────────────────────────────
     private array $inspekValueMap = [
         'Suspected cervical cancer'  => ['code' => '315266007', 'display' => 'Suspected cervical cancer'],
-        'No evidence of cancer found'=> ['code' => '395100000', 'display' => 'No evidence of cancer found'],
+        'No evidence of cancer found' => ['code' => '395100000', 'display' => 'No evidence of cancer found'],
     ];
 
     // ────────────────────────────────────────────────────────────────
@@ -270,9 +270,12 @@ class KankerServiksObservationService
         } else {
             $procInspekId = $this->createProcedure(
                 $this->baseProcedurePayload(
-                    $patientId, $encounterId,
-                    '103693007', 'Diagnostic procedure',
-                    '451024007', 'Inspection of vagina using vaginal speculum',
+                    $patientId,
+                    $encounterId,
+                    '103693007',
+                    'Diagnostic procedure',
+                    '451024007',
+                    'Inspection of vagina using vaginal speculum',
                     $inspekStatus
                 )
             );
@@ -290,9 +293,12 @@ class KankerServiksObservationService
             } else {
                 $obsInspekId = $this->createObservation(
                     $this->baseObservationPayload(
-                        $patientId, $encounterId,
-                        'exam', 'Exam',
-                        'http://snomed.info/sct', '451024007',
+                        $patientId,
+                        $encounterId,
+                        'exam',
+                        'Exam',
+                        'http://snomed.info/sct',
+                        '451024007',
                         'Inspection of vagina using vaginal speculum',
                         $this->inspekValueMap[$iva->inspekulo]
                     )
@@ -313,9 +319,12 @@ class KankerServiksObservationService
         } else {
             $procIvaId = $this->createProcedure(
                 $this->baseProcedurePayload(
-                    $patientId, $encounterId,
-                    '103693007', 'Diagnostic procedure',
-                    '251422004', 'Acetic acid test reaction',
+                    $patientId,
+                    $encounterId,
+                    '103693007',
+                    'Diagnostic procedure',
+                    '251422004',
+                    'Acetic acid test reaction',
                     $ivaStatus
                 )
             );
@@ -333,9 +342,12 @@ class KankerServiksObservationService
             } else {
                 $obsIvaId = $this->createObservation(
                     $this->baseObservationPayload(
-                        $patientId, $encounterId,
-                        'exam', 'Exam',
-                        'http://terminology.kemkes.go.id/CodeSystem/examination', 'X099241',
+                        $patientId,
+                        $encounterId,
+                        'exam',
+                        'Exam',
+                        'http://terminology.kemkes.go.id/CodeSystem/examination',
+                        'X099241',
                         'Tes IVA',
                         $this->ivaValueMap[$iva->iva]
                     )
@@ -401,9 +413,12 @@ class KankerServiksObservationService
                     } else {
                         $procTolakId = $this->createProcedure(
                             $this->baseProcedurePayload(
-                                $patientId, $encounterId,
-                                '277132007', 'Therapeutic procedure',
-                                $tindakan['code'], $tindakan['display'],
+                                $patientId,
+                                $encounterId,
+                                '277132007',
+                                'Therapeutic procedure',
+                                $tindakan['code'],
+                                $tindakan['display'],
                                 'not-done',
                                 [
                                     'code'    => '413311005',
@@ -480,9 +495,12 @@ class KankerServiksObservationService
                 $hpvVal = $hpvValueMap[$iva->hpv_dna] ?? $hpvValueMap['negatif'];
                 $hpvId  = $this->createObservation(
                     $this->baseObservationPayload(
-                        $patientId, $encounterId,
-                        'laboratory', 'Laboratory',
-                        'http://loinc.org', '44550-2',
+                        $patientId,
+                        $encounterId,
+                        'laboratory',
+                        'Laboratory',
+                        'http://loinc.org',
+                        '44550-2',
                         'Human papillomavirus DNA [Presence] in Cervix by Probe',
                         $hpvVal
                     )
@@ -506,9 +524,12 @@ class KankerServiksObservationService
 
                 $sadanisId = $this->createObservation(
                     $this->baseObservationPayload(
-                        $patientId, $encounterId,
-                        'exam', 'Exam',
-                        'http://snomed.info/sct', '13607009',
+                        $patientId,
+                        $encounterId,
+                        'exam',
+                        'Exam',
+                        'http://snomed.info/sct',
+                        '13607009',
                         'Manual examination of breast',
                         $sadanisVal
                     )
@@ -531,9 +552,12 @@ class KankerServiksObservationService
 
                 $usgId = $this->createObservation(
                     $this->baseObservationPayload(
-                        $patientId, $encounterId,
-                        'imaging', 'Imaging',
-                        'http://loinc.org', '24601-7',
+                        $patientId,
+                        $encounterId,
+                        'imaging',
+                        'Imaging',
+                        'http://loinc.org',
+                        '24601-7',
                         'US Breast',
                         $usgVal
                     )

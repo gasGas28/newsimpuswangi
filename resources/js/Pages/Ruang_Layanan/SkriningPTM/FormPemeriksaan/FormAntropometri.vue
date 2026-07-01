@@ -60,7 +60,7 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="imt_interp">Interpretasi IMT</label>
+            <label class="form-label" for="imt_interp">Kategori IMT</label>
             <input
               id="imt_interp"
               class="form-control"
@@ -72,7 +72,7 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="lp">Lingkar Pinggang</label>
+            <label class="form-label" for="lp">Lingkar Perut</label>
             <div class="input-with-addon">
               <input
                 id="lp"
@@ -89,7 +89,7 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="lp_interp">Interpretasi Lingkar Pinggang</label>
+            <label class="form-label" for="lp_interp">Kategori Lingkar Perut</label>
             <input
               id="lp_interp"
               class="form-control"
@@ -128,7 +128,7 @@
       <div class="panel-body">
         <div class="metric-grid">
           <div class="form-field">
-            <label class="form-label" for="td_s">Tekanan Darah Sistolik</label>
+            <label class="form-label" for="td_s">Sistolik</label>
             <div class="input-with-addon">
               <input
                 id="td_s"
@@ -144,7 +144,7 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="td_d">Tekanan Darah Diastolik</label>
+            <label class="form-label" for="td_d">Diastolik</label>
             <div class="input-with-addon">
               <input
                 id="td_d"

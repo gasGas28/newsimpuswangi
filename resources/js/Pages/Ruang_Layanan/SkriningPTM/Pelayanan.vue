@@ -1,17 +1,11 @@
 <template>
   <div class="p-2 rounded-4 mt-2">
-    <!--  Data Pasien -->
     <DataPasienCard :DataPasien="props.DataPasien" :backRoute="backRoute" />
-
-    <!--  Quick Actions -->
-
     <QuickActions
       :DataPasien="props.DataPasien"
       :sudahMulai="sudahMulai"
       @mulai-pemeriksaan="mulaiPemeriksaan"
     />
-
-    <!--  Title Section -->
     <TitleSection title="Pemeriksaan Skrining Penyakit Tidak Menular" />
   </div>
 
@@ -27,7 +21,8 @@
       <p class="text-muted mb-0">Pemeriksaan dimulai</p>
     </div>
   </div>
-  <!-- Form Pemeriksaan -->
+
+  
   <div v-if="showFormPemeriksaan" class="bg-white rounded-4 shadow-sm p-4 mt-1">
     <FormPemeriksaan
       :DataPasien="props.DataPasien"
@@ -35,6 +30,10 @@
       :DataTindakan="props.DataTindakan"
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"
+      :Diagnosa="props.Diagnosa"
+      :AlergiMakanan="props.AlergiMakanan"
+      :AlergiObat="props.AlergiObat"
+      :DataDiagnosa="props.DataDiagnosa"
     />
   </div>
 </template>
@@ -57,6 +56,10 @@
     DataTindakan: Array,
     TenagaMedis: Array,
     DataSkrining: Object,
+    Diagnosa: Array,
+    DataDiagnosa: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
   });
 
   const hipertensi = computed(() => props.DataSkrining?.kategori_tekanan_darah);

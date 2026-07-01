@@ -20,20 +20,33 @@
       </div>
     </div>
     <div class="form-actions">
-      <div class="save-status"></div>
-      <button type="button" class="save-button" @click="kirimAsamUrat">
-        <i class="bi bi-save"></i>
-        <span>Kirim Satu Sehat</span>
-      </button>
-    </div>
-  </section>
+        <div
+          class="save-status"
+          :class="{ success: lastStatus === 'success', danger: lastStatus === 'error' }"
+        >
+          {{ statusMessage }}
+        </div>
+        <button type="button" class="save-button" :disabled="isSending" @click="kirimAsamUrat">
+          <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
+          <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Panel: Log Pengiriman ── -->
+    <SubmitLogPanel
+      :logs="logs"
+      description="Riwayat percobaan pengiriman data ke platform SATUSEHAT."
+      @clear="clearLogs"
+    />
 </template>
 
 <script setup>
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import SubmitLogPanel from '@/Components/Layouts/RuangLayanan/SkriningPTM/SubmitLogPanel.vue';
+  import { useSubmitLog } from '@/composables/useSubmitLog.js';
 
   const props = defineProps({
     DataPasien: Object,
@@ -47,7 +60,6 @@
 
   const asam_urat = computed(() => valueOrDash(patient.value.asam_urat));
   const kategori = computed(() => valueOrDash(patient.value.kategori_asam_urat));
-  
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
@@ -67,23 +79,44 @@
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
+  const {
+    logs, isSending, lastStatus, statusMessage,
+    clearLogs, submit,
+  } = useSubmitLog(`asam-urat_logs_${props.DataPasien?.idSkrining ?? 'default'}`);
+
+  // ─── Kirim ───────────────────────────────────────────────────
   const kirimAsamUrat = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.asam-urat', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Encounter berhasil dikirim');
+    submit({
+      routerPost:     router.post.bind(router),
+      getFlash:       () => page.props.flash,
+      successMessage: 'Data Asam Urat (Observation + Condition) berhasil dikirim.',
+
+      steps: [
+        {
+          logTitle: 'Pengiriman Data Asam Urat (Observation)',
+          routeFn:  () => route('satusehat.asam-urat', props.DataPasien?.idSkrining),
+          idField:  'observation_id',
         },
-        onError: (errors) => {
-          console.error(errors);
+        {
+          logTitle: 'Pengiriman Diagnosis Asam Urat (Condition)',
+          routeFn:  () => route('satusehat.asam-urat', props.DataPasien?.idSkrining),
+          idField:  'condition_id',
         },
-      }
-    );
+      ],
+    });
   };
+
+  // Hanya update status bar jika submit() belum menanganinya
+  watch(flash, (val) => {
+    if (!val) return;
+    if (val.success && lastStatus.value !== 'success') {
+      lastStatus.value = 'success';
+      statusMessage.value = val.message ?? 'Berhasil dikirim.';
+    } else if (val.error && lastStatus.value !== 'error') {
+      lastStatus.value = 'error';
+      statusMessage.value = val.message ?? 'Pengiriman gagal.';
+    }
+  });
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>

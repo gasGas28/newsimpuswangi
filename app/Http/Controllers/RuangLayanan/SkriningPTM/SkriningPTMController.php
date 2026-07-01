@@ -50,10 +50,10 @@ class SkriningPTMController extends Controller
         return Inertia::render('Ruang_Layanan/SkriningPTM/Index', $dataPasien);
     }
 
-    public function pelayanan($id, $idPoli, $idPelayanan)
+    public function pelayanan(string $id, string $idPoli, string $idPelayanan)
     {
         $DataPasien = $this->pelayananService->getDataPasien($id, $idPoli);
-        $masterData = $this->pelayananService->getMasterData();
+        $masterData = $this->pelayananService->getMasterData($idPelayanan);
         $DataTindakan = $this->tindakanService->getTindakanPelayanan($idPelayanan);
 
         // dd($DataTindakan);

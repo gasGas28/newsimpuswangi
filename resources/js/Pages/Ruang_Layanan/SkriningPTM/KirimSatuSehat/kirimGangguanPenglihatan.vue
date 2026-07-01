@@ -67,79 +67,98 @@
         </div>
       </div>
     </div>
-    <div class="form-actions">
-      <div class="save-status"></div>
-      <button type="button" class="save-button" @click="sendSatusehat">
-        <i class="bi bi-save"></i>
-        <span>Kirim Satu Sehat</span>
+   <div class="form-actions">
+      <div
+        class="save-status"
+        :class="{ success: lastStatus === 'success', danger: lastStatus === 'error' }"
+      >
+        {{ statusMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSending" @click="sendSatuSehat">
+        <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
+        <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
     </div>
   </section>
+  <SubmitLogPanel
+    :logs="logs"
+    description="Riwayat percobaan pengiriman data ke platform SATUSEHAT."
+    @clear="clearLogs"
+  />
 </template>
 
 <script setup>
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import SubmitLogPanel from '@/Components/Layouts/RuangLayanan/SkriningPTM/SubmitLogPanel.vue';
+  import { useSubmitLog } from '@/composables/useSubmitLog.js';
 
   const props = defineProps({
     DataPasien: Object,
   });
 
   const patient = computed(() => props.DataPasien || {});
+  const page = usePage();
+  const flash = computed(() => page.props.flash);
 
-  const visus_kr =  computed(() => valueOrDash(patient.value.visus_os));
-  const visus_kn =  computed(() => valueOrDash(patient.value.visus_od));
-  const pinhole_kr =  computed(() => valueOrDash(patient.value.pinhole_os));
-  const pinhole_kn =  computed(() => valueOrDash(patient.value.pinhole_od));
-  const anterior_kr =  computed(() => valueOrDash(patient.value.anterior_os));
-  const anterior_kn =  computed(() => valueOrDash(patient.value.anterior_od));
-  const shadow_kr =  computed(() => valueOrDash(patient.value.shadow_os));
-  const shadow_kn =  computed(() => valueOrDash(patient.value.shadow_od));
-  const refleks_kr =  computed(() => valueOrDash(patient.value.refleks_os));
-  const refleks_kn =  computed(() => valueOrDash(patient.value.refleks_od));
-  const glaukoma_kr =  computed(() => valueOrDash(patient.value.glaukoma_os));
-  const glaukoma_kn =  computed(() => valueOrDash(patient.value.glaukoma_od));
-  const retinopati_kr =  computed(() => valueOrDash(patient.value.retinopati_os));
-  const retinopati_kn =  computed(() => valueOrDash(patient.value.retinopati_od));
-  
+  const visus_kr = computed(() => valueOrDash(patient.value.visus_os));
+  const visus_kn = computed(() => valueOrDash(patient.value.visus_od));
+  const pinhole_kr = computed(() => valueOrDash(patient.value.pinhole_os));
+  const pinhole_kn = computed(() => valueOrDash(patient.value.pinhole_od));
+  const anterior_kr = computed(() => valueOrDash(patient.value.anterior_os));
+  const anterior_kn = computed(() => valueOrDash(patient.value.anterior_od));
+  const shadow_kr = computed(() => valueOrDash(patient.value.shadow_os));
+  const shadow_kn = computed(() => valueOrDash(patient.value.shadow_od));
+  const refleks_kr = computed(() => valueOrDash(patient.value.refleks_os));
+  const refleks_kn = computed(() => valueOrDash(patient.value.refleks_od));
+  const glaukoma_kr = computed(() => valueOrDash(patient.value.glaukoma_os));
+  const glaukoma_kn = computed(() => valueOrDash(patient.value.glaukoma_od));
+  const retinopati_kr = computed(() => valueOrDash(patient.value.retinopati_os));
+  const retinopati_kn = computed(() => valueOrDash(patient.value.retinopati_od));
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
   }
-
-  function toDateInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-  }
-
-  const tglSkrining =
-    toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  const sendSatusehat = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.gangguan-penglihatan', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Encounter berhasil dikirim');
+  // ─── Log ─────────────────────────────────────────────────────
+  const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
+    `gangguan-penglihatan_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+  );
+
+  // ─── Kirim ───────────────────────────────────────────────────
+  const sendSatuSehat = () => {
+    submit({
+      routerPost: router.post.bind(router),
+      getFlash: () => page.props.flash,
+      successMessage: 'Data Observation Gangguan Penglihatan berhasil dikirim ke SATUSEHAT.',
+
+      steps: [
+        {
+          logTitle: 'Pengiriman Data Gangguan Penglihatan (Observation)',
+          routeFn: () => route('satusehat.gangguan-penglihatan', props.DataPasien?.idSkrining),
+          idField: 'observationId',
         },
-        onError: (errors) => {
-          console.error(errors);
-        },
-      }
-    );
+      ],
+    });
   };
+
+  // Hanya update status bar jika submit() belum menanganinya
+  watch(flash, (val) => {
+    if (!val) return;
+    if (val.success && lastStatus.value !== 'success') {
+      lastStatus.value = 'success';
+      statusMessage.value = val.message ?? 'Berhasil dikirim.';
+    } else if (val.error && lastStatus.value !== 'error') {
+      lastStatus.value = 'error';
+      statusMessage.value = val.message ?? 'Pengiriman gagal.';
+    }
+  });
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>

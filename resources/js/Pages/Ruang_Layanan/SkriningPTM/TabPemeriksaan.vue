@@ -30,6 +30,10 @@
           :DataTindakan="props.DataTindakan"
           :TenagaMedis="props.TenagaMedis"
           :DataSkrining="props.DataSkrining"
+          :Diagnosa="props.Diagnosa"
+          :AlergiMakanan="props.AlergiMakanan"
+          :AlergiObat="props.AlergiObat"
+          :DataDiagnosa="props.DataDiagnosa"
         />
       </div>
     </div>
@@ -54,6 +58,10 @@
     DataTindakan: Array,
     TenagaMedis: Array,
     DataSkrining: Object,
+    Diagnosa: Array,
+    DataDiagnosa: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
   });
 
   // Tabs list

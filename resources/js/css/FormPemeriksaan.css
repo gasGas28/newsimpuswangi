@@ -1,6 +1,5 @@
 .subjektif-form,
 .risk-form,
-.metabolik-form,
 .genetik-form,
 .indera-form,
 .assessment-form,
@@ -8,6 +7,24 @@
 .resume-form {
   display: grid;
   gap: 18px;
+}
+
+.metabolik-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+/* Panel kelima (Profil Lipid) melebar penuh karena field-nya lebih banyak */
+.metabolik-form .metabolik-panel:last-child {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .metabolik-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .subjektif-toolbar,
@@ -556,6 +573,25 @@ textarea.form-control {
   animation: spin 0.8s linear infinite;
 }
 
+
+.kirim-hipertensi-wrapper {
+  display: grid;
+  gap: 18px;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.save-status.danger {
+  color: #dc2626;
+}
+                    
 .action-buttons {
   display: inline-flex;
   gap: 10px;

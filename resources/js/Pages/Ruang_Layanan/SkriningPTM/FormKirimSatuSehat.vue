@@ -57,4 +57,4 @@
   const pasien = computed(() => props.DataPasien || {});
 </script>
 
-<style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

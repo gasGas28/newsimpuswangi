@@ -44,20 +44,31 @@
       </div>
     </div>
     <div class="form-actions">
-      <div class="save-status"></div>
-      <button type="button" class="save-button" @click="kirimProfilLipid">
-        <i class="bi bi-save"></i>
-        <span>Kirim Satu Sehat</span>
+      <div
+        class="save-status"
+        :class="{ success: lastStatus === 'success', danger: lastStatus === 'error' }"
+      >
+        {{ statusMessage }}
+      </div>
+      <button type="button" class="save-button" :disabled="isSending" @click="kirimStroke">
+        <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
+        <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
     </div>
   </section>
+  <SubmitLogPanel
+    :logs="logs"
+    description="Riwayat percobaan pengiriman data ke platform SATUSEHAT."
+    @clear="clearLogs"
+  />
 </template>
 
 <script setup>
   import { ref, watchEffect, computed, watch } from 'vue';
   import { useForm, router, usePage } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
-  import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import SubmitLogPanel from '@/Components/Layouts/RuangLayanan/SkriningPTM/SubmitLogPanel.vue';
+  import { useSubmitLog } from '@/composables/useSubmitLog.js';
 
   const props = defineProps({
     DataPasien: Object,
@@ -75,38 +86,61 @@
   const hdl = computed(() => valueOrDash(patient.value.hdl));
   const ldl = computed(() => valueOrDash(patient.value.ldl));
   const trigliserida = computed(() => valueOrDash(patient.value.trigliserida));
-  const kategori_kolesterol = computed(() => valueOrDash(patient.value.interpretasi_kolesterol_total));
+  const kategori_kolesterol = computed(() =>
+    valueOrDash(patient.value.interpretasi_kolesterol_total)
+  );
   const kategori_hdl = computed(() => valueOrDash(patient.value.interpretasi_hdl));
   const kategori_ldl = computed(() => valueOrDash(patient.value.interpretasi_ldl));
-  const kategori_trigliserida = computed(() => valueOrDash(patient.value.interpretasi_trigliserida));
+  const kategori_trigliserida = computed(() =>
+    valueOrDash(patient.value.interpretasi_trigliserida)
+  );
 
   function valueOrDash(value) {
     return value === undefined || value === null || value === '' ? '-' : value;
   }
- 
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  const kirimProfilLipid = () => {
-    console.log('props.DataSkrining:', props.DataSkrining);
-    console.log('idSkrining yang dikirim:', props.DataPasien?.idSkrining);
-    router.post(
-      route('satusehat.profil-lipid', props.DataPasien?.idSkrining),
-      {},
-      {
-        preserveScroll: true,
-        onSuccess: () => {
-          console.log('Encounter berhasil dikirim');
+  const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
+    `stroke_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+  );
+
+  // ─── Kirim ───────────────────────────────────────────────────
+  const kirimStroke = () => {
+    submit({
+      routerPost: router.post.bind(router),
+      getFlash: () => page.props.flash,
+      successMessage: 'Data deteksi dini stroke (Observation + Condition) berhasil dikirim.',
+
+      steps: [
+        {
+          logTitle: 'Pengiriman Deteksi Dini stroke (Observation)',
+          routeFn: () => route('satusehat.profil-lipid', props.DataPasien?.idSkrining),
+          idField: 'observation_id',
         },
-        onError: (errors) => {
-          console.error(errors);
+        {
+          logTitle: 'Pengiriman Diagnosis Stroke (Condition)',
+          routeFn: () => route('satusehat.profil-lipid', props.DataPasien?.idSkrining),
+          idField: 'condition_id',
         },
-      }
-    );
+      ],
+    });
   };
+
+  // Hanya update status bar jika submit() belum menanganinya
+  watch(flash, (val) => {
+    if (!val) return;
+    if (val.success && lastStatus.value !== 'success') {
+      lastStatus.value = 'success';
+      statusMessage.value = val.message ?? 'Berhasil dikirim.';
+    } else if (val.error && lastStatus.value !== 'error') {
+      lastStatus.value = 'error';
+      statusMessage.value = val.message ?? 'Pengiriman gagal.';
+    }
+  });
 </script>
 
 <style scoped src="@/css/FormPemeriksaan.css"></style>
