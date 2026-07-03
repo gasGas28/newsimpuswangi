@@ -34,6 +34,7 @@
           :AlergiMakanan="props.AlergiMakanan"
           :AlergiObat="props.AlergiObat"
           :DataDiagnosa="props.DataDiagnosa"
+          :DataObat="props.DataObat"
         />
       </div>
     </div>
@@ -62,6 +63,7 @@
     DataDiagnosa: Array,
     AlergiMakanan: Array,
     AlergiObat: Array,
+    DataObat: Array,
   });
 
   // Tabs list

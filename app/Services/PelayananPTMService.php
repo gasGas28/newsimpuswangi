@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusStatusPTM;
+use App\Models\RuangLayanan\SimpusMasterObat;
 
 class PelayananPTMService
 {
@@ -146,6 +147,7 @@ class PelayananPTMService
         $AlergiMakanan = Alergi::where('category', 1)->get();
         $AlergiObat = Alergi::where('category', 2)->get();
         $DataDiagnosa = SimpusDataDiagnosa::where('pelayananId', $idPelayanan)->get();
+        $DataObat = SimpusMasterObat::where('AKTIF', 1)->get();
 
         // dd($diagnosa);
 
@@ -157,6 +159,7 @@ class PelayananPTMService
             'AlergiMakanan' => $AlergiMakanan,
             'AlergiObat' => $AlergiObat,
             'DataDiagnosa' => $DataDiagnosa,
+            'DataObat' => $DataObat,
         ];
     }
     public function updateStatusPelayanan(string $idPelayanan, string $status)

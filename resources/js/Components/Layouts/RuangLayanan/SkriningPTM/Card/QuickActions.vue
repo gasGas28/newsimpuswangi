@@ -41,6 +41,15 @@
         </span>
       </button> -->
 
+      <Link :href="registerPasien" class="action-item">
+        <span class="action-icon">
+          <i class="bi bi-file-text"></i>
+        </span>
+        <span class="action-copy">
+          <strong>Data Register Pasien</strong>
+          <small>Catatan Registrasi Pasien PTM</small>
+        </span>
+      </Link>
       <Link :href="riwayatPasien" class="action-item">
         <span class="action-icon">
           <i class="bi bi-file-text"></i>
@@ -106,11 +115,21 @@
   defineEmits(['mulai-pemeriksaan']);
 
   const riwayatPasien = computed(() => {
-    return route('ruang-layanan.riwayat-pasien', {
-      idPoli: props.DataPasien?.kdPoli,
-      idPasien: props.DataPasien?.ID,
+    return route('ruang-layanan.riwayat-ptm', {
+      idSkrining: props.DataPasien?.idSkrining,
     });
   });
+  const registerPasien = computed(() => {
+    return route('ruang-layanan.register-ptm', {
+      NIK: props.DataPasien?.NIK,
+    });
+  });
+  // const riwayatPasien = computed(() => {
+  //   return route('ruang-layanan.riwayat-ptm', {
+  //     idPoli: props.DataPasien?.kdPoli,
+  //     idPasien: props.DataPasien?.ID,
+  //   });
+  // });
   const cpptHref = computed(() => {
     return route('ruang-layanan.cppt', {
       idPoli: props.DataPasien?.kdPoli,
@@ -277,8 +296,6 @@
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
-
-  
 
   @media (max-width: 992px) {
     .action-grid {

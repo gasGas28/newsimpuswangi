@@ -43,6 +43,8 @@ use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 use App\Http\Requests\SimpanTindakanRequest;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SatuSehatController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\DashboardPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\RiwayatPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\RegisterPTMController;
 
 use App\Http\Requests\StoreKunjunganPTMRequest;
 
@@ -588,6 +590,15 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-kolorektal');
         Route::post('/simpus/skrining-ptm/simpan-ekg', [SkriningPTMController::class, 'addPemeriksaanEKG'])
             ->name('pelayanan.simpan-ekg');
+
+        Route::get('simpus/riwayat-ptm', [RiwayatPTMController::class, 'index'])->name('ruang-layanan.riwayat-ptm');
+        Route::get('simpus/register-ptm/', [RegisterPTMController::class, 'index'])->name('ruang-layanan.register-ptm');
+        Route::get('simpus/riwayat-ptm/download/register-ptm', [RegisterPTMController::class, 'downloadRegisterPTM'])
+            ->name('ruang-layanan.download-register');
+        Route::get('simpus/riwayat-ptm/download/pdf', [RiwayatPTMController::class, 'downloadPDF'])->name('ruang-layanan.riwayat-ptm-pdf');
+        Route::get('simpus/riwayat-ptm/download/lembar-ptm', [RiwayatPTMController::class, 'downloadLembarPTM'])
+            ->name('ruang-layanan.lembar-ptm');
+
         // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
         //     ->name('satusehat.submit-ptm');
 
@@ -617,6 +628,10 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('satusehat.send-kolorektal');
         Route::post('/satusehat/serviks/{idSkrining}', [SatuSehatController::class, 'sendKankerServiks'])
             ->name('satusehat.kanker-serviks');
+        Route::post('/satusehat/thalasemia/{idSkrining}', [SatuSehatController::class, 'sendThalasemia'])
+            ->name('satusehat.thalasemia');
+        Route::post('/satusehat/diagnosis/{pelayananId}', [SatuSehatController::class, 'sendDiagnosis'])
+            ->name('satusehat.diagnosis');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');

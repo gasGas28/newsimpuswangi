@@ -34,6 +34,7 @@
       :AlergiMakanan="props.AlergiMakanan"
       :AlergiObat="props.AlergiObat"
       :DataDiagnosa="props.DataDiagnosa"
+      :DataObat="props.DataObat"
     />
   </div>
 </template>
@@ -60,6 +61,7 @@
     DataDiagnosa: Array,
     AlergiMakanan: Array,
     AlergiObat: Array,
+    DataObat: Array,
   });
 
   const hipertensi = computed(() => props.DataSkrining?.kategori_tekanan_darah);

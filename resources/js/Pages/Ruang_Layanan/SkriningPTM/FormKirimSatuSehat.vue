@@ -24,6 +24,15 @@
           <i class="bi bi-exclamation-triangle"></i>
           <span>Objective</span>
         </button>
+        <button
+          type="button"
+          class="segment-button"
+          :class="{ active: activeForm === 'assessment' }"
+          @click="toggleForm('assessment')"
+        >
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Assessment</span>
+        </button>
       </div>
     </div>
 
@@ -32,6 +41,9 @@
     </div>
     <div v-if="activeForm === 'condition'" class="fade-in">
       <condition :DataPasien="props.DataPasien" :TenagaMedis="props.TenagaMedis" :DataSkrining="props.DataSkrining"/>
+    </div>
+    <div v-if="activeForm === 'assessment'" class="fade-in">
+      <assessment :DataPasien="props.DataPasien" :TenagaMedis="props.TenagaMedis" :DataSkrining="props.DataSkrining"/>
     </div>
   </div>
 </template>
@@ -42,7 +54,7 @@
   import { route } from 'ziggy-js';
   import encounter from './FormPemeriksaan/FormEncounter.vue';
   import condition from './FormPemeriksaan/FormCondition.vue';
-
+  import assessment from './KirimSatuSehat/KirimDiagnosis.vue';
   const activeForm = ref('encounter');
   const toggleForm = (form) => {
     activeForm.value = form;
