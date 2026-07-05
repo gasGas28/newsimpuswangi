@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\SkriningPTM;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 
 
-class RegisterPasienPTMService
+class RiwayatPasien
 {
-    public function getRegister(string $nik)
+    public function getDataPasien($idSkrining)
     {
       $skrining = KunjunganPTM::select(
                 'simpus_kunjungan_ptm.*',
@@ -25,7 +25,7 @@ class RegisterPasienPTMService
                 ->join(
                     'simpus_hipertensi', 'simpus_hipertensi.skriningID', '=', 'simpus_kunjungan_ptm.idSkrining'
                 )
-                ->where('simpus_kunjungan_ptm.nik_pasien', $nik)
+                ->where('simpus_kunjungan_ptm.idSkrining', $idSkrining)
                 ->get();
        
     //    dd($skrining);

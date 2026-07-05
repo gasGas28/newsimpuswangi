@@ -3,18 +3,26 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
-use App\Services\RiwayatPasien;
+use App\Services\SkriningPTM\LaporanPTMService;
+use App\Services\SkriningPTM\RiwayatPasien;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class RiwayatPTMController extends Controller
 {
-    public function __construct(private RiwayatPasien $riwayatPasienService) {}
-
+    public function __construct(private RiwayatPasien $riwayatPasienService, private LaporanPTMService $laporanPTM) {}
     public function index(Request $request)
     {
         $dataRiwayat = $this->riwayatPasienService->getDataPasien($request->idSkrining);
+
+        return Inertia::render('Ruang_Layanan/SkriningPTM/RiwayatPasien/RiwayatPasien', [
+            'DataRiwayat' => $dataRiwayat,
+        ]);
+    }
+    public function laporanPTM(Request $request)
+    {
+        $dataRiwayat = $this->riwayatPasienService->getDataPasien($request->kdPoli);
 
         return Inertia::render('Ruang_Layanan/SkriningPTM/RiwayatPasien/RiwayatPasien', [
             'DataRiwayat' => $dataRiwayat,

@@ -209,10 +209,8 @@
     try {
       const response = await axios.post(route('ruang-layanan-anc.dataDiagnosa'), form.value);
 
-      // Ambil data dari server
       const dataBaru = response.data.data;
 
-      // Tambahkan ke tabel tanpa reload
       daftarDiagnosa.value.push(dataBaru);
 
       // Reset form

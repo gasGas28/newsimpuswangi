@@ -22,7 +22,6 @@
     </div>
   </div>
 
-  
   <div v-if="showFormPemeriksaan" class="bg-white rounded-4 shadow-sm p-4 mt-1">
     <FormPemeriksaan
       :DataPasien="props.DataPasien"
@@ -35,6 +34,9 @@
       :AlergiObat="props.AlergiObat"
       :DataDiagnosa="props.DataDiagnosa"
       :DataObat="props.DataObat"
+      :ResepObat="props.ResepObat"
+      :MasterEdukasi="props.MasterEdukasi"
+      :DataEdukasi="props.DataEdukasi"
     />
   </div>
 </template>
@@ -62,6 +64,9 @@
     AlergiMakanan: Array,
     AlergiObat: Array,
     DataObat: Array,
+    ResepObat: Array,
+    MasterEdukasi: Array,
+    DataEdukasi: Array,
   });
 
   const hipertensi = computed(() => props.DataSkrining?.kategori_tekanan_darah);

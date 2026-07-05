@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\SkriningPTM;
 
 use App\Models\RuangLayanan\KIA\Alergi;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +29,10 @@ use Illuminate\Validation\ValidationException;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusStatusPTM;
 use App\Models\RuangLayanan\SimpusMasterObat;
+use App\Models\RuangLayanan\SimpusResepObat;
+use App\Models\RuangLayanan\SimpusDetailResepObat;
+use App\Models\MasterEdukasiPTM;
+use App\Models\SimpusDataEdukasi;
 
 class PelayananPTMService
 {
@@ -55,7 +59,7 @@ class PelayananPTMService
             ->leftJoin('assessment_ptm as assessment', 'skrining.id', '=', 'assessment.skrining_ptm_id')
             ->leftJoin('simpus_ekg as ekg', 'skrining.idSkrining', '=', 'ekg.skriningID')
             ->leftJoin('simpus_kanker_iva as serviks', 'skrining.idSkrining', '=', 'serviks.skriningID')
-
+            ->leftJoin('simpus_status_ptm as status', 'skrining.idSkrining', '=', 'status.skriningID')
 
             ->leftJoin('setup_kel as kel', function ($join) {
                 $join->on('p.NO_KEL', '=', 'kel.NO_KEL')
@@ -126,11 +130,76 @@ class PelayananPTMService
                 'paru.*',
                 'ekg.*',
                 'serviks.*',
+                'status.*'
             )
             ->first();
         // dd($DataPasien);
 
         return $DataPasien;
+    }
+    public function resepObat(array $data)
+    {
+        $idResep = Str::uuid();
+        $jumlah = $data['jumlah'];
+        $dosis = $data['frekuensi'];
+        $jam = $data['intervalJam'];
+        $waktu = $data['waktu'];
+        $kondisi = $data['kondisi'];
+        $nama = $data['nama'];
+        $unit = $data['unit'];
+
+        $resep = SimpusResepObat::updateOrCreate([
+            'id_resep' => $idResep,
+            'kode_resep' => Str::random(10),
+            'loketId' => $data['loketId'],
+            'pelayananId' => $data['pelayananId'],
+            'kategori' => $data['kategori'],
+            'nama_puyer' => $data['jenis'],
+            'jumlah_puyer' => $jumlah,
+            'dosis_pakai_puyer' => $dosis,
+            'tiapJam' => $jam,
+            'waktu' => $waktu,
+            'kondisi' => $kondisi,
+            'diambil' => $data['status'],
+            'namaPasien' => $nama,
+            'unit_details' => $unit,
+        ]);
+
+        SimpusDetailResepObat::updateOrCreate([
+            'id_resep_detail' => Str::uuid(),
+            'resep_id' => $idResep,
+            'poli' => $data['nama_poli'],
+            'obat_id' => $data['obat_id'],
+            'jumlah' => $jumlah,
+            'dosis_pakai' => $dosis,
+            'tiapJam' => $jam,
+            'waktu' => $waktu,
+            'kondisi' => $kondisi,
+            'nama_pasien' => $nama,
+            'unit_details' => $unit,
+            'keterangan' => $data['catatan'],
+        ]);
+
+        return $resep->load('DetailResepObat');
+    }
+
+    public function hapusResep(string $idResep)
+    {
+        $delResep = SimpusResepObat::find($idResep);
+
+        if (!$delResep) {
+            return [
+                'success' => false,
+                'message' => 'Data Resep tidak ditemukan.',
+            ];
+        }
+
+        $delResep->delete();
+
+        return [
+            'success' => true,
+            'message' => 'Resep Obat berhasil dihapus.',
+        ];
     }
 
     public function getMasterData(string $idPelayanan)
@@ -148,8 +217,25 @@ class PelayananPTMService
         $AlergiObat = Alergi::where('category', 2)->get();
         $DataDiagnosa = SimpusDataDiagnosa::where('pelayananId', $idPelayanan)->get();
         $DataObat = SimpusMasterObat::where('AKTIF', 1)->get();
+        $ResepObat = SimpusResepObat::select(
+            'simpus_resep_obat.*',
+            'simpus_resep_detail.obat_id',
+            'simpus_master_obat.NAMA'
+        )
+            ->join('simpus_resep_detail', 'simpus_resep_obat.id_resep', '=', 'simpus_resep_detail.resep_id')
+            ->join('simpus_master_obat', 'simpus_resep_detail.obat_id', '=', 'simpus_master_obat.OBAT_ID')
+            ->where('pelayananId', $idPelayanan)
+            ->get();
 
-        // dd($diagnosa);
+        $MasterEdukasi = MasterEdukasiPTM::all();
+        $DataEdukasi = SimpusDataEdukasi::select(
+            'simpus_data_edukasi.*',
+            'master_edukasi_ptm.*'
+        )
+            ->join('master_edukasi_ptm', 'master_edukasi_ptm.kode_snomed', '=', 'simpus_data_edukasi.kode_snomed')
+            ->where('pelayananID', $idPelayanan)->get();
+
+        // dd($ResepObat);
 
         // dd($DataSkrining);
         return [
@@ -160,7 +246,25 @@ class PelayananPTMService
             'AlergiObat' => $AlergiObat,
             'DataDiagnosa' => $DataDiagnosa,
             'DataObat' => $DataObat,
+            'ResepObat' => $ResepObat,
+            'MasterEdukasi' => $MasterEdukasi,
+            'DataEdukasi' => $DataEdukasi,
         ];
+    }
+
+    public function saveEdukasi(array $data)
+    {
+        SimpusDataEdukasi::updateOrCreate(
+            [
+                'pelayananID' => $data['idpelayanan'],
+                'skriningID' => $data['idskrining'],
+                'kode_snomed' => $data['kode_snomed'],
+            ],
+            [
+                'keterangan' => $data['keterangan'] ?? null,
+                'procedureId' => $data['procedureId'] ?? null,
+            ]
+        );
     }
     public function updateStatusPelayanan(string $idPelayanan, string $status)
     {
@@ -175,7 +279,6 @@ class PelayananPTMService
             'idPelayanan' => $idPelayanan,
             'status' => 'arrived',
         ]);
-        // dd($idLoket);
     }
 
 
@@ -506,9 +609,6 @@ class PelayananPTMService
 
     public function saveStatusPasien($data)
     {
-        if (empty(array_filter($data, fn($value) => $value !== null && $value !== ''))) {
-            return;
-        }
         $status = SimpusStatusPTM::updateOrCreate(
             [
                 'skriningID' => $data['skriningId'],

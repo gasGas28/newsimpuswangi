@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
-use App\Services\RegisterPasienPTMService;
+use App\Services\SkriningPTM\RegisterPasienPTMService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;

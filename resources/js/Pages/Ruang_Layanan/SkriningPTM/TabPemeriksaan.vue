@@ -25,7 +25,6 @@
         <component
           :is="currentForm"
           :DataPasien="DataPasien"
-          :formData="formPemeriksaan"
           :tindakan="props.tindakan"
           :DataTindakan="props.DataTindakan"
           :TenagaMedis="props.TenagaMedis"
@@ -35,6 +34,9 @@
           :AlergiObat="props.AlergiObat"
           :DataDiagnosa="props.DataDiagnosa"
           :DataObat="props.DataObat"
+          :ResepObat="props.ResepObat"
+          :MasterEdukasi="props.MasterEdukasi"
+          :DataEdukasi="props.DataEdukasi"
         />
       </div>
     </div>
@@ -64,6 +66,9 @@
     AlergiMakanan: Array,
     AlergiObat: Array,
     DataObat: Array,
+    ResepObat: Array,
+    MasterEdukasi: Array,
+    DataEdukasi: Array,
   });
 
   // Tabs list

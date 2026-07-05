@@ -224,7 +224,7 @@ Route::prefix('home')->group(function () {
 // routes/web.php
 
 
-Route::get('/dashboard-ptm', [DashboardPTMController::class, 'index'])
+Route::get('/dashboard-ptm', [DashboardPTMController::class, 'dashboardPTM'])
     ->name('ptm.dashboard')
     ->middleware('auth'); // Protect home (wajib login)
 // Route::get('/', function () {
@@ -554,8 +554,12 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.update-status');
         Route::post('/skrining-ptm/tindakan/simpan', [SkriningPTMController::class, 'simpanTindakan'])
             ->name('ptm.tindakan-simpan');
+        Route::post('/skrining-ptm/edukasi/simpan', [SkriningPTMController::class, 'addEdukasi'])
+            ->name('ptm.edukasi-simpan');
         Route::delete('/ptm/tindakan/{id}', [SkriningPTMController::class, 'tindakanHapus'])
             ->name('ptm.tindakan-hapus');
+        Route::delete('/ptm/resep-hapus/{id}', [SkriningPTMController::class, 'deleteResep'])
+            ->name('pelayanan.hapus-resep-ptm');
         Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
             ->name('pelayanan.tambah-kunjungan-ptm');
         Route::post('/simpus/skrining-ptm/simpan-risiko', [SkriningPTMController::class, 'addFaktorRisiko'])->name('pelayanan.simpan-risiko-ptm');
@@ -575,6 +579,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-asamUrat');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');
+        Route::post('/simpus/skrining-ptm/simpan-resep', [SkriningPTMController::class, 'simpanResepObat'])
+            ->name('pelayanan.simpan-resep-ptm');
         Route::post('/simpus/skrining-ptm/simpan-status', [SkriningPTMController::class, 'addStatusPasien'])
             ->name('pelayanan.status-pasien-ptm');
 
@@ -593,6 +599,7 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
 
         Route::get('simpus/riwayat-ptm', [RiwayatPTMController::class, 'index'])->name('ruang-layanan.riwayat-ptm');
         Route::get('simpus/register-ptm/', [RegisterPTMController::class, 'index'])->name('ruang-layanan.register-ptm');
+        Route::get('simpus/laporan-ptm/', [DashboardPTMController::class, 'laporanPTM'])->name('ruang-layanan.laporan-ptm');
         Route::get('simpus/riwayat-ptm/download/register-ptm', [RegisterPTMController::class, 'downloadRegisterPTM'])
             ->name('ruang-layanan.download-register');
         Route::get('simpus/riwayat-ptm/download/pdf', [RiwayatPTMController::class, 'downloadPDF'])->name('ruang-layanan.riwayat-ptm-pdf');

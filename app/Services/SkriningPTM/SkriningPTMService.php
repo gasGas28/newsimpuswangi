@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\SkriningPTM;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,6 @@ class SkriningPTMService
         // dd($userAuth->NO_KEC);
         // dd($userAuth);
         // dd(Auth::user()->getAttributes());
-
         return DataMasterUnitDetail::with('DataMasterUnit')
             ->where('id_unit', $userAuth->unit)
             ->orderBy('id_kategori')
