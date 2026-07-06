@@ -98,6 +98,56 @@
       </button>
     </div>
 
+     <section class="planning-panel">
+      <div class="panel-header compact">
+        <div>
+          <h4><i class="bi bi-list-check"></i> Data Status</h4>
+          <p>Status tercatat untuk pasien ini.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table planning-table mb-0">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kondisi Pasien</th>
+              <th>Jadwal Kontrol</th>
+              <th>Nama Dokter</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!pasien.kondisi_pasien">
+              <td colspan="7" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <span>Data status belum tersedia.</span>
+              </td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>
+                <span class="code-pill">{{ pasien.kondisi_pasien }}</span>
+              </td>
+              <td class="fw-semibold">{{ pasien.jadwal_kontrol }}</td>
+              <td>
+                <span class="service-pill">{{ pasien.nmDokter }}</span>
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-outline-danger"
+                  @click="hapusTindakan(item.idTindakan)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
     <ModalAlert
       :show="showSuccessModal"
       type="success"
@@ -128,6 +178,8 @@
    const props = defineProps({
      DataPasien: Object,
    });
+
+   const pasien = computed(() => props.DataPasien || {});
 
    const emit = defineEmits(['save-status-pasien']);
    const isSaving = ref(false);

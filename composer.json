@@ -20,7 +20,6 @@
     "phpoffice/phpspreadsheet": "*",
     "simplesoftwareio/simple-qrcode": "^4.2",
     "spatie/browsershot": "^5.4",
-    "spatie/laravel-pdf": "2.12",
     "tightenco/ziggy": "^2.5"
   },
   "require-dev": {

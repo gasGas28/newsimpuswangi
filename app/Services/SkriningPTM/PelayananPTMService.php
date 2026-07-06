@@ -220,7 +220,8 @@ class PelayananPTMService
         $ResepObat = SimpusResepObat::select(
             'simpus_resep_obat.*',
             'simpus_resep_detail.obat_id',
-            'simpus_master_obat.NAMA'
+            'simpus_master_obat.NAMA',
+            'simpus_master_obat.SATUAN',
         )
             ->join('simpus_resep_detail', 'simpus_resep_obat.id_resep', '=', 'simpus_resep_detail.resep_id')
             ->join('simpus_master_obat', 'simpus_resep_detail.obat_id', '=', 'simpus_master_obat.OBAT_ID')
