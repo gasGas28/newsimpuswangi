@@ -4,7 +4,7 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 
 class DiagnosisConditionService
 {
@@ -100,7 +100,7 @@ class DiagnosisConditionService
      */
     public function sendDiagnosis(string $pelayananId, $diagnosas): array
     {
-        $skrining = SimpusSkriningPTM::where('idPelayanan', $pelayananId)->firstOrFail();
+        $skrining = KunjunganPTM::where('idPelayanan', $pelayananId)->firstOrFail();
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;

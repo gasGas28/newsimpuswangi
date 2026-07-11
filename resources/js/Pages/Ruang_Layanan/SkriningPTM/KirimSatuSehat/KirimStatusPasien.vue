@@ -38,7 +38,7 @@
       >
         {{ statusMessage }}
       </div>
-      <button type="button" class="save-button" :disabled="isSending" @click="kirimObesitas">
+      <button type="button" class="save-button" :disabled="isSending" @click="kirimStatusPasien">
         <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
         <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
@@ -46,7 +46,7 @@
   </section>
   <SubmitLogPanel
     :logs="logs"
-    description="Riwayat percobaan pengiriman data deteksi dini obesitas ke platform SATUSEHAT."
+    description="Riwayat percobaan pengiriman update status pasien ke platform SATUSEHAT."
     @clear="clearLogs"
   />
 </template>
@@ -77,26 +77,21 @@
   const validationMessages = ref([]);
 
   const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
-    `obesitas_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+    `status_pasien_logs_${props.DataPasien?.idSkrining ?? 'default'}`
   );
 
   // ─── Kirim ───────────────────────────────────────────────────
-  const kirimObesitas = () => {
+  const kirimStatusPasien = () => {
     submit({
       routerPost: router.post.bind(router),
       getFlash: () => page.props.flash,
-      successMessage: 'Data deteksi dini obesitas (Observation + Condition) berhasil dikirim.',
+      successMessage: 'Data request status pasien berhasil dikirim.',
 
       steps: [
         {
-          logTitle: 'Pengiriman Deteksi Dini Obesitas (Observation)',
-          routeFn: () => route('satusehat.obesitas', props.DataPasien?.idSkrining),
-          idField: 'observation_id',
-        },
-        {
-          logTitle: 'Pengiriman Diagnosis Obesitas (Condition)',
-          routeFn: () => route('satusehat.obesitas', props.DataPasien?.idSkrining),
-          idField: 'condition_id',
+          logTitle: 'Pengiriman Encounter-Discharge Status Pasien',
+          routeFn: () => route('satusehat.status-pasien', props.DataPasien?.idSkrining),
+          idField: 'service_request_id',
         },
       ],
     });

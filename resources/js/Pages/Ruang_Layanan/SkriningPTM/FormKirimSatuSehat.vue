@@ -64,7 +64,7 @@
       <assessment :DataPasien="props.DataPasien" :DataDiagnosa="props.DataDiagnosa"/>
     </div>
     <div v-if="activeForm === 'planning'" class="fade-in">
-      <planning :DataTindakan='props.DataTindakan' :DataEdukasi='props.DataEdukasi' :ResepObat="props.ResepObat"
+      <planning :DataPasien="props.DataPasien" :DataTindakan='props.DataTindakan' :DataEdukasi='props.DataEdukasi' :ResepObat="props.ResepObat"
 />
     </div>
     <div v-if="activeForm === 'status'" class="fade-in">

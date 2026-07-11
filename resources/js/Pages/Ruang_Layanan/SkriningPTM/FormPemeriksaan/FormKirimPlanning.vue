@@ -24,9 +24,9 @@
         <p>Pilih jenis data yang ingin dikirim ke SATUSEHAT.</p>
       </div>
 
-      <SendTindakan v-if="selectedForm === 'Tindakan'" :DataTindakan="props.DataTindakan" :DataEdukasi="props.DataEdukasi" />
+      <SendTindakan v-if="selectedForm === 'Tindakan'" :DataPasien="props.DataPasien" :DataTindakan="props.DataTindakan" :DataEdukasi="props.DataEdukasi" />
       <SendEdukasi v-if="selectedForm === 'Edukasi'" :DataPasien="props.DataPasien" :DataEdukasi="props.DataEdukasi" />
-      <SendPengobatan v-if="selectedForm === 'Pengobatan'" :ResepObat="props.ResepObat" />
+      <SendPengobatan v-if="selectedForm === 'Pengobatan'" :DataPasien="props.DataPasien" :ResepObat="props.ResepObat" />
     </div>
   </div>
 </template>

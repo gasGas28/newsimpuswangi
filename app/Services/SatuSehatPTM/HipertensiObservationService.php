@@ -4,7 +4,7 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 
 class HipertensiObservationService
@@ -56,7 +56,7 @@ class HipertensiObservationService
 
     public function sendBloodPressure(string $idSkrining): array
     {
-        $skrining    = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $hipertensi  = SimpusHipertensi::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

@@ -4,7 +4,7 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusEkg;
 
 class EkgObservationService
@@ -161,7 +161,7 @@ class EkgObservationService
 
     public function sendEkg(string $idSkrining): array
     {
-        $skrining = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $ekg      = SimpusEkg::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

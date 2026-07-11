@@ -50,6 +50,108 @@ class EncounterService
         return $token;
     }
 
+    public function updateDischargeStatus(
+        string $encounterId,
+        string $caraKeluar,
+        string $periodEnd,
+        ?string $idPelayanan = null,
+        array $conditionIds = [], // <-- baru: array of ['id' => ..., 'display' => ...]
+    ): array {
+        $token = $this->getAccessToken();
+
+        $getResponse = Http::withToken($token)
+            ->get(config('services.satusehat.fhir_url') . '/Encounter/' . $encounterId);
+
+        if (! $getResponse->successful()) {
+            Log::error('SatuSehat: gagal GET Encounter existing untuk update discharge', [
+                'encounterId' => $encounterId,
+                'status'      => $getResponse->status(),
+                'body'        => $getResponse->body(),
+            ]);
+            throw new \Exception('Gagal mengambil data Encounter: ' . $getResponse->body());
+        }
+
+        $existing = $getResponse->json();
+
+        $caraKeluarDisplay = match ($caraKeluar) {
+            'home'     => 'Home',
+            'aadvice'  => 'Left against advice',
+            'alt-home' => 'Alternative home',
+            'oth'      => 'Other',
+            default    => 'Other',
+        };
+
+        // --- Perbaikan statusHistory: pastikan semua entry punya start & end ---
+        $statusHistory = $existing['statusHistory'] ?? [];
+
+        $statusHistory = array_map(function ($item) use ($periodEnd) {
+            if (empty($item['period']['end'])) {
+                $item['period']['end'] = $periodEnd;
+            }
+            return $item;
+        }, $statusHistory);
+
+        // Tambahkan entry untuk status akhir 'finished' (start = end = periodEnd)
+        $statusHistory[] = [
+            'status' => 'finished',
+            'period' => [
+                'start' => $periodEnd,
+                'end'   => $periodEnd,
+            ],
+        ];
+
+        // --- Perbaikan diagnosis: wajib merujuk ke Condition ---
+        $diagnosis = array_map(function ($cond) {
+            return [
+                'condition' => [
+                    'reference' => 'Condition/' . $cond['id'],
+                    'display'   => $cond['display'] ?? null,
+                ],
+            ];
+        }, $conditionIds);
+
+        $existing['status'] = 'finished';
+        $existing['statusHistory'] = $statusHistory;
+        $existing['period']['end'] = $periodEnd;
+        $existing['hospitalization'] = [
+            'dischargeDisposition' => [
+                'coding' => [[
+                    'system'  => 'http://terminology.hl7.org/CodeSystem/discharge-disposition',
+                    'code'    => $caraKeluar,
+                    'display' => $caraKeluarDisplay,
+                ]],
+            ],
+        ];
+
+        if (!empty($diagnosis)) {
+            $existing['diagnosis'] = $diagnosis;
+        }
+
+        $response = Http::withToken($token)
+            ->put(config('services.satusehat.fhir_url') . '/Encounter/' . $encounterId, $existing);
+
+        $terima = $response->json() ?? $response->body();
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Encounter-Discharge',
+            idResponse: $encounterId,
+            method: 'PUT',
+            kirim: $existing,
+            terima: $terima,
+        );
+
+        if (! $response->successful()) {
+            Log::error('SatuSehat: gagal update discharge status Encounter', [
+                'encounterId' => $encounterId,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
+            throw new \Exception('Gagal update status keluar pasien: ' . $response->body());
+        }
+
+        return $terima;
+    }
     public function createEncounter(array $payload, ?string $idPelayanan, ?string $idEncounter = null): string
     {
         $token = $this->getAccessToken();
@@ -152,7 +254,10 @@ class EncounterService
                 'simpus_pasien.IHS_NUMBER',
             )
                 ->join(
-                    'simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien'
+                    'simpus_pasien',
+                    'simpus_pasien.NIK',
+                    '=',
+                    'simpus_kunjungan_ptm.nik_pasien'
                 )
                 ->where('simpus_kunjungan_ptm.idSkrining', $idSkrining)
                 ->firstOrFail();

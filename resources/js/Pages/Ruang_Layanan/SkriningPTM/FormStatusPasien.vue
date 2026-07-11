@@ -10,6 +10,7 @@
 
       <div class="panel-body">
         <div class="status-grid">
+          <!-- Kondisi Saat Meninggalkan Fasyankes -> Encounter + Condition -->
           <div class="form-field">
             <label class="form-label" for="kondisi_keluar"
               >Kondisi Saat Meninggalkan Fasyankes</label
@@ -26,8 +27,10 @@
               <option value="dirujuk">Dirujuk</option>
               <option value="observasi">Perlu observasi</option>
             </select>
+            <small class="field-hint">Dikirim ke Encounter &amp; Condition</small>
           </div>
 
+          <!-- Cara Keluar Fasyankes -> Encounter.hospitalization.dischargeDisposition -->
           <div class="form-field">
             <label class="form-label" for="cara_keluar">Cara Keluar Fasyankes</label>
             <select
@@ -37,12 +40,18 @@
               class="form-select"
             >
               <option value="">Pilih cara keluar</option>
-              <option value="pulang">Pulang sendiri</option>
-              <option value="rujuk">Dirujuk</option>
-              <option value="diantar">Diantar keluarga</option>
+              <option value="home">Pulang atas persetujuan dokter</option>
+              <option value="aadvice">Pulang atas permintaan sendiri</option>
+              <option value="oth">Dirujuk / rujuk ke fasyankes lain</option>
+              <option value="alt-home">Diantar ke tempat tinggal lain</option>
             </select>
+            <small class="field-hint">
+              Kode standar: {{ form.cara_keluar || '-' }}
+              (system: http://terminology.hl7.org/CodeSystem/discharge-disposition)
+            </small>
           </div>
 
+          <!-- Jadwal Kontrol -> ServiceRequest.occurrenceDateTime -->
           <div class="form-field">
             <label class="form-label" for="jadwal_kontrol">Jadwal Kontrol Berikutnya</label>
             <input
@@ -52,8 +61,10 @@
               type="date"
               class="form-control"
             />
+            <small class="field-hint">Dikirim ke ServiceRequest.occurrenceDateTime</small>
           </div>
 
+          <!-- Rujukan / Konsultasi -> ServiceRequest (rencana tindak lanjut) -->
           <div class="form-field">
             <label class="form-label" for="rencana_rujuk">Rujukan / Konsultasi</label>
             <select
@@ -67,8 +78,10 @@
               <option value="fkrtl">Rujuk FKRTL</option>
               <option value="igd">Rujuk segera / IGD</option>
             </select>
+            <small class="field-hint">Dikirim sebagai ServiceRequest (rencana tindak lanjut)</small>
           </div>
 
+          <!-- Transportasi Rujukan -> ServiceRequest (sarana transportasi) -->
           <div class="form-field">
             <label class="form-label" for="transport">Transportasi Rujukan</label>
             <select
@@ -78,11 +91,12 @@
               class="form-select"
               :disabled="form.rencana_rujuk === 'tidak'"
             >
-              <option value="Tidak Berlaku">Tidak berlaku</option>
-              <option value="ambulan">Ambulans</option>
+              <option value="tidak_berlaku">Tidak berlaku</option>
+              <option value="ambulance">Ambulans</option>
               <option value="kendaraan_pribadi">Kendaraan pribadi</option>
               <option value="ojek">Ojek/taksi</option>
             </select>
+            <small class="field-hint">Dikirim ke ServiceRequest terkait transportasi rujuk</small>
           </div>
         </div>
       </div>
@@ -98,7 +112,7 @@
       </button>
     </div>
 
-     <section class="planning-panel">
+    <section class="planning-panel">
       <div class="panel-header compact">
         <div>
           <h4><i class="bi bi-list-check"></i> Data Status</h4>
@@ -112,6 +126,7 @@
             <tr>
               <th>No</th>
               <th>Kondisi Pasien</th>
+              <th>Cara Keluar</th>
               <th>Jadwal Kontrol</th>
               <th>Nama Dokter</th>
               <th class="text-center">Aksi</th>
@@ -124,10 +139,13 @@
                 <span>Data status belum tersedia.</span>
               </td>
             </tr>
-            <tr>
+            <tr v-else>
               <td>1</td>
               <td>
-                <span class="code-pill">{{ pasien.kondisi_pasien }}</span>
+                <span class="code-pill">{{ labelize(pasien.kondisi_pasien) }}</span>
+              </td>
+              <td>
+                <span class="code-pill">{{ labelize(pasien.cara_keluar) }}</span>
               </td>
               <td class="fw-semibold">{{ pasien.jadwal_kontrol }}</td>
               <td>
@@ -136,7 +154,7 @@
               <td class="text-center">
                 <button
                   class="btn btn-outline-danger"
-                  @click="hapusTindakan(item.idTindakan)"
+                  @click="hapusTindakan(pasien.idTindakan)"
                 >
                   <i class="bi bi-trash"></i>
                 </button>
@@ -146,7 +164,6 @@
         </table>
       </div>
     </section>
-
 
     <ModalAlert
       :show="showSuccessModal"
@@ -170,112 +187,89 @@
 </template>
 
 <script setup>
-   import { useForm } from '@inertiajs/vue3';
-   import { computed, ref, watchEffect } from 'vue';
-  import ModalAlert from '../../../Components/Layouts/Modal/ModalAlert.vue';
+import { useForm } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import ModalAlert from '../../../Components/Layouts/Modal/ModalAlert.vue';
 
+const props = defineProps({
+  DataPasien: Object,
+});
 
-   const props = defineProps({
-     DataPasien: Object,
-   });
+const pasien = computed(() => props.DataPasien || {});
 
-   const pasien = computed(() => props.DataPasien || {});
+const isSaving = ref(false);
+const saveStatus = ref('idle');
+const saveError = ref('');
+const showSuccessModal = ref(false);
+const showValidationModal = ref(false);
+const validationMessages = ref([]);
 
-   const emit = defineEmits(['save-status-pasien']);
-   const isSaving = ref(false);
-   const saveStatus = ref('idle');
-   const saveError = ref('');
-   const showSuccessModal = ref(false);
-   const showValidationModal = ref(false);
-   const validationMessages = ref([]);
+const form = useForm({
+  skriningId: props.DataPasien?.idSkrining || '',
+  kondisi_keluar: '',
+  cara_keluar: '',
+  jadwal_kontrol: '',
+  rencana_rujuk: 'tidak',
+  transport: 'tidak_berlaku',
+});
 
-   const form = useForm({
-     skriningId: props.DataPasien?.idSkrining || '',
-     kondisi_keluar: '',
-     cara_keluar: '',
-     jadwal_kontrol: '',
-     rencana_rujuk: 'tidak',
-     transport: 'Tidak Berlaku'
-   });
+const saveMessage = computed(() => {
+  if (saveStatus.value === 'ready') {
+    return 'Data status pasien siap disimpan.';
+  }
+  return 'Simpan setelah status keluar selesai diisi.';
+});
 
-    console.log('Form initialized with:', form);
+function saveStatusPasien() {
+  isSaving.value = true;
+  saveStatus.value = 'idle';
+  saveError.value = '';
 
-   const saveMessage = computed(() => {
-     if (saveStatus.value === 'ready') {
-       return 'Data status pasien siap disimpan.';
-     }
-     return 'Simpan setelah status keluar selesai diisi.';
-   });
+  showSuccessModal.value = false;
+  showValidationModal.value = false;
+  validationMessages.value = [];
 
-  function saveStatusPasien() {
-     console.log('Data yang akan dikirim:', form.data());
+  form.post(route('pelayanan.status-pasien-ptm'), {
+    preserveScroll: true,
 
-     isSaving.value = true;
-     saveStatus.value = 'idle';
-     saveError.value = '';
+    onSuccess: () => {
+      saveStatus.value = 'ready';
+      saveError.value = '';
+      validationMessages.value = [];
 
-     showSuccessModal.value = false;
-     showValidationModal.value = false;
+      form.clearErrors();
+      form.defaults(form.data());
 
-     validationMessages.value = [];
+      showSuccessModal.value = true;
+    },
 
-     form.post(route('pelayanan.status-pasien-ptm'), {
-       preserveScroll: true,
+    onError: (errors) => {
+      saveStatus.value = 'error';
+      validationMessages.value = Object.values(errors).flat();
+      saveError.value = extractMessage(errors);
+      showValidationModal.value = true;
+    },
 
-       onBefore: () => {
-         console.log('Mulai request');
-       },
+    onFinish: () => {
+      isSaving.value = false;
+    },
+  });
+}
 
-       onSuccess: () => {
-         saveStatus.value = 'ready';
+function extractMessage(errors) {
+  return (
+    Object.values(errors || {})
+      .flat()
+      .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
+  );
+}
 
-         saveError.value = '';
-         validationMessages.value = [];
-
-         form.clearErrors();
-         form.defaults(form.data());
-
-         showSuccessModal.value = true;
-       },
-
-       onError: (errors) => {
-         saveStatus.value = 'error';
-
-         validationMessages.value = Object.values(errors).flat();
-
-         saveError.value = extractMessage(errors);
-
-         showValidationModal.value = true;
-       },
-
-       onFinish: () => {
-         console.log('Request selesai');
-         isSaving.value = false;
-       },
-     });
-   }
-
-   function extractMessage(errors) {
-     return (
-       Object.values(errors || {})
-         .flat()
-         .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
-     );
-   }
-
-   function isDuplicateError(message) {
-     const lower = message.toLowerCase();
-     return ['sudah', 'tersimpan', 'duplikat', 'duplicate', 'already', 'exists'].some((kw) =>
-       lower.includes(kw)
-     );
-   }
-
-   function labelize(value) {
-     if (!value) return '-';
-     return String(value)
-       .replace(/_/g, ' ')
-       .replace(/\b\w/g, (char) => char.toUpperCase());
-   }
+function labelize(value) {
+  if (!value) return '-';
+  return String(value)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 </script>
 
 <style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>

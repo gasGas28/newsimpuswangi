@@ -59,6 +59,7 @@ class PelayananPTMService
             ->leftJoin('assessment_ptm as assessment', 'skrining.id', '=', 'assessment.skrining_ptm_id')
             ->leftJoin('simpus_ekg as ekg', 'skrining.idSkrining', '=', 'ekg.skriningID')
             ->leftJoin('simpus_kanker_iva as serviks', 'skrining.idSkrining', '=', 'serviks.skriningID')
+            ->leftJoin('simpus_thalasemia as thalasemia', 'skrining.idSkrining', '=', 'thalasemia.skriningID')
             ->leftJoin('simpus_status_ptm as status', 'skrining.idSkrining', '=', 'status.skriningID')
 
             ->leftJoin('setup_kel as kel', function ($join) {
@@ -129,6 +130,7 @@ class PelayananPTMService
                 'kolorektal.*',
                 'paru.*',
                 'ekg.*',
+                'thalasemia.*',
                 'serviks.*',
                 'status.*'
             )
@@ -216,7 +218,7 @@ class PelayananPTMService
         $AlergiMakanan = Alergi::where('category', 1)->get();
         $AlergiObat = Alergi::where('category', 2)->get();
         $DataDiagnosa = SimpusDataDiagnosa::where('pelayananId', $idPelayanan)->get();
-        $DataObat = SimpusMasterObat::where('AKTIF', 1)->get();
+        $DataObat = SimpusMasterObat::where('AKTIF', 1)->where('SATUAN', 'Tablet')->get();
         $ResepObat = SimpusResepObat::select(
             'simpus_resep_obat.*',
             'simpus_resep_detail.obat_id',
@@ -280,6 +282,15 @@ class PelayananPTMService
             'idPelayanan' => $idPelayanan,
             'status' => 'arrived',
         ]);
+    }
+    public function endPelayanan(string $idPelayanan, string $status)
+    {
+        DB::table('simpus_pelayanan')
+            ->where('idpelayanan', $idPelayanan)
+            ->update([
+                'sudahDilayani' => $status,
+                'endTime' => now(),
+            ]);
     }
 
 

@@ -4,7 +4,7 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusKolorektal;
 
 class KolorektalQuestionnaireService
@@ -21,7 +21,6 @@ class KolorektalQuestionnaireService
     private const LOINC_DARAH_SAMAR  = '14563-1'; // Hemoglobin [Presence] in Stool (FOBT)
 
     /**
-     * Mapping hasil_kuesioner ke ICD-10 untuk Condition
      */
     private array $riskConditionMap = [
         'Low'      => ['code' => '723505004', 'display' => 'Encounter for screening for malignant neoplasm of colon'],
@@ -221,7 +220,7 @@ class KolorektalQuestionnaireService
 
     public function sendKolorektal(string $idSkrining): array
     {
-        $skrining   = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining   = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $kolorektal = SimpusKolorektal::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

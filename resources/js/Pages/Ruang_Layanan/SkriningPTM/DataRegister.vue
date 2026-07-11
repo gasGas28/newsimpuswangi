@@ -54,12 +54,32 @@
       </div>
       <div class="patient-card-footer">
         <button
+          @click="downloadExcel"
+          class="btn-download btn-excel"
+          :disabled="!riwayat.length || isDownloadingExcel"
+        >
+          <i :class="isDownloadingExcel ? 'bi bi-arrow-repeat' : 'bi bi-file-earmark-excel'"></i>
+          <span>{{ isDownloadingExcel ? 'Mengunduh...' : 'Download Excel' }}</span>
+        </button>
+
+        <button
           @click="downloadPDF"
           class="btn-download btn-pdf"
           :disabled="!riwayat.length || isDownloading"
         >
           <i :class="isDownloading ? 'bi bi-arrow-repeat' : 'bi bi-file-pdf'"></i>
           <span>{{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}</span>
+        </button>
+
+        <button
+          @click="downloadLaporanPTM"
+          class="btn-download btn-laporan"
+          :disabled="!riwayat.length || isDownloadingLaporan"
+        >
+          <i
+            :class="isDownloadingLaporan ? 'bi bi-arrow-repeat' : 'bi bi-file-earmark-spreadsheet'"
+          ></i>
+          <span>{{ isDownloadingLaporan ? 'Mengunduh...' : 'Download Laporan' }}</span>
         </button>
       </div>
     </div>
@@ -144,6 +164,129 @@
     window.history.back();
   };
 
+  const isDownloadingExcel = ref(false); // tambahan
+  const isDownloadingLaporan = ref(false);
+
+  const downloadLaporanPTM = async () => {
+    if (riwayat.length === 0 || isDownloadingLaporan.value) return;
+    isDownloadingLaporan.value = true;
+
+    try {
+      const response = await fetch(route('ptm.export-laporanPTM'), {
+        method: 'GET',
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      });
+
+      if (!response.ok) throw new Error('Gagal mengunduh Laporan');
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'Laporan_Klaster_3_PTM.xlsx';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download Laporan error:', error);
+      alert('Gagal mengunduh Laporan. Silakan coba lagi.');
+    } finally {
+      isDownloadingLaporan.value = false;
+    }
+  };
+
+  // const downloadExcel = async () => {
+  //   if (riwayat.length === 0 || isDownloadingExcel.value) return;
+
+  //   isDownloadingExcel.value = true;
+  //   const NIK = getQueryParam('NIK');
+
+  //   try {
+  //     const response = await fetch(route('ruang-layanan.export-excel') + '?nik=' + NIK, {
+  //       method: 'GET',
+  //       headers: {
+  //         Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Gagal mengunduh Excel');
+  //     }
+
+  //     const blob = await response.blob();
+
+  //     const contentDisposition = response.headers.get('Content-Disposition');
+  //     let filename = 'Riwayat_Pasien.xlsx';
+  //     if (contentDisposition) {
+  //       const match = contentDisposition.match(/filename="?([^"]+)"?/);
+  //       if (match) filename = match[1];
+  //     }
+
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement('a');
+  //     link.href = url;
+  //     link.download = filename;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   } catch (error) {
+  //     console.error('Download Excel error:', error);
+  //     alert('Gagal mengunduh Excel. Silakan coba lagi.');
+  //   } finally {
+  //     isDownloadingExcel.value = false;
+  //   }
+  // };
+
+  const downloadExcel = async () => {
+    if (riwayat.length === 0 || isDownloadingExcel.value) return;
+    isDownloadingExcel.value = true;
+
+    try {
+      const tahun = new Date().getFullYear();
+      const response = await fetch(route('ptm.export-register', { tahun }), {
+        method: 'GET',
+        headers: {
+          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      });
+
+      if (!response.ok) throw new Error('Gagal mengunduh Excel');
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `kohort-ptm-${tahun}.xlsx`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download Excel error:', error);
+      alert('Gagal mengunduh Excel. Silakan coba lagi.');
+    } finally {
+      isDownloadingExcel.value = false;
+    }
+  };
+
   const downloadPDF = async () => {
     if (riwayat.length === 0 || isDownloading.value) return;
 
@@ -151,15 +294,12 @@
     const NIK = getQueryParam('NIK');
 
     try {
-      const response = await fetch(
-        route('ruang-layanan.download-register') + '?NIK=' + NIK,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/pdf',
-          },
-        }
-      );
+      const response = await fetch(route('ruang-layanan.download-register') + '?NIK=' + NIK, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/pdf',
+        },
+      });
 
       if (!response.ok) {
         throw new Error('Gagal mengunduh PDF');
@@ -238,11 +378,33 @@
     font-size: 13px;
   }
 
+  .btn-excel {
+    background-color: #16a34a;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.18);
+  }
+
+  .btn-excel:hover:not(:disabled) {
+    background-color: #15803d;
+    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.24);
+  }
+
   .header-right {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     flex-wrap: wrap;
+  }
+
+  .btn-laporan {
+    background-color: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+  }
+
+  .btn-laporan:hover:not(:disabled) {
+    background-color: #1d4ed8;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.24);
   }
 
   .btn-back,
@@ -258,7 +420,10 @@
     font-weight: 700;
     line-height: 1.2;
     cursor: pointer;
-    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
       box-shadow 0.18s ease;
     white-space: nowrap;
   }
@@ -312,6 +477,10 @@
     border-radius: 8px;
     background: #ffffff;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  }
+
+  .patient-card-footer {
+    gap: 12px; /* tambahkan ini kalau belum ada */
   }
 
   .patient-row {
@@ -598,8 +767,3 @@
     }
   }
 </style>
-
-
-
-
-

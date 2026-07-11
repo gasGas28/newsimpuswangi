@@ -4,6 +4,7 @@ namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
 use App\Models\RuangLayanan\SimpusDataDiagnosa;
+use App\Models\RuangLayanan\SimpusTindakan;
 use App\Services\SatuSehatPTM\KankerServiksObservationService;
 use Illuminate\Http\Request;
 use App\Services\SatuSehatPTM\EncounterService;
@@ -24,6 +25,10 @@ use App\Services\SatuSehatPTM\KolorektalQuestionnaireService;
 use App\Services\SatuSehatPTM\ProfilLipidObservationService;
 use App\Services\SatuSehatPTM\ThalasemiaObservationService;
 use App\Services\SatuSehatPTM\DiagnosisConditionService;
+use App\Services\SatuSehatPTM\EdukasiProcedureService;
+use App\Services\SatuSehatPTM\TindakanProcedureService;
+use App\Services\SatuSehatPTM\MedicationRequestService;
+use App\Services\SatuSehatPTM\StatusPasienService;
 
 class SatuSehatController extends Controller
 {
@@ -47,6 +52,12 @@ class SatuSehatController extends Controller
         private KankerServiksObservationService $kankerServiksObservationService,
         private ThalasemiaObservationService $thalasemiaObservationService,
         private DiagnosisConditionService $diagnosisConditionService,
+        private EdukasiProcedureService $edukasiProcedureService,
+        private TindakanProcedureService $tindakanProcedureService,
+        private MedicationRequestService $medicationRequestService,
+        private StatusPasienService $statusPasienService,
+
+
     ) {}
 
     public function testEncounter(string $idSkrining)
@@ -260,6 +271,62 @@ class SatuSehatController extends Controller
 
             return redirect()->back()->with([
                 'message' => 'Diagnosis berhasil dikirim',
+                'data'    => ['results' => $results],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+    public function sendTindakan(string $pelayananId)
+    {
+        try {
+
+            $results = $this->tindakanProcedureService->sendTindakan($pelayananId);
+
+            return redirect()->back()->with([
+                'message' => 'Tindakan berhasil dikirim',
+                'data'    => ['results' => $results],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+    public function sendEdukasi(string $idSkrining)
+    {
+        try {
+            // Ambil semua diagnosis dari pelayanan ini
+            $results = $this->edukasiProcedureService->sendEdukasi($idSkrining);
+
+            return redirect()->back()->with([
+                'message' => 'Edukasi berhasil dikirim',
+                'data'    => ['results' => $results],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function sendResepObat(string $idPelayanan)
+    {
+        try {
+            $results = $this->medicationRequestService->sendResepObat($idPelayanan);
+
+            return redirect()->back()->with([
+                'message' => 'Resep obat berhasil dikirim',
+                'data'    => ['results' => $results],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function sendStatusPasien(string $idSkrining)
+    {
+        try {
+            $results = $this->statusPasienService->sendStatusPasien($idSkrining);
+
+            return redirect()->back()->with([
+                'message' => 'Status pasien berhasil dikirim ke SATUSEHAT',
                 'data'    => ['results' => $results],
             ]);
         } catch (\Exception $e) {

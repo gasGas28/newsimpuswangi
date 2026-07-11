@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
+use App\Services\SkriningPTM\LaporanService;
 use App\Services\SkriningPTM\RegisterPasienPTMService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

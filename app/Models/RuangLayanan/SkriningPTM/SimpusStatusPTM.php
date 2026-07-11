@@ -15,7 +15,8 @@ class SimpusStatusPTM extends Model
         'kondisi_pasien',
         'jadwal_kontrol',
         'rujukan',
-        'transportasi'
+        'transportasi',
+        'service_request_id'
     ];
     //
 }

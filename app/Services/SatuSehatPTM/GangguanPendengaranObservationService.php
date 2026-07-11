@@ -5,7 +5,7 @@ namespace App\Services\SatuSehatPTM;
 use App\Models\RuangLayanan\SkriningPTM\GangguanPendengaran;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusGangguanPendengaran;
 
 class GangguanPendengaranObservationService
@@ -189,7 +189,7 @@ class GangguanPendengaranObservationService
 
     public function sendGangguanPendengaran(string $idSkrining): void
     {
-        $skrining    = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $pendengaran = GangguanPendengaran::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

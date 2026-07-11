@@ -36,7 +36,7 @@
       >
         {{ statusMessage }}
       </div>
-      <button type="button" class="save-button" :disabled="isSending" @click="kirimObesitas">
+      <button type="button" class="save-button" :disabled="isSending" @click="kirimResep">
         <i class="bi" :class="isSending ? 'bi-arrow-repeat spin' : 'bi-send'"></i>
         <span>{{ isSending ? 'Mengirim...' : 'Kirim ke SATUSEHAT' }}</span>
       </button>
@@ -57,24 +57,12 @@
   import { useSubmitLog } from '@/composables/useSubmitLog.js';
 
   const props = defineProps({
+    DataPasien: Object,
     ResepObat: Array,
   });
 
   const page = usePage();
   const flash = computed(() => page.props.flash);
-
-  const patient = computed(() => props.DataPasien || {});
-
-  const bb = computed(() => valueOrDash(patient.value.berat_badan));
-  const tb = computed(() => valueOrDash(patient.value.tinggi_badan));
-  const imt = computed(() => valueOrDash(patient.value.imt));
-  const imt_status = computed(() => valueOrDash(patient.value.interpretasi_ptm));
-  const lp = computed(() => valueOrDash(patient.value.lingkar_pinggang));
-  const lp_status = computed(() => valueOrDash(patient.value.interpretasi_lp));
-
-  function valueOrDash(value) {
-    return value === undefined || value === null || value === '' ? '-' : value;
-  }
 
   const showSuccessModal = ref(false);
   const showValidationModal = ref(false);
@@ -82,26 +70,21 @@
   const validationMessages = ref([]);
 
   const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
-    `obesitas_logs_${props.DataPasien?.idSkrining ?? 'default'}`
+    `resep_obat_logs_${props.DataPasien?.idpelayanan ?? 'default'}`
   );
 
   // ─── Kirim ───────────────────────────────────────────────────
-  const kirimObesitas = () => {
+  const kirimResep = () => {
     submit({
       routerPost: router.post.bind(router),
       getFlash: () => page.props.flash,
-      successMessage: 'Data deteksi dini obesitas (Observation + Condition) berhasil dikirim.',
+      successMessage: 'Data Medication Request berhasil dikirim.',
 
       steps: [
         {
-          logTitle: 'Pengiriman Deteksi Dini Obesitas (Observation)',
-          routeFn: () => route('satusehat.obesitas', props.DataPasien?.idSkrining),
+          logTitle: 'Pengiriman Data Medication Request',
+          routeFn: () => route('satusehat.pengobatan', props.DataPasien?.idpelayanan),
           idField: 'observation_id',
-        },
-        {
-          logTitle: 'Pengiriman Diagnosis Obesitas (Condition)',
-          routeFn: () => route('satusehat.obesitas', props.DataPasien?.idSkrining),
-          idField: 'condition_id',
         },
       ],
     });

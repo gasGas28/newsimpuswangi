@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM; // sesuaikan dengan namespace controller Anda yang sebenarnya
 
 use App\Services\SkriningPTM\LaporanPTMService;
+use App\Services\SkriningPTM\LaporanService;
 use App\Services\SkriningPTM\DashboardPTMService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class DashboardPTMController extends Controller // sesuaikan nama class sesuai p
     public function __construct(
         private LaporanPTMService $laporanPTM,
         private DashboardPTMService $dashboardPTM,
+        private LaporanService $laporan,
     ) {}
 
     // =========================================================================
@@ -122,4 +124,6 @@ class DashboardPTMController extends Controller // sesuaikan nama class sesuai p
             'serverNow' => $today,
         ]);
     }
+
+  
 }

@@ -78,6 +78,17 @@ class SkriningPTMController extends Controller
 
         return back();
     }
+    public function akhirPelayanan(Request $request)
+    {
+        $this->pelayananService->endPelayanan(
+            $request->idpelayanan,
+            $request->status
+        );
+
+        // dd($request->idloket);
+
+        return back();
+    }
 
 
     public function simpanResepObat(ResepObatRequest $request)
