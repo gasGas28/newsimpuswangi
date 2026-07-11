@@ -334,7 +334,11 @@ class PelayananPTMService
             'obat' => $data['obat'] ?? null,
             'kesiapan' => $data['kesiapan'] ?? null,
             'dukung' => $data['dukung'] ?? null,
-
+            'napas_pendek' => $data['napas_pendek'] ?? null,
+            'batuk' => $data['batuk'] ?? null,
+            'dahak' => $data['dahak'] ?? null,
+            'spirometri' => $data['spirometri'] ?? null,
+            
             'r_pribadi_htn' => $data['r_pribadi_htn'] ?? null,
             'r_pribadi_dm' => $data['r_pribadi_dm'] ?? null,
             'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? null,

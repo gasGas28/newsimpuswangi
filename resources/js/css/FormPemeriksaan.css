@@ -9,6 +9,35 @@
   gap: 18px;
 }
 
+.respiratory-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .respiratory-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.respiratory-grid .form-label {
+  min-height: 3.5rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.risk-panel .section-title {
+  font-weight: 600;
+  color: #0f6b4c;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.risk-panel .section-title:first-child {
+  margin-top: 0;
+}
+
 .metabolik-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

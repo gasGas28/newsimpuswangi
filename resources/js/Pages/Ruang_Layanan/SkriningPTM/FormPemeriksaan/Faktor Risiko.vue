@@ -2,42 +2,22 @@
   <div class="risk-form">
     <section class="risk-score-panel" :class="scoreClass">
       <div class="risk-score-main">
-        <div>
-          <p class="risk-score-label">Skor Faktor Risiko Perilaku</p>
-          <h4>{{ riskScore.total }} / {{ riskScore.maxScore }}</h4>
-          <span>{{ riskScore.category }}</span>
+        <div class="risk-score-value">
+          <span class="risk-score-number"
+            >{{ riskScore.total }}<small>/{{ riskScore.maxScore }}</small></span
+          >
+          <span class="risk-score-category">{{ riskScore.category }}</span>
         </div>
-        <div class="risk-score-meter" aria-hidden="true">
-          <div :style="{ width: riskScore.percentage + '%' }"></div>
-        </div>
-      </div>
-
-      <div class="risk-score-note">
-        <strong>{{ riskScore.recommendation }}</strong>
-        <span>{{ riskScore.summary }}</span>
-      </div>
-
-      <div v-if="riskScore.items.length" class="risk-score-factors">
-        <span v-for="item in riskScore.items" :key="item.key">
-          +{{ item.score }} {{ item.label }}
-        </span>
-      </div>
-      <div v-if="riskScore.items.length" class="risk-score-factors">
-        <span v-for="item in riskScore.items" :key="item.key">
-          +{{ item.score }} {{ item.label }}
-        </span>
+        <p class="risk-score-note">{{ riskScore.recommendation }}</p>
       </div>
 
       <div class="risk-score-disclaimer">
         <i class="bi bi-info-circle"></i>
-        <span>
-          Skor ini adalah <strong>indikator internal</strong> untuk membantu triase di fasyankes,
-          bukan instrumen skoring klinis yang dibakukan Kemenkes atau dipersyaratkan SATUSEHAT.
-          Keputusan klinis tetap mengacu pada penilaian tenaga kesehatan.
-        </span>
+        <span
+          >Indikator internal untuk triase, bukan instrumen skoring baku Kemenkes/SATUSEHAT.</span
+        >
       </div>
     </section>
-
     <section class="risk-panel">
       <div class="panel-header">
         <div>
@@ -119,6 +99,68 @@
               <option value="tidak">Tidak</option>
               <option value="kadang">Ya, tidak setiap hari</option>
               <option value="setiap_hari">Ya, setiap hari</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="form.merokok === 'ya'" class="risk-panel">
+      <div class="panel-header">
+        <div>
+          <h4><i class="bi bi-lungs"></i> Gejala Pernapasan</h4>
+          <p>Kuesioner PUMA (Q0021) linkId 1.5-1.8.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="smoking-grid">
+          <div class="form-field">
+            <label for="napas_pendek" class="form-label"
+              >Apakah peserta pernah merasa napas pendek ketika peserta berjalan lebih cepat pada
+              jalan yang datar atau pada jalan yang sedikit menanjak?</label
+            >
+            <select
+              id="napas_pendek"
+              name="napas_pendek"
+              class="form-select"
+              v-model="form.napas_pendek"
+            >
+              <option value="tidak">Tidak</option>
+              <option value="iya">Iya</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="dahak" class="form-label"
+              >Apakah peserta biasanya mempunyai dahak yang berasal dari paru atau kesulitan
+              mengeluarkan dahak saat peserta sedang tidak menderita selesma/flu?</label
+            >
+            <select id="dahak" name="dahak" class="form-select" v-model="form.dahak">
+              <option value="tidak">Tidak</option>
+              <option value="iya">Iya</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="batuk" class="form-label"
+              >Apakah peserta biasanya batuk saat peserta sedang tidak menderita selesma/flu?</label
+            >
+            <select id="batuk" name="batuk" class="form-select" v-model="form.batuk">
+              <option value="tidak">Tidak</option>
+              <option value="iya">Iya</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="spirometri" class="form-label"
+              >Apakah Dokter atau tenaga medis lainnya pernah meminta peserta untuk melakukan
+              pemeriksaan spirometri atau peak flow meter (meniup ke dalam suatu alat) untuk
+              mengetahui fungsi paru peserta?</label
+            >
+            <select id="spirometri" name="spirometri" class="form-select" v-model="form.spirometri">
+              <option value="tidak">Tidak</option>
+              <option value="iya">Iya</option>
             </select>
           </div>
         </div>
@@ -303,6 +345,7 @@
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
+  import FormPPOK from './FormPPOK.vue';
 
   // --- Props ---
   const props = defineProps({
@@ -324,6 +367,12 @@
     btg_rokok: 0,
     lama_rokok: 0,
     paparan_rokok: 'tidak',
+
+    napas_pendek: 'tidak',
+    dahak: 'tidak',
+    batuk: 'tidak',
+    spirometri: 'tidak',
+    hasil_puma: '',
 
     gula: 'tidak',
     garam: 'tidak',

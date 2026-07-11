@@ -22,9 +22,12 @@ use Illuminate\Support\Facades\DB;
  *    untuk keluarga, dan dipecah utk pribadi ke 3 slot (riwayat_penyakit_diri_1/2/3)
  *    karena template cuma sediakan 3 slot bebas. Kalau ada 4 penyakit positif,
  *    yang ke-4 otomatis tidak tertampung -- lihat packDiseaseList().
- * 2. Kolom PUMA (napas pendek, dahak, batuk, spirometri) & Edukasi
- *    (berhenti merokok, asap rokok, diet, aktivitas fisik) TIDAK ADA di skema
+ * 2. Kolom PUMA (napas pendek, dahak, batuk, spirometri) TIDAK ADA di skema
  *    SIMPUS kamu saat ini, jadi dibiarkan null (sel akan kosong di Excel, bukan error).
+ *    Edukasi (berhenti_merokok, aktivitas_fisik, diet) SUDAH diambil dari
+ *    simpus_data_edukasi + master_edukasi_ptm (lihat buildEdukasiMap());
+ *    kecuali "edukasi_asap_rokok" yang tetap null karena belum ada kode SNOMED
+ *    yang cocok di master_edukasi_ptm.
  * 3. Template hanya menyediakan 1 pasang Diagnosis+Terapi yang benar-benar general;
  *    skema kamu cuma punya 1 field diagnosis_utama, jadi diagnosis_2/3 & terapi_2/3
  *    akan selalu kosong kecuali kamu punya sumber data tambahan.
@@ -36,10 +39,21 @@ use Illuminate\Support\Facades\DB;
 class LaporanService
 {
     /**
+     * Entry point yang dipanggil controller: query utama -> gabungkan data edukasi -> mapping.
+     *
      * @param  array{tanggal_mulai?: string, tanggal_selesai?: string}  $filters
      * @return Collection<int, object>
      */
     public function build(array $filters): Collection
+    {
+        return $this->mapRows($this->runMainQuery($filters));
+    }
+
+    /**
+     * @param  array{tanggal_mulai?: string, tanggal_selesai?: string}  $filters
+     * @return Collection<int, object>
+     */
+    private function runMainQuery(array $filters): Collection
     {
         // Catatan: join di bawah pakai CONVERT(...USING utf8mb4) COLLATE eksplisit
         // karena tabel-tabel yang terlibat punya charset/collation berbeda-beda
@@ -111,6 +125,27 @@ class LaporanService
                     $norm('simpus_kunjungan_ptm.idSkrining')
                 );
             })
+            ->join('simpus_kanker_iva', function ($join) use ($norm) {
+                $join->on(
+                    $norm('simpus_kanker_iva.skriningID'),
+                    '=',
+                    $norm('simpus_kunjungan_ptm.idSkrining')
+                );
+            })
+            ->join('simpus_ekg', function ($join) use ($norm) {
+                $join->on(
+                    $norm('simpus_ekg.skriningID'),
+                    '=',
+                    $norm('simpus_kunjungan_ptm.idSkrining')
+                );
+            })
+            ->join('simpus_status_ptm', function ($join) use ($norm) {
+                $join->on(
+                    $norm('simpus_ekg.skriningID'),
+                    '=',
+                    $norm('simpus_kunjungan_ptm.idSkrining')
+                );
+            })
             ->where('simpus_pelayanan.kdPoli', '006')
             ->when(
                 $filters['tanggal_mulai'] ?? null,
@@ -127,6 +162,9 @@ class LaporanService
                 'simpus_profil_lipid.*',
                 'simpus_obesitas.*',
                 'simpus_asam_urat.*',
+                'simpus_ekg.*',
+                'simpus_status_ptm.*',
+                'simpus_kanker_iva.*',
                 // nik & nama di-select PALING TERAKHIR supaya tidak ke-overwrite oleh
                 // kolom bernama sama dari tabel lain
                 'simpus_pasien.NIK as nik',
@@ -134,16 +172,70 @@ class LaporanService
                 'simpus_pelayanan.kdPoli as poli',
             ])
             ->orderBy('simpus_kunjungan_ptm.tanggal_skrining')
-            ->get()
-            ->map(fn ($row) => $this->mapRow($row));
+            ->get();
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $rawRows  hasil dari runMainQuery()
+     */
+    public function mapRows(Collection $rawRows): Collection
+    {
+        $edukasiMap = $this->buildEdukasiMap($rawRows->pluck('skriningID')->filter()->unique()->values());
+
+        return $rawRows->map(fn ($row) => $this->mapRow($row, $edukasiMap));
+    }
+
+    /**
+     * Query terpisah untuk edukasi, karena simpus_data_edukasi bersifat 1:banyak
+     * per skriningID (1 kunjungan bisa dapat lebih dari 1 jenis edukasi).
+     * Kalau di-join langsung ke query utama, baris pasien bisa terduplikasi.
+     *
+     * Kode SNOMED yang dipetakan ke 4 kolom template (lihat MasterEdukasiSeeder):
+     * - berhenti_merokok : 171207006
+     * - aktivitas_fisik  : 409073007
+     * - diet             : 183063000, 698360004, 710824005, 311401005
+     * - asap_rokok       : TIDAK ADA kode yang cocok saat ini -> selalu null
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>  $skriningIds
+     * @return array<string, array<int, string>>  skriningID => daftar kode_snomed yang diberikan
+     */
+    private function buildEdukasiMap(Collection $skriningIds): array
+    {
+        if ($skriningIds->isEmpty()) {
+            return [];
+        }
+
+        $collate = 'utf8mb4_unicode_ci';
+        $norm = fn (string $column) => DB::raw("CONVERT({$column} USING utf8mb4) COLLATE {$collate}");
+
+        $rows = DB::table('simpus_data_edukasi')
+            ->join('master_edukasi_ptm', function ($join) use ($norm) {
+                $join->on(
+                    $norm('master_edukasi_ptm.kode_snomed'),
+                    '=',
+                    $norm('simpus_data_edukasi.kode_snomed')
+                );
+            })
+            ->whereIn('simpus_data_edukasi.skriningID', $skriningIds)
+            ->select(['simpus_data_edukasi.skriningID', 'simpus_data_edukasi.kode_snomed'])
+            ->get();
+
+        $map = [];
+        foreach ($rows as $r) {
+            $map[$r->skriningID][] = $r->kode_snomed;
+        }
+
+        return $map;
     }
 
     /**
      * Nempelin properti baru ke $row dengan nama PERSIS sama seperti key di
      * PtmKlaster3ExportService::COLUMN_MAP, supaya export service tinggal baca
      * langsung tanpa mapping lagi.
+     *
+     * @param  array<string, array<int, string>>  $edukasiMap  hasil buildEdukasiMap()
      */
-    private function mapRow(object $row): object
+    private function mapRow(object $row, array $edukasiMap = []): object
     {
         [$diri1, $diri2, $diri3] = $this->packDiseaseList([
             'Hipertensi' => $row->r_pribadi_htn ?? null,
@@ -167,11 +259,10 @@ class LaporanService
         $row->merokok_lama_tahun = $this->toIntOrNull($row->lama_rokok ?? null);
         $row->terpapar_asap_rokok = $row->paparan_rokok ?? null;
 
-        // PUMA questionnaire: belum ada kolomnya di skema SIMPUS kamu
-        $row->puma_napas_pendek = null;
-        $row->puma_dahak = null;
-        $row->puma_batuk = null;
-        $row->puma_spirometri = null;
+        $row->napas_pendek = $this->normalizeYaTidak($row->napas_pendek ?? null);
+        $row->dahak = $this->normalizeYaTidak($row->dahak ?? null);
+        $row->batuk = $this->normalizeYaTidak($row->batuk ?? null);
+        $row->spirometri = $this->normalizeYaTidak($row->spirometri ?? null);
 
         $row->konsumsi_gula_berlebih = $this->normalizeYaTidak($row->gula ?? null);
         $row->konsumsi_garam_berlebih = $this->normalizeYaTidak($row->garam ?? null);
@@ -204,14 +295,22 @@ class LaporanService
         $row->diagnosis_3 = null;
         $row->terapi_3 = null;
 
-        // Edukasi: belum ada kolomnya di skema SIMPUS kamu
-        $row->edukasi_berhenti_merokok = null;
-        $row->edukasi_asap_rokok = null;
-        $row->edukasi_diet = null;
-        $row->edukasi_aktivitas_fisik = null;
+        // Edukasi: berdasarkan kode_snomed yang tercatat di simpus_data_edukasi
+        // untuk skriningID ini (lihat buildEdukasiMap()). Kalau skriningID tidak
+        // ditemukan sama sekali di $edukasiMap, berarti belum ada data edukasi
+        // tercatat untuk kunjungan ini -> tetap null (bukan "Tidak"), supaya beda
+        // makna antara "belum ada data" vs "sudah dicek, tidak diberikan".
+        $kodeEdukasi = $edukasiMap[$row->skriningID ?? null] ?? null;
+
+        $row->edukasi_berhenti_merokok = $this->edukasiFlag($kodeEdukasi, ['171207006']);
+        $row->edukasi_aktivitas_fisik = $this->edukasiFlag($kodeEdukasi, ['409073007']);
+        $row->edukasi_diet = $this->edukasiFlag($kodeEdukasi, ['183063000', '698360004', '710824005', '311401005']);
+        $row->edukasi_asap_rokok = $this->edukasiFlag($kodeEdukasi, ['225323000']);
 
         $row->ekg = $row->kesimpulan_ekg ?? null;
         $row->rujuk = $row->rujukan ?? null;
+
+        // dd($row);
 
         return $row;
     }
@@ -244,6 +343,21 @@ class LaporanService
             $labels[2] ?? null,
             // catatan: kalau ada label ke-4, akan hilang -- lihat komentar di atas class
         ];
+    }
+
+    /**
+     * @param  array<int, string>|null  $kodeYangDiberikan  daftar kode_snomed edukasi utk 1 skriningID
+     * @param  array<int, string>  $kodeTarget  kode-kode yang dianggap masuk kategori ini
+     */
+    private function edukasiFlag(?array $kodeYangDiberikan, array $kodeTarget): ?string
+    {
+        if ($kodeYangDiberikan === null) {
+            return null; // belum ada data edukasi sama sekali utk kunjungan ini
+        }
+
+        $adaYangCocok = count(array_intersect($kodeYangDiberikan, $kodeTarget)) > 0;
+
+        return $adaYangCocok ? 'Ya' : 'Tidak';
     }
 
     private function isTruthy(mixed $v): bool

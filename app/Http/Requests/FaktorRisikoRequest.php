@@ -36,6 +36,10 @@ class FaktorRisikoRequest extends FormRequest
             'sayur' => 'nullable|string',
             'aktivitas' => 'nullable|string',
             'alkohol' => 'nullable|string',
+            'napas_pendek' => 'nullable|string',
+            'batuk' => 'nullable|string',
+            'dahak' => 'nullable|string',
+            'spirometri' => 'nullable|string',
 
             'r_pribadi_htn' => 'nullable|boolean',
             'r_pribadi_dm' => 'nullable|boolean',
