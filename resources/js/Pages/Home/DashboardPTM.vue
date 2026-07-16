@@ -113,6 +113,14 @@
             <div class="metric-label">Total Kasus PTM</div>
             <div class="metric-value">{{ totalPtm.toLocaleString('id-ID') }}</div>
             <div class="metric-sub">dalam periode ini</div>
+            <div class="metric-badges">
+              <span class="mini-badge mini-badge-baru">
+                Baru {{ totalBaru.toLocaleString('id-ID') }}
+              </span>
+              <span class="mini-badge mini-badge-lama">
+                Lama {{ totalLama.toLocaleString('id-ID') }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -138,14 +146,18 @@
           <div class="metric-body">
             <div class="metric-label">{{ ptm.label }}</div>
             <div class="metric-value" :style="{ color: ptm.color }">
-              {{ (summary[ptm.key] ?? 0).toLocaleString('id-ID') }}
+              {{ getTotal(ptm.key).toLocaleString('id-ID') }}
             </div>
-            <div class="metric-sub">{{ pct(summary[ptm.key] ?? 0, totalPtm) }}% dari total</div>
+            <div class="metric-sub">{{ pct(getTotal(ptm.key), totalPtm) }}% dari total</div>
+            <div class="metric-badges">
+              <span class="mini-badge mini-badge-baru">Baru {{ getBaru(ptm.key) }}</span>
+              <span class="mini-badge mini-badge-lama">Lama {{ getLama(ptm.key) }}</span>
+            </div>
           </div>
           <div class="metric-bar-track">
             <div
               class="metric-bar-fill"
-              :style="{ width: pct(summary[ptm.key] ?? 0, totalPtm) + '%', background: ptm.color }"
+              :style="{ width: pct(getTotal(ptm.key), totalPtm) + '%', background: ptm.color }"
             ></div>
           </div>
           <div v-if="activeFilter === ptm.key" class="active-badge">
@@ -176,7 +188,7 @@
           <circle cx="12" cy="12" r="10" />
           <path d="M12 16v-4M12 8h.01" />
         </svg>
-        Klik kartu penyakit untuk menampilkan / menyembunyikan tren-nya pada grafik
+        Klik kartu penyakit untuk menampilkan tren baru/lama-nya pada grafik
       </div>
 
       <!-- LINE CHART -->
@@ -185,18 +197,36 @@
           <div class="panel-header">
             <div>
               <div class="panel-title">Tren Kasus PTM Per Hari</div>
-              <div class="panel-sub">Distribusi harian per jenis penyakit tidak menular</div>
+              <div class="panel-sub">
+                {{
+                  activeFilter
+                    ? 'Perbandingan kunjungan baru vs lama — ' + activePtmLabel
+                    : 'Distribusi harian per jenis penyakit tidak menular'
+                }}
+              </div>
             </div>
             <div class="chart-legend">
-              <div
-                v-for="ptm in visiblePtm"
-                :key="ptm.key"
-                class="legend-pill"
-                :style="{ '--c': ptm.color }"
-              >
-                <span class="legend-dot"></span>
-                {{ ptm.label }}
-              </div>
+              <template v-if="activeFilter">
+                <div class="legend-pill" style="--c: #185fa5">
+                  <span class="legend-dot"></span>
+                  Kunjungan Baru
+                </div>
+                <div class="legend-pill" style="--c: #94a3b8">
+                  <span class="legend-dot"></span>
+                  Kunjungan Lama
+                </div>
+              </template>
+              <template v-else>
+                <div
+                  v-for="ptm in ptmList"
+                  :key="ptm.key"
+                  class="legend-pill"
+                  :style="{ '--c': ptm.color }"
+                >
+                  <span class="legend-dot"></span>
+                  {{ ptm.label }}
+                </div>
+              </template>
             </div>
           </div>
           <div class="chart-wrap">
@@ -219,6 +249,8 @@
               <div class="ptm-col-rank">#</div>
               <div class="ptm-col-name">Penyakit</div>
               <div class="ptm-col-bar"></div>
+              <div class="ptm-col-baru">Baru</div>
+              <div class="ptm-col-lama">Lama</div>
               <div class="ptm-col-total">Total</div>
               <div class="ptm-col-pct">%</div>
             </div>
@@ -240,15 +272,17 @@
                   <div
                     class="tbar-fill"
                     :style="{
-                      width: pct(summary[ptm.key] ?? 0, maxPtmVal) + '%',
+                      width: pct(getTotal(ptm.key), maxPtmVal) + '%',
                       background: ptm.color,
                     }"
                   ></div>
                 </div>
               </div>
-              <div class="ptm-col-total">{{ (summary[ptm.key] ?? 0).toLocaleString('id-ID') }}</div>
+              <div class="ptm-col-baru">{{ getBaru(ptm.key) }}</div>
+              <div class="ptm-col-lama">{{ getLama(ptm.key) }}</div>
+              <div class="ptm-col-total">{{ getTotal(ptm.key).toLocaleString('id-ID') }}</div>
               <div class="ptm-col-pct">
-                <span class="pct-badge">{{ pct(summary[ptm.key] ?? 0, totalPtm) }}%</span>
+                <span class="pct-badge">{{ pct(getTotal(ptm.key), totalPtm) }}%</span>
               </div>
             </div>
           </div>
@@ -344,28 +378,43 @@
   ];
 
   // ── Server data ───────────────────────────────────────────────────────
-  const perDayAll = ref(initial.perDayAll ?? []); // array of { date, hipertensi, diabetes, ... }
-  const summary = ref(initial.summary ?? {}); // { hipertensi: N, diabetes: N, ... }
+  // summary[key]   = { baru, lama, total }
+  // perDayAll item = { date, hipertensi: { baru, lama, total }, ... }
+  const perDayAll = ref(initial.perDayAll ?? []);
+  const summary = ref(initial.summary ?? {});
 
-  // ── Active filter (which lines to show) ───────────────────────────────
-  const activeFilter = ref(null); // null = semua ditampilkan
+  // ── Active filter (which disease's baru/lama trend to show) ───────────
+  const activeFilter = ref(null); // null = semua penyakit (total per penyakit)
 
   function toggleFilter(key) {
     activeFilter.value = activeFilter.value === key ? null : key;
     refreshLine();
   }
 
-  // ── Computed ──────────────────────────────────────────────────────────
-  const totalPtm = computed(() => ptmList.reduce((s, p) => s + (summary.value[p.key] ?? 0), 0));
+  // ── Summary helpers ──────────────────────────────────────────────────
+  function getTotal(key) {
+    return summary.value[key]?.total ?? 0;
+  }
+  function getBaru(key) {
+    return summary.value[key]?.baru ?? 0;
+  }
+  function getLama(key) {
+    return summary.value[key]?.lama ?? 0;
+  }
 
-  const maxPtmVal = computed(() => Math.max(1, ...ptmList.map((p) => summary.value[p.key] ?? 0)));
+  // ── Computed ──────────────────────────────────────────────────────────
+  const totalPtm = computed(() => ptmList.reduce((s, p) => s + getTotal(p.key), 0));
+  const totalBaru = computed(() => ptmList.reduce((s, p) => s + getBaru(p.key), 0));
+  const totalLama = computed(() => ptmList.reduce((s, p) => s + getLama(p.key), 0));
+
+  const maxPtmVal = computed(() => Math.max(1, ...ptmList.map((p) => getTotal(p.key))));
 
   const sortedPtm = computed(() =>
-    [...ptmList].sort((a, b) => (summary.value[b.key] ?? 0) - (summary.value[a.key] ?? 0))
+    [...ptmList].sort((a, b) => getTotal(b.key) - getTotal(a.key))
   );
 
-  const visiblePtm = computed(() =>
-    activeFilter.value ? ptmList.filter((p) => p.key === activeFilter.value) : ptmList
+  const activePtmLabel = computed(
+    () => ptmList.find((p) => p.key === activeFilter.value)?.label ?? ''
   );
 
   function pct(val, total) {
@@ -415,22 +464,54 @@
   function buildLineConfig() {
     const days = perDayAll.value;
     const labels = days.map((d) => d.date);
-    const shown = activeFilter.value
-      ? ptmList.filter((p) => p.key === activeFilter.value)
-      : ptmList;
 
-    const datasets = shown.map((ptm) => ({
-      label: ptm.label,
-      data: days.map((d) => d[ptm.key] ?? 0),
-      borderColor: ptm.color,
-      backgroundColor: ptm.color + '18',
-      borderWidth: 2,
-      pointRadius: days.length <= 31 ? 3 : 0,
-      pointHoverRadius: 5,
-      pointBackgroundColor: ptm.color,
-      tension: 0.35,
-      fill: shown.length === 1,
-    }));
+    let datasets;
+
+    if (activeFilter.value) {
+      // Satu penyakit dipilih -> 2 garis: Kunjungan Baru vs Kunjungan Lama
+      const key = activeFilter.value;
+      datasets = [
+        {
+          label: 'Kunjungan Baru',
+          data: days.map((d) => d[key]?.baru ?? 0),
+          borderColor: '#185fa5',
+          backgroundColor: '#185fa518',
+          borderWidth: 2,
+          pointRadius: days.length <= 31 ? 3 : 0,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#185fa5',
+          tension: 0.35,
+          fill: false,
+        },
+        {
+          label: 'Kunjungan Lama',
+          data: days.map((d) => d[key]?.lama ?? 0),
+          borderColor: '#94a3b8',
+          backgroundColor: '#94a3b818',
+          borderWidth: 2,
+          borderDash: [5, 4],
+          pointRadius: days.length <= 31 ? 3 : 0,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#94a3b8',
+          tension: 0.35,
+          fill: false,
+        },
+      ];
+    } else {
+      // Semua penyakit -> 1 garis (total) per penyakit
+      datasets = ptmList.map((ptm) => ({
+        label: ptm.label,
+        data: days.map((d) => d[ptm.key]?.total ?? 0),
+        borderColor: ptm.color,
+        backgroundColor: ptm.color + '18',
+        borderWidth: 2,
+        pointRadius: days.length <= 31 ? 3 : 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: ptm.color,
+        tension: 0.35,
+        fill: false,
+      }));
+    }
 
     const gridColor = 'rgba(0,0,0,0.05)';
     const tickColor = 'rgba(0,0,0,0.38)';
@@ -779,9 +860,6 @@
     }
   }
 
-  /* Row 2 — cards 5–8 occupy cols 1–4 normally via auto-fill */
-  /* Force wrap: the 5th to 8th ptm cards auto-wrap onto next row */
-
   .metric-card {
     background: #fff;
     border: 1px solid #e8eaf0;
@@ -836,6 +914,10 @@
   .metric-total .metric-sub {
     color: rgba(255, 255, 255, 0.5);
   }
+  .metric-total .mini-badge {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
 
   .metric-icon-wrap {
     width: 38px;
@@ -874,6 +956,29 @@
     font-size: 11px;
     color: #94a3b8;
     margin-top: 1px;
+  }
+
+  /* Baru/Lama mini badges */
+  .metric-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .mini-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .mini-badge-baru {
+    background: rgba(24, 95, 165, 0.1);
+    color: #185fa5;
+  }
+  .mini-badge-lama {
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
   }
 
   .metric-bar-track {
@@ -982,7 +1087,7 @@
   }
   .ptm-row {
     display: grid;
-    grid-template-columns: 44px 180px 1fr 80px 70px;
+    grid-template-columns: 44px 170px 1fr 60px 60px 70px 60px;
     align-items: center;
     gap: 10px;
     padding: 9px 20px;
@@ -1016,6 +1121,13 @@
   }
   .ptm-col-bar {
     min-width: 0;
+  }
+  .ptm-col-baru,
+  .ptm-col-lama {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: right;
   }
   .ptm-col-total {
     font-size: 13px;
@@ -1083,7 +1195,7 @@
 
   @media (max-width: 768px) {
     .ptm-row {
-      grid-template-columns: 36px 1fr 60px 56px;
+      grid-template-columns: 36px 1fr 50px 50px 56px;
     }
     .ptm-col-bar {
       display: none;

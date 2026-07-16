@@ -225,11 +225,6 @@ class EncounterService
                 'resource' => $resource,
             ]);
         } catch (\Throwable $e) {
-            // Penyebab paling umum data tidak tersimpan:
-            // - kolom 'kirim'/'terima' terlalu pendek (VARCHAR) untuk menampung JSON besar
-            // - koneksi DB terputus / timeout
-            // - constraint/foreign key gagal
-            // - Auth::id() null padahal kolom userId NOT NULL
             Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
                 'message' => $e->getMessage(),
                 'idPelayanan' => $idPelayanan,

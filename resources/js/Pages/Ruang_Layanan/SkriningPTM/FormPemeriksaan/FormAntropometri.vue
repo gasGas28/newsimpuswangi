@@ -579,20 +579,20 @@
   // --- Props ---
   const props = defineProps({
     DataPasien: Object,
-    tindakan: Array,
   });
 
   const skriningId = props.DataPasien?.idSkrining || null;
 
   const formHipertensi = useForm({
     skriningId,
-    sistolik: '',
-    diastolik: '',
-    kategori_hipertensi: '',
-    suhu: '',
-    nadi: '',
-    pernapasan: '',
+    sistolik: props.DataPasien?.sistolik || '',
+    diastolik: props.DataPasien?.tekanan_diastolik || '',
+    kategori_hipertensi: props.DataPasien?.kategori_tekanan_darah || '',
+    suhu: props.DataPasien?.suhu || '',
+    nadi: props.DataPasien?.nadi || '',
+    pernapasan: props.DataPasien?.pernapasan || '',
   });
+
   const formDiabetes = useForm({
     skriningId,
     gdp: '',

@@ -27,9 +27,13 @@ class DashboardPTMService
         'kolesterol'   => ['table' => 'simpus_profil_lipid', 'fk' => 'skriningID', 'pk' => 'id'],
     ];
 
+    protected const JENIS_BARU = 'Kunjungan Baru';
+    protected const JENIS_LAMA = 'Kunjungan Lama';
+
     /**
-     * Total kasus per kategori PTM dalam rentang tanggal.
-     * Hasil: ['hipertensi' => 12, 'diabetes' => 5, ...]
+     * Total kasus per kategori PTM dalam rentang tanggal, dipecah
+     * jadi kunjungan baru, kunjungan lama, dan total keduanya.
+     * Hasil: ['hipertensi' => ['baru' => 4, 'lama' => 8, 'total' => 12], ...]
      */
     public function getSummary(array $filters): array
     {
@@ -43,7 +47,8 @@ class DashboardPTMService
     /**
      * Breakdown harian tiap kategori, kontinu dari start_date s/d end_date
      * (tanggal tanpa kasus tetap diisi 0 supaya garis chart tidak putus).
-     * Hasil: [ ['date' => '2026-07-01', 'hipertensi' => 3, 'diabetes' => 1, ...], ... ]
+     * Tiap kategori per-hari juga dipecah baru/lama/total.
+     * Hasil: [ ['date' => '2026-07-01', 'hipertensi' => ['baru'=>1,'lama'=>2,'total'=>3], ...], ... ]
      */
     public function getPerDayAll(array $filters): array
     {
@@ -60,7 +65,7 @@ class DashboardPTMService
             $row = ['date' => $d];
 
             foreach (array_keys($this->ptmTables) as $key) {
-                $row[$key] = (int) ($perKeyDaily[$key][$d] ?? 0);
+                $row[$key] = $perKeyDaily[$key][$d] ?? ['baru' => 0, 'lama' => 0, 'total' => 0];
             }
 
             $rows[] = $row;
@@ -69,18 +74,29 @@ class DashboardPTMService
         return $rows;
     }
 
-    protected function countForKey(string $key, array $filters): int
+    protected function countForKey(string $key, array $filters): array
     {
         $cfg = $this->ptmTables[$key] ?? null;
+        $empty = ['baru' => 0, 'lama' => 0, 'total' => 0];
+
         if (!$cfg || !Schema::hasTable($cfg['table'])) {
-            return 0;
+            return $empty;
         }
 
         $result = $this->baseKeyQuery($cfg, $filters)
-            ->selectRaw('COUNT(DISTINCT t.' . $cfg['pk'] . ') as jml')
+            ->selectRaw(
+                "COUNT(DISTINCT CASE WHEN kj.jenis_kunjungan = ? THEN t.{$cfg['pk']} END) as baru,
+                 COUNT(DISTINCT CASE WHEN kj.jenis_kunjungan = ? THEN t.{$cfg['pk']} END) as lama,
+                 COUNT(DISTINCT t.{$cfg['pk']}) as total",
+                [self::JENIS_BARU, self::JENIS_LAMA]
+            )
             ->first();
 
-        return (int) ($result->jml ?? 0);
+        return [
+            'baru'  => (int) ($result->baru ?? 0),
+            'lama'  => (int) ($result->lama ?? 0),
+            'total' => (int) ($result->total ?? 0),
+        ];
     }
 
     protected function perDayForKey(string $key, array $filters): array
@@ -90,15 +106,32 @@ class DashboardPTMService
             return [];
         }
 
-        return $this->baseKeyQuery($cfg, $filters)
-            ->selectRaw('DATE(l.tglKunjungan) as tgl, COUNT(DISTINCT t.' . $cfg['pk'] . ') as jml')
+        $rows = $this->baseKeyQuery($cfg, $filters)
+            ->selectRaw(
+                "DATE(l.tglKunjungan) as tgl,
+                 COUNT(DISTINCT CASE WHEN kj.jenis_kunjungan = ? THEN t.{$cfg['pk']} END) as baru,
+                 COUNT(DISTINCT CASE WHEN kj.jenis_kunjungan = ? THEN t.{$cfg['pk']} END) as lama,
+                 COUNT(DISTINCT t.{$cfg['pk']}) as total",
+                [self::JENIS_BARU, self::JENIS_LAMA]
+            )
             ->groupBy('tgl')
-            ->pluck('jml', 'tgl')
-            ->toArray();
+            ->get();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[$r->tgl] = [
+                'baru'  => (int) $r->baru,
+                'lama'  => (int) $r->lama,
+                'total' => (int) $r->total,
+            ];
+        }
+
+        return $out;
     }
 
     /**
      * Query dasar: tabel penyakit -> skrining -> pelayanan -> loket,
+     * plus join ke kunjungan_ptm untuk status baru/lama,
      * difilter ke poli PTM (006) dan rentang tanggal kunjungan.
      */
     protected function baseKeyQuery(array $cfg, array $filters)
@@ -107,6 +140,7 @@ class DashboardPTMService
             ->join('simpus_skrining_ptm as skrining', 'skrining.idSkrining', '=', "t.{$cfg['fk']}")
             ->join('simpus_pelayanan as pel', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
             ->join('simpus_loket as l', 'l.idLoket', '=', 'pel.loketId')
+            ->leftJoin('simpus_kunjungan_ptm as kj', 'kj.idSkrining', '=', 'skrining.idSkrining')
             ->where('l.kdPoli', '006')
             ->whereBetween('l.tglKunjungan', [
                 $filters['start_date'] . ' 00:00:00',

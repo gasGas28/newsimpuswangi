@@ -63,7 +63,7 @@ class HipertensiObservationService
         $encounterId = $skrining->encounter_id;
         $effectiveAt = now()->toIso8601String();
 
-        // ✅ Cek duplikat — pakai LOINC panel tekanan darah
+        // Cek duplikat — pakai LOINC panel tekanan darah
         $existingId = $this->findExisting($encounterId, '55284-4');
         if ($existingId) {
             Log::info('Observation BloodPressure sudah ada, skip', [

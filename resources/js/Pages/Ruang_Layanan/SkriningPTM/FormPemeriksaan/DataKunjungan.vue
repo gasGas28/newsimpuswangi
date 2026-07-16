@@ -146,8 +146,6 @@
   const defaultFasyankes = props.DataPasien?.nama_unit || '-';
   const ihsSatusehat = props.DataPasien?.IHS_NUMBER || '-';
 
-  // --- Form ---
-
   const form = useForm({
     idSkrining: pasien.value?.idSkrining || '',
     idPelayanan: pasien.value?.idpelayanan || '',
@@ -155,9 +153,9 @@
     nik_pasien: pasien.value?.NIK || '',
     tanggal_skrining: defaultTanggal,
     jenis_kunjungan: defaultJenisKunjungan,
-    id_petugas: '',
+    id_petugas: pasien.value?.id_petugas || '',
     fasyankes: defaultFasyankes,
-    keluhan_utama: '',
+    keluhan_utama: pasien.value?.keluhan_utama || '',
     patient_id: ihsSatusehat || ''
   });
 

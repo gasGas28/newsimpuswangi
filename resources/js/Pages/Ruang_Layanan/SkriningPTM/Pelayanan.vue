@@ -118,7 +118,7 @@
   const showAkhiriSuccessModal = ref(false);
 
   onMounted(() => {
-    if (props.DataPasien.sudahDilayani == 2) {
+    if (props.DataPasien.sudahDilayani == 2 || props.DataPasien.sudahDilayani == 1) {
       sudahMulai.value = true;
       showFormPemeriksaan.value = true;
     }

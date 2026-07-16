@@ -9,7 +9,7 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 
 class HipertensiConditionService
 {
-    // ✅ Map kategori_tekanan_darah -> ICD-10 + display
+    //  Map kategori_tekanan_darah -> ICD-10 + display
     private array $categoryMap = [
         'normal'             => ['code' => 'Z03.8', 'display' => 'Tekanan darah normal'],
         'elevated'           => ['code' => 'R03.0', 'display' => 'Elevated blood-pressure reading'],

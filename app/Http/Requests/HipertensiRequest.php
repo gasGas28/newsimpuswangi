@@ -32,4 +32,26 @@ class HipertensiRequest extends FormRequest
 
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'sistolik.required' => 'Tanggal skrining wajib diisi.',
+            'diastolik.required' => 'Dokter atau petugas wajib dipilih.',
+            'suhu.required' => 'Fasyankes wajib diisi.',
+            'nadi.required' => 'Jenis kunjungan wajib diisi.',
+            'pernapasan.required' => 'Keluhan utama wajib diisi.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'sistolik' => 'dokter/petugas',
+            'diastolik' => 'tanggal skrining',
+            'suhu' => 'keluhan utama',
+            'nadi' => 'keluhan utama',
+            'pernapasan' => 'keluhan utama',
+        ];
+    }
 }

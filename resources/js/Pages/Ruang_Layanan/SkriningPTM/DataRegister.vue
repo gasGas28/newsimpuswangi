@@ -59,16 +59,7 @@
           :disabled="!riwayat.length || isDownloadingExcel"
         >
           <i :class="isDownloadingExcel ? 'bi bi-arrow-repeat' : 'bi bi-file-earmark-excel'"></i>
-          <span>{{ isDownloadingExcel ? 'Mengunduh...' : 'Download Excel' }}</span>
-        </button>
-
-        <button
-          @click="downloadPDF"
-          class="btn-download btn-pdf"
-          :disabled="!riwayat.length || isDownloading"
-        >
-          <i :class="isDownloading ? 'bi bi-arrow-repeat' : 'bi bi-file-pdf'"></i>
-          <span>{{ isDownloading ? 'Mengunduh...' : 'Download PDF' }}</span>
+          <span>{{ isDownloadingExcel ? 'Mengunduh...' : 'Download Register Cohort' }}</span>
         </button>
 
         <button
@@ -138,6 +129,7 @@
   const props = defineProps({
     DataRiwayat: Array,
   });
+  
 
   const riwayat = props.DataRiwayat || [];
   const isDownloading = ref(false);
@@ -205,49 +197,6 @@
     }
   };
 
-  // const downloadExcel = async () => {
-  //   if (riwayat.length === 0 || isDownloadingExcel.value) return;
-
-  //   isDownloadingExcel.value = true;
-  //   const NIK = getQueryParam('NIK');
-
-  //   try {
-  //     const response = await fetch(route('ruang-layanan.export-excel') + '?nik=' + NIK, {
-  //       method: 'GET',
-  //       headers: {
-  //         Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Gagal mengunduh Excel');
-  //     }
-
-  //     const blob = await response.blob();
-
-  //     const contentDisposition = response.headers.get('Content-Disposition');
-  //     let filename = 'Riwayat_Pasien.xlsx';
-  //     if (contentDisposition) {
-  //       const match = contentDisposition.match(/filename="?([^"]+)"?/);
-  //       if (match) filename = match[1];
-  //     }
-
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement('a');
-  //     link.href = url;
-  //     link.download = filename;
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-  //   } catch (error) {
-  //     console.error('Download Excel error:', error);
-  //     alert('Gagal mengunduh Excel. Silakan coba lagi.');
-  //   } finally {
-  //     isDownloadingExcel.value = false;
-  //   }
-  // };
-
   const downloadExcel = async () => {
     if (riwayat.length === 0 || isDownloadingExcel.value) return;
     isDownloadingExcel.value = true;
@@ -287,48 +236,48 @@
     }
   };
 
-  const downloadPDF = async () => {
-    if (riwayat.length === 0 || isDownloading.value) return;
+  // const downloadPDF = async () => {
+  //   if (riwayat.length === 0 || isDownloading.value) return;
 
-    isDownloading.value = true;
-    const NIK = getQueryParam('NIK');
+  //   isDownloading.value = true;
+  //   const NIK = getQueryParam('NIK');
 
-    try {
-      const response = await fetch(route('ruang-layanan.download-register') + '?NIK=' + NIK, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/pdf',
-        },
-      });
+  //   try {
+  //     const response = await fetch(route('ruang-layanan.download-register') + '?NIK=' + NIK, {
+  //       method: 'GET',
+  //       headers: {
+  //         Accept: 'application/pdf',
+  //       },
+  //     });
 
-      if (!response.ok) {
-        throw new Error('Gagal mengunduh PDF');
-      }
+  //     if (!response.ok) {
+  //       throw new Error('Gagal mengunduh PDF');
+  //     }
 
-      const blob = await response.blob();
+  //     const blob = await response.blob();
 
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = 'Riwayat_Pasien.pdf';
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename="?([^"]+)"?/);
-        if (match) filename = match[1];
-      }
+  //     const contentDisposition = response.headers.get('Content-Disposition');
+  //     let filename = 'Riwayat_Pasien.pdf';
+  //     if (contentDisposition) {
+  //       const match = contentDisposition.match(/filename="?([^"]+)"?/);
+  //       if (match) filename = match[1];
+  //     }
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download PDF error:', error);
-      alert('Gagal mengunduh PDF. Silakan coba lagi.');
-    } finally {
-      isDownloading.value = false;
-    }
-  };
+  //     const url = window.URL.createObjectURL(blob);
+  //     const link = document.createElement('a');
+  //     link.href = url;
+  //     link.download = filename;
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //     window.URL.revokeObjectURL(url);
+  //   } catch (error) {
+  //     console.error('Download PDF error:', error);
+  //     alert('Gagal mengunduh PDF. Silakan coba lagi.');
+  //   } finally {
+  //     isDownloading.value = false;
+  //   }
+  // };
 
   console.log('Data Riwayat:', riwayat);
 </script>
