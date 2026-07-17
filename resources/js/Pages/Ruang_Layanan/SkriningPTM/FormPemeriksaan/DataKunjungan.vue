@@ -161,13 +161,11 @@
 
   console.log('Form initialized with:', form);
 
-  // --- UI state ---
 
   const isSaving = ref(false);
   const saveStatus = ref('idle');
   const saveError = ref('');
 
-  // --- Computed ---
 
   const saveMessage = computed(() => {
     if (saveStatus.value === 'ready') return 'Data subjektif berhasil disimpan.';
