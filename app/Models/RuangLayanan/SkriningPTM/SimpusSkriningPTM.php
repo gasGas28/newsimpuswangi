@@ -8,6 +8,7 @@ use App\Models\RuangLayanan\SkriningPTM\SimpusDiabetes;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
 use App\Models\RuangLayanan\SkriningPTM\SimpusProfilLipid;
 use App\Models\RuangLayanan\SkriningPTM\SimpusAsamUrat;
+use App\Models\SimpusDataEdukasi;
 
 class SimpusSkriningPTM extends Model
 {
@@ -17,7 +18,6 @@ class SimpusSkriningPTM extends Model
     protected $fillable = [
         'idSkrining',
         'idPelayanan',
-        'idLoket',
         'encounter_id',
         'patient_id',
         'status',
@@ -49,6 +49,10 @@ class SimpusSkriningPTM extends Model
     public function asamUrat()
     {
         return $this->hasOne(SimpusAsamUrat::class, 'idSkrining');
+    }
+    public function edukasi()
+    {
+        return $this->hasMany(SimpusDataEdukasi::class, 'idSkrining');
     }
     //
 }

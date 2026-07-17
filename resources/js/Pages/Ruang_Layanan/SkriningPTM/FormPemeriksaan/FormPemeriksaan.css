@@ -1,13 +1,136 @@
 .subjektif-form,
 .risk-form,
-.metabolik-form,
 .genetik-form,
 .indera-form,
 .assessment-form,
 .status-form,
-.resume-form {
+.resume-form,
+.assessment-form {
   display: grid;
   gap: 18px;
+}
+
+.objektif-toolbar,
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.objektif-toolbar {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5edf0;
+}
+
+.objektif-kicker {
+  margin: 0 0 4px;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.objektif-toolbar h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.2rem;
+  font-weight: 750;
+}
+
+.metabolik-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+/* Panel kelima (Profil Lipid) melebar penuh karena field-nya lebih banyak */
+.metabolik-form .metabolik-panel:last-child {
+  grid-column: 1 / -1;
+}
+
+.risk-score-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: #f4faf7;
+  border: 1px solid #dde7e2;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.risk-score-main {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.risk-score-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.risk-score-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f6b4c;
+}
+
+.risk-score-number small {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.risk-score-category {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #eafbf3;
+  color: #0f6b4c;
+}
+
+.risk-score-panel.risk-score-medium .risk-score-category {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.risk-score-panel.risk-score-high .risk-score-category {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.risk-score-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.risk-score-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.risk-score-disclaimer i {
+  color: #94a3b8;
+}
+
+@media (max-width: 900px) {
+  .metabolik-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .subjektif-toolbar,
@@ -95,7 +218,7 @@
 .panel-header {
   padding: 18px 20px;
   border-bottom: 1px solid #e5edf0;
-  background: #f8fafc;
+  background: #16a36f;
 }
 
 .panel-header h4 {
@@ -103,14 +226,14 @@
   align-items: center;
   gap: 10px;
   margin: 0;
-  color: #0f3d2e;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 750;
 }
 
 .panel-header p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #ffffff;
   font-size: 0.86rem;
 }
 
@@ -1033,5 +1156,154 @@ pre {
   .send-button,
   .finish-button {
     width: 100%;
+  }
+}
+
+/* ============================================================
+   ASSESSMENT – komponen FormAssessment.vue
+   ============================================================ */
+
+/* Input group diagnosa (kode + nama + tombol aksi) */
+.diagnosa-input-group {
+  display: flex;
+}
+
+.diagnosa-input-group .diagnosa-kode {
+  max-width: 120px;
+  border-radius: 8px 0 0 8px;
+  flex-shrink: 0;
+}
+
+.diagnosa-input-group .diagnosa-nama {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0;
+  border-left: 0;
+}
+
+/* Tombol Cari */
+.btn-diagnosa-cari {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 0;
+  background: #0ea5e9;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-diagnosa-cari:hover {
+  background: #0284c7;
+}
+
+/* Tombol Hapus (reset form) */
+.btn-diagnosa-hapus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #ffffff;
+  color: #0f3d2e;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-diagnosa-hapus:hover {
+  background: #f1f5f9;
+}
+
+/* Grid 2 kolom untuk Alergi Makanan & Obat */
+.alergi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+/* Tabel daftar diagnosa */
+.diagnosa-table {
+  font-size: 0.88rem;
+}
+
+.diagnosa-table .col-no {
+  width: 40px;
+}
+
+.diagnosa-table .col-aksi {
+  width: 80px;
+  text-align: center;
+}
+
+.diagnosa-table td:last-child {
+  text-align: center;
+}
+
+/* Baris kosong tabel */
+.diagnosa-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 20px 0;
+}
+
+/* Tombol hapus per baris tabel */
+.btn-hapus-diagnosa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #dc2626;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btn-hapus-diagnosa:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+@media (max-width: 576px) {
+  .alergi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnosa-input-group {
+    flex-wrap: wrap;
+  }
+
+  .diagnosa-input-group .diagnosa-kode,
+  .diagnosa-input-group .diagnosa-nama {
+    border-radius: 8px;
+    border-left: 1px solid #cfd9e3;
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .btn-diagnosa-cari {
+    flex: 1;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .btn-diagnosa-hapus {
+    flex: 1;
+    border-radius: 0 8px 8px 0;
   }
 }

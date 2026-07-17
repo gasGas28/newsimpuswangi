@@ -23,7 +23,7 @@ class AssessmentPTMRequest extends FormRequest
     {
         return [
             //
-            'skrining_ptm_id' => 'nullable|exists:skrining_ptm,id',
+            'skrining_ptm_id' => 'nullable|exists:simpus_skrining_ptm,id',
             'idpelayanan' => 'required_without:skrining_ptm_id',
             'masalah_hasil_skrining' => 'nullable|array',
             'ringkasan_temuan' => 'nullable|array',

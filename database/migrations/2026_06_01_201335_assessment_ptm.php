@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('assessment_ptm', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('skrining_ptm_id')->constrained('skrining_ptm')->cascadeOnDelete();
+            $table->foreignId('skrining_ptm_id')->constrained('simpus_skrining_ptm')->cascadeOnDelete();
 
             $table->json('masalah_hasil_skrining')->nullable();
             $table->json('ringkasan_temuan')->nullable();

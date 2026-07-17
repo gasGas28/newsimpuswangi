@@ -5,14 +5,30 @@ namespace App\Services\SatuSehatPTM;
 use Illuminate\Support\Facades\Http;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use Illuminate\Support\Facades\Log;
 
 class ObservationService
 {
     public function __construct(
-        private EncounterService $encounterService
+        private EncounterService $encounterService,
     ) {}
 
+    private ?string $cachedToken = null;
+
+    private function getToken(): string
+    {
+        if (!$this->cachedToken) {
+            $this->cachedToken = $this->encounterService->getAccessToken();
+        }
+        return $this->cachedToken;
+    }
+
+
+    /**
+     * Kirim status merokok sebagai Observation (LOINC 72166-2)
+     * Return observation ID untuk dipakai di QuestionnaireResponse (linkId 1.4)
+     */
     private function createObservation(array $payload): string
     {
         $token = $this->encounterService->getAccessToken();
@@ -32,29 +48,14 @@ class ObservationService
 
         return $response->json('id');
     }
-
-    private ?string $cachedToken = null;
-
-    private function getToken(): string
-    {
-        if (!$this->cachedToken) {
-            $this->cachedToken = $this->encounterService->getAccessToken();
-        }
-        return $this->cachedToken;
-    }
-
-    /**
-     * Kirim status merokok sebagai Observation (LOINC 72166-2)
-     * Return observation ID untuk dipakai di QuestionnaireResponse (linkId 1.4)
-     */
     public function sendSmokingStatus(string $idSkrining): string
     {
-        $skrining     = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining     = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $faktorRisiko = FaktorRisiko::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId      = $skrining->patient_id;
         $encounterId    = $skrining->encounter_id;
-        
+
         $existingId = $this->findExistingObservation($encounterId);
         if ($existingId) {
             Log::info('Observation sudah ada, skip kirim', [
@@ -79,7 +80,7 @@ class ObservationService
         }
 
         $snomed = $smokingStatusMap[$statusValue] ?? ['code' => '8392000', 'display' => 'Non-smoker'];
-        
+
         $payload = [
             'resourceType' => 'Observation',
             'status'       => 'final',
@@ -138,9 +139,8 @@ class ObservationService
 
     private function findExistingObservation(string $encounterId): ?string
     {
-        $token = $this->encounterService->getAccessToken();
 
-        $response = Http::withToken($token)
+        $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->get(config('services.satusehat.fhir_url') . '/Observation', [
                 'encounter' => $encounterId,

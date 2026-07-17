@@ -1,18 +1,16 @@
 <template>
   <div class="p-2 rounded-4 mt-2">
-    <!--  Data Pasien -->
     <DataPasienCard :DataPasien="props.DataPasien" :backRoute="backRoute" />
-
-    <!--  Quick Actions -->
-
     <QuickActions
       :DataPasien="props.DataPasien"
       :sudahMulai="sudahMulai"
       @mulai-pemeriksaan="mulaiPemeriksaan"
     />
-
-    <!--  Title Section -->
-    <TitleSection title="Pemeriksaan Skrining Penyakit Tidak Menular" />
+    <TitleSection
+      title="Pemeriksaan Skrining Penyakit Tidak Menular"
+      :loading="isEnding"
+      @akhiri-pelayanan="confirmAkhiriPelayanan"
+    />
   </div>
 
   <div
@@ -27,7 +25,41 @@
       <p class="text-muted mb-0">Pemeriksaan dimulai</p>
     </div>
   </div>
-  <!-- Form Pemeriksaan -->
+
+  <div
+    v-if="showAkhiriSuccessModal"
+    class="custom-modal d-flex justify-content-center align-items-center"
+  >
+    <div class="modal-content-custom">
+      <div class="success-icon">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <h5 class="fw-bold mt-3">Berhasil</h5>
+      <p class="text-muted mb-0">Pelayanan berhasil diakhiri &amp; dikirim ke SATUSEHAT</p>
+    </div>
+  </div>
+
+  <div
+    v-if="showConfirmModal"
+    class="custom-modal d-flex justify-content-center align-items-center"
+  >
+    <div class="modal-content-custom">
+      <div class="warning-icon">
+        <i class="bi bi-exclamation-circle-fill"></i>
+      </div>
+      <h5 class="fw-bold mt-3">Akhiri Pelayanan?</h5>
+      <p class="text-muted mb-3">
+        Pastikan semua data pemeriksaan sudah lengkap sebelum mengakhiri pelayanan.
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <button class="btn btn-secondary" @click="showConfirmModal = false">Batal</button>
+        <button class="btn btn-success" :disabled="isEnding" @click="akhiriPelayanan">
+          {{ isEnding ? 'Memproses...' : 'Ya, Akhiri' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div v-if="showFormPemeriksaan" class="bg-white rounded-4 shadow-sm p-4 mt-1">
     <FormPemeriksaan
       :DataPasien="props.DataPasien"
@@ -35,6 +67,14 @@
       :DataTindakan="props.DataTindakan"
       :TenagaMedis="props.TenagaMedis"
       :DataSkrining="props.DataSkrining"
+      :Diagnosa="props.Diagnosa"
+      :AlergiMakanan="props.AlergiMakanan"
+      :AlergiObat="props.AlergiObat"
+      :DataDiagnosa="props.DataDiagnosa"
+      :DataObat="props.DataObat"
+      :ResepObat="props.ResepObat"
+      :MasterEdukasi="props.MasterEdukasi"
+      :DataEdukasi="props.DataEdukasi"
     />
   </div>
 </template>
@@ -57,19 +97,28 @@
     DataTindakan: Array,
     TenagaMedis: Array,
     DataSkrining: Object,
+    Diagnosa: Array,
+    DataDiagnosa: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataObat: Array,
+    ResepObat: Array,
+    MasterEdukasi: Array,
+    DataEdukasi: Array,
   });
-
-  const hipertensi = computed(() => props.DataSkrining?.kategori_tekanan_darah);
-
-  console.log('data ', hipertensi);
 
   const backRoute = 'ruang-layanan.ptm';
   const showSuccessModal = ref(false);
   const showFormPemeriksaan = ref(false);
   const sudahMulai = ref(false);
 
+  // --- Akhiri Pelayanan ---
+  const isEnding = ref(false);
+  const showConfirmModal = ref(false);
+  const showAkhiriSuccessModal = ref(false);
+
   onMounted(() => {
-    if (props.DataPasien.sudahDilayani == 2) {
+    if (props.DataPasien.sudahDilayani == 2 || props.DataPasien.sudahDilayani == 1) {
       sudahMulai.value = true;
       showFormPemeriksaan.value = true;
     }
@@ -97,6 +146,41 @@
       }
     );
   };
+
+  // Step 1: klik tombol -> munculkan modal konfirmasi
+  function confirmAkhiriPelayanan() {
+    showConfirmModal.value = true;
+  }
+
+  // Step 2: user konfirmasi -> kirim request akhiri pelayanan
+  function akhiriPelayanan() {
+    isEnding.value = true;
+
+    router.post(
+      route('pelayanan.akhiri-pelayanan'),
+      {
+        idpelayanan: props.DataPasien.idpelayanan,
+        status: 1,
+      },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          showConfirmModal.value = false;
+          showAkhiriSuccessModal.value = true;
+          setTimeout(() => {
+            showAkhiriSuccessModal.value = false;
+          }, 1500);
+        },
+        onError: (errors) => {
+          console.error('Gagal akhiri pelayanan', errors);
+          showConfirmModal.value = false;
+        },
+        onFinish: () => {
+          isEnding.value = false;
+        },
+      }
+    );
+  }
 </script>
 
 <style scoped>
@@ -120,6 +204,11 @@
   .success-icon {
     font-size: 70px;
     color: #22c55e;
+  }
+
+  .warning-icon {
+    font-size: 60px;
+    color: #f59e0b;
   }
 
   @keyframes popup {

@@ -141,50 +141,6 @@
     animation: fadeIn 0.3s ease;
   }
 
-  .form-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 14px;
-    padding-top: 16px;
-    border-top: 1px solid #e5edf0;
-    flex-wrap: wrap;
-  }
-
-  .save-status {
-    color: #64748b;
-    font-size: 0.86rem;
-    font-weight: 600;
-  }
-
-  .save-status.success {
-    color: #0f6b4c;
-  }
-
-  .save-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 40px;
-    padding: 9px 16px;
-    border: 0;
-    border-radius: 8px;
-    background: #0f6b4c;
-    color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 750;
-    box-shadow: 0 8px 18px rgba(15, 107, 76, 0.18);
-  }
-
-  .save-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.72;
-  }
-
-  .save-button .bi-arrow-repeat {
-    animation: spin 0.8s linear infinite;
-  }
 
   @keyframes spin {
     to {

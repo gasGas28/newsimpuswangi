@@ -25,11 +25,18 @@
         <component
           :is="currentForm"
           :DataPasien="DataPasien"
-          :formData="formPemeriksaan"
           :tindakan="props.tindakan"
           :DataTindakan="props.DataTindakan"
           :TenagaMedis="props.TenagaMedis"
           :DataSkrining="props.DataSkrining"
+          :Diagnosa="props.Diagnosa"
+          :AlergiMakanan="props.AlergiMakanan"
+          :AlergiObat="props.AlergiObat"
+          :DataDiagnosa="props.DataDiagnosa"
+          :DataObat="props.DataObat"
+          :ResepObat="props.ResepObat"
+          :MasterEdukasi="props.MasterEdukasi"
+          :DataEdukasi="props.DataEdukasi"
         />
       </div>
     </div>
@@ -54,6 +61,14 @@
     DataTindakan: Array,
     TenagaMedis: Array,
     DataSkrining: Object,
+    Diagnosa: Array,
+    DataDiagnosa: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+    DataObat: Array,
+    ResepObat: Array,
+    MasterEdukasi: Array,
+    DataEdukasi: Array,
   });
 
   // Tabs list

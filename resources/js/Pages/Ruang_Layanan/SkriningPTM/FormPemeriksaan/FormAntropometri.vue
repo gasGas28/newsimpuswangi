@@ -3,7 +3,7 @@
     <section class="metabolik-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-speedometer2"></i> Obesitas</h4>
+          <h4><i class="bi bi-speedometer2"></i>Deteksi Dini Obesitas</h4>
           <p>Antropometri, IMT, dan lingkar pinggang.</p>
         </div>
       </div>
@@ -19,7 +19,7 @@
                 type="number"
                 min="0"
                 step="0.1"
-                v-model.number="form.obesitas.berat_badan"
+                v-model.number="formObesitas.berat_badan"
                 placeholder="0.0"
                 @input="hitungIMT"
               />
@@ -36,7 +36,7 @@
                 type="number"
                 min="0"
                 step="0.1"
-                v-model.number="form.obesitas.tinggi_badan"
+                v-model.number="formObesitas.tinggi_badan"
                 placeholder="0.0"
                 @input="hitungIMT"
               />
@@ -51,7 +51,7 @@
                 id="imt"
                 class="form-control"
                 type="text"
-                v-model="form.obesitas.imt"
+                v-model="formObesitas.imt"
                 readonly
                 placeholder="-"
               />
@@ -60,19 +60,19 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="imt_interp">Interpretasi IMT</label>
+            <label class="form-label" for="imt_interp">Kategori IMT</label>
             <input
               id="imt_interp"
               class="form-control"
               type="text"
-              v-model="form.obesitas.interpretasi_imt"
+              v-model="formObesitas.interpretasi_imt"
               readonly
               placeholder="-"
             />
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="lp">Lingkar Pinggang</label>
+            <label class="form-label" for="lp">Lingkar Perut</label>
             <div class="input-with-addon">
               <input
                 id="lp"
@@ -80,7 +80,7 @@
                 type="number"
                 min="0"
                 step="0.1"
-                v-model.number="form.obesitas.lingkar_pinggang"
+                v-model.number="formObesitas.lingkar_perut"
                 placeholder="0.0"
                 @input="interpretLP"
               />
@@ -89,16 +89,30 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="lp_interp">Interpretasi Lingkar Pinggang</label>
+            <label class="form-label" for="lp_interp">Kategori Lingkar Perut</label>
             <input
               id="lp_interp"
               class="form-control"
               type="text"
-              v-model="form.obesitas.interpretasi_lingkar_pinggang"
+              v-model="formObesitas.interpretasi_lp"
               readonly
               placeholder="-"
             />
           </div>
+        </div>
+        <div class="form-actions">
+          <div class="save-status">
+            {{ saveMessage.obesitas }}
+          </div>
+          <button
+            type="button"
+            class="save-button"
+            :disabled="isSaving.obesitas"
+            @click="saveObesitas"
+          >
+            <i class="bi" :class="isSaving.obesitas ? 'bi-arrow-repeat' : 'bi-save'"></i>
+            <span>{{ isSaving.obesitas ? 'Menyimpan...' : 'Simpan Obesitas' }}</span>
+          </button>
         </div>
       </div>
     </section>
@@ -106,7 +120,7 @@
     <section class="metabolik-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-heart-pulse"></i> Hipertensi</h4>
+          <h4><i class="bi bi-heart-pulse"></i>Deteksi Dini Hipertensi</h4>
           <p>Tekanan darah, nadi, frekuensi napas, dan suhu tubuh.</p>
         </div>
       </div>
@@ -114,14 +128,14 @@
       <div class="panel-body">
         <div class="metric-grid">
           <div class="form-field">
-            <label class="form-label" for="td_s">Tekanan Darah Sistolik</label>
+            <label class="form-label" for="td_s">Sistolik</label>
             <div class="input-with-addon">
               <input
                 id="td_s"
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.hipertensi.sistolik"
+                v-model.number="formHipertensi.sistolik"
                 placeholder="120"
                 @input="interpretTD"
               />
@@ -130,14 +144,14 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="td_d">Tekanan Darah Diastolik</label>
+            <label class="form-label" for="td_d">Diastolik</label>
             <div class="input-with-addon">
               <input
                 id="td_d"
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.hipertensi.tekanan_diastolik"
+                v-model.number="formHipertensi.diastolik"
                 placeholder="80"
                 @input="interpretTD"
               />
@@ -151,7 +165,7 @@
               id="td_interp"
               class="form-control"
               type="text"
-              v-model="form.hipertensi.kategori_tekanan_darah"
+              v-model="formHipertensi.kategori_hipertensi"
               readonly
               placeholder="-"
             />
@@ -165,7 +179,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.hipertensi.nadi"
+                v-model.number="formHipertensi.nadi"
                 placeholder="80"
               />
               <span>x/mnt</span>
@@ -180,7 +194,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.hipertensi.pernapasan"
+                v-model.number="formHipertensi.pernapasan"
                 placeholder="18"
               />
               <span>x/mnt</span>
@@ -196,12 +210,26 @@
                 type="number"
                 min="0"
                 step="0.1"
-                v-model.number="form.hipertensi.suhu"
+                v-model.number="formHipertensi.suhu"
                 placeholder="36.5"
               />
               <span>C</span>
             </div>
           </div>
+        </div>
+        <div class="form-actions">
+          <div class="save-status">
+            {{ saveMessage.hipertensi }}
+          </div>
+          <button
+            type="button"
+            class="save-button"
+            :disabled="isSaving.hipertensi"
+            @click="saveHipertensi"
+          >
+            <i class="bi" :class="isSaving.hipertensi ? 'bi-arrow-repeat' : 'bi-save'"></i>
+            <span>{{ isSaving.hipertensi ? 'Menyimpan...' : 'Simpan Hipertensi' }}</span>
+          </button>
         </div>
       </div>
     </section>
@@ -209,7 +237,7 @@
     <section class="metabolik-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-droplet-half"></i> Diabetes Melitus</h4>
+          <h4><i class="bi bi-droplet-half"></i>Deteksi Dini Diabetes Melitus</h4>
           <p>Gula darah puasa, gula darah sewaktu, HbA1c, dan interpretasi diabetes.</p>
         </div>
       </div>
@@ -224,7 +252,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.diabetes.gdp"
+                v-model.number="formDiabetes.gdp"
                 placeholder="0"
                 @input="interpretDM"
               />
@@ -238,7 +266,7 @@
               id="dm_interp"
               class="form-control"
               type="text"
-              v-model="form.diabetes.interpretasi_gdp"
+              v-model="formDiabetes.interpretasi_gdp"
               readonly
               placeholder="-"
             />
@@ -252,7 +280,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.diabetes.gds"
+                v-model.number="formDiabetes.gds"
                 placeholder="0"
                 @input="interpretDM"
               />
@@ -266,7 +294,7 @@
               id="dm_interp"
               class="form-control"
               type="text"
-              v-model="form.diabetes.interpretasi_gds"
+              v-model="formDiabetes.interpretasi_gds"
               readonly
               placeholder="-"
             />
@@ -281,7 +309,7 @@
                 type="number"
                 min="0"
                 step="0.1"
-                v-model.number="form.diabetes.hba1c"
+                v-model.number="formDiabetes.hba1c"
                 placeholder="0.0"
                 @input="interpretDM"
               />
@@ -294,7 +322,7 @@
               id="dm_interp"
               class="form-control"
               type="text"
-              v-model="form.diabetes.interpretasi_hba1c"
+              v-model="formDiabetes.interpretasi_hba1c"
               readonly
               placeholder="-"
             />
@@ -307,7 +335,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.diabetes.gd2pp"
+                v-model.number="formDiabetes.gd2pp"
                 placeholder="0.0"
                 @input="interpretDM"
               />
@@ -320,11 +348,25 @@
               id="dm_interp"
               class="form-control"
               type="text"
-              v-model="form.diabetes.interpretasi_gd2pp"
+              v-model="formDiabetes.interpretasi_gd2pp"
               readonly
               placeholder="-"
             />
           </div>
+        </div>
+        <div class="form-actions">
+          <div class="save-status">
+            {{ saveMessage.diabetes }}
+          </div>
+          <button
+            type="button"
+            class="save-button"
+            :disabled="isSaving.diabetes"
+            @click="saveDiabetes"
+          >
+            <i class="bi" :class="isSaving.diabetes ? 'bi-arrow-repeat' : 'bi-save'"></i>
+            <span>{{ isSaving.diabetes ? 'Menyimpan...' : 'Simpan Diabetes' }}</span>
+          </button>
         </div>
       </div>
     </section>
@@ -332,7 +374,7 @@
     <section class="metabolik-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-droplet"></i> Asam Urat</h4>
+          <h4><i class="bi bi-droplet"></i> Deteksi Dini Asam Urat</h4>
           <p>Asam urat serum dan interpretasi risiko hiperurisemia.</p>
         </div>
       </div>
@@ -347,7 +389,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.asam_urat.asam_urat"
+                v-model.number="formAsamUrat.asam_urat"
                 placeholder="0"
                 @input="interpretUrat"
               />
@@ -361,11 +403,25 @@
               id="urat_interp"
               class="form-control"
               type="text"
-              v-model="form.asam_urat.interpretasi_asam_urat"
+              v-model="formAsamUrat.interpretasi_asam_urat"
               readonly
               placeholder="-"
             />
           </div>
+        </div>
+        <div class="form-actions">
+          <div class="save-status">
+            {{ saveMessage.asamUrat }}
+          </div>
+          <button
+            type="button"
+            class="save-button"
+            :disabled="isSaving.asamUrat"
+            @click="saveAsamUrat"
+          >
+            <i class="bi" :class="isSaving.asamUrat ? 'bi-arrow-repeat' : 'bi-save'"></i>
+            <span>{{ isSaving.asamUrat ? 'Menyimpan...' : 'Simpan Asam Urat' }}</span>
+          </button>
         </div>
       </div>
     </section>
@@ -373,7 +429,7 @@
     <section class="metabolik-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-capsule"></i> Profil Lipid</h4>
+          <h4><i class="bi bi-capsule"></i> Deteksi Dini Profil Lipid</h4>
           <p>Kolesterol total, HDL, LDL, trigliserida, dan prediksi risiko PTM.</p>
         </div>
       </div>
@@ -388,7 +444,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.profil_lipid.kolesterol_total"
+                v-model.number="formProfilLipid.kolesterol_total"
                 placeholder="0"
                 @input="interpretLipid"
               />
@@ -397,7 +453,7 @@
             <input
               class="form-control interpretation-control"
               type="text"
-              v-model="form.profil_lipid.interpretasi_kolesterol_total"
+              v-model="formProfilLipid.interpretasi_kolesterol_total"
               readonly
               placeholder="Interpretasi"
             />
@@ -412,7 +468,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.profil_lipid.hdl"
+                v-model.number="formProfilLipid.hdl"
                 placeholder="0"
                 @input="interpretLipid"
               />
@@ -421,7 +477,7 @@
             <input
               class="form-control interpretation-control"
               type="text"
-              v-model="form.profil_lipid.interpretasi_hdl"
+              v-model="formProfilLipid.interpretasi_hdl"
               readonly
               placeholder="Interpretasi"
             />
@@ -436,7 +492,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.profil_lipid.ldl"
+                v-model.number="formProfilLipid.ldl"
                 placeholder="0"
                 @input="interpretLipid"
               />
@@ -445,7 +501,7 @@
             <input
               class="form-control interpretation-control"
               type="text"
-              v-model="form.profil_lipid.interpretasi_ldl"
+              v-model="formProfilLipid.interpretasi_ldl"
               readonly
               placeholder="Interpretasi"
             />
@@ -460,7 +516,7 @@
                 class="form-control"
                 type="number"
                 min="0"
-                v-model.number="form.profil_lipid.trigliserida"
+                v-model.number="formProfilLipid.trigliserida"
                 placeholder="0"
                 @input="interpretLipid"
               />
@@ -469,79 +525,30 @@
             <input
               class="form-control interpretation-control"
               type="text"
-              v-model="form.profil_lipid.interpretasi_trigliserida"
+              v-model="formProfilLipid.interpretasi_trigliserida"
               readonly
               placeholder="Interpretasi"
             />
             <small>LOINC 2571-8</small>
           </div>
         </div>
-
-        <div class="section-title with-gap">
-          <h5>Prediksi Risiko PTM</h5>
-          <span>WHO/ISH risk chart</span>
-        </div>
-
-        <div class="risk-grid">
-          <div class="form-field">
-            <label class="form-label" for="risiko_lab">Risiko dengan Lab</label>
-            <div class="input-with-addon">
-              <input
-                id="risiko_lab"
-                class="form-control"
-                type="number"
-                min="0"
-                max="100"
-                v-model.number="form.risiko_lab"
-                placeholder="0"
-              />
-              <span>%</span>
-            </div>
+        <div class="form-actions">
+          <div class="save-status">
+            {{ saveMessage.profilLipid }}
           </div>
-
-          <div class="form-field">
-            <label class="form-label" for="risiko_nolab">Risiko tanpa Lab</label>
-            <div class="input-with-addon">
-              <input
-                id="risiko_nolab"
-                class="form-control"
-                type="number"
-                min="0"
-                max="100"
-                v-model.number="form.risiko_nolab"
-                placeholder="0"
-              />
-              <span>%</span>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="kat_risiko">Interpretasi Risiko</label>
-            <select id="kat_risiko" class="form-select" v-model="form.kat_risiko">
-              <option value="">Pilih kategori</option>
-              <option value="rendah">&lt;10% (Rendah)</option>
-              <option value="sedang">10-20% (Sedang)</option>
-              <option value="tinggi">20-30% (Tinggi)</option>
-              <option value="sangat_tinggi">&gt;30% (Sangat Tinggi)</option>
-            </select>
-          </div>
+          <button
+            type="button"
+            class="save-button"
+            :disabled="isSaving.profilLipid"
+            @click="saveProfilLipid"
+          >
+            <i class="bi" :class="isSaving.profilLipid ? 'bi-arrow-repeat' : 'bi-save'"></i>
+            <span>{{ isSaving.profilLipid ? 'Menyimpan...' : 'Simpan Profil Lipid' }}</span>
+          </button>
         </div>
       </div>
     </section>
-    <div class="form-actions">
-      <div class="save-status" :class="{ success: saveStatus === 'ready' }">
-        {{ saveMessage }}
-      </div>
-      <button
-        type="button"
-        class="save-button"
-        :disabled="form.processing"
-        @click="savePemeriksaan"
-      >
-        <i class="bi" :class="form.processing ? 'bi-arrow-repeat' : 'bi-save'"></i>
-        <span>{{ form.processing ? 'Menyimpan...' : 'Simpan Pemeriksaan Metabolik' }}</span>
-      </button>
-    </div>
+
     <ModalAlert
       :show="showSuccessModal"
       type="success"
@@ -564,7 +571,7 @@
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
@@ -572,68 +579,60 @@
   // --- Props ---
   const props = defineProps({
     DataPasien: Object,
-    tindakan: Array,
   });
 
-  const showSuccessModal = ref(false);
-  const showValidationModal = ref(false);
-  const showDuplicateModal = ref(false); // ← tambahkan jika memang dipakai
-  const validationMessages = ref([]);
+  const skriningId = props.DataPasien?.idSkrining || null;
 
-  const pasien = computed(() => props.DataPasien || {});
-
-  // --- Form ---
-  const form = useForm({
-    skriningId: props.DataPasien?.idSkrining || null,
-
-    hipertensi: {
-      sistolik: null,
-      tekanan_diastolik: null,
-      kategori_tekanan_darah: '',
-      suhu: null,
-      nadi: null,
-      pernapasan: null,
-    },
-
-    diabetes: {
-      gdp: null,
-      interpretasi_gdp: '',
-      gds: null,
-      interpretasi_gds: '',
-      hba1c: null,
-      interpretasi_hba1c: '',
-      gd2pp: null,
-      interpretasi_gd2pp: '',
-    },
-
-    obesitas: {
-      berat_badan: null,
-      tinggi_badan: null,
-      imt: null,
-      interpretasi_imt: '',
-      lingkar_pinggang: null,
-      interpretasi_lingkar_pinggang: '',
-    },
-
-    profil_lipid: {
-      kolesterol_total: null,
-      interpretasi_kolesterol_total: '',
-      ldl: null,
-      interpretasi_ldl: '',
-      hdl: null,
-      interpretasi_hdl: '',
-      trigliserida: null,
-      interpretasi_trigliserida: '',
-    },
-
-    asam_urat: {
-      asam_urat: null,
-      interpretasi_asam_urat: '',
-    },
-    risiko_lab: null,
-    risiko_nolab: null,
-    kat_risiko: '',
+  const formHipertensi = useForm({
+    skriningId,
+    sistolik: props.DataPasien?.sistolik || '',
+    diastolik: props.DataPasien?.tekanan_diastolik || '',
+    kategori_hipertensi: props.DataPasien?.kategori_tekanan_darah || '',
+    suhu: props.DataPasien?.suhu || '',
+    nadi: props.DataPasien?.nadi || '',
+    pernapasan: props.DataPasien?.pernapasan || '',
   });
+
+  const formDiabetes = useForm({
+    skriningId,
+    gdp: '',
+    interpretasi_gdp: '',
+    gds: '',
+    interpretasi_gds: '',
+    hba1c: '',
+    interpretasi_hba1c: '',
+    gd2pp: '',
+    interpretasi_gd2pp: '',
+  });
+
+  const formObesitas = useForm({
+    skriningId,
+    berat_badan: '',
+    tinggi_badan: '',
+    imt: '',
+    interpretasi_imt: '',
+    lingkar_perut: '',
+    interpretasi_lp: '',
+  });
+
+  const formProfilLipid = useForm({
+    skriningId,
+    kolesterol_total: '',
+    interpretasi_kolesterol_total: '',
+    ldl: '',
+    interpretasi_ldl: '',
+    hdl: '',
+    interpretasi_hdl: '',
+    trigliserida: '',
+    interpretasi_trigliserida: '',
+  });
+
+  const formAsamUrat = useForm({
+    skriningId,
+    asam_urat: null,
+    interpretasi_asam_urat: '',
+  });
+
   // ============================================================
   // HELPERS
   // ============================================================
@@ -651,205 +650,222 @@
   // KALKULASI & INTERPRETASI
   // ============================================================
   function hitungIMT() {
-    const bb = toNumber(form.obesitas.berat_badan);
-    const tb = toNumber(form.obesitas.tinggi_badan);
+    const bb = toNumber(formObesitas.berat_badan);
+    const tb = toNumber(formObesitas.tinggi_badan);
 
     if (!bb || !tb) {
-      form.obesitas.imt = '';
-      form.obesitas.interpretasi_imt = '';
+      formObesitas.imt = '';
+      formObesitas.interpretasi_imt = '';
       return;
     }
 
     const imt = bb / (tb / 100) ** 2;
-    form.obesitas.imt = imt.toFixed(1);
+    formObesitas.imt = imt.toFixed(1);
 
-    if (imt < 18.5) form.obesitas.interpretasi_imt = 'Kurus';
-    else if (imt < 23) form.obesitas.interpretasi_imt = 'Normal';
-    else if (imt < 27) form.obesitas.interpretasi_imt = 'Gemuk';
-    else form.obesitas.interpretasi_imt = 'Obesitas';
+    if (imt < 18.5) formObesitas.interpretasi_imt = 'Kurus';
+    else if (imt < 23) formObesitas.interpretasi_imt = 'Normal';
+    else if (imt < 27) formObesitas.interpretasi_imt = 'Gemuk';
+    else formObesitas.interpretasi_imt = 'Obesitas';
   }
 
   function interpretLP() {
-    const lp = toNumber(form.obesitas.lingkar_pinggang);
+    const lp = toNumber(formObesitas.lingkar_perut);
 
     if (!lp) {
-      form.obesitas.interpretasi_lingkar_pinggang = '';
+      formObesitas.interpretasi_lp = '';
       return;
     }
 
-    form.obesitas.interpretasi_lingkar_pinggang = lp >= 90 ? 'Risiko meningkat' : 'Normal';
+    formObesitas.interpretasi_lp = lp >= 90 ? 'Risiko meningkat' : 'Normal';
   }
 
   function interpretTD() {
-    const s = toNumber(form.hipertensi.sistolik);
-    const d = toNumber(form.hipertensi.tekanan_diastolik);
+    const s = toNumber(formHipertensi.sistolik);
+    const d = toNumber(formHipertensi.diastolik);
 
     if (!s || !d) {
-      form.hipertensi.kategori_tekanan_darah = '';
+      formHipertensi.kategori_hipertensi = '';
       return;
     }
 
-    if (s < 120 && d < 80) form.hipertensi.kategori_tekanan_darah = 'Normal';
-    else if (s < 130 && d < 80) form.hipertensi.kategori_tekanan_darah = 'Elevated';
-    else if (s < 140 || d < 90) form.hipertensi.kategori_tekanan_darah = 'Hipertensi Grade 1';
-    else if (s < 180 || d < 110) form.hipertensi.kategori_tekanan_darah = 'Hipertensi Grade 2';
-    else form.hipertensi.kategori_tekanan_darah = 'Krisis Hipertensi';
+    if (s < 120 && d < 80) formHipertensi.kategori_hipertensi = 'Normal';
+    else if (s < 130 && d < 80) formHipertensi.kategori_hipertensi = 'Elevated';
+    else if (s < 140 || d < 90) formHipertensi.kategori_hipertensi = 'Hipertensi Grade 1';
+    else if (s < 180 || d < 110) formHipertensi.kategori_hipertensi = 'Hipertensi Grade 2';
+    else formHipertensi.kategori_hipertensi = 'Krisis Hipertensi';
   }
 
   function interpretDM() {
-    const gdp = toNumber(form.diabetes.gdp);
-    const gds = toNumber(form.diabetes.gds);
-    const hba1c = toNumber(form.diabetes.hba1c);
-    const gd2pp = toNumber(form.diabetes.gd2pp);
+    const gdp = toNumber(formDiabetes.gdp);
+    const gds = toNumber(formDiabetes.gds);
+    const hba1c = toNumber(formDiabetes.hba1c);
+    const gd2pp = toNumber(formDiabetes.gd2pp);
 
     // --- GDP ---
     if (!gdp) {
-      form.diabetes.interpretasi_gdp = '';
+      formDiabetes.interpretasi_gdp = '';
     } else if (gdp >= 126) {
-      form.diabetes.interpretasi_gdp = 'Diabetes';
+      formDiabetes.interpretasi_gdp = 'Diabetes';
     } else if (gdp >= 100) {
-      form.diabetes.interpretasi_gdp = 'Prediabetes';
+      formDiabetes.interpretasi_gdp = 'Prediabetes';
     } else {
-      form.diabetes.interpretasi_gdp = 'Normal';
+      formDiabetes.interpretasi_gdp = 'Normal';
     }
 
     // --- GDS ---
     if (!gds) {
-      form.diabetes.interpretasi_gds = '';
+      formDiabetes.interpretasi_gds = '';
     } else if (gds >= 200) {
-      form.diabetes.interpretasi_gds = 'Diabetes';
+      formDiabetes.interpretasi_gds = 'Diabetes';
     } else if (gds >= 140) {
-      form.diabetes.interpretasi_gds = 'Prediabetes';
+      formDiabetes.interpretasi_gds = 'Prediabetes';
     } else {
-      form.diabetes.interpretasi_gds = 'Normal';
+      formDiabetes.interpretasi_gds = 'Normal';
     }
 
     // --- GD2PP ---
     if (!gd2pp) {
-      form.diabetes.interpretasi_gd2pp = '';
+      formDiabetes.interpretasi_gd2pp = '';
     } else if (gd2pp >= 200) {
-      form.diabetes.interpretasi_gd2pp = 'Diabetes';
+      formDiabetes.interpretasi_gd2pp = 'Diabetes';
     } else if (gd2pp >= 140) {
-      form.diabetes.interpretasi_gd2pp = 'Prediabetes';
+      formDiabetes.interpretasi_gd2pp = 'Prediabetes';
     } else {
-      form.diabetes.interpretasi_gd2pp = 'Normal';
+      formDiabetes.interpretasi_gd2pp = 'Normal';
     }
 
     // --- HbA1c ---
     if (!hba1c) {
-      form.diabetes.interpretasi_hba1c = '';
+      formDiabetes.interpretasi_hba1c = '';
     } else if (hba1c >= 6.5) {
-      form.diabetes.interpretasi_hba1c = 'Diabetes';
+      formDiabetes.interpretasi_hba1c = 'Diabetes';
     } else if (hba1c >= 5.7) {
-      form.diabetes.interpretasi_hba1c = 'Prediabetes';
+      formDiabetes.interpretasi_hba1c = 'Prediabetes';
     } else {
-      form.diabetes.interpretasi_hba1c = 'Normal';
+      formDiabetes.interpretasi_hba1c = 'Normal';
     }
   }
 
   function interpretUrat() {
-    const urat = toNumber(form.asam_urat.asam_urat);
+    const urat = toNumber(formAsamUrat.asam_urat);
 
     if (!urat) {
-      form.asam_urat.interpretasi_asam_urat = '';
+      formAsamUrat.interpretasi_asam_urat = '';
       return;
     }
 
-    form.asam_urat.interpretasi_asam_urat = urat > 7 ? 'Hiperurisemia' : 'Normal';
+    formAsamUrat.interpretasi_asam_urat = urat > 7 ? 'Hiperurisemia' : 'Normal';
   }
 
   function interpretLipid() {
     // Kolesterol Total
-    const kolesterol = toNumber(form.profil_lipid.kolesterol_total);
-    const hdl = toNumber(form.profil_lipid.hdl);
-    const ldl = toNumber(form.profil_lipid.ldl);
-    const trigliserida = toNumber(form.profil_lipid.trigliserida);
+    const kolesterol = toNumber(formProfilLipid.kolesterol_total);
+    const hdl = toNumber(formProfilLipid.hdl);
+    const ldl = toNumber(formProfilLipid.ldl);
+    const trigliserida = toNumber(formProfilLipid.trigliserida);
 
     if (kolesterol < 200) {
-      form.profil_lipid.interpretasi_kolesterol_total = 'Normal';
+      formProfilLipid.interpretasi_kolesterol_total = 'Normal';
     } else if (kolesterol >= 200 && kolesterol < 240) {
-      form.profil_lipid.interpretasi_kolesterol_total = 'Borderline Tinggi';
+      formProfilLipid.interpretasi_kolesterol_total = 'Borderline Tinggi';
     } else if (kolesterol >= 240) {
-      form.profil_lipid.interpretasi_kolesterol_total = 'Tinggi';
+      formProfilLipid.interpretasi_kolesterol_total = 'Tinggi';
     } else {
-      form.profil_lipid.interpretasi_kolesterol_total = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_kolesterol_total = 'Data Tidak Tersedia';
     }
 
     // HDL
     if (hdl < 40) {
-      form.profil_lipid.interpretasi_hdl = 'Rendah';
+      formProfilLipid.interpretasi_hdl = 'Rendah';
     } else if (hdl >= 40 && hdl < 59) {
-      form.profil_lipid.interpretasi_hdl = 'Sedang';
+      formProfilLipid.interpretasi_hdl = 'Sedang';
     } else if (hdl >= 60) {
-      form.profil_lipid.interpretasi_hdl = 'Protektif';
+      formProfilLipid.interpretasi_hdl = 'Protektif';
     } else {
-      form.profil_lipid.interpretasi_hdl = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_hdl = 'Data Tidak Tersedia';
     }
 
     // LDL
     if (ldl < 100) {
-      form.profil_lipid.interpretasi_ldl = 'Optimal';
+      formProfilLipid.interpretasi_ldl = 'Optimal';
     } else if (ldl >= 100 && ldl < 160) {
-      form.profil_lipid.interpretasi_ldl = 'Borderline Tinggi';
+      formProfilLipid.interpretasi_ldl = 'Borderline Tinggi';
     } else if (ldl >= 160) {
-      form.profil_lipid.interpretasi_ldl = 'Tinggi';
+      formProfilLipid.interpretasi_ldl = 'Tinggi';
     } else {
-      form.profil_lipid.interpretasi_ldl = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_ldl = 'Data Tidak Tersedia';
     }
 
     // Trigliserida
     if (trigliserida < 150) {
-      form.profil_lipid.interpretasi_trigliserida = 'Normal';
+      formProfilLipid.interpretasi_trigliserida = 'Normal';
     } else if (trigliserida >= 160 && trigliserida < 199) {
-      form.profil_lipid.interpretasi_trigliserida = 'Borderline Tinggi';
+      formProfilLipid.interpretasi_trigliserida = 'Borderline Tinggi';
     } else if (trigliserida >= 200) {
-      form.profil_lipid.interpretasi_trigliserida = 'Tinggi';
+      formProfilLipid.interpretasi_trigliserida = 'Tinggi';
     } else {
-      form.profil_lipid.interpretasi_trigliserida = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_trigliserida = 'Data Tidak Tersedia';
     }
   }
 
-  const saveStatus = ref('idle');
-  const saveError = ref('');
+  const showSuccessModal = ref(false);
+  const showValidationModal = ref(false);
+  const validationMessages = ref([]);
 
-  const saveMessage = computed(() => {
-    if (saveStatus.value === 'ready') return 'Data subjektif berhasil disimpan.';
-    if (saveError.value) return saveError.value;
-    return 'Simpan setelah data kunjungan selesai diisi.';
+  const isSaving = ref({
+    obesitas: false,
+    hipertensi: false,
+    asamUrat: false,
+    diabetes: false,
+    profilLipid: false,
   });
 
-  function extractMessage(errors) {
-    return (
-      Object.values(errors || {})
-        .flat()
-        .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
-    );
+  const saveStatus = ref({
+    obesitas: 'idle',
+    hipertensi: 'idle',
+    diabetes: 'idle',
+    asamUrat: 'idle',
+    profilLipid: 'idle',
+  });
+
+  const saveError = ref({
+    diabetes: '',
+    obesitas: '',
+    hipertensi: '',
+    asamuUrat: '',
+    profilLipid: '',
+  });
+
+  // ── Computed messages ─────────────────────────────────────────────────────────
+
+  const saveMessage = computed(() => ({
+    obesitas: msgFor('obesitas'),
+    hipertensi: msgFor('hipertensi'),
+    diabetes: msgFor('diabetes'),
+    asamUrat: msgFor('asamUrat'),
+    profilLipid: msgFor('profilLipid'),
+  }));
+
+  function msgFor(key) {
+    if (saveStatus.value[key] === 'ready') return 'Data berhasil disimpan.';
+    if (saveError.value[key]) return saveError.value[key];
+    return 'Simpan setelah data selesai diisi.';
   }
 
-  function isDuplicateError(message) {
-    const lower = message.toLowerCase();
-    return ['sudah', 'tersimpan', 'duplikat', 'duplicate', 'already', 'exists'].some((kw) =>
-      lower.includes(kw)
-    );
-  }
-
-  function closeDuplicateModal() {
-    showDuplicateModal.value = false;
-  }
-
-  function savePemeriksaan() {
-    saveStatus.value = 'idle';
-    saveError.value = '';
+  function saveSection(key, form, routeName) {
+    isSaving.value[key] = true;
+    saveStatus.value[key] = 'idle';
+    saveError.value[key] = '';
     showSuccessModal.value = false;
     showValidationModal.value = false;
     validationMessages.value = [];
 
-    form.post(route('pelayanan.simpan-pemeriksaan-metabolik'), {
+    form.post(route(routeName), {
       preserveScroll: true,
 
       onSuccess: () => {
-        saveStatus.value = 'ready';
-        saveError.value = '';
+        saveStatus.value[key] = 'ready';
+        saveError.value[key] = '';
         validationMessages.value = [];
         form.clearErrors();
         form.defaults(form.data());
@@ -857,18 +873,32 @@
       },
 
       onError: (errors) => {
-        saveStatus.value = 'error';
-        const message = extractMessage(errors);
+        saveStatus.value[key] = 'error';
         validationMessages.value = Object.values(errors).flat();
-        saveError.value = message;
+        saveError.value[key] = extractMessage(errors);
+        showValidationModal.value = true;
+      },
 
-        if (isDuplicateError(message)) {
-          showDuplicateModal.value = true;
-        } else {
-          showValidationModal.value = true;
-        }
+      onFinish: () => {
+        isSaving.value[key] = false;
       },
     });
+  }
+
+  const saveObesitas = () => saveSection('obesitas', formObesitas, 'pelayanan.simpan-obesitas');
+  const saveHipertensi = () =>
+    saveSection('hipertensi', formHipertensi, 'pelayanan.simpan-hipertensi');
+  const saveAsamUrat = () => saveSection('asamUrat', formAsamUrat, 'pelayanan.simpan-asamUrat');
+  const saveDiabetes = () => saveSection('diabetes', formDiabetes, 'pelayanan.simpan-diabetes');
+  const saveProfilLipid = () =>
+    saveSection('profilLipid', formProfilLipid, 'pelayanan.simpan-profilLipid');
+
+  function extractMessage(errors) {
+    return (
+      Object.values(errors || {})
+        .flat()
+        .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
+    );
   }
 </script>
 

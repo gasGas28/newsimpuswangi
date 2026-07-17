@@ -5,8 +5,7 @@ namespace App\Services\SatuSehatPTM;
 use App\Models\RuangLayanan\SkriningPTM\GangguanPenglihatan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
-use App\Models\RuangLayanan\SkriningPTM\SimpusGangguanPenglihatan;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 
 class GangguanPenglihatanObservationService
 {
@@ -253,7 +252,7 @@ class GangguanPenglihatanObservationService
 
     public function sendGangguanPenglihatan(string $idSkrining): void
     {
-        $skrining    = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $penglihatan = GangguanPenglihatan::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

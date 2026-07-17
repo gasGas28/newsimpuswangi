@@ -24,6 +24,15 @@
           <i class="bi bi-exclamation-triangle"></i>
           <span>Faktor Risiko</span>
         </button>
+        <button
+          type="button"
+          class="segment-button"
+          :class="{ active: activeFormPlanning === 'puma' }"
+          @click="toggleForm('puma')"
+        >
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Form PPOK</span>
+        </button>
       </div>
     </div>
 
@@ -41,8 +50,11 @@
         :TenagaMedis="props.TenagaMedis"
       />
     </div>
-
-   
+    <div v-if="activeFormPlanning === 'puma'" class="fade-in">
+      <formPPOK
+        :DataPasien="props.DataPasien"
+      />
+    </div>
   </div>
 </template>
 
@@ -52,6 +64,7 @@
   import { route } from 'ziggy-js';
   import dataKunjungan from './FormPemeriksaan/DataKunjungan.vue';
   import faktorRisiko from './FormPemeriksaan/Faktor Risiko.vue';
+  import formPPOK from './FormPemeriksaan/FormPPOK.vue';
 
   const activeFormPlanning = ref('dataKunjungan');
   const isSaving = ref(false);

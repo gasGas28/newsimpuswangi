@@ -35,6 +35,7 @@
             <label class="form-label" for="dokter">Dokter</label>
             <div class="field-with-icon">
               <select v-model="form.id_petugas" class="form-select">
+                <option value="">Pilih Dokter</option>
                 <option
                   v-for="dokter in props.TenagaMedis"
                   :key="dokter.ihs_nakes"
@@ -143,8 +144,7 @@
   })();
 
   const defaultFasyankes = props.DataPasien?.nama_unit || '-';
-
-  // --- Form ---
+  const ihsSatusehat = props.DataPasien?.IHS_NUMBER || '-';
 
   const form = useForm({
     idSkrining: pasien.value?.idSkrining || '',
@@ -153,20 +153,19 @@
     nik_pasien: pasien.value?.NIK || '',
     tanggal_skrining: defaultTanggal,
     jenis_kunjungan: defaultJenisKunjungan,
-    id_petugas: '',
+    id_petugas: pasien.value?.id_petugas || '',
     fasyankes: defaultFasyankes,
-    keluhan_utama: '',
+    keluhan_utama: pasien.value?.keluhan_utama || '',
+    patient_id: ihsSatusehat || ''
   });
 
   console.log('Form initialized with:', form);
 
-  // --- UI state ---
 
   const isSaving = ref(false);
   const saveStatus = ref('idle');
   const saveError = ref('');
 
-  // --- Computed ---
 
   const saveMessage = computed(() => {
     if (saveStatus.value === 'ready') return 'Data subjektif berhasil disimpan.';

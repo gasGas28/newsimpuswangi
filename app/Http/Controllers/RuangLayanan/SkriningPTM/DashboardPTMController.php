@@ -1,147 +1,129 @@
 <?php
 
-namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
+namespace App\Http\Controllers\RuangLayanan\SkriningPTM; // sesuaikan dengan namespace controller Anda yang sebenarnya
 
+use App\Services\SkriningPTM\LaporanPTMService;
+use App\Services\SkriningPTM\LaporanService;
+use App\Services\SkriningPTM\DashboardPTMService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 
 
-class DashboardPtmController extends Controller
+class DashboardPTMController extends Controller // sesuaikan nama class sesuai project Anda
 {
+    public function __construct(
+        private LaporanPTMService $laporanPTM,
+        private DashboardPTMService $dashboardPTM,
+        private LaporanService $laporan,
+    ) {}
+
+    // =========================================================================
+    //  LAPORAN PTM  (Halaman Laporan/SkriningPTM/Index)
+    // =========================================================================
+
     /**
-     * Daftar key PTM yang didukung.
-     * Tambahkan/kurangi di sini saja kalau jenis PTM berubah —
-     * dipakai konsisten di summary maupun tren harian.
+     * Render halaman laporan PTM beserta data awal.
+     * Filter dikirim via query string dari frontend (Inertia router.get).
      *
-     * 'count_column' = kolom PK tabel skrining masing-masing,
-     * dipakai untuk COUNT(DISTINCT ...) agar leftJoin 1:many tidak
-     * menggandakan hitungan.
-     *
-     * SESUAIKAN nama kolom PK di bawah ini dengan struktur tabel
-     * aslinya jika berbeda.
+     * Query params yang didukung:
+     *   - tgl_awal        : Y-m-d
+     *   - tgl_akhir       : Y-m-d
+     *   - jenis_kelamin   : L | P   (kosong = semua)
+     *   - kelompok_usia   : 15-19 | 20-44 | 45-59 | 60+  (kosong = semua)
+     *   - no_kel          : kode kelurahan  (kosong = semua)
      */
-    protected array $ptmTables = [
-        'hipertensi'    => ['table' => 'simpus_hipertensi',    'alias' => 'hipertensi',    'pk' => 'id'],
-        'diabetes'      => ['table' => 'simpus_diabetes',      'alias' => 'diabetes',      'pk' => 'id'],
-        'obesitas'      => ['table' => 'simpus_obesitas',      'alias' => 'obesitas',      'pk' => 'id'],
-        'asam_urat'     => ['table' => 'simpus_asam_urat',     'alias' => 'asam_urat',     'pk' => 'id'],
-        'profil_lipid'  => ['table' => 'simpus_profil_lipid',  'alias' => 'profil_lipid',  'pk' => 'id'],
-    ];
-
-    public function index(Request $request)
+    public function laporanPTM(Request $request)
     {
-        $startDate = $request->query('start_date')
-            ?: Carbon::today()->subDays(7)->toDateString();
-        $endDate   = $request->query('end_date') ?: Carbon::today()->toDateString();
+        $request->validate([
+            'tgl_awal'      => 'nullable|date',
+            'tgl_akhir'     => 'nullable|date|after_or_equal:tgl_awal',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'kelompok_usia' => 'nullable|in:15-19,20-44,45-59,60+',
+            'no_kel'        => 'nullable|string',
+        ]);
 
-        // Validasi ringan: kalau end_date < start_date, swap supaya query tetap aman
-        if ($endDate < $startDate) {
-            [$startDate, $endDate] = [$endDate, $startDate];
-        }
+        $filters = [
+            'tgl_awal'      => $request->query('tgl_awal'),
+            'tgl_akhir'     => $request->query('tgl_akhir'),
+            'jenis_kelamin' => $request->query('jenis_kelamin'),
+            'kelompok_usia' => $request->query('kelompok_usia'),
+            'no_kel'        => $request->query('no_kel'),
+        ];
 
-        $summary = $this->getSummaryPTM($startDate, $endDate);
-        $tren    = $this->getTrenHarianPTM($startDate, $endDate);
+        // Hanya tarik data jika filter tanggal sudah diisi
+        // (hindari query berat saat halaman pertama dibuka)
+        $dataTampil  = !empty($filters['tgl_awal']) && !empty($filters['tgl_akhir']);
+        $dataLaporan = $dataTampil ? $this->laporanPTM->getDataLaporan($filters)        : [];
+        $statistik   = $dataTampil ? $this->laporanPTM->getStatistikRingkasan($filters) : $this->defaultStatistik();
 
-        return Inertia::render('Home/DashboardPTM', [
-            'filters' => [
-                'start_date' => $startDate,
-                'end_date'   => $endDate,
-            ],
-            'summary'  => $summary,
-            'trenHarian' => $tren,
+        // Daftar kelurahan untuk dropdown filter desa di frontend
+        $daftarKelurahan = DB::table('setup_kel')
+            ->select('NO_KEL as no_kel', 'nama_kel')
+            ->orderBy('nama_kel')
+            ->get();
+
+        return Inertia::render('Laporan/SkriningPTM/Index', [
+            'filters'         => $filters,
+            'DataLaporan'     => $dataLaporan,
+            'Statistik'       => $statistik,
+            'DaftarKelurahan' => $daftarKelurahan,
+            'dataTampil'      => $dataTampil,
         ]);
     }
 
     /**
-     * Total kasus per jenis PTM dalam rentang tanggal (untuk metric cards & tabel ringkasan).
+     * Nilai default statistik saat belum ada filter tanggal yang diisi,
+     * supaya frontend tidak error mengakses properti yang undefined.
      */
-    protected function getSummaryPTM(string $startDate, string $endDate): array
+    protected function defaultStatistik(): array
     {
-        $query = $this->baseQuery($startDate, $endDate);
-
-        $selects = [];
-        foreach ($this->ptmTables as $key => $cfg) {
-            $selects[] = "COUNT(DISTINCT {$cfg['alias']}.{$cfg['pk']}) as {$key}";
-        }
-
-        $row = $query->selectRaw(implode(', ', $selects))->first();
-
-        // Pastikan semua key ada & berupa integer, walau hasilnya null/0
-        $summary = [];
-        foreach ($this->ptmTables as $key => $cfg) {
-            $summary[$key] = (int) ($row->{$key} ?? 0);
-        }
-
-        return $summary;
+        return [
+            'total_skrining'     => 0,
+            'total_hipertensi'   => 0,
+            'total_diabetes'     => 0,
+            'total_obesitas'     => 0,
+            'total_asam_urat'    => 0,
+            'total_profil_lipid' => 0,
+        ];
     }
+
+    // =========================================================================
+    //  DASHBOARD PTM  (Halaman Home/DashboardPTM)
+    // =========================================================================
 
     /**
-     * Tren harian per jenis PTM (untuk line chart), satu baris per tanggal.
+     * Render halaman dashboard PTM: kartu ringkasan 8 kategori penyakit
+     * + tren harian untuk line chart. Default rentang tanggal = hari ini
+     * kalau belum ada filter (sesuai kebutuhan frontend yang selalu punya
+     * start_date/end_date terisi).
+     *
+     * Query params:
+     *   - start_date : Y-m-d (default: hari ini)
+     *   - end_date   : Y-m-d (default: hari ini)
      */
-    protected function getTrenHarianPTM(string $startDate, string $endDate): array
+    public function dashboardPTM(Request $request)
     {
-        $query = $this->baseQuery($startDate, $endDate);
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date'   => 'nullable|date|after_or_equal:start_date',
+        ]);
 
-        $selects = ['l.tglKunjungan as tanggal'];
-        foreach ($this->ptmTables as $key => $cfg) {
-            $selects[] = "COUNT(DISTINCT {$cfg['alias']}.{$cfg['pk']}) as {$key}";
-        }
+        $today = now()->format('Y-m-d');
 
-        $rows = $query
-            ->groupBy('l.tglKunjungan')
-            ->orderBy('l.tglKunjungan')
-            ->selectRaw(implode(', ', $selects))
-            ->get();
+        $filters = [
+            'start_date' => $request->query('start_date', $today),
+            'end_date'   => $request->query('end_date', $today),
+        ];
 
-        // Isi tanggal yang kosong (tidak ada kasus sama sekali) agar chart tidak bolong
-        $byDate = $rows->keyBy('tanggal');
-        $result = [];
-
-        $cursor = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
-
-        while ($cursor->lte($end)) {
-            $dateStr = $cursor->toDateString();
-            $existing = $byDate->get($dateStr);
-
-            $entry = ['tanggal' => $dateStr];
-            foreach ($this->ptmTables as $key => $cfg) {
-                $entry[$key] = $existing ? (int) $existing->{$key} : 0;
-            }
-
-            $result[] = $entry;
-            $cursor->addDay();
-        }
-
-        return $result;
+        return Inertia::render('Home/DashboardPTM', [
+            'filters'   => $filters,
+            'summary'   => $this->dashboardPTM->getSummary($filters),
+            'perDayAll' => $this->dashboardPTM->getPerDayAll($filters),
+            'serverNow' => $today,
+        ]);
     }
 
-    /**
-     * Query dasar bersama (join + filter) yang dipakai summary & tren.
-     * Sengaja TIDAK pakai select('*') — hanya join tabel yang dibutuhkan
-     * untuk menghitung jenis PTM, tanpa menarik kolom pasien/loket yang
-     * tidak relevan untuk dashboard agregat ini.
-     */
-    protected function baseQuery(string $startDate, string $endDate)
-    {
-        $query = DB::table('simpus_loket as l')
-            ->join('simpus_pelayanan as pel', 'l.idLoket', '=', 'pel.loketId')
-            ->join('simpus_skrining_ptm as skrining', 'pel.idpelayanan', '=', 'skrining.idPelayanan')
-            ->where('l.kdPoli', '006')
-            ->whereBetween('l.tglKunjungan', [$startDate, $endDate]);
-
-        foreach ($this->ptmTables as $key => $cfg) {
-            $query->leftJoin(
-                "{$cfg['table']} as {$cfg['alias']}",
-                'skrining.idSkrining',
-                '=',
-                "{$cfg['alias']}.skriningID"
-            );
-        }
-
-        return $query;
-    }
+  
 }

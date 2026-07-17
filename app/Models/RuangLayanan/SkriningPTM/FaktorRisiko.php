@@ -26,6 +26,10 @@ class FaktorRisiko extends Model
         'obat',
         'kesiapan',
         'dukung',
+        'napas_pendek',
+        'batuk',
+        'dahak',
+        'spirometri',
         'r_pribadi_htn',
         'r_pribadi_dm',
         'r_pribadi_stroke',
@@ -36,7 +40,8 @@ class FaktorRisiko extends Model
         'r_keluarga_jantung',
         'skor_faktor_risiko',
         'kategori_faktor_risiko',
-        'detail_faktor_risiko'
+        'detail_faktor_risiko',
+        'observation_id',
     ];
 
     protected $casts = [

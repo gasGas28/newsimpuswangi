@@ -19,6 +19,7 @@ class SimpusProfilLipid extends Model
         'interpretasi_hdl',
         'interpretasi_ldl',
         'interpretasi_trigliserida',
+        'condition_id',
         'sent_at',
     ];
 

@@ -293,6 +293,8 @@ class AncController extends Controller
             'pelayananId' => $request->pelayananId,
         ]);
 
+        // dd($diagnosaBaru);
+
         return response()->json([
             'success' => true,
             'data' => $diagnosaBaru

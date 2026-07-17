@@ -10,6 +10,7 @@
 
       <div class="panel-body">
         <div class="status-grid">
+          <!-- Kondisi Saat Meninggalkan Fasyankes -> Encounter + Condition -->
           <div class="form-field">
             <label class="form-label" for="kondisi_keluar"
               >Kondisi Saat Meninggalkan Fasyankes</label
@@ -26,8 +27,10 @@
               <option value="dirujuk">Dirujuk</option>
               <option value="observasi">Perlu observasi</option>
             </select>
+            <small class="field-hint">Dikirim ke Encounter &amp; Condition</small>
           </div>
 
+          <!-- Cara Keluar Fasyankes -> Encounter.hospitalization.dischargeDisposition -->
           <div class="form-field">
             <label class="form-label" for="cara_keluar">Cara Keluar Fasyankes</label>
             <select
@@ -37,12 +40,18 @@
               class="form-select"
             >
               <option value="">Pilih cara keluar</option>
-              <option value="pulang">Pulang sendiri</option>
-              <option value="rujuk">Dirujuk</option>
-              <option value="diantar">Diantar keluarga</option>
+              <option value="home">Pulang atas persetujuan dokter</option>
+              <option value="aadvice">Pulang atas permintaan sendiri</option>
+              <option value="oth">Dirujuk / rujuk ke fasyankes lain</option>
+              <option value="alt-home">Diantar ke tempat tinggal lain</option>
             </select>
+            <small class="field-hint">
+              Kode standar: {{ form.cara_keluar || '-' }}
+              (system: http://terminology.hl7.org/CodeSystem/discharge-disposition)
+            </small>
           </div>
 
+          <!-- Jadwal Kontrol -> ServiceRequest.occurrenceDateTime -->
           <div class="form-field">
             <label class="form-label" for="jadwal_kontrol">Jadwal Kontrol Berikutnya</label>
             <input
@@ -52,8 +61,10 @@
               type="date"
               class="form-control"
             />
+            <small class="field-hint">Dikirim ke ServiceRequest.occurrenceDateTime</small>
           </div>
 
+          <!-- Rujukan / Konsultasi -> ServiceRequest (rencana tindak lanjut) -->
           <div class="form-field">
             <label class="form-label" for="rencana_rujuk">Rujukan / Konsultasi</label>
             <select
@@ -67,8 +78,10 @@
               <option value="fkrtl">Rujuk FKRTL</option>
               <option value="igd">Rujuk segera / IGD</option>
             </select>
+            <small class="field-hint">Dikirim sebagai ServiceRequest (rencana tindak lanjut)</small>
           </div>
 
+          <!-- Transportasi Rujukan -> ServiceRequest (sarana transportasi) -->
           <div class="form-field">
             <label class="form-label" for="transport">Transportasi Rujukan</label>
             <select
@@ -78,23 +91,12 @@
               class="form-select"
               :disabled="form.rencana_rujuk === 'tidak'"
             >
-              <option value="">Tidak berlaku</option>
-              <option value="ambulan">Ambulans</option>
+              <option value="tidak_berlaku">Tidak berlaku</option>
+              <option value="ambulance">Ambulans</option>
               <option value="kendaraan_pribadi">Kendaraan pribadi</option>
               <option value="ojek">Ojek/taksi</option>
             </select>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="saran_tindak_lanjut">Saran Tindak Lanjut</label>
-            <input
-              id="saran_tindak_lanjut"
-              :value="saranTindakLanjut"
-              name="saran_tindak_lanjut"
-              type="text"
-              class="form-control readonly-field"
-              readonly
-            />
+            <small class="field-hint">Dikirim ke ServiceRequest terkait transportasi rujuk</small>
           </div>
         </div>
       </div>
@@ -109,81 +111,165 @@
         <span>{{ isSaving ? 'Menyimpan...' : 'Simpan Status Pasien' }}</span>
       </button>
     </div>
+
+    <section class="planning-panel">
+      <div class="panel-header compact">
+        <div>
+          <h4><i class="bi bi-list-check"></i> Data Status</h4>
+          <p>Status tercatat untuk pasien ini.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table planning-table mb-0">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kondisi Pasien</th>
+              <th>Cara Keluar</th>
+              <th>Jadwal Kontrol</th>
+              <th>Nama Dokter</th>
+              <th class="text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!pasien.kondisi_pasien">
+              <td colspan="7" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <span>Data status belum tersedia.</span>
+              </td>
+            </tr>
+            <tr v-else>
+              <td>1</td>
+              <td>
+                <span class="code-pill">{{ labelize(pasien.kondisi_pasien) }}</span>
+              </td>
+              <td>
+                <span class="code-pill">{{ labelize(pasien.cara_keluar) }}</span>
+              </td>
+              <td class="fw-semibold">{{ pasien.jadwal_kontrol }}</td>
+              <td>
+                <span class="service-pill">{{ pasien.nmDokter }}</span>
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-outline-danger"
+                  @click="hapusTindakan(pasien.idTindakan)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <ModalAlert
+      :show="showSuccessModal"
+      type="success"
+      title="Status Pasien Berhasil Disimpan"
+      message="Silakan lanjutkan pengiriman satu sehat."
+      button-text="Tutup"
+      secondary-button-text="Close"
+      @close="showSuccessModal = false"
+    />
+
+    <ModalAlert
+      :show="showValidationModal"
+      type="warning"
+      title="Data Belum Lengkap"
+      message="Mohon lengkapi data berikut:"
+      :items="validationMessages"
+      @close="showValidationModal = false"
+    />
   </div>
 </template>
 
 <script setup>
-  import { computed, ref, watchEffect } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import ModalAlert from '../../../Components/Layouts/Modal/ModalAlert.vue';
 
-  const props = defineProps({
-    DataPasien: Object,
-    formData: Object,
-    tindakan: Array,
-  });
+const props = defineProps({
+  DataPasien: Object,
+});
 
-  const emit = defineEmits(['save-status-pasien']);
-  const isSaving = ref(false);
-  const saveStatus = ref('idle');
-  const form = props.formData?.status_pasien || (props.formData.status_pasien = {});
-  const assessment = computed(() => props.formData?.assessment || {});
+const pasien = computed(() => props.DataPasien || {});
 
-  form.kondisi_keluar = form.kondisi_keluar || '';
-  form.cara_keluar = form.cara_keluar || '';
-  form.jadwal_kontrol = form.jadwal_kontrol || '';
-  form.rencana_rujuk = form.rencana_rujuk || 'tidak';
-  form.transport = form.transport || '';
+const isSaving = ref(false);
+const saveStatus = ref('idle');
+const saveError = ref('');
+const showSuccessModal = ref(false);
+const showValidationModal = ref(false);
+const validationMessages = ref([]);
 
-  const saranTindakLanjut = computed(() => {
-    if (form.rencana_rujuk && form.rencana_rujuk !== 'tidak') return labelize(form.rencana_rujuk);
-    if (assessment.value.diabetes_melitus || assessment.value.risiko_kardiovaskular) {
-      return 'Konsultasi internal puskesmas';
-    }
-    if (
-      assessment.value.hipertensi ||
-      assessment.value.dislipidemia ||
-      assessment.value.risiko_diabetes
-    ) {
-      return 'Edukasi dan kontrol berkala';
-    }
-    if (assessment.value.obesitas || assessment.value.perilaku_berisiko) {
-      return 'Edukasi perubahan gaya hidup';
-    }
-    return 'Tidak ada tindak lanjut khusus';
-  });
+const form = useForm({
+  skriningId: props.DataPasien?.idSkrining || '',
+  kondisi_keluar: '',
+  cara_keluar: '',
+  jadwal_kontrol: '',
+  rencana_rujuk: 'tidak',
+  transport: 'tidak_berlaku',
+});
 
-  watchEffect(() => {
-    if (form.rencana_rujuk === 'tidak') form.transport = '';
-    form.saran_tindak_lanjut = saranTindakLanjut.value;
-  });
-
-  const saveMessage = computed(() => {
-    if (saveStatus.value === 'ready') {
-      return 'Data status pasien siap disimpan.';
-    }
-
-    return 'Simpan setelah status keluar selesai diisi.';
-  });
-
-  const saveStatusPasien = () => {
-    isSaving.value = true;
-
-    emit('save-status-pasien', {
-      DataPasien: props.DataPasien,
-      status_pasien: props.formData?.status_pasien || {},
-    });
-
-    window.setTimeout(() => {
-      isSaving.value = false;
-      saveStatus.value = 'ready';
-    }, 400);
-  };
-
-  function labelize(value) {
-    if (!value) return '-';
-    return String(value)
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+const saveMessage = computed(() => {
+  if (saveStatus.value === 'ready') {
+    return 'Data status pasien siap disimpan.';
   }
+  return 'Simpan setelah status keluar selesai diisi.';
+});
+
+function saveStatusPasien() {
+  isSaving.value = true;
+  saveStatus.value = 'idle';
+  saveError.value = '';
+
+  showSuccessModal.value = false;
+  showValidationModal.value = false;
+  validationMessages.value = [];
+
+  form.post(route('pelayanan.status-pasien-ptm'), {
+    preserveScroll: true,
+
+    onSuccess: () => {
+      saveStatus.value = 'ready';
+      saveError.value = '';
+      validationMessages.value = [];
+
+      form.clearErrors();
+      form.defaults(form.data());
+
+      showSuccessModal.value = true;
+    },
+
+    onError: (errors) => {
+      saveStatus.value = 'error';
+      validationMessages.value = Object.values(errors).flat();
+      saveError.value = extractMessage(errors);
+      showValidationModal.value = true;
+    },
+
+    onFinish: () => {
+      isSaving.value = false;
+    },
+  });
+}
+
+function extractMessage(errors) {
+  return (
+    Object.values(errors || {})
+      .flat()
+      .find(Boolean) || 'Terjadi kesalahan saat menyimpan data.'
+  );
+}
+
+function labelize(value) {
+  if (!value) return '-';
+  return String(value)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 </script>
 
 <style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>

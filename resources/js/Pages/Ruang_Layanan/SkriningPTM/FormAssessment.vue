@@ -1,338 +1,602 @@
 <template>
   <div class="assessment-form">
+
+    <!-- ── Panel: Input Diagnosa ── -->
     <section class="assessment-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-clipboard2-check"></i> Masalah Hasil Skrining</h4>
-          <p>
-            Konfirmasi masalah atau faktor risiko PTM dari data subjektif, objektif, dan penunjang.
-          </p>
-        </div>
-        <span class="status-pill complete">3 saran</span>
-      </div>
-
-      <div class="panel-body">
-        <div class="diagnosis-grid">
-          <label class="diagnosis-option" for="obesitas">
-            <input id="obesitas" class="form-check-input" type="checkbox" />
-            <span>
-              <strong>Obesitas / berat badan lebih</strong>
-              <small>ICD-10 - E66</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option checked" for="hipertensi">
-            <input id="hipertensi" class="form-check-input" type="checkbox" checked />
-            <span>
-              <strong>Hipertensi / tekanan darah tinggi</strong>
-              <small>ICD-10 - I10</small>
-              <small class="suggestion-hint">Disarankan dari hasil skrining</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option" for="risiko_diabetes">
-            <input id="risiko_diabetes" class="form-check-input" type="checkbox" />
-            <span>
-              <strong>Risiko prediabetes</strong>
-              <small>ICD-10 - R73.0</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option checked" for="diabetes_melitus">
-            <input id="diabetes_melitus" class="form-check-input" type="checkbox" checked />
-            <span>
-              <strong>Diabetes melitus</strong>
-              <small>ICD-10 - E11</small>
-              <small class="suggestion-hint">Disarankan dari hasil skrining</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option checked" for="dislipidemia">
-            <input id="dislipidemia" class="form-check-input" type="checkbox" checked />
-            <span>
-              <strong>Dislipidemia</strong>
-              <small>ICD-10 - E78.5</small>
-              <small class="suggestion-hint">Disarankan dari hasil skrining</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option" for="risiko_kardiovaskular">
-            <input id="risiko_kardiovaskular" class="form-check-input" type="checkbox" />
-            <span>
-              <strong>Risiko penyakit kardiovaskular</strong>
-              <small>SNOMED CT - 395112001</small>
-            </span>
-          </label>
-
-          <label class="diagnosis-option" for="perilaku_berisiko">
-            <input id="perilaku_berisiko" class="form-check-input" type="checkbox" />
-            <span>
-              <strong>Perilaku berisiko PTM</strong>
-              <small>SNOMED CT - 160573003</small>
-            </span>
-          </label>
-        </div>
-      </div>
-    </section>
-
-    <section class="assessment-panel">
-      <div class="panel-header">
-        <div>
-          <h4><i class="bi bi-clipboard2-pulse"></i> Diagnosis Klinis</h4>
-          <p>Keputusan diagnosis oleh petugas berdasarkan masalah yang sudah dikonfirmasi.</p>
+          <h4><i class="bi bi-clipboard2-pulse"></i> Diagnosa Medis</h4>
+          <p>Pencarian dan pencatatan diagnosa ICD-10 pasien.</p>
         </div>
       </div>
 
       <div class="panel-body">
-        <div class="diagnosis-form-grid">
-          <div class="form-field diagnosis-main-field">
-            <label class="form-label" for="diagnosis_utama">Diagnosis Utama</label>
-            <select id="diagnosis_utama" name="diagnosis_utama" class="form-select">
-              <option value="">Gunakan saran otomatis: E11 - Diabetes melitus tipe 2</option>
-              <option value="Z13.6 - Skrining penyakit kardiovaskular">Z13.6 - Skrining penyakit kardiovaskular</option>
-              <option value="E66 - Obesitas / berat badan lebih">E66 - Obesitas / berat badan lebih</option>
-              <option value="I10 - Hipertensi esensial">I10 - Hipertensi esensial</option>
-              <option value="R73.0 - Risiko prediabetes">R73.0 - Risiko prediabetes</option>
-              <option value="E11 - Diabetes melitus tipe 2" selected>E11 - Diabetes melitus tipe 2</option>
-              <option value="E78.5 - Dislipidemia">E78.5 - Dislipidemia</option>
-            </select>
-            <span class="field-hint">Saran sistem hanya membantu pengisian. Diagnosis final tetap ditentukan petugas.</span>
+
+        <!-- Kode + Nama Diagnosa -->
+        <div class="form-field span-full">
+          <label class="form-label" for="kode-diagnosa">Diagnosa</label>
+          <div class="diagnosa-input-group">
+            <input
+              id="kode-diagnosa"
+              type="text"
+              class="form-control diagnosa-kode"
+              placeholder="Kode"
+              disabled
+              v-model="form.kode_diagnosa"
+            />
+            <input
+              type="text"
+              class="form-control diagnosa-nama"
+              placeholder="Nama Diagnosa"
+              disabled
+              v-model="form.nama_diagnosa"
+            />
+            <button type="button" class="btn-diagnosa-cari" @click="showModal = true">
+              <i class="bi bi-search"></i> Cari
+            </button>
+            <button type="button" class="btn-diagnosa-hapus" @click="hapusForm">
+              <i class="bi bi-x-lg"></i> Hapus
+            </button>
           </div>
+        </div>
 
+        <!-- Alergi Makanan & Obat -->
+        <div class="alergi-grid">
           <div class="form-field">
-            <label class="form-label" for="status_klinis">Status Klinis</label>
-            <select id="status_klinis" name="status_klinis" class="form-select">
-              <option value="active" selected>Aktif</option>
-              <option value="recurrence">Berulang</option>
-              <option value="remission">Remisi</option>
-              <option value="resolved">Selesai / teratasi</option>
+            <label class="form-label" for="alergi-makanan">Alergi Makanan</label>
+            <select id="alergi-makanan" class="form-select">
+              <option value="">- Pilih -</option>
+              <option
+                v-for="alrgm in AlergiMakanan"
+                :key="alrgm.kodeBpjs"
+                :value="alrgm.kodeBpjs"
+              >
+                {{ alrgm.namaAlergiBpjs }}
+              </option>
             </select>
           </div>
-
           <div class="form-field">
-            <label class="form-label" for="verification_status">Status Verifikasi Diagnosis</label>
-            <select id="verification_status" name="verification_status" class="form-select status-provisional">
-              <option value="unconfirmed">Belum dikonfirmasi (Unconfirmed)</option>
-              <option value="provisional" selected>Diagnosis sementara (Provisional)</option>
-              <option value="confirmed">Sudah dikonfirmasi (Confirmed)</option>
-              <option value="refuted">Dibatalkan / Disangkal (Refuted)</option>
+            <label class="form-label" for="alergi-obat">Alergi Obat</label>
+            <select id="alergi-obat" class="form-select">
+              <option value="">- Pilih -</option>
+              <option
+                v-for="alrgo in AlergiObat"
+                :key="alrgo.kodeBpjs"
+                :value="alrgo.namaAlergiBpjs"
+              >
+                {{ alrgo.namaAlergiBpjs }}
+              </option>
             </select>
-            <span class="field-hint verification-hint status-provisional">
-              <i class="bi bi-clock"></i>
-              Diagnosis sementara, menunggu data penunjang tambahan.
-            </span>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="catatan_diagnosis">Catatan Diagnosis / Komorbid</label>
-            <textarea
-              id="catatan_diagnosis"
-              name="catatan_diagnosis"
-              class="form-control"
-              rows="3"
-              placeholder="Diagnosis tambahan, komorbid, atau pertimbangan singkat bila ada"
-            >Pasien dengan DM tipe 2 disertai hipertensi dan dislipidemia. Perlu kontrol gula darah dan tekanan darah rutin.</textarea>
           </div>
         </div>
+
+        <!-- Keterangan Alergi -->
+        <div class="form-field span-full">
+          <label class="form-label" for="ket-alergi">Keterangan Alergi</label>
+          <textarea id="ket-alergi" class="form-control" rows="2"></textarea>
+        </div>
+
+        <!-- Kunjungan Kasus -->
+        <div class="form-field span-full">
+          <label class="form-label" for="kunjungan-kasus">Kunjungan Kasus</label>
+          <select id="kunjungan-kasus" class="form-select" v-model="form.kunjungan_khusus">
+            <option value="">- Pilih -</option>
+            <option value="1">Kasus Baru</option>
+            <option value="2">Kasus Lama</option>
+            <option value="3">Kunjungan Kasus Lama</option>
+            <option value="4">Kunjungan Kasus Baru</option>
+          </select>
+        </div>
+
+        <!-- Keterangan -->
+        <div class="form-field span-full">
+          <label class="form-label" for="keterangan">Keterangan</label>
+          <textarea
+            id="keterangan"
+            class="form-control"
+            rows="2"
+            v-model="form.keterangan"
+          ></textarea>
+        </div>
+
+        <!-- Aksi -->
+        <div class="form-actions">
+          <button type="button" class="save-button" @click="saveForm">
+            <i class="bi bi-save"></i>
+            <span>Simpan Diagnosa Medis</span>
+          </button>
+        </div>
+
       </div>
     </section>
 
+    <!-- ── Panel: Daftar Diagnosa ── -->
     <section class="assessment-panel">
       <div class="panel-header">
         <div>
-          <h4><i class="bi bi-journal-check"></i> Kesimpulan Assessment</h4>
-          <p>Kesimpulan akhir dari masalah hasil skrining dan diagnosis klinis.</p>
+          <h4><i class="bi bi-list-check"></i> Daftar Diagnosa</h4>
+          <p>Riwayat diagnosa yang telah dicatat untuk kunjungan ini.</p>
         </div>
       </div>
 
       <div class="panel-body">
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span>Diagnosis Final / Saran</span>
-            <strong>E11 - Diabetes melitus tipe 2</strong>
-          </div>
-
-          <div class="summary-item">
-            <span>Masalah Hasil Skrining</span>
-            <strong>Hipertensi / tekanan darah tinggi, Diabetes melitus, Dislipidemia</strong>
-          </div>
-
-          <div class="summary-item">
-            <span>Kategori Risiko</span>
-            <strong>Risiko Tinggi</strong>
-          </div>
-
-          <div class="summary-item">
-            <span>Status Verifikasi</span>
-            <strong class="verification-badge status-provisional">
-              <i class="bi bi-clock"></i>
-              Diagnosis sementara
-            </strong>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="ringkasan_klinis">Ringkasan Klinis</label>
-            <textarea
-              id="ringkasan_klinis"
-              name="ringkasan_klinis"
-              class="form-control"
-              rows="3"
-              placeholder="Kesimpulan hasil skrining, diagnosis kerja, dan pertimbangan klinis"
-            >Pasien Siti Rahayu dengan hasil skrining menunjukkan DM tipe 2, hipertensi grade 1, dan dislipidemia. Risiko kardiovaskular tinggi. Disarankan penatalaksanaan komprehensif dan kontrol berkala.</textarea>
-          </div>
-
-          <div class="form-field note-field">
-            <label class="form-label" for="catatan_assessment">Catatan Tambahan</label>
-            <textarea
-              id="catatan_assessment"
-              name="catatan_assessment"
-              class="form-control"
-              rows="3"
-              placeholder="Catatan tambahan bila ada"
-            ></textarea>
-          </div>
+        <div class="section-title">
+          <h5>Diagnosa Aktif</h5>
+          <span>{{ daftarDiagnosa.length }} entri</span>
         </div>
+
+        <table class="diagnosa-table table table-sm">
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th>Nama Diagnosa Medis</th>
+              <th>Keterangan</th>
+              <th>Kasus</th>
+              <th>Poli</th>
+              <th class="col-aksi">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!daftarDiagnosa.length">
+              <td colspan="6" class="diagnosa-empty">
+                Belum ada diagnosa yang dicatat.
+              </td>
+            </tr>
+            <tr v-for="(diag, index) in daftarDiagnosa" :key="diag.idDiagnosa">
+              <td>{{ index + 1 }}</td>
+              <td>{{ diag.nmDiagnosa }}</td>
+              <td>{{ diag.keterangan }}</td>
+              <td>{{ diag.diagnosaKasus }}</td>
+              <td>{{ nmPoli }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-hapus-diagnosa"
+                  @click="hapusData(diag.idDiagnosa)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <div class="form-actions">
-      <div class="save-status">
-        Simpan setelah diagnosis dan kesimpulan assessment selesai diisi.
-      </div>
-      <button type="button" class="save-button">
-        <i class="bi bi-save"></i>
-        <span>Simpan Assessment</span>
-      </button>
-    </div>
   </div>
+
+  <DiagnosaModal
+    :show="showModal"
+    :Diagnosa="Diagnosa"
+    @close="showModal = false"
+    @select="pilihDiagnosa"
+  />
 </template>
 
 <script setup>
-const props = defineProps({
-  DataPasien: Object,
-  formData: Object,
-  tindakan: Array,
-});
+  import { ref, computed } from 'vue';
+  import axios from 'axios';
+  import { route } from 'ziggy-js';
+  import { router, Link, useForm } from '@inertiajs/vue3';
+  import DiagnosaModal from '../../../Components/Layouts/RuangLayanan/SkriningPTM/DiagnosaModal.vue';
+
+  const props = defineProps({
+    DataPasien: Object,
+    Diagnosa: Array,
+    DataDiagnosa: Array,
+    AlergiMakanan: Array,
+    AlergiObat: Array,
+  });
+
+  const data = computed(() => props.DataPasien || {});
+  const kdPoli = computed(() => data.value.kdPoli);
+  const loketId = computed(() => data.value.idLoket);
+  const pelayananId = computed(() => data.value.idPelayanan);
+  const nmPoli = computed(() => data.value.nmPoli);
+  const daftarDiagnosa = computed(() => props.DataDiagnosa || {});
+
+  const form = ref({
+    kode_diagnosa: '',
+    nama_diagnosa: '',
+    kunjungan_khusus: '',
+    keterangan: '',
+    kdPoli: kdPoli,
+    loketId: loketId,
+    pelayananId: pelayananId,
+  });
+
+  const saveForm = async () => {
+    try {
+      const response = await axios.post(route('ruang-layanan-anc.dataDiagnosa'), form.value);
+
+      const dataBaru = response.data.data;
+
+      daftarDiagnosa.value.push(dataBaru);
+
+      // Reset form
+      form.value = {
+        kode_diagnosa: '',
+        nama_diagnosa: '',
+        kunjungan_khusus: '',
+        keterangan: '',
+        kdPoli: kdPoli,
+        loketId: loketId,
+        pelayananId: pelayananId,
+      };
+
+      alert('Data berhasil disimpan!');
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menyimpan data');
+    }
+  };
+
+  const hapusData = async (id) => {
+    if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+    try {
+      await axios.delete(route('diagnosa.destroy', id));
+
+      // Hapus dari reactive state
+      const index = daftarDiagnosa.value.findIndex((item) => item.idDiagnosa === id);
+      if (index !== -1) {
+        daftarDiagnosa.value.splice(index, 1);
+      }
+
+      alert('Data berhasil dihapus!');
+    } catch (error) {
+      console.error(error);
+      alert('Gagal menghapus data.');
+    }
+  };
+  // Modal control
+  const showModal = ref(false);
+
+  // Fungsi
+  const pilihDiagnosa = (item) => {
+    form.value.kode_diagnosa = item.kdDiag;
+    form.value.nama_diagnosa = item.nmDiag;
+    showModal.value = false;
+  };
+
+  const hapusForm = () => {
+    form.value.kode_diagnosa = '';
+    form.value.nama_diagnosa = '';
+  };
 </script>
 
-<style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>
-
 <style scoped>
-  .verification-hint {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.8rem;
-    margin-top: 0.35rem;
+.assessment-form {
+  display: grid;
+  gap: 18px;
+}
+
+.assessment-panel {
+  overflow: hidden;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #d8e0ea;
+  background: #1f7a8c;
+}
+
+.panel-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.panel-header p {
+  margin: 5px 0 0;
+  color: #dff7fb;
+  font-size: 0.86rem;
+}
+
+.panel-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.form-field {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e7edf3;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.span-full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  margin-bottom: 6px;
+  color: #27364a;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.form-control,
+.form-select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #cbd7e3;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background: #f4f7fa;
+  color: #64748b;
+  opacity: 1;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #1f7a8c;
+  box-shadow: 0 0 0 0.2rem rgba(31, 122, 140, 0.14);
+}
+
+textarea.form-control {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.diagnosa-input-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.diagnosa-input-group .diagnosa-kode {
+  max-width: 120px;
+  border-radius: 8px 0 0 8px;
+  flex-shrink: 0;
+}
+
+.diagnosa-input-group .diagnosa-nama {
+  flex: 1;
+  min-width: 0;
+  border-left: 0;
+  border-radius: 0;
+}
+
+.btn-diagnosa-cari,
+.btn-diagnosa-hapus,
+.save-button,
+.btn-hapus-diagnosa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.btn-diagnosa-cari {
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 0;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.88rem;
+}
+
+.btn-diagnosa-cari:hover {
+  background: #1d4ed8;
+}
+
+.btn-diagnosa-hapus {
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid #cbd7e3;
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.88rem;
+}
+
+.btn-diagnosa-hapus:hover {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.alergi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e7edf3;
+}
+
+.save-button {
+  min-height: 42px;
+  padding: 10px 17px;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
+}
+
+.save-button:hover {
+  background: #115e59;
+}
+
+.section-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e7edf3;
+}
+
+.section-title h5 {
+  margin: 0;
+  color: #183245;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.section-title span {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.diagnosa-table {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #e7edf3;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.diagnosa-table thead th {
+  border-bottom: 1px solid #d8e0ea;
+  background: #f5f9fc;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.diagnosa-table tbody td {
+  color: #27364a;
+  vertical-align: middle;
+}
+
+.diagnosa-table tbody tr:hover td {
+  background: #f8fbfd;
+}
+
+.diagnosa-table .col-no {
+  width: 44px;
+}
+
+.diagnosa-table .col-aksi {
+  width: 80px;
+  text-align: center;
+}
+
+.diagnosa-table td:last-child {
+  text-align: center;
+}
+
+.diagnosa-empty {
+  padding: 22px 0;
+  color: #94a3b8;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-align: center;
+}
+
+.btn-hapus-diagnosa {
+  min-width: 34px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #dc2626;
+  font-size: 0.82rem;
+}
+
+.btn-hapus-diagnosa:hover {
+  border-color: #f87171;
+  background: #fee2e2;
+}
+
+@media (max-width: 768px) {
+  .panel-header {
+    align-items: flex-start;
+    padding: 16px;
   }
 
-  .verification-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.875rem;
+  .panel-body {
+    padding: 16px;
   }
 
-  .status-unconfirmed { color: #6c757d; }
-  .status-provisional  { color: #fd7e14; }
-  .status-confirmed    { color: #198754; }
-  .status-refuted      { color: #dc3545; }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1050;
+  .alergi-grid {
+    grid-template-columns: 1fr;
   }
 
-  .modal-content {
-    background: white;
+  .diagnosa-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .diagnosa-input-group .diagnosa-kode,
+  .diagnosa-input-group .diagnosa-nama,
+  .btn-diagnosa-cari,
+  .btn-diagnosa-hapus {
+    max-width: 100%;
+    border: 1px solid #cbd7e3;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.15);
-    max-width: 450px;
-    width: 90%;
-    animation: modalSlideIn 0.3s ease-out;
   }
 
-  @keyframes modalSlideIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .diagnosa-input-group .diagnosa-kode,
+  .diagnosa-input-group .diagnosa-nama {
+    grid-column: 1 / -1;
   }
 
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .modal-title {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  .save-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-title {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .success-icon { color: #28a745; font-size: 1.5rem; }
-
-  .btn-close {
-    background: none;
-    border: none;
-    color: #6c757d;
-    cursor: pointer;
-    font-size: 1.5rem;
-    padding: 0;
-    line-height: 1;
-  }
-  .btn-close:hover { color: #2c3e50; }
-
-  .modal-body { padding: 1.5rem; }
-  .modal-body > p { margin: 0 0 1rem 0; color: #495057; font-size: 0.95rem; }
-
-  .save-summary {
-    background: #f8f9fa;
-    border-left: 4px solid #28a745;
-    padding: 1rem;
-    border-radius: 4px;
+  .section-title span {
+    text-align: left;
   }
 
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    font-size: 0.9rem;
+  .diagnosa-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
-  .summary-row span { color: #6c757d; }
-  .summary-row strong { color: #2c3e50; text-align: right; flex: 1; margin-left: 1rem; }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #e9ecef;
-    gap: 0.5rem;
-  }
-
-  .btn {
-    padding: 0.5rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-  }
-
-  .btn-primary { background: #0d6efd; color: white; }
-  .btn-primary:hover { background: #0b5ed7; box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25); }
+}
 </style>
+

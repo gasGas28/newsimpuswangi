@@ -4,8 +4,10 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use Illuminate\Support\Facades\Auth;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusObesitas;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class ObesitasConditionService
 {
@@ -35,6 +37,40 @@ class ObesitasConditionService
         return $this->cachedToken;
     }
 
+    /**
+     * ✅ Helper untuk menyimpan log kirim/terima ke SatuSehatLog
+     */
+    private function logSatuSehat(
+        string $idPelayanan,
+        ?string $puskId,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        array|string|null $kirim,
+        array|string|null $terima,
+        ?string $userId,
+    ): void {
+        try {
+            SatuSehatLog::create([
+                'idPelayanan' => $idPelayanan,
+                'tanggal'     => now(),
+                'puskId'      => $puskId,
+                'resource'    => $resource,
+                'idResponse'  => $idResponse,
+                'method'      => $method,
+                'kirim'       => is_array($kirim) ? json_encode($kirim) : $kirim,
+                'terima'      => is_array($terima) ? json_encode($terima) : $terima,
+                'userId'      => $userId,
+            ]);
+        } catch (\Throwable $e) {
+            // Jangan sampai gagal logging menggagalkan proses utama
+            Log::error('Gagal menyimpan SatuSehatLog (Obesitas)', [
+                'message'  => $e->getMessage(),
+                'resource' => $resource,
+            ]);
+        }
+    }
+
     private function findExisting(string $encounterId, string $icdCode): ?string
     {
         $response = Http::withToken($this->getToken())
@@ -50,7 +86,10 @@ class ObesitasConditionService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function createCondition(array $payload): string
+    /**
+     * ✅ Kembalikan response HTTP utuh supaya bisa dipakai untuk logging oleh caller
+     */
+    private function createCondition(array $payload)
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
@@ -63,7 +102,7 @@ class ObesitasConditionService
             throw new \Exception('Gagal membuat Condition: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $response;
     }
 
     private function resolveImt(string $interpretasi): array
@@ -99,6 +138,7 @@ class ObesitasConditionService
         array $icd,
         string $patientId,
         string $encounterId,
+        string $practitionerId,
     ): array {
         return [
             'resourceType'       => 'Condition',
@@ -134,18 +174,20 @@ class ObesitasConditionService
             'encounter'      => ['reference' => "Encounter/{$encounterId}"],
             'onsetDateTime'  => now()->toIso8601String(),
             'recorder'       => [
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ],
         ];
     }
 
     public function sendCondition(string $idSkrining): array
     {
-        $skrining  = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining  = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $obesitas  = SimpusObesitas::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
+        $practitionerId = $skrining->id_petugas;
+        $puskId = Auth::id();
 
         $icdImt = $this->resolveImt($obesitas->interpretasi_ptm);
         $icdLp  = $this->resolveLp($obesitas->interpretasi_lp);
@@ -161,10 +203,23 @@ class ObesitasConditionService
                 Log::info('Condition IMT sudah ada, skip', ['condition_id' => $existingImtId]);
                 $imtConditionId = $existingImtId;
             } else {
-                $imtConditionId = $this->createCondition(
-                    $this->buildPayload($icdImt, $patientId, $encounterId)
-                );
+                $imtPayload  = $this->buildPayload($icdImt, $patientId, $encounterId, $practitionerId);
+                $imtResponse = $this->createCondition($imtPayload);
+                $imtResponseJson = $imtResponse->json();
+                $imtConditionId  = $imtResponseJson['id'] ?? null;
+
                 Log::info('Condition IMT berhasil', ['condition_id' => $imtConditionId]);
+
+                $this->logSatuSehat(
+                    idPelayanan: $idSkrining,
+                    puskId: $puskId,
+                    resource: 'Condition',
+                    idResponse: $imtConditionId,
+                    method: 'POST',
+                    kirim: $imtPayload,
+                    terima: $imtResponseJson,
+                    userId: $puskId,
+                );
             }
         }
 
@@ -180,10 +235,24 @@ class ObesitasConditionService
                 Log::info('Condition LP sudah ada, skip', ['condition_id' => $existingLpId]);
                 $lpConditionId = $existingLpId;
             } else {
-                $lpConditionId = $this->createCondition(
-                    $this->buildPayload($icdLp, $patientId, $encounterId)
-                );
+                $lpPayload  = $this->buildPayload($icdLp, $patientId, $encounterId, $practitionerId);
+                $lpResponse = $this->createCondition($lpPayload);
+                $lpResponseJson = $lpResponse->json();
+                $lpConditionId  = $lpResponseJson['id'] ?? null;
+
                 Log::info('Condition LP berhasil', ['condition_id' => $lpConditionId]);
+
+                // ✅ Catat log untuk Condition LP
+                $this->logSatuSehat(
+                    idPelayanan: $idSkrining,
+                    puskId: $puskId,
+                    resource: 'Condition',
+                    idResponse: $lpConditionId,
+                    method: 'POST',
+                    kirim: $lpPayload,
+                    terima: $lpResponseJson,
+                    userId: $puskId,
+                );
             }
         }
 

@@ -3,23 +3,31 @@
 namespace App\Http\Controllers\RuangLayanan\SkriningPTM;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AsamUratRequest;
 use Inertia\Inertia;
-use App\Services\SkriningPTMService;
-use App\Services\PelayananPTMService;
+use App\Services\SkriningPTM\SkriningPTMService;
+use App\Services\SkriningPTM\PelayananPTMService;
 use App\Services\TindakanService;
 use App\Http\Requests\SimpanTindakanRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreKunjunganPTMRequest;
 use App\Http\Requests\AssessmentPTMRequest;
+use App\Http\Requests\DiabetesRequest;
 use App\Http\Requests\FaktorRisikoRequest;
 use App\Http\Requests\GangguanInderaRequest;
+use App\Http\Requests\HipertensiRequest;
+use App\Http\Requests\ObesitasRequest;
 use App\Http\Requests\PemeriksaanEKGRequest;
 use App\Http\Requests\PemeriksaanKankerIvaRequest;
 use App\Http\Requests\PemeriksaanKolorektalRequest;
 use App\Http\Requests\PemeriksaanParuRequest;
 use App\Http\Requests\PemeriksaanPTMRequest;
+use App\Http\Requests\ProfilLipidRequest;
+use App\Http\Requests\StatusPasienRequest;
 use App\Http\Requests\ThalasemiaRequest;
+use App\Http\Requests\ResepObatRequest;
+use App\Http\Requests\EdukasiRequest;
 
 class SkriningPTMController extends Controller
 {
@@ -44,10 +52,10 @@ class SkriningPTMController extends Controller
         return Inertia::render('Ruang_Layanan/SkriningPTM/Index', $dataPasien);
     }
 
-    public function pelayanan($id, $idPoli, $idPelayanan)
+    public function pelayanan(string $id, string $idPoli, string $idPelayanan)
     {
         $DataPasien = $this->pelayananService->getDataPasien($id, $idPoli);
-        $masterData = $this->pelayananService->getMasterData();
+        $masterData = $this->pelayananService->getMasterData($idPelayanan);
         $DataTindakan = $this->tindakanService->getTindakanPelayanan($idPelayanan);
 
         // dd($DataTindakan);
@@ -55,8 +63,6 @@ class SkriningPTMController extends Controller
         return Inertia::render('Ruang_Layanan/SkriningPTM/Pelayanan', [
             'DataPasien' => $DataPasien,
             'DataTindakan' => $DataTindakan,
-            'idPelayanan' => $idPelayanan,
-            'idPoli' => $idPoli,
             ...$masterData,
         ]);
     }
@@ -65,25 +71,32 @@ class SkriningPTMController extends Controller
     {
         $this->pelayananService->updateStatusPelayanan(
             $request->idpelayanan,
-            $request->idloket,
             $request->status
         );
 
+        // dd($request->idloket);
+
         return back();
     }
-    public function simpanTindakan(Request $request)
+    public function akhirPelayanan(Request $request)
     {
-        $validated = Validator::make($request->all(), [
-            'idpelayanan' => 'required',
-            'kode_tindakan' => 'required',
-            'nama_tindakan' => 'required',
-            'loketId' => 'required',
-            'nama_tindakan_ind' => 'nullable',
-            'keterangan' => 'nullable',
-            'kdPoli' => 'required',
-        ])->validate();
+        $this->pelayananService->endPelayanan(
+            $request->idpelayanan,
+            $request->status
+        );
 
-        $this->tindakanService->svTindakan($validated);
+        // dd($request->idloket);
+
+        return back();
+    }
+
+
+    public function simpanResepObat(ResepObatRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+
+        $this->pelayananService->resepObat($validated);
 
         return redirect()->back();
     }
@@ -107,70 +120,108 @@ class SkriningPTMController extends Controller
         return redirect()->back();
     }
 
+    public function addPemeriksaanObesitas(ObesitasRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveObesitas($validated);
+        return redirect()->back();
+    }
+    public function addPemeriksaanHipertensi(HipertensiRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveHipertensi($validated);
+        return redirect()->back();
+    }
+    public function addPemeriksaanDiabetes(DiabetesRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveDiabetes($validated);
+        return redirect()->back();
+    }
+    public function addPemeriksaanLipid(ProfilLipidRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveProfilLipid($validated);
+        return redirect()->back();
+    }
+    public function addPemeriksaanAsamUrat(AsamUratRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveAsamUrat($validated);
+        return redirect()->back();
+    }
+
     public function addPemeriksaanPTM(PemeriksaanPTMRequest $request)
     {
         $validated = $request->validated();
-        
         $this->pelayananService->savePemeriksaanMetabolik($validated);
-
         return redirect()->back();
     }
     public function addPemeriksaanIndera(GangguanInderaRequest $request)
     {
         $validated = $request->validated();
-        // dd($validated);
         $this->pelayananService->saveGangguanIndera($validated);
-
         return redirect()->back();
     }
 
-    public function addPemeriksaanThalasemia(ThalasemiaRequest $request){
+    public function addPemeriksaanThalasemia(ThalasemiaRequest $request)
+    {
         $validated = $request->validated();
-
-        // dd($validated);
         $this->pelayananService->saveThalasemia($validated);
         return redirect()->back();
-    }   
-    public function addPemeriksaanParu(PemeriksaanParuRequest $request){
+    }
+    public function addPemeriksaanParu(PemeriksaanParuRequest $request)
+    {
         $validated = $request->validated();
-
-        // dd($validated);
         $this->pelayananService->saveKankerParu($validated);
         return redirect()->back();
-    }   
-    public function addPemeriksaanEKG(PemeriksaanEKGRequest $request){
+    }
+    public function addPemeriksaanEKG(PemeriksaanEKGRequest $request)
+    {
         $validated = $request->validated();
-
-        // dd($validated);
         $this->pelayananService->saveEKG($validated);
         return redirect()->back();
-    }   
-    public function addPemeriksaanKolorektal(PemeriksaanKolorektalRequest $request){
+    }
+    public function addPemeriksaanKolorektal(PemeriksaanKolorektalRequest $request)
+    {
         $validated = $request->validated();
-
-        // dd($validated);
         $this->pelayananService->saveKolorektal($validated);
         return redirect()->back();
-    }   
-    public function addPemeriksaanKanker(PemeriksaanKankerIvaRequest $request){
+    }
+    public function addPemeriksaanKanker(PemeriksaanKankerIvaRequest $request)
+    {
         $validated = $request->validated();
-
-        // dd($validated);
         $this->pelayananService->saveKankerServiks($validated);
         return redirect()->back();
-    }   
+    }
+    public function addStatusPasien(StatusPasienRequest $request)
+    {
+        $validated = $request->validated();
+        $this->pelayananService->saveStatusPasien($validated);
+        return redirect()->back();
+    }
 
 
     public function addAssessmentPTM(AssessmentPTMRequest $request)
     {
         $validated = $request->validated();
-
         $this->pelayananService->addAssessmentPTM($validated);
-
+        return redirect()->back();
+    }
+    public function addEdukasi(EdukasiRequest $request)
+    {
+        $validated = $request->validated();
+        // dd($validated);
+        $this->pelayananService->saveEdukasi($validated);
         return redirect()->back();
     }
 
-    public function tindakanHapus($id)
+    public function tindakanHapus(string $id)
     {
         $result = $this->tindakanService->hapusTindakan($id);
 
@@ -181,5 +232,30 @@ class SkriningPTMController extends Controller
         return back();
     }
 
-    
+    public function simpanTindakan(Request $request)
+    {
+        $validated = Validator::make($request->all(), [
+            'idpelayanan' => 'required',
+            'kode_tindakan' => 'required',
+            'nama_tindakan' => 'required',
+            'loketId' => 'required',
+            'nama_tindakan_ind' => 'nullable',
+            'keterangan' => 'nullable',
+            'kdPoli' => 'required',
+        ])->validate();
+
+        $this->tindakanService->svTindakan($validated);
+
+        return redirect()->back();
+    }
+    public function deleteResep(string $id)
+    {
+        $result = $this->pelayananService->hapusResep($id);
+
+        if (!$result['success']) {
+            return back()->withErrors(['message' => $result['message']]);
+        }
+
+        return back();
+    }
 }

@@ -4,12 +4,12 @@ namespace App\Services\SatuSehatPTM;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
 
 class HipertensiConditionService
 {
-    // ✅ Map kategori_tekanan_darah -> ICD-10 + display
+    //  Map kategori_tekanan_darah -> ICD-10 + display
     private array $categoryMap = [
         'normal'             => ['code' => 'Z03.8', 'display' => 'Tekanan darah normal'],
         'elevated'           => ['code' => 'R03.0', 'display' => 'Elevated blood-pressure reading'],
@@ -79,7 +79,7 @@ class HipertensiConditionService
     }
     public function sendCondition(string $idSkrining): array
     {
-        $skrining   = SimpusSkriningPTM::where('idSkrining', $idSkrining)->firstOrFail();
+        $skrining   = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $hipertensi = SimpusHipertensi::where('skriningID', $idSkrining)->firstOrFail();
 
         $patientId   = $skrining->patient_id;

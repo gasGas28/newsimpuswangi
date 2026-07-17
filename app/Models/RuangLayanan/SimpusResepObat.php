@@ -45,6 +45,8 @@ class SimpusResepObat extends Model
     public function Loket(){
         return $this->belongsTo(SimpusLoket::class, 'loketId', 'idLoket');
     }
+
+    
  
     // protected static function boot()
     // {

@@ -43,6 +43,12 @@ use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMController;
 use App\Http\Requests\SimpanTindakanRequest;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SatuSehatController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\DashboardPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\LaporanPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\RegisterExportController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\RiwayatPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\RegisterPTMController;
+use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMExportController;
+
 
 use App\Http\Requests\StoreKunjunganPTMRequest;
 
@@ -222,7 +228,7 @@ Route::prefix('home')->group(function () {
 // routes/web.php
 
 
-Route::get('/dashboard-ptm', [DashboardPTMController::class, 'index'])
+Route::get('/dashboard-ptm', [DashboardPTMController::class, 'dashboardPTM'])
     ->name('ptm.dashboard')
     ->middleware('auth'); // Protect home (wajib login)
 // Route::get('/', function () {
@@ -545,24 +551,51 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
     ->group(function () {
         Route::get('simpus/popUpFormRujukLanjut', [PoliBpUmumController::class, 'popUpFormRujukLanjut'])->name('ruang-layanan.popUpFormRujukLanjut');
 
+        Route::get('/ruang-layanan/export-excel', [SkriningPTMExportController::class, 'export'])
+            ->name('ruang-layanan.export-excel');
+        Route::get('/ruang-layanan/export-register', [RegisterExportController::class, 'exportRegister'])
+            ->name('ptm.export-register');
+        Route::get('/ptm/export-laporanPTM', [LaporanPTMController::class, 'download'])
+            ->name('ptm.export-laporanPTM');
+
         // Skrining PTM
         Route::get('/simpus/skriningptm', [SkriningPTMController::class, 'index'])->name('ruang-layanan.ptm');
         Route::get('/simpus/skrining-ptm/pelayanan/{id}/{idPoli}/{idPelayanan}', [SkriningPTMController::class, 'pelayanan'])->name('ruang-layanan.skrining-ptm');
         Route::post('/simpus/skrining-ptm/update-status', [SkriningPTMController::class, 'updateStatus'])
             ->name('pelayanan.update-status');
+        Route::post('/simpus/skrining-ptm/akhiri-pelayanan', [SkriningPTMController::class, 'akhirPelayanan'])
+            ->name('pelayanan.akhiri-pelayanan');
         Route::post('/skrining-ptm/tindakan/simpan', [SkriningPTMController::class, 'simpanTindakan'])
             ->name('ptm.tindakan-simpan');
+        Route::post('/skrining-ptm/edukasi/simpan', [SkriningPTMController::class, 'addEdukasi'])
+            ->name('ptm.edukasi-simpan');
         Route::delete('/ptm/tindakan/{id}', [SkriningPTMController::class, 'tindakanHapus'])
             ->name('ptm.tindakan-hapus');
+        Route::delete('/ptm/resep-hapus/{id}', [SkriningPTMController::class, 'deleteResep'])
+            ->name('pelayanan.hapus-resep-ptm');
         Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
             ->name('pelayanan.tambah-kunjungan-ptm');
         Route::post('/simpus/skrining-ptm/simpan-risiko', [SkriningPTMController::class, 'addFaktorRisiko'])->name('pelayanan.simpan-risiko-ptm');
         Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
             ->name('pelayanan.simpan-assessment-ptm');
-        Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanPTM'])
+        Route::post('/simpus/skrining-ptm/simpan-metabolik', [SkriningPTMController::class, 'addPemeriksaanPTM'])
             ->name('pelayanan.simpan-pemeriksaan-metabolik');
+        Route::post('/simpus/skrining-ptm/simpan-obesitas', [SkriningPTMController::class, 'addPemeriksaanObesitas'])
+            ->name('pelayanan.simpan-obesitas');
+        Route::post('/simpus/skrining-ptm/simpan-hipertensi', [SkriningPTMController::class, 'addPemeriksaanHipertensi'])
+            ->name('pelayanan.simpan-hipertensi');
+        Route::post('/simpus/skrining-ptm/simpan-diabetes', [SkriningPTMController::class, 'addPemeriksaanDiabetes'])
+            ->name('pelayanan.simpan-diabetes');
+        Route::post('/simpus/skrining-ptm/simpan-profilLipid', [SkriningPTMController::class, 'addPemeriksaanLipid'])
+            ->name('pelayanan.simpan-profilLipid');
+        Route::post('/simpus/skrining-ptm/simpan-asamUrat', [SkriningPTMController::class, 'addPemeriksaanAsamUrat'])
+            ->name('pelayanan.simpan-asamUrat');
         Route::post('/simpus/skrining-ptm/simpan-pemeriksaan', [SkriningPTMController::class, 'addPemeriksaanIndera'])
             ->name('pelayanan.simpan-gangguan-indera');
+        Route::post('/simpus/skrining-ptm/simpan-resep', [SkriningPTMController::class, 'simpanResepObat'])
+            ->name('pelayanan.simpan-resep-ptm');
+        Route::post('/simpus/skrining-ptm/simpan-status', [SkriningPTMController::class, 'addStatusPasien'])
+            ->name('pelayanan.status-pasien-ptm');
 
         Route::post('/simpus/skrining-ptm/simpan-serviks', [SkriningPTMController::class, 'addPemeriksaanKanker'])
             ->name('pelayanan.simpan-serviks');
@@ -576,6 +609,16 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-kolorektal');
         Route::post('/simpus/skrining-ptm/simpan-ekg', [SkriningPTMController::class, 'addPemeriksaanEKG'])
             ->name('pelayanan.simpan-ekg');
+
+        Route::get('simpus/riwayat-ptm', [RiwayatPTMController::class, 'index'])->name('ruang-layanan.riwayat-ptm');
+        Route::get('simpus/register-ptm/', [RegisterPTMController::class, 'index'])->name('ruang-layanan.register-ptm');
+        Route::get('simpus/laporan-ptm/', [DashboardPTMController::class, 'laporanPTM'])->name('ruang-layanan.laporan-ptm');
+        Route::get('simpus/riwayat-ptm/download/register-ptm', [RegisterPTMController::class, 'downloadRegisterPTM'])
+            ->name('ruang-layanan.download-register');
+        Route::get('simpus/riwayat-ptm/download/pdf', [RiwayatPTMController::class, 'downloadPDF'])->name('ruang-layanan.riwayat-ptm-pdf');
+        Route::get('simpus/riwayat-ptm/download/lembar-ptm', [RiwayatPTMController::class, 'downloadLembarPTM'])
+            ->name('ruang-layanan.lembar-ptm');
+
         // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
         //     ->name('satusehat.submit-ptm');
 
@@ -605,6 +648,18 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('satusehat.send-kolorektal');
         Route::post('/satusehat/serviks/{idSkrining}', [SatuSehatController::class, 'sendKankerServiks'])
             ->name('satusehat.kanker-serviks');
+        Route::post('/satusehat/thalasemia/{idSkrining}', [SatuSehatController::class, 'sendThalasemia'])
+            ->name('satusehat.thalasemia');
+        Route::post('/satusehat/diagnosis/{pelayananId}', [SatuSehatController::class, 'sendDiagnosis'])
+            ->name('satusehat.diagnosis');
+        Route::post('/satusehat/tindakan/{pelayananId}', [SatuSehatController::class, 'sendTindakan'])
+            ->name('satusehat.tindakan');
+        Route::post('/satusehat/edukasi/{idSkrining}', [SatuSehatController::class, 'sendEdukasi'])
+            ->name('satusehat.edukasi');
+        Route::post('/satusehat/pengobatan/{idPelayanan}', [SatuSehatController::class, 'sendResepObat'])
+            ->name('satusehat.pengobatan');
+        Route::post('/satusehat/status-pasien/{idSkrining}', [SatuSehatController::class, 'sendStatusPasien'])
+            ->name('satusehat.status-pasien');
 
         //Simpan rujuk
         Route::post('simpus/pelayanan/simpan-rujuk/{idLoket}/{idPelayanan}', [PoliBpUmumController::class, 'simpanRujukan'])->name('ruang-layanan.simpanRujukan');
