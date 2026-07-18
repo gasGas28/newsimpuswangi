@@ -345,7 +345,6 @@
   import { useForm } from '@inertiajs/vue3';
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
-  import FormPPOK from './FormPPOK.vue';
 
   // --- Props ---
   const props = defineProps({
@@ -402,7 +401,7 @@
 
   console.log('Form initialized with:', form);
 
-  // --- Options untuk v-for di template ---       ← INI YANG HILANG
+  // Options untuk v-for di template
   const riwayatPribadiOptions = [
     { model: 'r_pribadi_htn', label: 'Hipertensi' },
     { model: 'r_pribadi_dm', label: 'Diabetes Melitus' },
@@ -417,7 +416,7 @@
     { model: 'r_keluarga_jantung', label: 'Penyakit Jantung' },
   ];
 
-  // --- UI state ---
+  // UI state 
   const saveStatus = ref('idle');
   const saveError = ref('');
 
@@ -427,7 +426,7 @@
     return 'Simpan setelah data kunjungan selesai diisi.';
   });
 
-  // --- Helpers ---                               ← PINDAH KE LUAR saveFaktorRisiko
+  // --- Helpers ---                               
   function extractMessage(errors) {
     return (
       Object.values(errors || {})
@@ -443,23 +442,13 @@
     );
   }
 
-  // ============================================================
-  // HELPER
-  // ============================================================
   const toNumber = (value) => Number(value || 0);
 
   const addRisk = (items, condition, key, label, score) => {
     if (condition) items.push({ key, label, score });
   };
 
-  // ============================================================
-  // DEFINISI RULE SKOR
-  // Setiap "group" berisi opsi yang saling eksklusif (hanya satu
-  // yang bisa aktif dalam satu waktu). maxScore dihitung otomatis
-  // dengan mengambil skor tertinggi tiap group lalu dijumlahkan,
-  // jadi tidak perlu diupdate manual kalau bobot/rule berubah.
-  // ============================================================
-
+  // rules
   const riskRuleGroups = computed(() => [
     {
       rules: [{ test: form.merokok === 'ya', key: 'merokok', label: 'Pernah merokok', score: 2 }],
@@ -775,6 +764,8 @@
 
     form.post(route('pelayanan.simpan-risiko-ptm'), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien'],
 
       onSuccess: () => {
         saveStatus.value = 'ready';
@@ -795,4 +786,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

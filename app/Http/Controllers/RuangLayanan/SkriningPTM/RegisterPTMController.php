@@ -16,10 +16,13 @@ class RegisterPTMController extends Controller
 
     public function index(Request $request)
     {
-        $dataRiwayat = $this->registerPTMService->getRegister($request->NIK);
+        $status = $request->query('status', 'semua');
+
+        $dataRiwayat = $this->registerPTMService->getRegister($request->NIK, $status);
         // dd($dataRiwayat);
         return Inertia::render('Ruang_Layanan/SkriningPTM/DataRegister', [
             'DataRiwayat' => $dataRiwayat,
+            'FilterStatus' => $status,
         ]);
     }
 

@@ -757,6 +757,8 @@
 
     form.post(route(routeName), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien'],
 
       onSuccess: () => {
         saveStatus.value[key] = 'ready';
@@ -801,4 +803,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

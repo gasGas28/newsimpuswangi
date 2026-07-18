@@ -108,7 +108,7 @@
                     id="gio_od"
                     class="form-control"
                     type="text"
-                    v-model ="form.penglihatan.gio_od"
+                    v-model="form.penglihatan.gio_od"
                     placeholder="0"
                   />
                   <span>mmHg</span>
@@ -151,7 +151,7 @@
                     id="gio_os"
                     class="form-control"
                     type="text"
-                    v-model = "form.penglihatan.gio_os"
+                    v-model="form.penglihatan.gio_os"
                     placeholder="0"
                   />
                   <span>mmHg</span>
@@ -209,14 +209,22 @@
               </div>
               <div class="form-field">
                 <label class="form-label" for="serumen_kanan">Serumen Impaksi</label>
-                <select id="serumen_kanan" class="form-select" v-model="form.pendengaran.serumen_kanan">
+                <select
+                  id="serumen_kanan"
+                  class="form-select"
+                  v-model="form.pendengaran.serumen_kanan"
+                >
                   <option value="false">Tidak</option>
                   <option value="true">Ya</option>
                 </select>
               </div>
               <div class="form-field">
                 <label class="form-label" for="presbi_kanan">Curiga Presbikusis</label>
-                <select id="presbi_kanan" class="form-select" v-model="form.pendengaran.presbi_kanan">
+                <select
+                  id="presbi_kanan"
+                  class="form-select"
+                  v-model="form.pendengaran.presbi_kanan"
+                >
                   <option value="false">Tidak</option>
                   <option value="true">Ya</option>
                 </select>
@@ -253,7 +261,11 @@
               </div>
               <div class="form-field">
                 <label class="form-label" for="serumen_kiri">Serumen Impaksi</label>
-                <select id="serumen_kiri" class="form-select" v-model="form.pendengaran.serumen_kiri">
+                <select
+                  id="serumen_kiri"
+                  class="form-select"
+                  v-model="form.pendengaran.serumen_kiri"
+                >
                   <option value="false">Tidak</option>
                   <option value="true">Ya</option>
                 </select>
@@ -319,30 +331,29 @@
     formData: Object,
   });
 
-
   const form = useForm({
     skriningId: props.DataPasien?.idSkrining || null,
 
-    penglihatan : {
+    penglihatan: {
       // Tajam Penglihatan
       visus_od: '',
       pinhole_od: '',
       visus_os: '',
       pinhole_os: '',
 
-    // Segmen Anterior & Katarak - Mata Kanan
+      // Segmen Anterior & Katarak - Mata Kanan
       sa_od: '',
       rf_od: '',
       st_od: '',
       gio_od: '',
 
-    // Segmen Anterior & Katarak - Mata Kiri
+      // Segmen Anterior & Katarak - Mata Kiri
       sa_os: '',
       rf_os: '',
       st_os: '',
       gio_os: '',
 
-    // Retinopati
+      // Retinopati
       retino_od: 'false',
       retino_os: 'false',
     },
@@ -355,14 +366,13 @@
       presbi_kanan: 'false',
       bisik_kanan: '',
 
-    // Pendengaran - Telinga Kiri
+      // Pendengaran - Telinga Kiri
       tuli_kiri: 'false',
       omsk_kiri: 'false',
       serumen_kiri: 'false',
       presbi_kiri: 'false',
       bisik_kiri: '',
     },
-
   });
 
   const showSuccessModal = ref(false);
@@ -403,6 +413,8 @@
 
     form.post(route('pelayanan.simpan-gangguan-indera'), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien'],
 
       onBefore: () => {
         console.log('Mulai request');
@@ -459,4 +471,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

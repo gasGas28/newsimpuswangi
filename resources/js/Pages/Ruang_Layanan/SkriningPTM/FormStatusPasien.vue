@@ -129,7 +129,7 @@
               <th>Cara Keluar</th>
               <th>Jadwal Kontrol</th>
               <th>Nama Dokter</th>
-              <th class="text-center">Aksi</th>
+              <!-- <th class="text-center">Aksi</th> -->
             </tr>
           </thead>
           <tbody>
@@ -151,14 +151,14 @@
               <td>
                 <span class="service-pill">{{ pasien.nmDokter }}</span>
               </td>
-              <td class="text-center">
+              <!-- <td class="text-center">
                 <button
                   class="btn btn-outline-danger"
                   @click="hapusTindakan(pasien.idTindakan)"
                 >
                   <i class="bi bi-trash"></i>
                 </button>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </table>
@@ -231,6 +231,8 @@ function saveStatusPasien() {
 
   form.post(route('pelayanan.status-pasien-ptm'), {
     preserveScroll: true,
+    showGlobalLoader: false,
+    only: ['DataPasien'],
 
     onSuccess: () => {
       saveStatus.value = 'ready';
@@ -272,4 +274,4 @@ function labelize(value) {
 }
 </script>
 
-<style scoped src="./FormPemeriksaan/FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

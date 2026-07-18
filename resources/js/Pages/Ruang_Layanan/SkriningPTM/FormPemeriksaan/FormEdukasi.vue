@@ -83,7 +83,7 @@
               <th>Kode</th>
               <th>Nama Tindakan</th>
               <th>Display</th>
-              <th class="text-center">Aksi</th>
+              <!-- <th class="text-center">Aksi</th> -->
             </tr>
           </thead>
           <tbody>
@@ -102,14 +102,14 @@
               <td>
                 <span class="service-pill">{{ item.display || '-' }}</span>
               </td>
-              <td class="text-center">
+              <!-- <td class="text-center">
                 <button
                   class="btn btn-outline-danger"
                   @click="hapusTindakan(item.idTindakan)"
                 >
                   <i class="bi bi-trash"></i>
                 </button>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </table>
@@ -184,6 +184,8 @@
     form.post(route('ptm.edukasi-simpan'), {
       preserveScroll: true,
       forceFormData: true,
+      showGlobalLoader: false,
+      only: ['DatEdukasi'],
       onSuccess: () => {
         if (index + 1 < items.length) {
           simpanTindakanBerikutnya(items, index + 1);

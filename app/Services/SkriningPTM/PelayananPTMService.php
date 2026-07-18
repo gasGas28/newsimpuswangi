@@ -338,7 +338,7 @@ class PelayananPTMService
             'batuk' => $data['batuk'] ?? null,
             'dahak' => $data['dahak'] ?? null,
             'spirometri' => $data['spirometri'] ?? null,
-            
+
             'r_pribadi_htn' => $data['r_pribadi_htn'] ?? null,
             'r_pribadi_dm' => $data['r_pribadi_dm'] ?? null,
             'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? null,
@@ -628,6 +628,8 @@ class PelayananPTMService
         $status = SimpusStatusPTM::updateOrCreate(
             [
                 'skriningID' => $data['skriningId'],
+            ],
+            [
                 'cara_keluar' => $data['cara_keluar'],
                 'kondisi_pasien' => $data['kondisi_keluar'],
                 'jadwal_kontrol' => $data['jadwal_kontrol'],

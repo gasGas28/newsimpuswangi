@@ -17,7 +17,9 @@
                 <span class="code-pill">{{ getObatKode(selectedObat) }}</span>
                 <div class="obat-selected-main">
                   <span class="obat-selected-nama">{{ getObatNama(selectedObat) }}</span>
-                  <span class="satuan-badge">{{ getObatSatuan(selectedObat) || 'Satuan belum tersedia' }}</span>
+                  <span class="satuan-badge">{{
+                    getObatSatuan(selectedObat) || 'Satuan belum tersedia'
+                  }}</span>
                 </div>
               </div>
               <button type="button" class="btn-ganti" @click="showObatModal = true">
@@ -31,7 +33,9 @@
           </div>
 
           <div class="form-field">
-            <label class="form-label" for="jumlah-obat">Jumlah <span class="required">*</span></label>
+            <label class="form-label" for="jumlah-obat"
+              >Jumlah <span class="required">*</span></label
+            >
             <div class="input-unit">
               <input
                 id="jumlah-obat"
@@ -237,7 +241,8 @@
     const parts = [];
     if (item?.dosis_pakai_puyer) parts.push(`${item.dosis_pakai_puyer}x sehari`);
     else if (item?.frekuensi) parts.push(`${item.frekuensi}x sehari`);
-    if (item?.tiapJam || item?.interval_jam) parts.push(`tiap ${item.tiapJam || item.interval_jam} jam`);
+    if (item?.tiapJam || item?.interval_jam)
+      parts.push(`tiap ${item.tiapJam || item.interval_jam} jam`);
     if (item?.waktu) parts.push(item.waktu);
     if (item?.kondisi) parts.push(item.kondisi);
     if (item?.catatan) parts.push(item.catatan);
@@ -283,6 +288,8 @@
 
     router.post(route('pelayanan.simpan-resep-ptm'), payload, {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['ResepObat'],
       onSuccess: () => {
         resetFormObat();
       },
@@ -295,6 +302,8 @@
   const hapusResep = (id) => {
     router.delete(route('pelayanan.hapus-resep-ptm', id), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien', 'ResepObat'],
       onError: (errors) => {
         errorResep.value = Object.values(errors)[0] || 'Gagal menghapus resep.';
       },
@@ -303,131 +312,131 @@
 </script>
 
 <style scoped>
-.pengobatan-form {
-  display: grid;
-  gap: 18px;
-}
-
-.pengobatan-panel {
-  margin-bottom: 0;
-}
-
-.pengobatan-grid {
-  display: grid;
-  grid-template-columns: minmax(280px, 1.5fr) minmax(180px, 0.65fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.pengobatan-grid .form-field {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.obat-field,
-.note-field {
-  grid-column: 1 / -1;
-}
-
-.obat-selected-wrap,
-.btn-pilih-obat {
-  min-height: 58px;
-}
-
-.obat-selected-info {
-  min-width: 0;
-}
-
-.obat-selected-main,
-.resep-obat-cell {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.obat-selected-nama,
-.resep-obat-cell .fw-semibold {
-  overflow-wrap: anywhere;
-}
-
-.dose-grid-readable {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.dose-input {
-  display: grid;
-  grid-template-columns: minmax(70px, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-}
-
-.schedule-field .check-list {
-  gap: 10px;
-}
-
-.resep-error {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  margin: 16px 0 0;
-  padding: 10px 12px;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  background: #fff5f5;
-  color: #b91c1c;
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-
-.col-no {
-  width: 52px;
-}
-
-.jumlah-cell {
-  white-space: nowrap;
-}
-
-.aturan-cell {
-  min-width: 240px;
-  line-height: 1.5;
-}
-
-.btn-hapus-resep {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-@media (max-width: 992px) {
-  .pengobatan-grid,
-  .dose-grid-readable {
-    grid-template-columns: 1fr;
+  .pengobatan-form {
+    display: grid;
+    gap: 18px;
   }
-}
 
-@media (max-width: 576px) {
+  .pengobatan-panel {
+    margin-bottom: 0;
+  }
+
+  .pengobatan-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.5fr) minmax(180px, 0.65fr);
+    gap: 16px;
+    align-items: start;
+  }
+
   .pengobatan-grid .form-field {
-    padding: 12px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 8px;
+    background: #ffffff;
   }
 
-  .obat-selected-wrap {
-    align-items: stretch;
-    flex-direction: column;
+  .obat-field,
+  .note-field {
+    grid-column: 1 / -1;
   }
 
-  .btn-ganti,
-  .btn-hapus-resep {
-    justify-content: center;
-    width: 100%;
+  .obat-selected-wrap,
+  .btn-pilih-obat {
+    min-height: 58px;
+  }
+
+  .obat-selected-info {
+    min-width: 0;
+  }
+
+  .obat-selected-main,
+  .resep-obat-cell {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .obat-selected-nama,
+  .resep-obat-cell .fw-semibold {
+    overflow-wrap: anywhere;
+  }
+
+  .dose-grid-readable {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dose-input {
-    grid-template-columns: 1fr;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: minmax(70px, 1fr) auto;
+    gap: 8px;
+    align-items: center;
   }
-}
+
+  .schedule-field .check-list {
+    gap: 10px;
+  }
+
+  .resep-error {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 16px 0 0;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fff5f5;
+    color: #b91c1c;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .col-no {
+    width: 52px;
+  }
+
+  .jumlah-cell {
+    white-space: nowrap;
+  }
+
+  .aturan-cell {
+    min-width: 240px;
+    line-height: 1.5;
+  }
+
+  .btn-hapus-resep {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 992px) {
+    .pengobatan-grid,
+    .dose-grid-readable {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .pengobatan-grid .form-field {
+      padding: 12px;
+    }
+
+    .obat-selected-wrap {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .btn-ganti,
+    .btn-hapus-resep {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .dose-input {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
 </style>

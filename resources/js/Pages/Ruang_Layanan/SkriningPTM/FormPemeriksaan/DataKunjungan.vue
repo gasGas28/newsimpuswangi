@@ -156,16 +156,14 @@
     id_petugas: pasien.value?.id_petugas || '',
     fasyankes: defaultFasyankes,
     keluhan_utama: pasien.value?.keluhan_utama || '',
-    patient_id: ihsSatusehat || ''
+    patient_id: ihsSatusehat || '',
   });
 
   console.log('Form initialized with:', form);
 
-
   const isSaving = ref(false);
   const saveStatus = ref('idle');
   const saveError = ref('');
-
 
   const saveMessage = computed(() => {
     if (saveStatus.value === 'ready') return 'Data subjektif berhasil disimpan.';
@@ -191,6 +189,8 @@
 
     form.post(route('pelayanan.tambah-kunjungan-ptm'), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien'],
 
       onBefore: () => {
         console.log('Mulai request');
@@ -198,23 +198,17 @@
 
       onSuccess: () => {
         saveStatus.value = 'ready';
-
         saveError.value = '';
         validationMessages.value = [];
-
         form.clearErrors();
         form.defaults(form.data());
-
         showSuccessModal.value = true;
       },
 
       onError: (errors) => {
         saveStatus.value = 'error';
-
         validationMessages.value = Object.values(errors).flat();
-
         saveError.value = extractMessage(errors);
-
         showValidationModal.value = true;
       },
 
@@ -247,4 +241,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

@@ -22,16 +22,16 @@ class RegisterExportController extends Controller
         $request->validate([
             'tahun' => 'nullable|integer|min:2000|max:2100',
             'puskesmas' => 'nullable|string',
+            'status' => 'nullable|in:semua,tidak_normal',
         ]);
 
         $year = (int) ($request->query('tahun') ?? now()->year);
         $namaPuskesmas = $request->query('puskesmas', '……………………….');
+        $status = $request->query('status', 'semua');
 
         $spreadsheet = new Spreadsheet();
 
-        // Sheet 1: Hipertensi
-        $htData = $htService->getData($year);
-
+        $htData = $htService->getData($year, $status);
         $exportService->buildSheet(
             $spreadsheet,
             0,
@@ -41,8 +41,7 @@ class RegisterExportController extends Controller
             $htData
         );
 
-        // Sheet 2: Diabetes
-        $dmData = $dmService->getData($year);
+        $dmData = $dmService->getData($year, $status);
         $exportService->buildSheet(
             $spreadsheet,
             1,
