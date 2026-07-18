@@ -303,9 +303,7 @@
       :show="showSuccessModal"
       type="success"
       title="Kunjungan Berhasil Disimpan"
-      message="Silakan lanjutkan pengisian Faktor Risiko."
-      button-text="Tutup"
-      secondary-button-text="Lanjut Faktor Risiko"
+      message="Data kunjungan telah tersimpan."
       @close="showSuccessModal = false"
     />
 

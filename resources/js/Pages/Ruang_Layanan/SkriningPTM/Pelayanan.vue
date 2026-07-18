@@ -136,6 +136,7 @@
       },
       {
         preserveScroll: true,
+        only: ['DataPasien'],
         onSuccess: () => {
           showSuccessModal.value = true;
           setTimeout(() => {
@@ -164,6 +165,8 @@
       },
       {
         preserveScroll: true,
+        showGlobalLoader: false,
+        only: ['DataPasien'],
         onSuccess: () => {
           showConfirmModal.value = false;
           showAkhiriSuccessModal.value = true;

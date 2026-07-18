@@ -508,7 +508,7 @@
           <div class="form-field">
             <label class="form-label" for="ekg_irama">Irama</label>
             <select id="ekg_irama" name="ekg_irama" class="form-select" v-model="formEkg.irama">
-              <option value="">Tidak dilakukan</option>
+              <option value="tidak dilakukan">Tidak dilakukan</option>
               <option value="sinus">Sinus Rhythm</option>
               <option value="aritmia">Aritmia</option>
             </select>
@@ -517,7 +517,7 @@
           <div class="form-field">
             <label class="form-label" for="ekg_axis">Axis</label>
             <select id="ekg_axis" name="ekg_axis" class="form-select" v-model="formEkg.axis">
-              <option value="">Tidak dilakukan</option>
+              <option value="tidak dilakukan">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="lad">Left Axis Deviation</option>
               <option value="rad">Right Axis Deviation</option>
@@ -527,7 +527,7 @@
           <div class="form-field">
             <label class="form-label" for="ekg_st">Segmen ST</label>
             <select id="ekg_st" name="ekg_st" class="form-select" v-model="formEkg.st">
-              <option value="">Tidak dilakukan</option>
+              <option value="tidak dilakukan">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="elevasi">ST Elevasi</option>
               <option value="depresi">ST Depresi</option>
@@ -537,7 +537,7 @@
           <div class="form-field">
             <label class="form-label" for="ekg_qrs">Kompleks QRS</label>
             <select id="ekg_qrs" name="ekg_qrs" class="form-select" v-model="formEkg.qrs">
-              <option value="">Tidak dilakukan</option>
+              <option value="tidak dilakukan">Tidak dilakukan</option>
               <option value="normal">Normal</option>
               <option value="abnormal">Abnormal</option>
             </select>
@@ -565,14 +565,11 @@
       </div>
     </section>
 
-    <!-- ==================== MODALS ==================== -->
     <ModalAlert
       :show="showSuccessModal"
       type="success"
       title="Kunjungan Berhasil Disimpan"
-      message="Silakan lanjutkan pengisian Selanjutnya."
-      button-text="Close"
-      secondary-button-text="Lanjut Pemeriksaan Berikutnya"
+      message="Data kunjungan telah tersimpan."
       @close="showSuccessModal = false"
     />
 
@@ -647,10 +644,10 @@
   const formEkg = useForm({
     skriningId,
     hr: '',
-    irama: '',
-    axis: '',
-    st: '',
-    qrs: '',
+    irama: 'tidak dilakukan',
+    axis: 'tidak dilakukan',
+    st: 'tidak dilakukan',
+    qrs: 'tidak dilakukan',
     hasil_ekg: '',
   });
 

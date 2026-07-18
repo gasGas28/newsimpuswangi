@@ -1,6 +1,6 @@
 <template>
   <AppLayouts>
-    <FormAnamnesa
+    <FormSkrining
       title="Skrining Penyakit Tidak Menular"
       :backRoute="backRoute"
       :pelayananRoute="pelayananRoute"
@@ -22,7 +22,7 @@
   import { route } from 'ziggy-js';
   import { usePage, router } from '@inertiajs/vue3';
 
-  import FormAnamnesa from './UnitPelayanan.vue';
+  import FormSkrining from './UnitPelayanan.vue';
   import AppLayouts from '../../../Components/Layouts/AppLayouts.vue';
 
   const page = usePage();
@@ -76,15 +76,14 @@
           preserveScroll: true,
           replace: true,
           async: true,
-
           showGlobalLoader: false,
+          only: ['DataPasien'],
 
           onStart: () => {
             loadingTable.value = true;
           },
 
           // hanya refresh data pasien
-          only: ['DataPasien'],
 
           onFinish: () => {
             loadingTable.value = false;

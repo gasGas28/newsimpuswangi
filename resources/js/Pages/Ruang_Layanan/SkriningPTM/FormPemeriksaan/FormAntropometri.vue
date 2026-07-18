@@ -552,13 +552,11 @@
     <ModalAlert
       :show="showSuccessModal"
       type="success"
-      title="Kunjungan Berhasil Disimpan"
-      message="Silakan lanjutkan pengisian Faktor Risiko."
-      button-text="Tutup"
-      secondary-button-text="Lanjut Faktor Risiko"
+      title="Pelayanan Berhasil Disimpan"
+      message="Data Pelayanan telah tersimpan."
       @close="showSuccessModal = false"
     />
-
+ 
     <ModalAlert
       :show="showValidationModal"
       type="warning"
