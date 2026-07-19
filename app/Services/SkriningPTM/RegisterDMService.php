@@ -17,15 +17,8 @@ class RegisterDMService
             ->whereYear('simpus_kunjungan_ptm.tanggal_skrining', $year);
 
         if ($status === 'tidak_normal') {
-            $normal = array_map('mb_strtolower', $this->kategoriNormal); // ['normal', 'prediabetes']
-            $placeholders = implode(',', array_fill(0, count($normal), '?'));
-
-            $query->where(function ($q) use ($normal, $placeholders) {
-                $q->whereRaw("LOWER(TRIM(simpus_diabetes.kategori_gula_darah_puasa)) NOT IN ({$placeholders})", $normal)
-                    ->orWhereRaw("LOWER(TRIM(simpus_diabetes.kategori_gula_darah_sewaktu)) NOT IN ({$placeholders})", $normal)
-                    ->orWhereRaw("LOWER(TRIM(simpus_diabetes.kategori_gula_darah_2_jam_pp)) NOT IN ({$placeholders})", $normal)
-                    ->orWhereRaw("LOWER(TRIM(simpus_diabetes.kategori_hba1c)) NOT IN ({$placeholders})", $normal);
-            });
+            $query->whereNotNull('simpus_diabetes.kategori_gula_darah_puasa')
+                ->whereNotIn('simpus_diabetes.kategori_gula_darah_puasa', $this->kategoriNormal);
         }
 
         $rows = $query
@@ -33,10 +26,10 @@ class RegisterDMService
                 'simpus_pasien.NIK as nik',
                 'simpus_pasien.NAMA_LGKP as nama',
                 'simpus_pasien.TGL_LHR as tgl_lahir',
-                'simpus_pasien.jenis_klmin as jenis_kelamin', // TODO: cek nama kolom asli
+                'simpus_pasien.jenis_klmin as jenis_kelamin',
                 'simpus_pasien.ALAMAT as alamat',
-                'simpus_pasien.PHONE as no_hp',                 // TODO: cek nama kolom asli, boleh null
-                'simpus_kunjungan_ptm.tanggal_skrining as tanggal_kunjungan', // TODO: sesuaikan
+                'simpus_pasien.PHONE as no_hp',
+                'simpus_kunjungan_ptm.tanggal_skrining as tanggal_kunjungan',
                 'simpus_diabetes.gula_darah_puasa as gdp',
                 'simpus_diabetes.gula_darah_2_jam_pp as gd2jpp',
                 'simpus_diabetes.gula_darah_sewaktu as gds',
@@ -53,9 +46,6 @@ class RegisterDMService
                 // GDP > GD2JPP > GDS > HbA1c. Sesuaikan urutan/label kalau perlu.
                 $row->vital = match (true) {
                     !empty($row->gdp) => "GDP {$row->gdp}",
-                    !empty($row->gd2jpp) => "GD2JPP {$row->gd2jpp}",
-                    !empty($row->gds) => "GDS {$row->gds}",
-                    !empty($row->hba1c) => "HbA1c {$row->hba1c}",
                     default => '-',
                 };
 

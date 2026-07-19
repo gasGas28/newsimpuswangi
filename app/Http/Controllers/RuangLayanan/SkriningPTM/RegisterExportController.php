@@ -25,9 +25,15 @@ class RegisterExportController extends Controller
             'status' => 'nullable|in:semua,tidak_normal',
         ]);
 
+        
         $year = (int) ($request->query('tahun') ?? now()->year);
         $namaPuskesmas = $request->query('puskesmas', '……………………….');
         $status = $request->query('status', 'semua');
+        
+        \Log::info('EXPORT STATUS DEBUG', [
+            'status_raw' => $request->query('status'),
+            'status_used' => $status,
+        ]);
 
         $spreadsheet = new Spreadsheet();
 

@@ -7,6 +7,8 @@ use Illuminate\Support\Collection;
 
 class RegisterHTService
 {
+    protected array $kategoriNormal = ['Normal', 'Elevated', 'Hipertensi Grade 1'];
+
     public function getData(int $year, string $status = 'semua')
     {
         $query = DB::table('simpus_kunjungan_ptm')
@@ -16,7 +18,7 @@ class RegisterHTService
 
         if ($status === 'tidak_normal') {
             $query->whereNotNull('simpus_hipertensi.kategori_tekanan_darah')
-                  ->where('simpus_hipertensi.kategori_tekanan_darah', '!=', 'Normal');
+                ->whereNotIn('simpus_hipertensi.kategori_tekanan_darah', $this->kategoriNormal);
         }
 
         $rows = $query

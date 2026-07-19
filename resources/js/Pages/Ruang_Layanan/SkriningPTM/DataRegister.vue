@@ -65,7 +65,7 @@
               :disabled="isFiltering"
             >
               <option value="semua">Semua Data</option>
-              <option value="tidak_normal">Tidak Normal Saja</option>
+              <option value="tidak_normal">HT dan DM Saja</option>
             </select>
           </div>
         </div>
