@@ -552,13 +552,11 @@
     <ModalAlert
       :show="showSuccessModal"
       type="success"
-      title="Kunjungan Berhasil Disimpan"
-      message="Silakan lanjutkan pengisian Faktor Risiko."
-      button-text="Tutup"
-      secondary-button-text="Lanjut Faktor Risiko"
+      title="Pelayanan Berhasil Disimpan"
+      message="Data Pelayanan telah tersimpan."
       @close="showSuccessModal = false"
     />
-
+ 
     <ModalAlert
       :show="showValidationModal"
       type="warning"
@@ -581,7 +579,10 @@
     DataPasien: Object,
   });
 
+  const data = computed(() => props.DataPasien || '');
+
   const skriningId = props.DataPasien?.idSkrining || null;
+
 
   const formHipertensi = useForm({
     skriningId,
@@ -595,47 +596,44 @@
 
   const formDiabetes = useForm({
     skriningId,
-    gdp: '',
-    interpretasi_gdp: '',
-    gds: '',
-    interpretasi_gds: '',
-    hba1c: '',
-    interpretasi_hba1c: '',
-    gd2pp: '',
-    interpretasi_gd2pp: '',
+    gdp: data.value.gula_darah_puasa || '',
+    interpretasi_gdp: data.value.kategori_gula_darah_puasa || '',
+    gds: data.value.gula_darah_sewaktu || '',
+    interpretasi_gds: data.value.kategori_gula_darah_sewaktu || '',
+    hba1c: data.value.hba1c || '',
+    interpretasi_hba1c: data.value.kategori_hba1c || '',
+    gd2pp: data.value.gula_darah_2_jam_pp || '',
+    interpretasi_gd2pp: data.value.kategori_gula_darah_2_jam_pp || '',
   });
 
   const formObesitas = useForm({
     skriningId,
-    berat_badan: '',
-    tinggi_badan: '',
-    imt: '',
-    interpretasi_imt: '',
-    lingkar_perut: '',
-    interpretasi_lp: '',
+    berat_badan: data.value.berat_badan || '',
+    tinggi_badan: data.value.tinggi_badan || '',
+    imt: data.value.imt || '',
+    interpretasi_imt: data.value.interpretasi_ptm || '',
+    lingkar_perut: data.value.lingkar_pinggang || '',
+    interpretasi_lp: data.value.interpretasi_lp || '',
   });
 
   const formProfilLipid = useForm({
     skriningId,
-    kolesterol_total: '',
-    interpretasi_kolesterol_total: '',
-    ldl: '',
-    interpretasi_ldl: '',
-    hdl: '',
-    interpretasi_hdl: '',
-    trigliserida: '',
-    interpretasi_trigliserida: '',
+    kolesterol_total: data.value.kolesterol_total || '',
+    interpretasi_kolesterol_total: data.value.interpretasi_kolesterol_total || '',
+    ldl: data.value.ldl || '',
+    interpretasi_ldl: data.value.interpretasi_ldl || '',
+    hdl: data.value.hdl || '',
+    interpretasi_hdl: data.value.interpretasi_hdl || '',
+    trigliserida: data.value.trigliserida || '',
+    interpretasi_trigliserida: data.value.interpretasi_trigliserida || '',
   });
 
   const formAsamUrat = useForm({
     skriningId,
-    asam_urat: null,
-    interpretasi_asam_urat: '',
+    asam_urat: data.value.asam_urat || '',
+    interpretasi_asam_urat: data.value.kategori_asam_urat || '',
   });
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
   function toNumber(value) {
     const number = parseFloat(value);
     return Number.isFinite(number) ? number : 0;
@@ -862,6 +860,8 @@
 
     form.post(route(routeName), {
       preserveScroll: true,
+      showGlobalLoader: false,
+      only: ['DataPasien'],
 
       onSuccess: () => {
         saveStatus.value[key] = 'ready';
@@ -902,4 +902,4 @@
   }
 </script>
 
-<style scoped src="./FormPemeriksaan.css"></style>
+<style scoped src="@/css/FormPemeriksaan.css"></style>

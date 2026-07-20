@@ -52,6 +52,26 @@
           </div>
         </div>
       </div>
+
+      <!-- ===== FILTER STATUS (baru) ===== -->
+      <div class="patient-row">
+        <div class="patient-col">
+          <div class="patient-field">
+            <label>Filter Data</label>
+            <select
+              v-model="filterStatus"
+              class="filter-select"
+              @change="applyFilter"
+              :disabled="isFiltering"
+            >
+              <option value="semua">Semua Data</option>
+              <option value="tidak_normal">HT dan DM Saja</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- ===== END FILTER STATUS ===== -->
+
       <div class="patient-card-footer">
         <button
           @click="downloadExcel"
@@ -88,6 +108,7 @@
             <th class="col-no">No</th>
             <th class="col-date">Tgl Kunjung</th>
             <th class="col-bp">Tekanan Darah</th>
+            <th class="col-gula">Gula Darah</th>
             <th class="col-anthro">Antropometri</th>
             <th class="col-nadi">Nadi</th>
             <th class="col-suhu">Suhu</th>
@@ -100,9 +121,49 @@
             <td class="col-no">{{ index + 1 }}</td>
             <td class="col-date">{{ formatDate(data.tanggal_skrining) }}</td>
             <td class="col-bp">
-              <span class="badge-bp"
-                >{{ data.sistolik || '-' }}/{{ data.tekanan_diastolik || '-' }}</span
+              <span
+                class="badge-bp"
+                :class="{ 'badge-abnormal': isAbnormal(data.kategori_tekanan_darah) }"
               >
+                {{ data.sistolik || '-' }}/{{ data.tekanan_diastolik || '-' }}
+              </span>
+              <div v-if="data.kategori_tekanan_darah" class="kategori-label">
+                {{ data.kategori_tekanan_darah }}
+              </div>
+            </td>
+            <td class="col-gula">
+              <div v-if="data.gula_darah_puasa" class="gula-item">
+                GDP: {{ data.gula_darah_puasa }}
+                <span v-if="isAbnormal(data.kategori_gula_darah_puasa)" class="dot-abnormal"></span>
+              </div>
+              <div v-if="data.gula_darah_sewaktu" class="gula-item">
+                GDS: {{ data.gula_darah_sewaktu }}
+                <span
+                  v-if="isAbnormal(data.kategori_gula_darah_sewaktu)"
+                  class="dot-abnormal"
+                ></span>
+              </div>
+              <div v-if="data.gula_darah_2_jam_pp" class="gula-item">
+                GD2PP: {{ data.gula_darah_2_jam_pp }}
+                <span
+                  v-if="isAbnormal(data.kategori_gula_darah_2_jam_pp)"
+                  class="dot-abnormal"
+                ></span>
+              </div>
+              <div v-if="data.hba1c" class="gula-item">
+                HbA1c: {{ data.hba1c }}
+                <span v-if="isAbnormal(data.kategori_hba1c)" class="dot-abnormal"></span>
+              </div>
+              <div
+                v-if="
+                  !data.gula_darah_puasa &&
+                  !data.gula_darah_sewaktu &&
+                  !data.gula_darah_2_jam_pp &&
+                  !data.hba1c
+                "
+              >
+                -
+              </div>
             </td>
             <td class="col-anthro">
               <div class="anthro-item">TB: {{ data.tinggi_badan || '-' }}</div>
@@ -115,7 +176,7 @@
             <td class="col-keluhan">{{ data.keluhan_utama || '-' }}</td>
           </tr>
           <tr v-if="!riwayat.length" class="empty-row">
-            <td colspan="8">Tidak ada data riwayat kesehatan</td>
+            <td colspan="9">Tidak ada data riwayat kesehatan</td>
           </tr>
         </tbody>
       </table>
@@ -124,15 +185,61 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
+  import { router } from '@inertiajs/vue3';
+  import { watch } from 'vue';
 
+  
   const props = defineProps({
     DataRiwayat: Array,
+    FilterStatus: { type: String, default: 'semua' }, // dikirim dari controller
   });
-  
+  watch(
+    () => props.FilterStatus,
+    (newVal) => {
+      console.log('FilterStatus berubah jadi:', newVal);
+    }
+  );
 
-  const riwayat = props.DataRiwayat || [];
+  watch(
+    () => props.DataRiwayat,
+    (newVal) => {
+      console.log('DataRiwayat berubah, jumlah:', newVal?.length);
+    }
+  );
+
+  // computed, BUKAN const biasa — supaya ikut ter-update saat Inertia
+  // mengirim props baru lewat router.get({ preserveState: true }),
+  // karena preserveState mempertahankan instance komponen (tidak remount).
+  const riwayat = computed(() => props.DataRiwayat || []);
   const isDownloading = ref(false);
+
+  // ===== FILTER STATUS (baru) =====
+  const filterStatus = ref(props.FilterStatus || 'semua');
+  const isFiltering = ref(false);
+
+  const isAbnormal = (kategori) => {
+    if (!kategori) return false;
+    return kategori.toLowerCase() !== 'normal';
+  };
+
+  const applyFilter = () => {
+    isFiltering.value = true;
+    const nik = getQueryParam('NIK');
+
+    router.get(
+      route('ruang-layanan.register-ptm'),
+      { NIK: nik, status: filterStatus.value },
+      {
+        preserveState: true,
+        preserveScroll: true,
+        onFinish: () => {
+          isFiltering.value = false;
+        },
+      }
+    );
+  };
+  // ===== END FILTER STATUS =====
 
   const formatDate = (date) => {
     if (!date) return '-';
@@ -156,11 +263,11 @@
     window.history.back();
   };
 
-  const isDownloadingExcel = ref(false); // tambahan
+  const isDownloadingExcel = ref(false);
   const isDownloadingLaporan = ref(false);
 
   const downloadLaporanPTM = async () => {
-    if (riwayat.length === 0 || isDownloadingLaporan.value) return;
+    if (riwayat.value.length === 0 || isDownloadingLaporan.value) return;
     isDownloadingLaporan.value = true;
 
     try {
@@ -198,17 +305,21 @@
   };
 
   const downloadExcel = async () => {
-    if (riwayat.length === 0 || isDownloadingExcel.value) return;
+    if (riwayat.value.length === 0 || isDownloadingExcel.value) return;
     isDownloadingExcel.value = true;
 
     try {
       const tahun = new Date().getFullYear();
-      const response = await fetch(route('ptm.export-register', { tahun }), {
-        method: 'GET',
-        headers: {
-          Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        },
-      });
+      // ikutkan filter status yang sedang aktif supaya export konsisten dengan tampilan
+      const response = await fetch(
+        route('ptm.export-register', { tahun, status: filterStatus.value }),
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Gagal mengunduh Excel');
 
@@ -235,51 +346,6 @@
       isDownloadingExcel.value = false;
     }
   };
-
-  // const downloadPDF = async () => {
-  //   if (riwayat.length === 0 || isDownloading.value) return;
-
-  //   isDownloading.value = true;
-  //   const NIK = getQueryParam('NIK');
-
-  //   try {
-  //     const response = await fetch(route('ruang-layanan.download-register') + '?NIK=' + NIK, {
-  //       method: 'GET',
-  //       headers: {
-  //         Accept: 'application/pdf',
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Gagal mengunduh PDF');
-  //     }
-
-  //     const blob = await response.blob();
-
-  //     const contentDisposition = response.headers.get('Content-Disposition');
-  //     let filename = 'Riwayat_Pasien.pdf';
-  //     if (contentDisposition) {
-  //       const match = contentDisposition.match(/filename="?([^"]+)"?/);
-  //       if (match) filename = match[1];
-  //     }
-
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement('a');
-  //     link.href = url;
-  //     link.download = filename;
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
-  //     window.URL.revokeObjectURL(url);
-  //   } catch (error) {
-  //     console.error('Download PDF error:', error);
-  //     alert('Gagal mengunduh PDF. Silakan coba lagi.');
-  //   } finally {
-  //     isDownloading.value = false;
-  //   }
-  // };
-
-  console.log('Data Riwayat:', riwayat);
 </script>
 
 <style scoped>
@@ -429,7 +495,7 @@
   }
 
   .patient-card-footer {
-    gap: 12px; /* tambahkan ini kalau belum ada */
+    gap: 12px;
   }
 
   .patient-row {
@@ -468,6 +534,55 @@
     font-size: 15px;
     word-break: break-word;
   }
+
+  /* ===== FILTER STATUS (baru) ===== */
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .filter-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .kategori-label {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .badge-abnormal {
+    background-color: #dc2626 !important;
+  }
+
+  .gula-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .dot-abnormal {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #dc2626;
+  }
+
+  .col-gula {
+    width: 15%;
+  }
+  /* ===== END FILTER STATUS ===== */
 
   .patient-card-footer {
     display: flex;
@@ -650,7 +765,7 @@
     }
 
     .data-table {
-      min-width: 760px;
+      min-width: 900px;
     }
 
     .data-table th,

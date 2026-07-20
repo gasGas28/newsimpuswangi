@@ -7,24 +7,29 @@ use Illuminate\Support\Collection;
 
 class RegisterHTService
 {
-    public function getData(int $year)
+    protected array $kategoriNormal = ['Normal', 'Elevated', 'Hipertensi Grade 1'];
+
+    public function getData(int $year, string $status = 'semua')
     {
-        $rows = DB::table('simpus_kunjungan_ptm')
+        $query = DB::table('simpus_kunjungan_ptm')
             ->join('simpus_pasien', 'simpus_pasien.NIK', '=', 'simpus_kunjungan_ptm.nik_pasien')
             ->join('simpus_hipertensi', 'simpus_hipertensi.skriningID', '=', 'simpus_kunjungan_ptm.idSkrining')
-            // TODO: ganti 'tanggal_kunjungan' dengan nama kolom tanggal yang benar
-            // di tabel simpus_kunjungan_ptm (cek migration-nya). sent_at di tabel
-            // simpus_hipertensi kemungkinan timestamp kirim ke Satu Sehat, bukan
-            // tanggal periksa, jadi TIDAK dipakai di sini.
-            ->whereYear('simpus_kunjungan_ptm.tanggal_skrining', $year)
+            ->whereYear('simpus_kunjungan_ptm.tanggal_skrining', $year);
+
+        if ($status === 'tidak_normal') {
+            $query->whereNotNull('simpus_hipertensi.kategori_tekanan_darah')
+                ->whereNotIn('simpus_hipertensi.kategori_tekanan_darah', $this->kategoriNormal);
+        }
+
+        $rows = $query
             ->select([
                 'simpus_pasien.NIK as nik',
                 'simpus_pasien.NAMA_LGKP as nama',
                 'simpus_pasien.TGL_LHR as tgl_lahir',
-                'simpus_pasien.jenis_klmin as jenis_kelamin', // TODO: cek nama kolom asli
+                'simpus_pasien.jenis_klmin as jenis_kelamin',
                 'simpus_pasien.ALAMAT as alamat',
-                'simpus_pasien.PHONE as no_hp',                 // TODO: cek nama kolom asli, boleh null
-                'simpus_kunjungan_ptm.tanggal_skrining as tanggal_kunjungan', // TODO: sesuaikan
+                'simpus_pasien.PHONE as no_hp',
+                'simpus_kunjungan_ptm.tanggal_skrining as tanggal_kunjungan',
                 'simpus_hipertensi.sistolik as sistolik',
                 'simpus_hipertensi.tekanan_diastolik as diastolik',
                 'simpus_hipertensi.kategori_tekanan_darah as kategori_tekanan_darah',
@@ -43,14 +48,8 @@ class RegisterHTService
                     2 => 'Perempuan',
                     default => '-',
                 };
-
-                // simpus_hipertensi TIDAK punya kolom obat (jumlah_obat / jenis_obat).
-                // Kalau data obat ada di tabel lain (mis. resep/terapi), join di sini
-                // dan ganti 2 baris di bawah. Sementara dikosongkan.
                 $row->jumlah_obat = null;
                 $row->jenis_obat = null;
-
-                // Belum tentu ada kolom tempat_layanan, default 'P'.
                 $row->tempat_layanan = $row->tempat_layanan ?? 'P';
 
                 return $row;

@@ -25,7 +25,7 @@ class HipertensiRequest extends FormRequest
             'skriningId' => ['required'],
             'sistolik' => ['required', 'integer'],
             'diastolik' => ['required', 'integer'],
-            'kategori_hipertensi' => ['required', 'string'],
+            'kategori_hipertensi' => ['nullable', 'string'],
             'suhu' => ['nullable', 'numeric'],
             'nadi' => ['nullable', 'integer'],
             'pernapasan' => ['nullable', 'integer'],
@@ -36,11 +36,9 @@ class HipertensiRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'sistolik.required' => 'Tanggal skrining wajib diisi.',
-            'diastolik.required' => 'Dokter atau petugas wajib dipilih.',
-            'suhu.required' => 'Fasyankes wajib diisi.',
-            'nadi.required' => 'Jenis kunjungan wajib diisi.',
-            'pernapasan.required' => 'Keluhan utama wajib diisi.',
+            'sistolik.required' => 'Tekanan Sistolik Masih Belum Diisi.',
+            'diastolik.required' => 'Tekanan Diastolik Masih Belum Diisi.',
+
         ];
     }
 

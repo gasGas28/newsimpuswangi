@@ -3,7 +3,7 @@
     <div class="objektif-toolbar">
       <div>
         <p class="objektif-kicker">Objektif</p>
-        <h3>Pendaftaran Kunjungan Peserta Skrining</h3>
+        <h3>Pelayanan Pemeriksaan Skrining Penyakit Tidak Menular</h3>
       </div>
       <div class="segmented-control" role="tablist" aria-label="Planning">
         <button

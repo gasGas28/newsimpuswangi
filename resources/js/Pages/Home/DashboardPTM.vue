@@ -40,7 +40,7 @@
                 PTM
                 <span class="nav-tab-badge">8 Penyakit</span>
               </span>
-              <Link :href="route('ruang-layanan.laporan-ptm')" class="nav-tab nav-tab-laporan">
+              <!-- <Link :href="route('ruang-layanan.laporan-ptm')" class="nav-tab nav-tab-laporan">
                 <svg
                   width="13"
                   height="13"
@@ -54,7 +54,7 @@
                   <path d="M16 13H8M16 17H8M10 9H8" />
                 </svg>
                 Laporan PTM
-              </Link>
+              </Link> -->
             </div>
           </div>
         </div>

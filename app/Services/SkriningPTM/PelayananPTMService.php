@@ -56,7 +56,6 @@ class PelayananPTMService
             ->leftJoin('simpus_gangguan_penglihatan as penglihatan', 'skrining.idSkrining', '=', 'penglihatan.skriningID')
             ->leftJoin('simpus_kolorektal as kolorektal', 'skrining.idSkrining', '=', 'kolorektal.skriningID')
             ->leftJoin('simpus_kanker_paru as paru', 'skrining.idSkrining', '=', 'paru.skriningID')
-            ->leftJoin('assessment_ptm as assessment', 'skrining.id', '=', 'assessment.skrining_ptm_id')
             ->leftJoin('simpus_ekg as ekg', 'skrining.idSkrining', '=', 'ekg.skriningID')
             ->leftJoin('simpus_kanker_iva as serviks', 'skrining.idSkrining', '=', 'serviks.skriningID')
             ->leftJoin('simpus_thalasemia as thalasemia', 'skrining.idSkrining', '=', 'thalasemia.skriningID')
@@ -126,7 +125,6 @@ class PelayananPTMService
                 'profil_lipid.*',
                 'pendengaran.*',
                 'penglihatan.*',
-                'assessment.*',
                 'kolorektal.*',
                 'paru.*',
                 'ekg.*',
@@ -338,7 +336,7 @@ class PelayananPTMService
             'batuk' => $data['batuk'] ?? null,
             'dahak' => $data['dahak'] ?? null,
             'spirometri' => $data['spirometri'] ?? null,
-            
+
             'r_pribadi_htn' => $data['r_pribadi_htn'] ?? null,
             'r_pribadi_dm' => $data['r_pribadi_dm'] ?? null,
             'r_pribadi_stroke' => $data['r_pribadi_stroke'] ?? null,
@@ -628,6 +626,8 @@ class PelayananPTMService
         $status = SimpusStatusPTM::updateOrCreate(
             [
                 'skriningID' => $data['skriningId'],
+            ],
+            [
                 'cara_keluar' => $data['cara_keluar'],
                 'kondisi_pasien' => $data['kondisi_keluar'],
                 'jadwal_kontrol' => $data['jadwal_kontrol'],

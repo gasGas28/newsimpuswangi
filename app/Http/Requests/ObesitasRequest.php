@@ -37,6 +37,8 @@ class ObesitasRequest extends FormRequest
             'berat_badan.required' => 'berat badan wajib diisi.',
             'tinggi_badan.required' => 'Tinggi badan wajib diidi.',
             'lingkar_perut.required' => 'Lingkar Perut wajib diisi.',
+            'imt.required' => 'IMT tidak boleh kosong.',
+            'interpretasi_lp.required' => 'Interpretasi Lingkar Perut tidak boleh kosong.',
         ];
     }
 }
