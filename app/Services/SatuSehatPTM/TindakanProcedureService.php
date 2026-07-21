@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SimpusTindakan;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class TindakanProcedureService
 {
@@ -42,17 +44,76 @@ class TindakanProcedureService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function createProcedure(array $payload): string
+    private function createProcedure(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Procedure', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $procedureId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "Procedure-Tindakan-{$label}",
+            idResponse: $procedureId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Procedure Tindakan', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Procedure Tindakan: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $procedureId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     private function buildPayload(
@@ -186,7 +247,7 @@ class TindakanProcedureService
                     $performedDate,
                     $ihsnakes
                 );
-                $procedureId = $this->createProcedure($payload);
+                $procedureId = $this->createProcedure($payload, $pelayananId, $icd9Code);
 
                 $tindakan->update(['procedureId' => $procedureId]);
 

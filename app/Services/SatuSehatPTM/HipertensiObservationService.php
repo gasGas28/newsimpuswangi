@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusHipertensi;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class HipertensiObservationService
 {
@@ -54,6 +56,44 @@ class HipertensiObservationService
         return $response->json('id');
     }
 
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => Auth::id(),
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'     => $e->getMessage(),
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+                'userId'      => Auth::id(),
+            ]);
+        }
+    }
+
     public function sendBloodPressure(string $idSkrining): array
     {
         $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
@@ -61,6 +101,9 @@ class HipertensiObservationService
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
+        $idPelayanan = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
+
         $effectiveAt = now()->toIso8601String();
 
         // Cek duplikat — pakai LOINC panel tekanan darah
@@ -69,6 +112,16 @@ class HipertensiObservationService
             Log::info('Observation BloodPressure sudah ada, skip', [
                 'observation_id' => $existingId,
             ]);
+
+            $this->simpanLog(
+                idPelayanan: $idPelayanan,
+                resource: 'Observation-BloodPressure',
+                idResponse: $existingId,
+                method: 'GET',
+                kirim: ['encounter' => $encounterId, 'code' => '55284-4'],
+                terima: ['observation_id' => $existingId, 'note' => 'sudah ada, skip create'],
+            );
+
             return ['observation_id' => $existingId];
         }
 
@@ -93,7 +146,7 @@ class HipertensiObservationService
             'encounter'      => ['reference' => "Encounter/{$encounterId}"],
             'effectiveDateTime' => $effectiveAt,
             'performer'      => [[
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ]],
             'component' => [
                 [
@@ -132,6 +185,15 @@ class HipertensiObservationService
         $id = $this->createObservation($payload);
 
         Log::info('Observation BloodPressure berhasil', ['observation_id' => $id]);
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Observation-BloodPressure',
+            idResponse: $id,
+            method: 'POST',
+            kirim: $payload,
+            terima: ['observation_id' => $id],
+        );
 
         return ['observation_id' => $id];
     }

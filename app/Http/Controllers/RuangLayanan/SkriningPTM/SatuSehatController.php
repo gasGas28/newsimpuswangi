@@ -167,7 +167,7 @@ class SatuSehatController extends Controller
                 'message' => 'Data Profil Lipid berhasil dikirim',
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['message' => $e->getMessage()], 500);
+            return redirect()->json(['message' => $e->getMessage()], 500);
         }
     }
     public function sendGangguanPendengaran(string $idSkrining)

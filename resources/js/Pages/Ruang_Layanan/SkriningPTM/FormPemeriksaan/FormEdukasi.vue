@@ -143,7 +143,6 @@
 
   const props = defineProps({
     DataPasien: Object,
-    DataTindakan: Array,
     MasterEdukasi: Array,
     DataEdukasi: Array,
   });
@@ -185,7 +184,7 @@
       preserveScroll: true,
       forceFormData: true,
       showGlobalLoader: false,
-      only: ['DatEdukasi'],
+      only: ['DataEdukasi'],
       onSuccess: () => {
         if (index + 1 < items.length) {
           simpanTindakanBerikutnya(items, index + 1);

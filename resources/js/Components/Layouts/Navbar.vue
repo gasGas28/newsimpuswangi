@@ -95,6 +95,7 @@
               <li><Link :href="route('laporan.lab')" class="dropdown-item">Lab</Link></li>
               <li><Link :href="route('laporan.kb')" class="dropdown-item">KB</Link></li>
               <li><Link :href="route('laporan.ugd')" class="dropdown-item">UGD</Link></li>
+              <li><Link :href="route('ruang-layanan.register-ptm')" class="dropdown-item">Skrining PTM</Link></li>
               <li>
                 <Link :href="route('laporan.rawat-inap')" class="dropdown-item">Rawat Inap</Link>
               </li>

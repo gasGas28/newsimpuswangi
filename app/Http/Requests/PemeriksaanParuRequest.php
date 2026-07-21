@@ -33,4 +33,27 @@ class PemeriksaanParuRequest extends FormRequest
             'hasil_kkp' => ['required', 'string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'string' => ':attribute harus berupa teks.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'skriningId' => 'Data skrining',
+            'kp1' => 'Kuesioner Paru pertanyaan 1',
+            'kp2' => 'Kuesioner Paru pertanyaan 2',
+            'kp3' => 'Kuesioner Paru pertanyaan 3',
+            'kp4' => 'Kuesioner Paru pertanyaan 4',
+            'kp5' => 'Kuesioner Paru pertanyaan 5',
+            'kp6' => 'Kuesioner Paru pertanyaan 6',
+            'kp7' => 'Kuesioner Paru pertanyaan 7',
+            'hasil_kkp' => 'Hasil Kuesioner Paru',
+        ];
+    }
 }

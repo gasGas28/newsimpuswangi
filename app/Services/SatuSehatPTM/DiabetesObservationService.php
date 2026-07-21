@@ -11,7 +11,6 @@ use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class DiabetesObservationService
 {
-    // ✅ Map kategori -> ICD-10
     private array $categoryMap = [
         'normal'     => ['code' => 'Z03.8', 'display' => 'No diagnosis'],
         'prediabetes' => ['code' => 'R73.0', 'display' => 'Prediabetes'],
@@ -23,6 +22,14 @@ class DiabetesObservationService
         'gula_darah_2_jam_pp'  => ['code' => '14743-9', 'display' => 'Glucose [Moles/volume] in Capillary blood --2 hours post meal', 'unit' => 'mg/dL', 'ucum' => 'mg/dL'],
         'gula_darah_sewaktu'   => ['code' => '2339-0',  'display' => 'Glucose [Mass/volume] in Blood', 'unit' => 'mg/dL', 'ucum' => 'mg/dL'],
         'hba1c'                => ['code' => '4548-4',  'display' => 'Hemoglobin A1c/Hemoglobin.total in Blood', 'unit' => '%', 'ucum' => '%'],
+    ];
+
+    private array $labelMap = [
+        'indikasi diabetes'            => 'diabetes',
+        'prediabetes'                  => 'prediabetes',
+        'toleransi glukosa terganggu'  => 'prediabetes',
+        'tidak diabetes'               => 'normal',
+        'normal'                       => 'normal',
     ];
 
     public function __construct(
@@ -40,7 +47,7 @@ class DiabetesObservationService
     }
 
     /**
-     * ✅ Helper untuk menyimpan log kirim/terima ke SatuSehatLog
+     * Log Satu Sehat
      */
     private function logSatuSehat(
         string $idPelayanan,
@@ -65,7 +72,6 @@ class DiabetesObservationService
                 'userId'      => $userId,
             ]);
         } catch (\Throwable $e) {
-            // Jangan sampai gagal logging menggagalkan proses utama
             Log::error('Gagal menyimpan SatuSehatLog (Diabetes)', [
                 'message'  => $e->getMessage(),
                 'resource' => $resource,
@@ -148,6 +154,43 @@ class DiabetesObservationService
         }
 
         return $this->categoryMap[$normalized];
+    }
+
+    private function normalizeKategori(?string $label): string
+    {
+        if (is_null($label) || trim($label) === '') {
+            return 'normal';
+        }
+
+        $key = strtolower(trim($label));
+
+        if (!isset($this->labelMap[$key])) {
+            Log::warning('normalizeKategori Diabetes: label tidak dikenali, fallback ke normal', [
+                'label' => $label,
+            ]);
+            return 'normal';
+        }
+
+        return $this->labelMap[$key];
+    }
+
+    // Prioritas: diabetes > prediabetes > normal
+    private function resolveKategoriUtama(array $kategoriList): string
+    {
+        $priority = ['diabetes' => 2, 'prediabetes' => 1, 'normal' => 0];
+        $highest  = 'normal';
+
+        foreach ($kategoriList as $kategoriMentah) {
+            if (is_null($kategoriMentah)) continue;
+
+            $kategori = $this->normalizeKategori($kategoriMentah);
+
+            if ($priority[$kategori] > ($priority[$highest] ?? 0)) {
+                $highest = $kategori;
+            }
+        }
+
+        return $highest;
     }
 
     private function buildObservationEntry(
@@ -263,7 +306,7 @@ class DiabetesObservationService
         ];
 
         $entries = [];
-        $entryKeys = []; // ✅ simpan urutan key sejajar dengan $entries, untuk keperluan logging per-resource
+        $entryKeys = [];
         foreach ($fields as $key => $value) {
             // Skip jika nilai null/kosong
             if (is_null($value)) continue;
@@ -303,7 +346,7 @@ class DiabetesObservationService
 
             Log::info('Bundle Observation Diabetes berhasil', ['total' => count($entries)]);
 
-            // ✅ Ambil observationId dari setiap entry hasil response bundle
+            // Ambil observationId dari setiap entry hasil response bundle
             $bundleResourceIds = [];
             foreach (($responseJson['entry'] ?? []) as $i => $respEntry) {
                 // SatuSehat biasanya mengembalikan response.location, contoh: "Observation/abcd-1234/_history/1"
@@ -335,8 +378,7 @@ class DiabetesObservationService
             );
         }
 
-        // ─── Condition ───────────────────────────────────────────────
-        // ✅ Ambil kategori paling berat sebagai Condition utama
+        //  Ambil kategori paling berat sebagai Condition utama
         $kategoriUtama = $this->resolveKategoriUtama([
             $diabetes->kategori_gula_darah_puasa,
             $diabetes->kategori_gula_darah_2_jam_pp,
@@ -382,22 +424,5 @@ class DiabetesObservationService
         ]);
 
         return ['condition_id' => $conditionId];
-    }
-
-    // Prioritas: diabetes > prediabetes > normal
-    private function resolveKategoriUtama(array $kategoriList): string
-    {
-        $priority = ['diabetes' => 2, 'prediabetes' => 1, 'normal' => 0];
-        $highest  = 'normal';
-
-        foreach ($kategoriList as $kategori) {
-            if (is_null($kategori)) continue;
-            $normalized = strtolower(trim($kategori));
-            if (($priority[$normalized] ?? 0) > ($priority[$highest] ?? 0)) {
-                $highest = $normalized;
-            }
-        }
-
-        return $highest;
     }
 }

@@ -207,7 +207,7 @@ class EncounterService
         $data = [
             'idPelayanan' => $idPelayanan,
             'tanggal' => now(),
-            'puskId' => '3',
+            'puskId' => Auth::id(),
             'resource' => $resource,
             'idResponse' => $idResponse,
             'method' => $method,

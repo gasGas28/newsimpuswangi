@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusKolorektal;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class KolorektalQuestionnaireService
 {
@@ -87,50 +89,143 @@ class KolorektalQuestionnaireService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function createQuestionnaireResponse(array $payload): string
+    private function createQuestionnaireResponse(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/QuestionnaireResponse', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $qrId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'QuestionnaireResponse-Kolorektal',
+            idResponse: $qrId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat QuestionnaireResponse Kolorektal', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat QuestionnaireResponse Kolorektal: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $qrId;
     }
 
-    private function createObservation(array $payload): string
+    private function createObservation(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Observation', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $observationId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "Observation",
+            idResponse: $observationId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Observation Kolorektal', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Observation Kolorektal: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $observationId;
     }
 
-    private function createCondition(array $payload): string
+    private function createCondition(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Condition', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $conditionId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Condition-Kolorektal',
+            idResponse: $conditionId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Condition Kolorektal', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Condition Kolorektal: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $conditionId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     /**
      * Observation colok dubur — valueCodeableConcept Normal/Curiga
      * Nilai DB: 'normal' | 'curiga'
      */
-    private function buildColokDuburObservation(string $patientId, string $encounterId, string $nilai): array
+    private function buildColokDuburObservation(string $patientId, string $encounterId, string $nilai, string $practitionerId): array
     {
         $valueMap = [
             'normal' => ['code' => '300870000', 'display' => 'No mass present', 'system' => 'http://snomed.info/sct'],
@@ -160,7 +255,7 @@ class KolorektalQuestionnaireService
             'encounter'            => ['reference' => "Encounter/{$encounterId}"],
             'effectiveDateTime'    => now()->toIso8601String(),
             'performer'            => [[
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ]],
             'valueCodeableConcept' => [
                 'coding' => [[
@@ -176,7 +271,7 @@ class KolorektalQuestionnaireService
      * Observation darah samar feses (FOBT) — valueCodeableConcept Positif/Negatif
      * Nilai DB: 'positif' | 'negatif'
      */
-    private function buildDarahSamarObservation(string $patientId, string $encounterId, string $nilai): array
+    private function buildDarahSamarObservation(string $patientId, string $encounterId, string $nilai, string $practitionerId): array
     {
         $valueMap = [
             'negatif' => ['code' => '167667006', 'display' => 'Occult blood not detected in feces', 'system' => 'http://snomed.info/sct'],
@@ -206,7 +301,7 @@ class KolorektalQuestionnaireService
             'encounter'            => ['reference' => "Encounter/{$encounterId}"],
             'effectiveDateTime'    => now()->toIso8601String(),
             'performer'            => [[
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ]],
             'valueCodeableConcept' => [
                 'coding' => [[
@@ -223,8 +318,10 @@ class KolorektalQuestionnaireService
         $skrining   = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $kolorektal = SimpusKolorektal::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
         // ─── QuestionnaireResponse ────────────────────────────────────
         $questionnaireResponseId = null;
@@ -267,13 +364,13 @@ class KolorektalQuestionnaireService
                 'encounter'     => ['reference' => "Encounter/{$encounterId}"],
                 'authored'      => now()->toIso8601String(),
                 'author'        => [
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ],
                 'source'        => [
                     'reference' => "Patient/{$patientId}",
                 ],
                 'item'          => $items,
-            ]);
+            ], $idPelayanan);
 
             Log::info('QuestionnaireResponse Kolorektal berhasil', ['qr_id' => $questionnaireResponseId]);
         }
@@ -289,7 +386,9 @@ class KolorektalQuestionnaireService
                 $colokDuburObsId = $existingColokId;
             } else {
                 $colokDuburObsId = $this->createObservation(
-                    $this->buildColokDuburObservation($patientId, $encounterId, $kolorektal->colok_dbr)
+                    $this->buildColokDuburObservation($patientId, $encounterId, $kolorektal->colok_dbr, $practitionerId),
+                    $idPelayanan,
+                    'ColokDubur',
                 );
                 Log::info('Observation Colok Dubur berhasil', ['observation_id' => $colokDuburObsId]);
             }
@@ -308,7 +407,9 @@ class KolorektalQuestionnaireService
                 $darahSamarObsId = $existingDarahId;
             } else {
                 $darahSamarObsId = $this->createObservation(
-                    $this->buildDarahSamarObservation($patientId, $encounterId, $kolorektal->darah_samar)
+                    $this->buildDarahSamarObservation($patientId, $encounterId, $kolorektal->darah_samar, $practitionerId),
+                    $idPelayanan,
+                    'DarahSamar',
                 );
                 Log::info('Observation Darah Samar berhasil', ['observation_id' => $darahSamarObsId]);
             }
@@ -362,12 +463,12 @@ class KolorektalQuestionnaireService
                     'encounter'          => ['reference' => "Encounter/{$encounterId}"],
                     'onsetDateTime'      => now()->toIso8601String(),
                     'recorder'           => [
-                        'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                        'reference' => 'Practitioner/' . $practitionerId,
                     ],
                     'note'               => [[
                         'text' => "Hasil skrining kolorektal: {$hasilKuesioner}",
                     ]],
-                ]);
+                ], $idPelayanan);
                 Log::info('Condition Kolorektal berhasil', ['condition_id' => $conditionId]);
             }
         } else {

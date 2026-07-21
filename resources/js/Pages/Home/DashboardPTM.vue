@@ -94,6 +94,86 @@
         <span class="period-tag">{{ filters.end_date }}</span>
       </div>
 
+      <!-- ===== FILTER STATUS & DOWNLOAD ===== -->
+      <div class="ptm-toolbar">
+        <div class="segmented-control" role="group">
+          <button
+            type="button"
+            class="segment-btn"
+            :class="{ active: filterStatus === 'semua' }"
+            @click="setFilterStatus('semua')"
+          >
+            Semua Data
+          </button>
+          <button
+            type="button"
+            class="segment-btn"
+            :class="{ active: filterStatus === 'tidak_normal' }"
+            @click="setFilterStatus('tidak_normal')"
+          >
+            HT &amp; DM Saja
+          </button>
+        </div>
+
+        <div class="toolbar-actions">
+          <button
+            type="button"
+            class="btn-download btn-excel"
+            :disabled="isDownloadingExcel"
+            @click="downloadExcel"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              :class="{ spin: isDownloadingExcel }"
+            >
+              <template v-if="isDownloadingExcel">
+                <circle cx="12" cy="12" r="9" stroke-opacity="0.25" />
+                <path d="M21 12a9 9 0 0 0-9-9" />
+              </template>
+              <template v-else>
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+              </template>
+            </svg>
+            <span>{{ isDownloadingExcel ? 'Mengunduh...' : 'Download Register Cohort' }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn-download btn-laporan"
+            :disabled="isDownloadingLaporan"
+            @click="downloadLaporanPTM"
+          >
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              :class="{ spin: isDownloadingLaporan }"
+            >
+              <template v-if="isDownloadingLaporan">
+                <circle cx="12" cy="12" r="9" stroke-opacity="0.25" />
+                <path d="M21 12a9 9 0 0 0-9-9" />
+              </template>
+              <template v-else>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M16 13H8M16 17H8M10 9H8" />
+              </template>
+            </svg>
+            <span>{{ isDownloadingLaporan ? 'Mengunduh...' : 'Download Laporan' }}</span>
+          </button>
+        </div>
+      </div>
+      <!-- ===== END FILTER STATUS & DOWNLOAD ===== -->
+
       <!-- METRIC CARDS -->
       <div class="metrics">
         <div class="metric-card metric-total">
@@ -125,7 +205,7 @@
         </div>
 
         <div
-          v-for="ptm in ptmList"
+          v-for="ptm in displayedPtmList"
           :key="ptm.key"
           class="metric-card"
           :class="{ 'active-filter': activeFilter === ptm.key }"
@@ -218,7 +298,7 @@
               </template>
               <template v-else>
                 <div
-                  v-for="ptm in ptmList"
+                  v-for="ptm in displayedPtmList"
                   :key="ptm.key"
                   class="legend-pill"
                   :style="{ '--c': ptm.color }"
@@ -305,6 +385,9 @@
   });
 
   // ── Filter ───────────────────────────────────────────────────────────
+  // Filter tanggal terakhir sudah dipulihkan dari session oleh controller
+  // (lihat DashboardPTMController::dashboardPTM), jadi cukup pakai apa
+  // yang dikirim lewat props — tidak perlu localStorage lagi di sini.
   const today = initial.serverNow ?? new Date().toISOString().slice(0, 10);
   const defaultStart = initial.filters?.start_date ?? today;
   const defaultEnd = initial.filters?.end_date ?? today;
@@ -391,6 +474,25 @@
     refreshLine();
   }
 
+  // ── Filter Status (Semua Data / HT & DM Saja) ──────────────────────────
+  const filterStatus = ref('semua');
+  const htDmKeys = ['hipertensi', 'diabetes'];
+
+  const displayedPtmList = computed(() =>
+    filterStatus.value === 'tidak_normal'
+      ? ptmList.filter((p) => htDmKeys.includes(p.key))
+      : ptmList
+  );
+
+  function setFilterStatus(value) {
+    if (filterStatus.value === value) return;
+    filterStatus.value = value;
+    if (activeFilter.value && !displayedPtmList.value.some((p) => p.key === activeFilter.value)) {
+      activeFilter.value = null;
+    }
+    refreshLine();
+  }
+
   // ── Summary helpers ──────────────────────────────────────────────────
   function getTotal(key) {
     return summary.value[key]?.total ?? 0;
@@ -403,14 +505,16 @@
   }
 
   // ── Computed ──────────────────────────────────────────────────────────
-  const totalPtm = computed(() => ptmList.reduce((s, p) => s + getTotal(p.key), 0));
-  const totalBaru = computed(() => ptmList.reduce((s, p) => s + getBaru(p.key), 0));
-  const totalLama = computed(() => ptmList.reduce((s, p) => s + getLama(p.key), 0));
+  const totalPtm = computed(() => displayedPtmList.value.reduce((s, p) => s + getTotal(p.key), 0));
+  const totalBaru = computed(() => displayedPtmList.value.reduce((s, p) => s + getBaru(p.key), 0));
+  const totalLama = computed(() => displayedPtmList.value.reduce((s, p) => s + getLama(p.key), 0));
 
-  const maxPtmVal = computed(() => Math.max(1, ...ptmList.map((p) => getTotal(p.key))));
+  const maxPtmVal = computed(() =>
+    Math.max(1, ...displayedPtmList.value.map((p) => getTotal(p.key)))
+  );
 
   const sortedPtm = computed(() =>
-    [...ptmList].sort((a, b) => getTotal(b.key) - getTotal(a.key))
+    [...displayedPtmList.value].sort((a, b) => getTotal(b.key) - getTotal(a.key))
   );
 
   const activePtmLabel = computed(
@@ -450,11 +554,103 @@
   }
 
   function resetFilter() {
-    filters.value.start_date = defaultStart;
-    filters.value.end_date = defaultEnd;
+    filters.value.start_date = today;
+    filters.value.end_date = today;
     activeFilter.value = null;
     applyFilter();
   }
+
+  // ── Download actions ────────────────────────────────────────────────────
+  const isDownloadingExcel = ref(false);
+  const isDownloadingLaporan = ref(false);
+
+  const downloadExcel = async () => {
+    if (isDownloadingExcel.value) return;
+    isDownloadingExcel.value = true;
+
+    try {
+      const { start_date, end_date } = filters.value;
+      const response = await fetch(
+        route('ptm.export-register', {
+          start_date,
+          end_date,
+          status: filterStatus.value,
+        }),
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Gagal mengunduh Excel');
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `kohort-ptm-${start_date}_${end_date}.xlsx`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download Excel error:', error);
+      alert('Gagal mengunduh Excel. Silakan coba lagi.');
+    } finally {
+      isDownloadingExcel.value = false;
+    }
+  };
+
+  const downloadLaporanPTM = async () => {
+    if (isDownloadingLaporan.value) return;
+    isDownloadingLaporan.value = true;
+
+    try {
+      const { start_date, end_date } = filters.value;
+      const response = await fetch(
+        route('ptm.export-laporanPTM', { start_date, end_date, status: filterStatus.value }),
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error('Gagal mengunduh Laporan');
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'Laporan_Klaster_3_PTM.xlsx';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download Laporan error:', error);
+      alert('Gagal mengunduh Laporan. Silakan coba lagi.');
+    } finally {
+      isDownloadingLaporan.value = false;
+    }
+  };
 
   // ── Chart ─────────────────────────────────────────────────────────────
   const lineRef = ref(null);
@@ -498,8 +694,8 @@
         },
       ];
     } else {
-      // Semua penyakit -> 1 garis (total) per penyakit
-      datasets = ptmList.map((ptm) => ({
+      // Semua penyakit (sesuai filter status) -> 1 garis (total) per penyakit
+      datasets = displayedPtmList.value.map((ptm) => ({
         label: ptm.label,
         data: days.map((d) => d[ptm.key]?.total ?? 0),
         borderColor: ptm.color,
@@ -825,6 +1021,107 @@
   .period-divider {
     color: #94a3b8;
     font-size: 13px;
+  }
+
+  /* ── Filter Status & Download toolbar ── */
+  .ptm-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 0 1.75rem 1rem;
+  }
+
+  .segmented-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    flex-shrink: 0;
+  }
+
+  .segment-btn {
+    font-family: inherit;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #64748b;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+    white-space: nowrap;
+  }
+
+  .segment-btn.active {
+    background: #185fa5;
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(24, 95, 165, 0.26);
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      box-shadow 0.15s,
+      transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-download:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  .btn-download:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-excel {
+    background: #3b9e82;
+    box-shadow: 0 6px 14px rgba(59, 158, 130, 0.24);
+  }
+  .btn-excel:not(:disabled):hover {
+    background: #33886f;
+  }
+
+  .btn-laporan {
+    background: #185fa5;
+    box-shadow: 0 6px 14px rgba(24, 95, 165, 0.24);
+  }
+  .btn-laporan:not(:disabled):hover {
+    background: #1a6fbc;
+  }
+
+  .spin {
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* ── Hint ── */
@@ -1199,6 +1496,20 @@
     }
     .ptm-col-bar {
       display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .ptm-toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .toolbar-actions {
+      flex-direction: column;
+    }
+    .toolbar-actions .btn-download {
+      justify-content: center;
+      width: 100%;
     }
   }
 </style>

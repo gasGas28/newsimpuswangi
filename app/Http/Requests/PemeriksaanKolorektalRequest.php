@@ -22,17 +22,32 @@ class PemeriksaanKolorektalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // kkr1: '',
-            //     kkr2: '',
-            //     hasil_kkr: '',
-            //     colok_dubur: '',
-            //     darah_samar: '',
             'skriningId' => ['required', 'string'],
             'kkr1' => ['required', 'string'],
             'kkr2' => ['required', 'string'],
             'hasil_kkr' => ['required', 'string'],
             'colok_dubur' => ['required', 'string'],
             'darah_samar' => ['required', 'string'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'string' => ':attribute harus berupa teks.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'skriningId' => 'Data skrining',
+            'kkr1' => 'Hasil KKR 1',
+            'kkr2' => 'Hasil KKR 2',
+            'hasil_kkr' => 'Hasil KKR',
+            'colok_dubur' => 'Hasil pemeriksaan colok dubur',
+            'darah_samar' => 'Hasil pemeriksaan darah samar',
         ];
     }
 }

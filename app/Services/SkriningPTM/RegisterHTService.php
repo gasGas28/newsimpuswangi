@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class RegisterHTService
 {
-    protected array $kategoriNormal = ['Normal', 'Elevated', 'Hipertensi Grade 1'];
+    protected array $kategoriNormal = ['Normal', 'Prahipertensi'];
 
     public function getData(int $year, string $status = 'semua')
     {

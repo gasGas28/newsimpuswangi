@@ -30,4 +30,24 @@ class StatusPasienRequest extends FormRequest
             'transport' => ['required', 'string'],
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'string' => ':attribute harus berupa teks.',
+            'date' => ':attribute harus berupa tanggal yang valid.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'skriningId' => 'Data skrining',
+            'kondisi_keluar' => 'Kondisi keluar',
+            'cara_keluar' => 'Cara keluar',
+            'jadwal_kontrol' => 'Jadwal kontrol',
+            'rencana_rujuk' => 'Rencana rujuk',
+            'transport' => 'Transport',
+        ];
+    }
 }

@@ -75,7 +75,7 @@ class StatusPasienService
         $patientId      = $kunjungan->patient_id;
         $patientName    = $kunjungan->NAMA_LGKP;
         $encounterId    = $kunjungan->encounter_id;
-        $practitionerId = $kunjungan->id_petugas ?? config('services.satusehat.practitioner_id');
+        $practitionerId = $kunjungan->id_petugas;
 
         $now = now()->toIso8601String();
 

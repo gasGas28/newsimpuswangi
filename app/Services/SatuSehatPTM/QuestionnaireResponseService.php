@@ -2,11 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class QuestionnaireResponseService
 {
@@ -31,7 +32,7 @@ class QuestionnaireResponseService
         return $this->cachedToken;
     }
 
-    private function createQuestionnaireResponse(array $payload): string
+    private function createQuestionnaireResponse(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
@@ -40,16 +41,73 @@ class QuestionnaireResponseService
                 $payload
             );
 
+        $terima = $response->json() ?? $response->body();
+        $qrId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'QuestionnaireResponse',
+            idResponse: $qrId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat QuestionnaireResponse Faktor Risiko', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception(
                 'Gagal membuat QuestionnaireResponse: ' . $response->body()
             );
         }
 
-        return $response->json('id');
+        return $qrId;
     }
 
-    // ✅ Cek duplikat
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
     private function findExistingQuestionnaireResponse(string $encounterId): ?string
     {
         $response = Http::withToken($this->getToken())
@@ -91,10 +149,11 @@ class QuestionnaireResponseService
         $skrining     = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $faktorRisiko = FaktorRisiko::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
-        // ✅ Cek duplikat sebelum kirim
         $existingId = $this->findExistingQuestionnaireResponse($encounterId);
         if ($existingId) {
             Log::info('QuestionnaireResponse sudah ada, skip', [
@@ -219,10 +278,10 @@ class QuestionnaireResponseService
             'questionnaire' => 'https://fhir.kemkes.go.id/Questionnaire/Q0013',
             'status'        => 'completed',
             'authored'      => now()->toIso8601String(),
-            'source'        => ['reference' => "Practitioner/" . config('services.satusehat.practitioner_id')],
+            'source'        => ['reference' => "Practitioner/" . $practitionerId],
             'subject'       => ['reference' => "Patient/{$patientId}"],
             'encounter'     => ['reference' => "Encounter/{$encounterId}"],
-            'author'        => ['reference' => "Practitioner/" . config('services.satusehat.practitioner_id')],
+            'author'        => ['reference' => "Practitioner/" . $practitionerId],
             'item'          => [[
                 'linkId' => '1',
                 'text'   => 'Faktor Risiko PTM',
@@ -231,8 +290,7 @@ class QuestionnaireResponseService
         ];
 
         try {
-            $id = $this->createQuestionnaireResponse($payload);
-            // ✅ Payload tidak ikut log
+            $id = $this->createQuestionnaireResponse($payload, $idPelayanan);
             Log::info('QuestionnaireResponse berhasil', [
                 'questionnaire_response_id' => $id,
                 'payload' => $payload,

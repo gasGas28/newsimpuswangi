@@ -22,19 +22,32 @@ class ThalasemiaRequest extends FormRequest
     public function rules(): array
     {
         return [
-              // thalasemia: {
-            //   hb: '',
-            //   mcv: '',
-            //   mch: '',
-            //   rbc: '',
-            //   rdw: '',
-            // },
+
             'skriningId' => ['required'],
             'hb' => ['required', 'numeric'],
             'mcv' => ['required', 'numeric'],
             'mch' => ['required', 'numeric'],
             'rbc' => ['required', 'numeric'],
             'rdw' => ['required', 'numeric'],
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'numeric' => ':attribute harus berupa angka.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'skriningId' => 'Data skrining',
+            'hb' => 'Nilai Hb',
+            'mcv' => 'Nilai MCV',
+            'mch' => 'Nilai MCH',
+            'rbc' => 'Nilai RBC',
+            'rdw' => 'Nilai RDW',
         ];
     }
 }
