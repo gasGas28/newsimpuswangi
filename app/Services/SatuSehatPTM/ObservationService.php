@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 use Illuminate\Support\Facades\Log;
 
 class ObservationService
@@ -29,7 +31,7 @@ class ObservationService
      * Kirim status merokok sebagai Observation (LOINC 72166-2)
      * Return observation ID untuk dipakai di QuestionnaireResponse (linkId 1.4)
      */
-    private function createObservation(array $payload): string
+    private function createObservation(array $payload, ?string $idPelayanan): string
     {
         $token = $this->encounterService->getAccessToken();
 
@@ -40,14 +42,73 @@ class ObservationService
                 $payload
             );
 
+        $terima = $response->json() ?? $response->body();
+        $observationId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Observation-StatusMerokok',
+            idResponse: $observationId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Observation status merokok', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception(
                 'Gagal membuat Observation: ' . $response->body()
             );
         }
 
-        return $response->json('id');
+        return $observationId;
     }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
     public function sendSmokingStatus(string $idSkrining): string
     {
         $skrining     = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
@@ -55,6 +116,8 @@ class ObservationService
 
         $patientId      = $skrining->patient_id;
         $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
         $existingId = $this->findExistingObservation($encounterId);
         if ($existingId) {
@@ -110,7 +173,7 @@ class ObservationService
 
             'subject'   => ['reference' => "Patient/{$patientId}"],
             'encounter' => ['reference' => "Encounter/{$encounterId}"],
-            'performer' => [['reference' => "Practitioner/" . config('services.satusehat.practitioner_id')]],
+            'performer' => [['reference' => "Practitioner/" . $practitionerId]],
 
             'valueCodeableConcept' => [
                 'coding' => [
@@ -124,7 +187,7 @@ class ObservationService
         ];
 
         try {
-            $observationId = $this->createObservation($payload);
+            $observationId = $this->createObservation($payload, $idPelayanan);
             Log::info('Observation status merokok berhasil', [
                 'observation_id' => $observationId,
             ]);

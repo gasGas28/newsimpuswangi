@@ -2,8 +2,10 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class ServiceRequestService
 {
@@ -21,17 +23,75 @@ class ServiceRequestService
         return $this->cachedToken;
     }
 
-    private function createServiceRequest(array $payload): string
+    private function createServiceRequest(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/ServiceRequest', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $serviceRequestId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'ServiceRequest',
+            idResponse: $serviceRequestId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat ServiceRequest', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat ServiceRequest: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $serviceRequestId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     /**
@@ -66,6 +126,7 @@ class ServiceRequestService
      * @param  string|null $jadwalKontrol   format Y-m-d
      * @param  string      $transport       tidak_berlaku | ambulan | kendaraan_pribadi | ojek
      * @param  string      $authoredOn      ISO8601 datetime
+     * @param  string|null $idPelayanan     idPelayanan di simpus_skrining_ptm, untuk log
      * @return string|null  ID ServiceRequest, null jika rencanaRujuk = 'tidak' dan tidak ada jadwal kontrol
      */
     public function sendRencanaTindakLanjut(
@@ -77,6 +138,7 @@ class ServiceRequestService
         ?string $jadwalKontrol,
         string $transport,
         string $authoredOn,
+        ?string $idPelayanan = null,
     ): ?string {
         // Kalau tidak ada rencana rujuk & tidak ada jadwal kontrol, tidak perlu kirim apa pun
         if ($rencanaRujuk === 'tidak' && empty($jadwalKontrol)) {
@@ -135,7 +197,7 @@ class ServiceRequestService
             $payload['occurrenceDateTime'] = \Carbon\Carbon::parse($jadwalKontrol)->toIso8601String();
         }
 
-        $serviceRequestId = $this->createServiceRequest($payload);
+        $serviceRequestId = $this->createServiceRequest($payload, $idPelayanan);
 
         Log::info('ServiceRequest rencana tindak lanjut berhasil', [
             'serviceRequestId' => $serviceRequestId,

@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class RegisterDMService
 {
-    protected array $kategoriNormal = ['Normal', 'Prediabetes'];
+    protected array $kategoriNormal = ['Tidak Diabetes', 'Prediabetes'];
 
     public function getData(int $year, string $status = 'semua')
     {

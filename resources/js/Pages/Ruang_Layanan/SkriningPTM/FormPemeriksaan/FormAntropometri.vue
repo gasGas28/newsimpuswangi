@@ -556,7 +556,7 @@
       message="Data Pelayanan telah tersimpan."
       @close="showSuccessModal = false"
     />
- 
+
     <ModalAlert
       :show="showValidationModal"
       type="warning"
@@ -582,7 +582,6 @@
   const data = computed(() => props.DataPasien || '');
 
   const skriningId = props.DataPasien?.idSkrining || null;
-
 
   const formHipertensi = useForm({
     skriningId,
@@ -662,7 +661,7 @@
 
     if (imt < 18.5) formObesitas.interpretasi_imt = 'Kurus';
     else if (imt < 23) formObesitas.interpretasi_imt = 'Normal';
-    else if (imt < 27) formObesitas.interpretasi_imt = 'Gemuk';
+    else if (imt < 27) formObesitas.interpretasi_imt = 'Overweight';
     else formObesitas.interpretasi_imt = 'Obesitas';
   }
 
@@ -686,11 +685,13 @@
       return;
     }
 
-    if (s < 120 && d < 80) formHipertensi.kategori_hipertensi = 'Normal';
-    else if (s < 130 && d < 80) formHipertensi.kategori_hipertensi = 'Elevated';
-    else if (s < 140 || d < 90) formHipertensi.kategori_hipertensi = 'Hipertensi Grade 1';
-    else if (s < 180 || d < 110) formHipertensi.kategori_hipertensi = 'Hipertensi Grade 2';
-    else formHipertensi.kategori_hipertensi = 'Krisis Hipertensi';
+    if (s < 120 && d < 80) {
+      formHipertensi.kategori_hipertensi = 'Normal';
+    } else if ((s >= 121 && s <= 139) || (d >= 81 && d <= 89)) {
+      formHipertensi.kategori_hipertensi = 'Prahipertensi';
+    } else if (s >= 140 || d >= 90) {
+      formHipertensi.kategori_hipertensi = 'Hipertensi';
+    }
   }
 
   function interpretDM() {
@@ -699,35 +700,35 @@
     const hba1c = toNumber(formDiabetes.hba1c);
     const gd2pp = toNumber(formDiabetes.gd2pp);
 
-    // --- GDP ---
+    // --- Gula Darah Puasa (GDP) ---
     if (!gdp) {
       formDiabetes.interpretasi_gdp = '';
     } else if (gdp >= 126) {
-      formDiabetes.interpretasi_gdp = 'Diabetes';
+      formDiabetes.interpretasi_gdp = 'Indikasi Diabetes';
     } else if (gdp >= 100) {
       formDiabetes.interpretasi_gdp = 'Prediabetes';
     } else {
-      formDiabetes.interpretasi_gdp = 'Normal';
+      formDiabetes.interpretasi_gdp = 'Tidak Diabetes';
     }
 
-    // --- GDS ---
+    // --- Gula Darah Sewaktu (GDS) ---
     if (!gds) {
       formDiabetes.interpretasi_gds = '';
     } else if (gds >= 200) {
-      formDiabetes.interpretasi_gds = 'Diabetes';
-    } else if (gds >= 140) {
-      formDiabetes.interpretasi_gds = 'Prediabetes';
+      formDiabetes.interpretasi_gds = 'Indikasi Diabetes';
+    } else if (gds >= 70) {
+      formDiabetes.interpretasi_gds = 'Tidak Diabetes';
     } else {
       formDiabetes.interpretasi_gds = 'Normal';
     }
 
-    // --- GD2PP ---
+    // --- Gula Darah 2 Jam Postprandial (GD2PP) ---
     if (!gd2pp) {
       formDiabetes.interpretasi_gd2pp = '';
     } else if (gd2pp >= 200) {
-      formDiabetes.interpretasi_gd2pp = 'Diabetes';
+      formDiabetes.interpretasi_gd2pp = 'Indikasi Diabetes';
     } else if (gd2pp >= 140) {
-      formDiabetes.interpretasi_gd2pp = 'Prediabetes';
+      formDiabetes.interpretasi_gd2pp = 'Toleransi Glukosa Terganggu';
     } else {
       formDiabetes.interpretasi_gd2pp = 'Normal';
     }
@@ -736,7 +737,7 @@
     if (!hba1c) {
       formDiabetes.interpretasi_hba1c = '';
     } else if (hba1c >= 6.5) {
-      formDiabetes.interpretasi_hba1c = 'Diabetes';
+      formDiabetes.interpretasi_hba1c = 'Indikasi Diabetes';
     } else if (hba1c >= 5.7) {
       formDiabetes.interpretasi_hba1c = 'Prediabetes';
     } else {
@@ -786,23 +787,25 @@
     // LDL
     if (ldl < 100) {
       formProfilLipid.interpretasi_ldl = 'Optimal';
-    } else if (ldl >= 100 && ldl < 160) {
+    } else if (ldl < 130) {
+      formProfilLipid.interpretasi_ldl = 'Mendekati Optimal';
+    } else if (ldl < 160) {
       formProfilLipid.interpretasi_ldl = 'Borderline Tinggi';
-    } else if (ldl >= 160) {
+    } else if (ldl < 190) {
       formProfilLipid.interpretasi_ldl = 'Tinggi';
     } else {
-      formProfilLipid.interpretasi_ldl = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_ldl = 'Sangat Tinggi';
     }
 
     // Trigliserida
     if (trigliserida < 150) {
       formProfilLipid.interpretasi_trigliserida = 'Normal';
-    } else if (trigliserida >= 160 && trigliserida < 199) {
+    } else if (trigliserida < 200) {
       formProfilLipid.interpretasi_trigliserida = 'Borderline Tinggi';
-    } else if (trigliserida >= 200) {
+    } else if (trigliserida < 500) {
       formProfilLipid.interpretasi_trigliserida = 'Tinggi';
     } else {
-      formProfilLipid.interpretasi_trigliserida = 'Data Tidak Tersedia';
+      formProfilLipid.interpretasi_trigliserida = 'Sangat Tinggi';
     }
   }
 

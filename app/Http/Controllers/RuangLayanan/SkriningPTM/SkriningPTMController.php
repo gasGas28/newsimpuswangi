@@ -12,7 +12,6 @@ use App\Http\Requests\SimpanTindakanRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreKunjunganPTMRequest;
-use App\Http\Requests\AssessmentPTMRequest;
 use App\Http\Requests\DiabetesRequest;
 use App\Http\Requests\FaktorRisikoRequest;
 use App\Http\Requests\GangguanInderaRequest;
@@ -28,6 +27,7 @@ use App\Http\Requests\StatusPasienRequest;
 use App\Http\Requests\ThalasemiaRequest;
 use App\Http\Requests\ResepObatRequest;
 use App\Http\Requests\EdukasiRequest;
+use App\Http\Requests\TindakanRequest;
 
 class SkriningPTMController extends Controller
 {
@@ -155,13 +155,6 @@ class SkriningPTMController extends Controller
         $this->pelayananService->saveAsamUrat($validated);
         return back();
     }
-
-    public function addPemeriksaanPTM(PemeriksaanPTMRequest $request)
-    {
-        $validated = $request->validated();
-        $this->pelayananService->savePemeriksaanMetabolik($validated);
-        return back();
-    }
     public function addPemeriksaanIndera(GangguanInderaRequest $request)
     {
         $validated = $request->validated();
@@ -206,13 +199,6 @@ class SkriningPTMController extends Controller
         return back();
     }
 
-
-    public function addAssessmentPTM(AssessmentPTMRequest $request)
-    {
-        $validated = $request->validated();
-        $this->pelayananService->addAssessmentPTM($validated);
-        return back();
-    }
     public function addEdukasi(EdukasiRequest $request)
     {
         $validated = $request->validated();
@@ -232,17 +218,9 @@ class SkriningPTMController extends Controller
         return back();
     }
 
-    public function simpanTindakan(Request $request)
+    public function simpanTindakan(TindakanRequest $request)
     {
-        $validated = Validator::make($request->all(), [
-            'idpelayanan' => 'required',
-            'kode_tindakan' => 'required',
-            'nama_tindakan' => 'required',
-            'loketId' => 'required',
-            'nama_tindakan_ind' => 'nullable',
-            'keterangan' => 'nullable',
-            'kdPoli' => 'required',
-        ])->validate();
+        $validated = $request->validated();
 
         $this->tindakanService->svTindakan($validated);
 

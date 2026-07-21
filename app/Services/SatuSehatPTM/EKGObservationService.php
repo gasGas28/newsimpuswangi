@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusEkg;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class EkgObservationService
 {
@@ -88,30 +90,105 @@ class EkgObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function createObservation(array $payload): string
+    private function createObservation(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Observation', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $observationId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Observation-EKG',
+            idResponse: $observationId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Observation EKG', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Observation EKG: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $observationId;
     }
 
-    private function createCondition(array $payload): string
+    private function createCondition(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Condition', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $conditionId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Condition-EKG',
+            idResponse: $conditionId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Condition EKG', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Condition EKG: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $conditionId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     /**
@@ -166,8 +243,9 @@ class EkgObservationService
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
+        $idPelayanan = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
-        // ─── Observation ─────────────────────────────────────────────
         $observationId = null;
         $existingObsId = $this->findExistingObservation($encounterId);
 
@@ -200,7 +278,7 @@ class EkgObservationService
                 'encounter'            => ['reference' => "Encounter/{$encounterId}"],
                 'effectiveDateTime'    => now()->toIso8601String(),
                 'performer'            => [[
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ]],
                 'valueCodeableConcept' => [
                     'coding' => [[
@@ -230,7 +308,7 @@ class EkgObservationService
                 ]];
             }
 
-            $observationId = $this->createObservation($observationPayload);
+            $observationId = $this->createObservation($observationPayload, $idPelayanan);
             Log::info('Observation EKG berhasil', ['observation_id' => $observationId]);
         }
 
@@ -283,9 +361,9 @@ class EkgObservationService
                     'encounter'          => ['reference' => "Encounter/{$encounterId}"],
                     'onsetDateTime'      => now()->toIso8601String(),
                     'recorder'           => [
-                        'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                        'reference' => 'Practitioner/' . $practitionerId,
                     ],
-                ]);
+                ], $idPelayanan);
                 Log::info('Condition EKG berhasil', ['condition_id' => $conditionId]);
             }
         }

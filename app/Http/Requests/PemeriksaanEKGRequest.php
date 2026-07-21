@@ -31,4 +31,15 @@ class PemeriksaanEKGRequest extends FormRequest
             'hasil_ekg' => ['required', 'string'],
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'hr.required' => 'Heart Rate wajib diisi.',
+            'irama.required' => 'Data pemeriksaan EKG wajib semua diisi',
+            'axis.required' => 'Data pemeriksaan EKG wajib semua diisi',
+            'st.required' => 'Data pemeriksaan EKG wajib semua diisi.',
+            'qrs.required' => 'Data pemeriksaan EKG wajib semua diisi.',
+            'hasil.required' => 'Kesimpulan EKG wajib diisi.',
+        ];
+    }
 }

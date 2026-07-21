@@ -13,10 +13,16 @@ use App\Http\Controllers\Controller;
 
 class DashboardPTMController extends Controller // sesuaikan nama class sesuai project Anda
 {
+    /**
+     * Key session untuk menyimpan filter tanggal dashboard PTM terakhir,
+     * supaya tidak reset ke hari ini saat pindah halaman lalu balik lagi
+     * (URL bersih tanpa query start_date/end_date).
+     */
+    private const SESSION_KEY_DASHBOARD_FILTER = 'ptm_dashboard_filters';
+
     public function __construct(
         private LaporanPTMService $laporanPTM,
         private DashboardPTMService $dashboardPTM,
-        private LaporanService $laporan,
     ) {}
 
     // =========================================================================
@@ -95,13 +101,19 @@ class DashboardPTMController extends Controller // sesuaikan nama class sesuai p
 
     /**
      * Render halaman dashboard PTM: kartu ringkasan 8 kategori penyakit
-     * + tren harian untuk line chart. Default rentang tanggal = hari ini
-     * kalau belum ada filter (sesuai kebutuhan frontend yang selalu punya
-     * start_date/end_date terisi).
+     * + tren harian untuk line chart.
+     *
+     * Filter tanggal disimpan di session (SESSION_KEY_DASHBOARD_FILTER):
+     *   - Kalau request membawa start_date & end_date -> itu filter yang
+     *     dipakai, dan langsung disimpan sebagai filter terakhir di session.
+     *   - Kalau request TIDAK membawa query (mis. user pindah ke tab lain
+     *     lalu balik lagi ke dashboard ini tanpa query string) -> ambil
+     *     filter terakhir dari session, bukan reset ke hari ini.
+     *   - Kalau session juga belum ada (kunjungan pertama) -> default hari ini.
      *
      * Query params:
-     *   - start_date : Y-m-d (default: hari ini)
-     *   - end_date   : Y-m-d (default: hari ini)
+     *   - start_date : Y-m-d (opsional)
+     *   - end_date   : Y-m-d (opsional)
      */
     public function dashboardPTM(Request $request)
     {
@@ -112,9 +124,26 @@ class DashboardPTMController extends Controller // sesuaikan nama class sesuai p
 
         $today = now()->format('Y-m-d');
 
+        $startDate = $request->query('start_date');
+        $endDate   = $request->query('end_date');
+
+        if ($startDate && $endDate) {
+            // Ada query eksplisit (mis. klik "Tampilkan") -> simpan sebagai filter terakhir
+            session([self::SESSION_KEY_DASHBOARD_FILTER => [
+                'start_date' => $startDate,
+                'end_date'   => $endDate,
+            ]]);
+        } else {
+            // Tidak ada query -> pakai filter terakhir dari session, kalau ada
+            $filterTersimpan = session(self::SESSION_KEY_DASHBOARD_FILTER);
+
+            $startDate = $filterTersimpan['start_date'] ?? $today;
+            $endDate   = $filterTersimpan['end_date'] ?? $today;
+        }
+
         $filters = [
-            'start_date' => $request->query('start_date', $today),
-            'end_date'   => $request->query('end_date', $today),
+            'start_date' => $startDate,
+            'end_date'   => $endDate,
         ];
 
         return Inertia::render('Home/DashboardPTM', [

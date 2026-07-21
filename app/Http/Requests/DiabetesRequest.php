@@ -33,4 +33,13 @@ class DiabetesRequest extends FormRequest
             'interpretasi_gd2pp' => ['required', 'string'],
         ];
     }
+        public function messages(): array
+    {
+        return [
+            'gdp.required' => 'Data Gula Darah Puasa wajib diisi.',
+            'gds.required' => 'Data Gula Darah Sewaktu wajib diisi.',
+            'hba1c.required' => 'Data hba1c wajib diisi.',
+            'gd2pp.required' => 'Data Gula Dara 2 Jam Pospradial wajib diisi.',
+        ];
+    }
 }

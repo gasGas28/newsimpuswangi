@@ -14,27 +14,12 @@ class RegisterPTMController extends Controller
 {
     public function __construct(private RegisterPasienPTMService $registerPTMService) {}
 
-    public function index(Request $request)
+    public function index()
     {
-        $status = $request->query('status', 'semua');
-
-        $dataRiwayat = $this->registerPTMService->getRegister($request->NIK, $status);
+        $dataRiwayat = $this->registerPTMService->getRegister();
         // dd($dataRiwayat);
         return Inertia::render('Ruang_Layanan/SkriningPTM/DataRegister', [
             'DataRiwayat' => $dataRiwayat,
-            'FilterStatus' => $status,
         ]);
     }
-
-    public function downloadRegisterPTM(Request $request)
-    {
-        $dataRiwayat = $this->registerPTMService->getRegister($request->NIK);
-
-        return Pdf::loadView('Reports.DataRegister', [
-            'riwayat' => $dataRiwayat,
-        ])
-            ->setPaper('a4', 'portrait')
-            ->download('Lembar_PTM_' . date('YmdHis') . '.pdf');
-    }
-    //
 }

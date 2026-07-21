@@ -33,4 +33,28 @@ class ProfilLipidRequest extends FormRequest
             'interpretasi_trigliserida' => ['required', 'string'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'numeric' => ':attribute harus berupa angka.',
+            'string' => ':attribute harus berupa teks.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'skriningId' => 'Data skrining',
+            'kolesterol_total' => 'Kolesterol total',
+            'interpretasi_kolesterol_total' => 'Interpretasi kolesterol total',
+            'ldl' => 'Nilai LDL',
+            'interpretasi_ldl' => 'Interpretasi LDL',
+            'hdl' => 'Nilai HDL',
+            'interpretasi_hdl' => 'Interpretasi HDL',
+            'trigliserida' => 'Nilai trigliserida',
+            'interpretasi_trigliserida' => 'Interpretasi trigliserida',
+        ];
+    }
 }

@@ -27,7 +27,7 @@ class ResepObatRequest extends FormRequest
             'pelayananId' => ['required', 'string'],
             'kategori' => ['required', 'string'],
             'jenis' => ['nullable', 'string'],
-            'jumlah' => ['nullable', 'numeric'], 
+            'jumlah' => ['nullable', 'numeric'],
             'frekuensi' => ['nullable', 'numeric'],
             'intervalJam' => ['nullable', 'numeric'],
             'status' => ['nullable', 'string'],
@@ -38,6 +38,36 @@ class ResepObatRequest extends FormRequest
             'unit' => ['required', 'numeric'],
             'obat_id' => ['required', 'numeric'],
             'nama_poli' => ['required', 'string'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'string' => ':attribute harus berupa teks.',
+            'numeric' => ':attribute harus berupa angka.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'loketId' => 'Loket',
+            'pelayananId' => 'Pelayanan',
+            'kategori' => 'Kategori obat',
+            'jenis' => 'Jenis obat',
+            'jumlah' => 'Jumlah',
+            'frekuensi' => 'Frekuensi',
+            'intervalJam' => 'Interval jam',
+            'status' => 'Status',
+            'waktu' => 'Waktu pemberian',
+            'kondisi' => 'Kondisi pemberian',
+            'catatan' => 'Catatan',
+            'nama' => 'Nama obat',
+            'unit' => 'Satuan obat',
+            'obat_id' => 'Obat',
+            'nama_poli' => 'Nama poli',
         ];
     }
 }

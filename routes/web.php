@@ -553,6 +553,8 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
 
         Route::get('/ruang-layanan/export-excel', [SkriningPTMExportController::class, 'export'])
             ->name('ruang-layanan.export-excel');
+        Route::get('simpus/register-ptm/', [RegisterPTMController::class, 'index'])->name('ruang-layanan.register-ptm');
+
         Route::get('/ruang-layanan/export-register', [RegisterExportController::class, 'exportRegister'])
             ->name('ptm.export-register');
         Route::get('/ptm/export-laporanPTM', [LaporanPTMController::class, 'download'])
@@ -576,10 +578,6 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         Route::post('/simpus/skrining-ptm/tambah-kunjungan', [SkriningPTMController::class, 'tambahKunjunganPTM'])
             ->name('pelayanan.tambah-kunjungan-ptm');
         Route::post('/simpus/skrining-ptm/simpan-risiko', [SkriningPTMController::class, 'addFaktorRisiko'])->name('pelayanan.simpan-risiko-ptm');
-        Route::post('/simpus/skrining-ptm/simpan-assessment', [SkriningPTMController::class, 'addAssessmentPTM'])
-            ->name('pelayanan.simpan-assessment-ptm');
-        Route::post('/simpus/skrining-ptm/simpan-metabolik', [SkriningPTMController::class, 'addPemeriksaanPTM'])
-            ->name('pelayanan.simpan-pemeriksaan-metabolik');
         Route::post('/simpus/skrining-ptm/simpan-obesitas', [SkriningPTMController::class, 'addPemeriksaanObesitas'])
             ->name('pelayanan.simpan-obesitas');
         Route::post('/simpus/skrining-ptm/simpan-hipertensi', [SkriningPTMController::class, 'addPemeriksaanHipertensi'])
@@ -611,7 +609,6 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
             ->name('pelayanan.simpan-ekg');
 
         Route::get('simpus/riwayat-ptm', [RiwayatPTMController::class, 'index'])->name('ruang-layanan.riwayat-ptm');
-        Route::get('simpus/register-ptm/', [RegisterPTMController::class, 'index'])->name('ruang-layanan.register-ptm');
         Route::get('simpus/laporan-ptm/', [DashboardPTMController::class, 'laporanPTM'])->name('ruang-layanan.laporan-ptm');
         Route::get('simpus/riwayat-ptm/download/register-ptm', [RegisterPTMController::class, 'downloadRegisterPTM'])
             ->name('ruang-layanan.download-register');

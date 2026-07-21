@@ -27,4 +27,10 @@ class AsamUratRequest extends FormRequest
             'interpretasi_asam_urat' => ['required', 'string'],
         ];
     }
+        public function messages(): array
+    {
+        return [
+            'asam_urat.required' => 'Data Asam Urat wajib diisi.',
+        ];
+    }
 }

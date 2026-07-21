@@ -2,10 +2,13 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\SimpusDataEdukasi;
 use App\Models\RuangLayanan\SkriningPTM\SimpusSkriningPTM;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class EdukasiProcedureService
 {
@@ -38,17 +41,75 @@ class EdukasiProcedureService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function createProcedure(array $payload): string
+    private function createProcedure(array $payload, ?string $idPelayanan): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Procedure', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $procedureId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Procedure',
+            idResponse: $procedureId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Procedure Edukasi', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Procedure Edukasi: ' . $response->body());
         }
 
-        return $response->json('id');
+        return $procedureId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     private function buildPayload(
@@ -57,6 +118,7 @@ class EdukasiProcedureService
         string $kodeSnomed,
         string $display,
         string $performedDate,
+        string $practitionerId,
     ): array {
         return [
             'resourceType'      => 'Procedure',
@@ -81,7 +143,7 @@ class EdukasiProcedureService
             'performedDateTime' => $performedDate,
             'performer'         => [[
                 'actor' => [
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ],
             ]],
             'location'          => [
@@ -98,10 +160,12 @@ class EdukasiProcedureService
      */
     public function sendEdukasi(string $skriningId): array
     {
-        $skrining = SimpusSkriningPTM::where('idSkrining', $skriningId)->firstOrFail();
+        $skrining = KunjunganPTM::where('idSkrining', $skriningId)->firstOrFail();
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
+        $idPelayanan = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
         $edukasiList = SimpusDataEdukasi::select(
             'simpus_data_edukasi.*',
@@ -183,8 +247,9 @@ class EdukasiProcedureService
                     $kodeSnomed,
                     $display,
                     $performedDate,
+                    $practitionerId,
                 );
-                $procedureId = $this->createProcedure($payload);
+                $procedureId = $this->createProcedure($payload, $idPelayanan);
 
                 $edukasi->update(['procedureId' => $procedureId]);
 

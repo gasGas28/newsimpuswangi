@@ -120,9 +120,7 @@
     });
   });
   const registerPasien = computed(() => {
-    return route('ruang-layanan.register-ptm', {
-      NIK: props.DataPasien?.NIK,
-    });
+    return route('ruang-layanan.register-ptm');
   });
   // const riwayatPasien = computed(() => {
   //   return route('ruang-layanan.riwayat-ptm', {

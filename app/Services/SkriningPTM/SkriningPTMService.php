@@ -11,9 +11,6 @@ class SkriningPTMService
     public function getDataUnitByAuth()
     {
         $userAuth = Auth::user();
-        // dd($userAuth->NO_KEC);
-        // dd($userAuth);
-        // dd(Auth::user()->getAttributes());
         return DataMasterUnitDetail::with('DataMasterUnit')
             ->where('id_unit', $userAuth->unit)
             ->orderBy('id_kategori')

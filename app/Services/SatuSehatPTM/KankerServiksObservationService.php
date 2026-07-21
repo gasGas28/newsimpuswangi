@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusKankerIva;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class KankerServiksObservationService
 {
@@ -115,45 +117,136 @@ class KankerServiksObservationService
     // HELPERS: create resource
     // ────────────────────────────────────────────────────────────────
 
-    private function createObservation(array $payload): string
+    private function createObservation(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Observation', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $observationId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "Observation-KankerServiks-{$label}",
+            idResponse: $observationId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Observation IVA/Serviks', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Observation IVA/Serviks: ' . $response->body());
         }
-        return $response->json('id');
+        return $observationId;
     }
 
-    private function createProcedure(array $payload): string
+    private function createProcedure(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Procedure', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $procedureId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "Procedure-KankerServiks-{$label}",
+            idResponse: $procedureId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Procedure IVA/Serviks', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat Procedure IVA/Serviks: ' . $response->body());
         }
-        return $response->json('id');
+        return $procedureId;
     }
 
-    private function createServiceRequest(array $payload): string
+    private function createServiceRequest(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/ServiceRequest', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $serviceRequestId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "ServiceRequest",
+            idResponse: $serviceRequestId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat ServiceRequest IVA/Serviks', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal membuat ServiceRequest IVA/Serviks: ' . $response->body());
         }
-        return $response->json('id');
+        return $serviceRequestId;
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // BASE PAYLOAD BUILDER
-    // ────────────────────────────────────────────────────────────────
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
+    }
 
     private function baseProcedurePayload(
         string $patientId,
@@ -163,7 +256,7 @@ class KankerServiksObservationService
         string $codeSnomedCode,
         string $codeDisplay,
         string $status,
-        // ?array $reasonCode = null
+        string $practitionerId,
     ): array {
         $payload = [
             'resourceType' => 'Procedure',
@@ -186,19 +279,9 @@ class KankerServiksObservationService
             'encounter'    => ['reference' => "Encounter/{$encounterId}"],
             'performedDateTime' => now()->toIso8601String(),
             'performer'    => [[
-                'actor' => ['reference' => 'Practitioner/' . config('services.satusehat.practitioner_id')],
+                'actor' => ['reference' => 'Practitioner/' . $practitionerId],
             ]],
         ];
-
-        // if ($reasonCode) {
-        //     $payload['reasonCode'] = [[
-        //         'coding' => [[
-        //             'system'  => 'http://snomed.info/sct',
-        //             'code'    => $reasonCode['code'],
-        //             'display' => $reasonCode['display'],
-        //         ]],
-        //     ]];
-        // }
 
         return $payload;
     }
@@ -211,7 +294,8 @@ class KankerServiksObservationService
         string $codeSystem,
         string $codeCode,
         string $codeDisplay,
-        array  $valueCoding
+        array  $valueCoding,
+        string $practitionerId,
     ): array {
         return [
             'resourceType'         => 'Observation',
@@ -234,7 +318,7 @@ class KankerServiksObservationService
             'encounter'            => ['reference' => "Encounter/{$encounterId}"],
             'effectiveDateTime'    => now()->toIso8601String(),
             'performer'            => [[
-                'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                'reference' => 'Practitioner/' . $practitionerId,
             ]],
             'valueCodeableConcept' => [
                 'coding' => [[
@@ -246,20 +330,20 @@ class KankerServiksObservationService
         ];
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // SEND
-    // ────────────────────────────────────────────────────────────────
+
 
     public function sendIvaServiks(string $idSkrining): array
     {
         $skrining = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $iva      = SimpusKankerIva::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
-        $result      = [];
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
+        $result         = [];
 
-        // ── 1. Procedure Inspekulo ────────────────────────────────
+        // Procedure Inspekulo
         // Kode SNOMED Inspekulo: 451024007
         $inspekStatus  = ($iva->inspekulo === 'Tidak Dilakukan') ? 'not-done' : 'completed';
         $existingProcInspek = $this->findExistingProcedure($encounterId, '451024007');
@@ -276,8 +360,11 @@ class KankerServiksObservationService
                     'Diagnostic procedure',
                     '451024007',
                     'Inspection of vagina using vaginal speculum',
-                    $inspekStatus
-                )
+                    $inspekStatus,
+                    $practitionerId,
+                ),
+                $idPelayanan,
+                'Inspekulo',
             );
             Log::info('Procedure Inspekulo berhasil', ['id' => $procInspekId]);
             $result['procedure_inspekulo_id'] = $procInspekId;
@@ -300,8 +387,11 @@ class KankerServiksObservationService
                         'http://snomed.info/sct',
                         '451024007',
                         'Inspection of vagina using vaginal speculum',
-                        $this->inspekValueMap[$iva->inspekulo]
-                    )
+                        $this->inspekValueMap[$iva->inspekulo],
+                        $practitionerId,
+                    ),
+                    $idPelayanan,
+                    'Inspekulo',
                 );
                 Log::info('Observation Inspekulo berhasil', ['id' => $obsInspekId]);
                 $result['observation_inspekulo_id'] = $obsInspekId;
@@ -325,14 +415,17 @@ class KankerServiksObservationService
                     'Diagnostic procedure',
                     '251422004',
                     'Acetic acid test reaction',
-                    $ivaStatus
-                )
+                    $ivaStatus,
+                    $practitionerId,
+                ),
+                $idPelayanan,
+                'IVA',
             );
             Log::info('Procedure IVA berhasil', ['id' => $procIvaId]);
             $result['procedure_iva_id'] = $procIvaId;
         }
 
-        // ── 4. Observation Hasil IVA (jika dilakukan) ────────────
+        // 4. Observation Hasil IVA (jika dilakukan)
         if ($iva->iva !== 'Tidak Dilakukan' && isset($this->ivaValueMap[$iva->iva])) {
             $existingObsIva = $this->findExistingObservation($encounterId, 'X099241');
 
@@ -349,8 +442,11 @@ class KankerServiksObservationService
                         'http://terminology.kemkes.go.id/CodeSystem/examination',
                         'X099241',
                         'Tes IVA',
-                        $this->ivaValueMap[$iva->iva]
-                    )
+                        $this->ivaValueMap[$iva->iva],
+                        $practitionerId,
+                    ),
+                    $idPelayanan,
+                    'IVA',
                 );
                 Log::info('Observation IVA berhasil', ['id' => $obsIvaId]);
                 $result['observation_iva_id'] = $obsIvaId;
@@ -395,12 +491,12 @@ class KankerServiksObservationService
                         'encounter'    => ['reference' => "Encounter/{$encounterId}"],
                         'authoredOn'   => now()->toIso8601String(),
                         'requester'    => [
-                            'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                            'reference' => 'Practitioner/' . $practitionerId,
                         ],
                         'performer'    => [[
-                            'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                            'reference' => 'Practitioner/' . $practitionerId,
                         ]],
-                    ]);
+                    ], $idPelayanan, "TindakLanjut-{$key}");
                     Log::info("ServiceRequest {$key} berhasil", ['id' => $srId]);
                     $result["service_request_{$key}_id"] = $srId;
                 } else {
@@ -420,11 +516,10 @@ class KankerServiksObservationService
                                 $tindakan['code'],
                                 $tindakan['display'],
                                 'not-done',
-                                [
-                                    'code'    => '413311005',
-                                    'display' => 'Patient non-compliant - declined intervention / support',
-                                ]
-                            )
+                                $practitionerId,
+                            ),
+                            $idPelayanan,
+                            "Tolak-{$key}",
                         );
                         Log::info("Procedure tolak {$key} berhasil", ['id' => $procTolakId]);
                         $result["procedure_tolak_{$key}_id"] = $procTolakId;
@@ -467,18 +562,18 @@ class KankerServiksObservationService
                     'encounter'    => ['reference' => "Encounter/{$encounterId}"],
                     'authoredOn'   => now()->toIso8601String(),
                     'requester'    => [
-                        'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                        'reference' => 'Practitioner/' . $practitionerId,
                     ],
                     'performer'    => [[
-                        'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                        'reference' => 'Practitioner/' . $practitionerId,
                     ]],
-                ]);
+                ], $idPelayanan, 'RujukServiks');
                 Log::info('ServiceRequest Rujuk Serviks berhasil', ['id' => $rujukId]);
                 $result['service_request_rujuk_id'] = $rujukId;
             }
         }
 
-        // ── 6. Observation HPV-DNA ────────────────────────────────
+        // 6. Observation HPV-DNA 
         // LOINC 44550-2
         if ($iva->hpv_dna !== 'Tidak Dilakukan' && !empty($iva->hpv_dna)) {
             $hpvValueMap = [
@@ -502,15 +597,18 @@ class KankerServiksObservationService
                         'http://loinc.org',
                         '44550-2',
                         'Human papillomavirus DNA [Presence] in Cervix by Probe',
-                        $hpvVal
-                    )
+                        $hpvVal,
+                        $practitionerId,
+                    ),
+                    $idPelayanan,
+                    'HPV-DNA',
                 );
                 Log::info('Observation HPV-DNA berhasil', ['id' => $hpvId]);
                 $result['observation_hpv_id'] = $hpvId;
             }
         }
 
-        // ── 7. Observation SADANIS ────────────────────────────────
+        // 7. Observation SADANIS
         // SNOMED 13607009
         if ($iva->sadanis !== 'Tidak Dilakukan' && !empty($iva->sadanis)) {
             $existingSadanis = $this->findExistingObservation($encounterId, '13607009');
@@ -531,15 +629,18 @@ class KankerServiksObservationService
                         'http://snomed.info/sct',
                         '13607009',
                         'Manual examination of breast',
-                        $sadanisVal
-                    )
+                        $sadanisVal,
+                        $practitionerId,
+                    ),
+                    $idPelayanan,
+                    'SADANIS',
                 );
                 Log::info('Observation SADANIS berhasil', ['id' => $sadanisId]);
                 $result['observation_sadanis_id'] = $sadanisId;
             }
         }
 
-        // ── 8. Observation USG Payudara ───────────────────────────
+        // Observation USG Payudara 
         // LOINC 24601-7
         if ($iva->usg !== 'Tidak Dilakukan' && !empty($iva->usg)) {
             $existingUsg = $this->findExistingObservation($encounterId, '24601-7');
@@ -559,8 +660,11 @@ class KankerServiksObservationService
                         'http://loinc.org',
                         '24601-7',
                         'US Breast',
-                        $usgVal
-                    )
+                        $usgVal,
+                        $practitionerId,
+                    ),
+                    $idPelayanan,
+                    'USG-Payudara',
                 );
                 Log::info('Observation USG Payudara berhasil', ['id' => $usgId]);
                 $result['observation_usg_id'] = $usgId;

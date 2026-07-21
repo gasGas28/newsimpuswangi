@@ -2,10 +2,12 @@
 
 namespace App\Services\SatuSehatPTM;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\FaktorRisiko;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class RiwayatPTMService
 {
@@ -87,7 +89,7 @@ class RiwayatPTMService
         ];
     }
 
-    private function createCondition(array $payload): string
+    private function createCondition(array $payload, ?string $idPelayanan, string $label): string
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
@@ -96,13 +98,72 @@ class RiwayatPTMService
                 $payload
             );
 
+        $terima = $response->json() ?? $response->body();
+        $conditionId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: "Condition-{$label}",
+            idResponse: $conditionId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
+
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal membuat Condition Riwayat PTM', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception(
                 'Gagal membuat Condition: ' . $response->body()
             );
         }
 
-        return $response->json('id');
+        return $conditionId;
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     private function buildPayload(
@@ -111,6 +172,7 @@ class RiwayatPTMService
         string $code,
         string $display,
         string $clinicalStatus,
+        string $practitionerId,
     ): array {
         return [
             'resourceType' => 'Condition',
@@ -137,7 +199,7 @@ class RiwayatPTMService
             ],
             'subject'  => ['reference' => "Patient/{$patientId}"],
             'encounter' => ['reference' => "Encounter/{$encounterId}"],
-            'recorder' => ['reference' => "Practitioner/" . config('services.satusehat.practitioner_id')],
+            'recorder' => ['reference' => "Practitioner/" . $practitionerId],
         ];
     }
 
@@ -146,8 +208,10 @@ class RiwayatPTMService
         $skrining     = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $faktorRisiko = FaktorRisiko::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $practitionerId = $skrining->id_petugas;
 
         $results = ['riwayat_ptm' => []];
 
@@ -178,10 +242,11 @@ class RiwayatPTMService
                 $snomed['code'],
                 $snomed['display'],
                 $clinicalStatus,
+                $practitionerId,
             );
 
             try {
-                $conditionId = $this->createCondition($payload);
+                $conditionId = $this->createCondition($payload, $idPelayanan, $field);
                 Log::info("Condition berhasil: {$field}", ['condition_id' => $conditionId]);
 
                 $results['riwayat_ptm'][$field] = [

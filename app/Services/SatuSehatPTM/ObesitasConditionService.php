@@ -14,7 +14,7 @@ class ObesitasConditionService
     private array $imtMap = [
         'kurus'   => ['code' => 'E46',  'display' => 'Unspecified protein-energy malnutrition'],
         'normal'  => ['code' => 'Z68.1', 'display' => 'Body mass index (BMI) 19 or less, adult'],
-        'gemuk'   => ['code' => 'E66.09', 'display' => 'Other obesity due to excess calories'],
+        'overweight'   => ['code' => 'E66.09', 'display' => 'Other obesity due to excess calories'],
         'obesitas' => ['code' => 'E66.9', 'display' => 'Obesity, unspecified'],
     ];
 
@@ -37,17 +37,14 @@ class ObesitasConditionService
         return $this->cachedToken;
     }
 
-    /**
-     * ✅ Helper untuk menyimpan log kirim/terima ke SatuSehatLog
-     */
     private function logSatuSehat(
         string $idPelayanan,
         ?string $puskId,
         string $resource,
         ?string $idResponse,
         string $method,
-        array|string|null $kirim,
-        array|string|null $terima,
+        mixed $kirim,
+        mixed $terima,
         ?string $userId,
     ): void {
         try {
@@ -58,8 +55,8 @@ class ObesitasConditionService
                 'resource'    => $resource,
                 'idResponse'  => $idResponse,
                 'method'      => $method,
-                'kirim'       => is_array($kirim) ? json_encode($kirim) : $kirim,
-                'terima'      => is_array($terima) ? json_encode($terima) : $terima,
+                'kirim'       => json_encode($kirim),
+                'terima'      => json_encode($terima),
                 'userId'      => $userId,
             ]);
         } catch (\Throwable $e) {
@@ -86,9 +83,7 @@ class ObesitasConditionService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    /**
-     * ✅ Kembalikan response HTTP utuh supaya bisa dipakai untuk logging oleh caller
-     */
+ 
     private function createCondition(array $payload)
     {
         $response = Http::withToken($this->getToken())
@@ -205,7 +200,8 @@ class ObesitasConditionService
             } else {
                 $imtPayload  = $this->buildPayload($icdImt, $patientId, $encounterId, $practitionerId);
                 $imtResponse = $this->createCondition($imtPayload);
-                $imtResponseJson = $imtResponse->json();
+                $imtResponseJson = $imtResponse->json() ?? $imtResponse->body();
+
                 $imtConditionId  = $imtResponseJson['id'] ?? null;
 
                 Log::info('Condition IMT berhasil', ['condition_id' => $imtConditionId]);
@@ -242,7 +238,7 @@ class ObesitasConditionService
 
                 Log::info('Condition LP berhasil', ['condition_id' => $lpConditionId]);
 
-                // ✅ Catat log untuk Condition LP
+                //  Catat log untuk Condition LP
                 $this->logSatuSehat(
                     idPelayanan: $idSkrining,
                     puskId: $puskId,

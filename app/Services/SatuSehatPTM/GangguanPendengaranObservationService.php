@@ -3,10 +3,12 @@
 namespace App\Services\SatuSehatPTM;
 
 use App\Models\RuangLayanan\SkriningPTM\GangguanPendengaran;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\RuangLayanan\SkriningPTM\KunjunganPTM;
 use App\Models\RuangLayanan\SkriningPTM\SimpusGangguanPendengaran;
+use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class GangguanPendengaranObservationService
 {
@@ -22,7 +24,7 @@ class GangguanPendengaranObservationService
         'omsk'    => ['code' => 'OC000149', 'display' => 'Suspek OMSK',             'system' => 'http://terminology.kemkes.go.id/CodeSystem/clinical-term'],
         'serumen' => ['code' => '18070006', 'display' => 'Impacted cerumen',         'system' => 'http://snomed.info/sct'],
         'presbi'  => ['code' => 'OC000151', 'display' => 'Suspek presbikusis',      'system' => 'http://terminology.kemkes.go.id/CodeSystem/clinical-term'],
-        'bisik'   => ['code' => '247301006','display' => 'Finding of ability to hear whisper', 'system' => 'http://snomed.info/sct'],
+        'bisik'   => ['code' => '247301006', 'display' => 'Finding of ability to hear whisper', 'system' => 'http://snomed.info/sct'],
     ];
 
     // ✅ valueCodeableConcept untuk bisik
@@ -60,18 +62,77 @@ class GangguanPendengaranObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function sendBundle(array $entries): void
+    private function sendBundle(array $entries, ?string $idPelayanan): void
     {
+        $payload = [
+            'resourceType' => 'Bundle',
+            'type'         => 'transaction',
+            'entry'        => $entries,
+        ];
+
         $response = Http::withToken($this->getToken())
             ->acceptJson()
-            ->post(config('services.satusehat.fhir_url'), [
-                'resourceType' => 'Bundle',
-                'type'         => 'transaction',
-                'entry'        => $entries,
-            ]);
+            ->post(config('services.satusehat.fhir_url'), $payload);
+
+        $terima = $response->json() ?? $response->body();
+
+        $this->simpanLog(
+            idPelayanan: $idPelayanan,
+            resource: 'Observation',
+            idResponse: null,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+        );
 
         if (!$response->successful()) {
+            Log::error('SatuSehat: gagal mengirim Bundle Gangguan Pendengaran', [
+                'idPelayanan' => $idPelayanan,
+                'status'      => $response->status(),
+                'body'        => $response->body(),
+            ]);
             throw new \Exception('Gagal mengirim Bundle Gangguan Pendengaran: ' . $response->body());
+        }
+    }
+
+    protected function simpanLog(
+        ?string $idPelayanan,
+        string $resource,
+        ?string $idResponse,
+        string $method,
+        mixed $kirim,
+        mixed $terima,
+    ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => '3',
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => json_encode($kirim),
+            'terima'      => json_encode($terima),
+            'userId'      => Auth::id(),
+        ];
+
+        try {
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log', [
+                'id'          => $log->id ?? null,
+                'idPelayanan' => $idPelayanan,
+                'resource'    => $resource,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => Auth::id(),
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
+            ]);
         }
     }
 
@@ -83,6 +144,7 @@ class GangguanPendengaranObservationService
         string $patientId,
         string $encounterId,
         string $effectiveAt,
+        string $practitionerId,
     ): array {
         $bodySite = $this->bodySite[$side];
 
@@ -116,7 +178,7 @@ class GangguanPendengaranObservationService
                 'encounter'         => ['reference' => "Encounter/{$encounterId}"],
                 'effectiveDateTime' => $effectiveAt,
                 'performer'         => [[
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ]],
                 'valueBoolean' => $value,
             ],
@@ -134,6 +196,7 @@ class GangguanPendengaranObservationService
         string $patientId,
         string $encounterId,
         string $effectiveAt,
+        string $practitionerId,
     ): array {
         $bodySite = $this->bodySite[$side];
         $code     = $this->codeMap['bisik'];
@@ -170,7 +233,7 @@ class GangguanPendengaranObservationService
                 'encounter'         => ['reference' => "Encounter/{$encounterId}"],
                 'effectiveDateTime' => $effectiveAt,
                 'performer'         => [[
-                    'reference' => 'Practitioner/' . config('services.satusehat.practitioner_id'),
+                    'reference' => 'Practitioner/' . $practitionerId,
                 ]],
                 'valueCodeableConcept' => [
                     'coding' => [[
@@ -194,7 +257,9 @@ class GangguanPendengaranObservationService
 
         $patientId   = $skrining->patient_id;
         $encounterId = $skrining->encounter_id;
+        $idPelayanan = $skrining->idPelayanan;
         $effectiveAt = now()->toIso8601String();
+        $practitionerId = $skrining->id_petugas;
 
         $entries = [];
 
@@ -223,12 +288,13 @@ class GangguanPendengaranObservationService
             }
 
             $entries[] = $this->buildBooleanEntry(
-                code:        $code,
-                side:        $meta['side'],
-                value:       filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                patientId:   $patientId,
+                code: $code,
+                side: $meta['side'],
+                value: filter_var($value, FILTER_VALIDATE_BOOLEAN),
+                patientId: $patientId,
                 encounterId: $encounterId,
                 effectiveAt: $effectiveAt,
+                practitionerId: $practitionerId,
             );
         }
 
@@ -250,11 +316,12 @@ class GangguanPendengaranObservationService
             }
 
             $entries[] = $this->buildBisikEntry(
-                side:        $side,
-                value:       $value,
-                patientId:   $patientId,
+                side: $side,
+                value: $value,
+                patientId: $patientId,
                 encounterId: $encounterId,
                 effectiveAt: $effectiveAt,
+                practitionerId: $practitionerId,
             );
         }
 
@@ -263,7 +330,7 @@ class GangguanPendengaranObservationService
             return;
         }
 
-        $this->sendBundle($entries);
+        $this->sendBundle($entries, $idPelayanan);
 
         Log::info('Bundle Gangguan Pendengaran berhasil', ['total' => count($entries)]);
 

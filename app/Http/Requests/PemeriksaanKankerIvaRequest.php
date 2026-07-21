@@ -34,4 +34,19 @@ class PemeriksaanKankerIvaRequest extends FormRequest
             'rujuk_serviks' => 'boolean',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'skriningId.required' => 'Data skrining wajib dipilih.',
+
+            'inspekulo.required' => 'Hasil inspekulo wajib diisi.',
+            'inspekulo.string' => 'Hasil inspekulo harus berupa teks.',
+
+            'iva.required' => 'Hasil IVA wajib diisi.',
+            'hpv.required' => 'Hasil HPV wajib diisi.',
+            'sadanis.required' => 'Hasil SADANIS wajib diisi.',
+            'usg_py.required' => 'Hasil USG P/Y wajib diisi.',
+        ];
+    }
 }
