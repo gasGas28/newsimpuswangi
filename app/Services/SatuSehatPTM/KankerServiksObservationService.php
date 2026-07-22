@@ -113,9 +113,23 @@ class KankerServiksObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // HELPERS: create resource
-    // ────────────────────────────────────────────────────────────────
+    private function extractResourceId(array|string|null $terima, $response): ?string
+    {
+        if (is_array($terima) && !empty($terima['id'])) {
+            return $terima['id'];
+        }
+
+        // Fallback: parse from Location header, e.g.
+        // https://.../ServiceRequest/1234-5678/_history/1
+        $location = $response->header('Location') ?? ($terima['location'] ?? null);
+        if ($location) {
+            $parts = explode('/', $location);
+            // find the segment right after the resource type
+            return $parts[1] ?? null;
+        }
+
+        return null;
+    }
 
     private function createObservation(array $payload, ?string $idPelayanan, string $label): string
     {
@@ -184,7 +198,7 @@ class KankerServiksObservationService
             ->post(config('services.satusehat.fhir_url') . '/ServiceRequest', $payload);
 
         $terima = $response->json() ?? $response->body();
-        $serviceRequestId = is_array($terima) ? ($terima['id'] ?? null) : null;
+        $serviceRequestId = $this->extractResourceId(is_array($terima) ? $terima : null, $response);
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
@@ -671,7 +685,6 @@ class KankerServiksObservationService
             }
         }
 
-        // Simpan semua ID ke DB
         $iva->update(array_merge($result, ['sent_at' => now()]));
 
         return $result;

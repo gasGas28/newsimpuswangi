@@ -93,7 +93,7 @@ class ProfilLipidObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function sendBundle(array $entries, ?string $idPelayanan): void
+    private function sendBundle(array $entries, ?string $idPelayanan): array
     {
         $payload = [
             'resourceType' => 'Bundle',
@@ -107,10 +107,26 @@ class ProfilLipidObservationService
 
         $terima = $response->json() ?? $response->body();
 
+        // Ambil observation id dari setiap entry hasil response bundle
+        $bundleResourceIds = [];
+        foreach ((is_array($terima) ? ($terima['entry'] ?? []) : []) as $respEntry) {
+            $location   = $respEntry['response']['location'] ?? null;
+            $resourceId = $respEntry['resource']['id'] ?? null;
+
+            if (!$resourceId && $location) {
+                $parts      = explode('/', $location);
+                $resourceId = $parts[1] ?? null;
+            }
+
+            if ($resourceId) {
+                $bundleResourceIds[] = $resourceId;
+            }
+        }
+
         $this->simpanLog(
             idPelayanan: $idPelayanan,
             resource: 'Observation-ProfilLipid',
-            idResponse: null,
+            idResponse: !empty($bundleResourceIds) ? implode(',', $bundleResourceIds) : null,
             method: 'POST',
             kirim: $payload,
             terima: $terima,
@@ -124,6 +140,8 @@ class ProfilLipidObservationService
             ]);
             throw new \Exception('Gagal mengirim Bundle Profil Lipid: ' . $response->body());
         }
+
+        return $bundleResourceIds;
     }
 
     private function createCondition(array $payload, ?string $idPelayanan, string $label): string
@@ -137,7 +155,7 @@ class ProfilLipidObservationService
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
-            resource: "Condition-{$label}",
+            resource: "Condition",
             idResponse: $conditionId,
             method: 'POST',
             kirim: $payload,
@@ -360,6 +378,9 @@ class ProfilLipidObservationService
         ];
 
         $entries = [];
+        $entryKeys = [];
+        $observationByKey = []; // <-- key => observation_id
+
         foreach ($fields as $key => $value) {
             if (is_null($value)) continue;
 
@@ -368,6 +389,7 @@ class ProfilLipidObservationService
 
             if ($existingId) {
                 Log::info("Observation {$key} sudah ada, skip", ['observation_id' => $existingId]);
+                $observationByKey[$key] = $existingId; // <-- simpan id yang sudah ada
                 continue;
             }
 
@@ -382,10 +404,19 @@ class ProfilLipidObservationService
                 effectiveAt: $effectiveAt,
                 practitionerId: $practitionerId
             );
+            $entryKeys[] = $key; // <-- catat urutan key yang benar-benar dikirim
         }
 
         if (!empty($entries)) {
-            $this->sendBundle($entries, $idPelayanan);
+            $bundleResourceIds = $this->sendBundle($entries, $idPelayanan);
+
+            // pasangkan observation id baru dengan key-nya berdasarkan urutan $entryKeys
+            foreach ($entryKeys as $i => $key) {
+                if (isset($bundleResourceIds[$i])) {
+                    $observationByKey[$key] = $bundleResourceIds[$i];
+                }
+            }
+
             Log::info('Bundle Observation Profil Lipid berhasil', ['total' => count($entries)]);
         }
 
@@ -429,11 +460,20 @@ class ProfilLipidObservationService
             'sent_at' => now(),
         ]);
 
+        // Prioritas: kolesterol total dulu, baru LDL, HDL, trigliserida
+        $priorityOrder = ['kolesterol_total', 'ldl', 'hdl', 'trigliserida'];
+        $primaryObservationId = null;
+
+        foreach ($priorityOrder as $key) {
+            if (isset($observationByKey[$key])) {
+                $primaryObservationId = $observationByKey[$key];
+                break;
+            }
+        }
+
         return [
-            'condition_kolesterol_id'   => $conditionKolesterolId,
-            'condition_hdl_id'          => $conditionHdlId,
-            'condition_ldl_id'          => $conditionLdlId,
-            'condition_trigliserida_id' => $conditionTrigliseridaId,
+            'observation_id' => $primaryObservationId,
+            'condition_id'   => $conditionKolesterolId,
         ];
     }
 }

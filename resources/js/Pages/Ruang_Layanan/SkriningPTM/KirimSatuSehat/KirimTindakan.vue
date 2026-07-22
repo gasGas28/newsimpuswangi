@@ -84,7 +84,7 @@
         {
           logTitle: 'Pengiriman Data Tindakan',
           routeFn: () => route('satusehat.tindakan', props.DataPasien?.idpelayanan),
-          idField: 'procedureId',
+          idField: 'results',
         },
       ],
     });

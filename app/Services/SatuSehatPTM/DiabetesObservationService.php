@@ -354,9 +354,7 @@ class DiabetesObservationService
         $practitionerId = $skrining->id_petugas;
 
         $puskId      = Auth::id();
-        // dd($practitionerId);
 
-        // Observation Bundle
         $fields = [
             'gula_darah_puasa'    => $diabetes->gula_darah_puasa,
             'gula_darah_2_jam_pp' => $diabetes->gula_darah_2_jam_pp,
@@ -366,16 +364,17 @@ class DiabetesObservationService
 
         $entries = [];
         $entryKeys = [];
+        $observationByKey = []; 
+
         foreach ($fields as $key => $value) {
-            // Skip jika nilai null/kosong
             if (is_null($value)) continue;
 
             $loinc = $this->loincMap[$key];
 
-            // Cek duplikat per LOINC
             $existingId = $this->findExistingObservation($encounterId, $loinc['code']);
             if ($existingId) {
                 Log::info("Observation {$key} sudah ada, skip", ['observation_id' => $existingId]);
+                $observationByKey[$key] = $existingId;
                 continue;
             }
 
@@ -394,12 +393,19 @@ class DiabetesObservationService
         }
 
         if (!empty($entries)) {
-            $this->sendBundle($entries, $idSkrining, $puskId);
+            $bundleResult = $this->sendBundle($entries, $idSkrining, $puskId);
+
+            // pasangkan observation id baru dengan key-nya (urutan sesuai $entryKeys)
+            foreach ($entryKeys as $i => $key) {
+                if (isset($bundleResult['observation_ids'][$i])) {
+                    $observationByKey[$key] = $bundleResult['observation_ids'][$i];
+                }
+            }
 
             Log::info('Bundle Observation Diabetes berhasil', ['total' => count($entries)]);
         }
 
-        //  Ambil kategori paling berat sebagai Condition utama
+        // Ambil kategori paling berat sebagai Condition utama
         $kategoriUtama = $this->resolveKategoriUtama([
             $diabetes->kategori_gula_darah_puasa,
             $diabetes->kategori_gula_darah_2_jam_pp,
@@ -432,6 +438,20 @@ class DiabetesObservationService
             'sent_at'      => now(),
         ]);
 
-        return ['condition_id' => $conditionId];
+        // Prioritas: GDP dulu, baru HbA1c, 2 jam PP, terakhir sewaktu
+        $priorityOrder = ['gula_darah_puasa', 'hba1c', 'gula_darah_2_jam_pp', 'gula_darah_sewaktu'];
+        $primaryObservationId = null;
+
+        foreach ($priorityOrder as $key) {
+            if (isset($observationByKey[$key])) {
+                $primaryObservationId = $observationByKey[$key];
+                break;
+            }
+        }
+
+        return [
+            'observation_id' => $primaryObservationId,
+            'condition_id'   => $conditionId,
+        ];
     }
 }

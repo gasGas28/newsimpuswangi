@@ -109,7 +109,7 @@
         {
           logTitle: 'Pengiriman Data Kanker Paru (Observation)',
           routeFn: () => route('satusehat.send-paru', props.DataPasien?.idSkrining),
-          idField: 'observationId',
+          idField: 'condition_id',
         },
       ],
     });

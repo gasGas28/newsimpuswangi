@@ -108,7 +108,7 @@
         {
           logTitle: 'Pengiriman Diagnosis Obesitas (Condition)',
           routeFn: () => route('satusehat.obesitas', props.DataPasien?.idSkrining),
-          idField: 'condition_id',
+          idField: 'condition_imt_id',
         },
       ],
     });

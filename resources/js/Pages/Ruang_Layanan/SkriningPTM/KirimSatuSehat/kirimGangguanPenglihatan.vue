@@ -140,9 +140,9 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Data Gangguan Penglihatan (Observation)',
+          logTitle: 'Pengiriman Data Gangguan Penglihatan',
           routeFn: () => route('satusehat.gangguan-penglihatan', props.DataPasien?.idSkrining),
-          idField: 'observationId',
+          idField: 'results',
         },
       ],
     });

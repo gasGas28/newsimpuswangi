@@ -94,7 +94,7 @@
         {
           logTitle: 'Pengiriman Data Diagnosis (Condition)',
           routeFn: () => route('satusehat.diagnosis', props.DataPasien?.idpelayanan),
-          idField: 'condition_id',
+          idField: 'results',
         },
       ],
     });

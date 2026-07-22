@@ -11,7 +11,7 @@ use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class GangguanPenglihatanObservationService
 {
-    // ✅ bodySite SNOMED per sisi
+    //    bodySite SNOMED per sisi
     private array $bodySite = [
         'od' => [
             'eye'      => ['code' => '18944008',  'display' => 'Right eye structure'],
@@ -27,23 +27,23 @@ class GangguanPenglihatanObservationService
         ],
     ];
 
-    //  valueCodeableConcept map untuk anterior
+    // valueCodeableConcept map untuk anterior
     private array $anteriorMap = [
         'normal'       => ['code' => '17621005',        'display' => 'Normal',             'system' => 'http://snomed.info/sct'],
         'tidak_normal' => ['code' => '1111451000000106', 'display' => 'Acute angle closure', 'system' => 'http://snomed.info/sct'],
     ];
 
-    //  valueCodeableConcept map untuk refleks (shadow test)
+    // valueCodeableConcept map untuk refleks (shadow test)
     private array $shadowMap = [
         'negatif' => ['code' => '260385009', 'display' => 'Negative', 'system' => 'http://snomed.info/sct'],
         'positif' => ['code' => '10828004',  'display' => 'Positive', 'system' => 'http://snomed.info/sct'],
     ];
 
-    //  valueCodeableConcept map untuk refleks fundus
+    // valueCodeableConcept map untuk refleks fundus
     private array $refleksMap = [
-        'matur'   => ['code' => '34071009', 'display' => 'Mature',   'system' => 'http://snomed.info/sct'],
-        'tidak_normal'  => ['code' => '34071009', 'display' => 'Immature', 'system' => 'http://snomed.info/sct'], // ⚠️ sesuaikan
-        'normal'  => ['code' => '17621005', 'display' => 'Normal',   'system' => 'http://snomed.info/sct'],
+        'matur'        => ['code' => '34071009', 'display' => 'Mature',   'system' => 'http://snomed.info/sct'],
+        'tidak_normal' => ['code' => '34071009', 'display' => 'Immature', 'system' => 'http://snomed.info/sct'], // ⚠️ sesuaikan
+        'normal'       => ['code' => '17621005', 'display' => 'Normal',   'system' => 'http://snomed.info/sct'],
     ];
 
     public function __construct(
@@ -76,37 +76,76 @@ class GangguanPenglihatanObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function sendBundle(array $entries, ?string $idPelayanan): void
+    /**
+     * Ekstrak id resource dari response SatuSehat.
+     * Prioritas: field 'id' di body → header Location → field 'location' di body.
+     */
+    private function extractResourceId($response, $terima): ?string
     {
-        $payload = [
-            'resourceType' => 'Bundle',
-            'type'         => 'transaction',
-            'entry'        => $entries,
-        ];
+        if (is_array($terima) && !empty($terima['id'])) {
+            return $terima['id'];
+        }
 
+        $location = $response->header('Location')
+            ?? (is_array($terima) ? ($terima['location'] ?? null) : null);
+
+        if ($location) {
+            $parts = explode('/', trim($location, '/'));
+            // ambil segmen id setelah nama resource, contoh:
+            // .../Observation/xxxxxxxx/_history/1  ->  xxxxxxxx
+            $idx = array_search('Observation', $parts);
+            if ($idx !== false && isset($parts[$idx + 1])) {
+                return $parts[$idx + 1];
+            }
+            // fallback: ambil segmen kedua dari belakang jika format tidak sesuai
+            return $parts[count($parts) - 3] ?? ($parts[1] ?? null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Kirim satu Observation langsung (bukan lewat Bundle) dan simpan log.
+     */
+    private function createObservation(array $payload, ?string $idPelayanan, string $label): ?string
+    {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
-            ->post(config('services.satusehat.fhir_url'), $payload);
+            ->post(config('services.satusehat.fhir_url') . '/Observation', $payload);
 
         $terima = $response->json() ?? $response->body();
+        $observationId = $this->extractResourceId($response, $terima);
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
-            resource: 'Observation-Penglihatan',
-            idResponse: null,
+            resource: "Observation-Penglihatan-{$label}",
+            idResponse: $observationId,
             method: 'POST',
             kirim: $payload,
             terima: $terima,
         );
 
         if (!$response->successful()) {
-            Log::error('SatuSehat: gagal mengirim Bundle Gangguan Penglihatan', [
+            Log::error('SatuSehat: gagal membuat Observation Gangguan Penglihatan', [
                 'idPelayanan' => $idPelayanan,
+                'label'       => $label,
                 'status'      => $response->status(),
                 'body'        => $response->body(),
             ]);
-            throw new \Exception('Gagal mengirim Bundle Gangguan Penglihatan: ' . $response->body());
+            throw new \Exception("Gagal membuat Observation Penglihatan ({$label}): " . $response->body());
         }
+
+        if (!$observationId) {
+            Log::error('SatuSehat: Observation Penglihatan sukses tapi id tidak ditemukan', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'body'        => $response->body(),
+            ]);
+        }
+
+        Log::info("Observation Penglihatan {$label} berhasil", ['id' => $observationId]);
+
+        return $observationId;
     }
 
     protected function simpanLog(
@@ -158,7 +197,7 @@ class GangguanPenglihatanObservationService
         string $effectiveAt,
         string $practitionerId,
     ): array {
-        return [
+        $resource = [
             'resourceType'      => 'Observation',
             'status'            => 'final',
             'category'          => [[
@@ -175,13 +214,6 @@ class GangguanPenglihatanObservationService
                     'display' => $code['display'],
                 ]],
             ],
-            'bodySite'          => [
-                'coding' => [[
-                    'system'  => 'http://snomed.info/sct',
-                    'code'    => $bodySite['code'],
-                    'display' => $bodySite['display'],
-                ]],
-            ],
             'subject'           => ['reference' => "Patient/{$patientId}"],
             'encounter'         => ['reference' => "Encounter/{$encounterId}"],
             'effectiveDateTime' => $effectiveAt,
@@ -189,10 +221,22 @@ class GangguanPenglihatanObservationService
                 'reference' => 'Practitioner/' . $practitionerId,
             ]],
         ];
+
+        if (!empty($bodySite['code'])) {
+            $resource['bodySite'] = [
+                'coding' => [[
+                    'system'  => 'http://snomed.info/sct',
+                    'code'    => $bodySite['code'],
+                    'display' => $bodySite['display'],
+                ]],
+            ];
+        }
+
+        return $resource;
     }
 
-    //  visus & pinhole — valueRatio (format 6/12)
-    private function buildRatioEntry(
+    // visus & pinhole — valueRatio (format 6/12)
+    private function buildRatioPayload(
         array $code,
         array $bodySite,
         string $value,
@@ -203,7 +247,7 @@ class GangguanPenglihatanObservationService
         array $referenceRange = [],
         array $interpretation = [],
     ): array {
-        //  Parse "6/12" -> numerator=6, denominator=12
+        // Parse "6/12" -> numerator=6, denominator=12
         [$num, $den] = array_map('intval', explode('/', $value));
 
         $resource = array_merge(
@@ -216,14 +260,14 @@ class GangguanPenglihatanObservationService
             ]
         );
 
-        if (!empty($referenceRange)) $resource['referenceRange']  = $referenceRange;
-        if (!empty($interpretation)) $resource['interpretation']  = $interpretation;
+        if (!empty($referenceRange)) $resource['referenceRange'] = $referenceRange;
+        if (!empty($interpretation)) $resource['interpretation'] = $interpretation;
 
-        return ['fullUrl' => 'urn:uuid:' . \Str::uuid(), 'resource' => $resource, 'request' => ['method' => 'POST', 'url' => 'Observation']];
+        return $resource;
     }
 
     // glaukoma — valueQuantity + referenceRange
-    private function buildGlaukomaEntry(
+    private function buildGlaukomaPayload(
         array $code,
         float $value,
         string $patientId,
@@ -261,14 +305,11 @@ class GangguanPenglihatanObservationService
             ]
         );
 
-        // Glaukoma tidak pakai bodySite, hapus
-        unset($resource['bodySite']);
-
-        return ['fullUrl' => 'urn:uuid:' . \Str::uuid(), 'resource' => $resource, 'request' => ['method' => 'POST', 'url' => 'Observation']];
+        return $resource;
     }
 
-    // valueCodeableConcept entry (anterior, shadow, refleks)
-    private function buildCodeableEntry(
+    // valueCodeableConcept payload (anterior, shadow, refleks)
+    private function buildCodeablePayload(
         array $code,
         array $bodySite,
         array $valueCodeableConcept,
@@ -277,7 +318,7 @@ class GangguanPenglihatanObservationService
         string $effectiveAt,
         string $practitionerId,
     ): array {
-        $resource = array_merge(
+        return array_merge(
             $this->baseResource($code, $bodySite, $patientId, $encounterId, $effectiveAt, $practitionerId),
             [
                 'valueCodeableConcept' => [
@@ -289,12 +330,10 @@ class GangguanPenglihatanObservationService
                 ],
             ]
         );
-
-        return ['fullUrl' => 'urn:uuid:' . \Str::uuid(), 'resource' => $resource, 'request' => ['method' => 'POST', 'url' => 'Observation']];
     }
 
-    // valueBoolean entry (retinopati)
-    private function buildBooleanEntry(
+    // valueBoolean payload (retinopati)
+    private function buildBooleanPayload(
         array $code,
         array $bodySite,
         bool $value,
@@ -303,12 +342,10 @@ class GangguanPenglihatanObservationService
         string $effectiveAt,
         string $practitionerId,
     ): array {
-        $resource = array_merge(
+        return array_merge(
             $this->baseResource($code, $bodySite, $patientId, $encounterId, $effectiveAt, $practitionerId),
             ['valueBoolean' => $value]
         );
-
-        return ['fullUrl' => 'urn:uuid:' . \Str::uuid(), 'resource' => $resource, 'request' => ['method' => 'POST', 'url' => 'Observation']];
     }
 
     private function normalizeValue(string $value): string
@@ -316,21 +353,21 @@ class GangguanPenglihatanObservationService
         return strtolower(trim(preg_replace('/\s+/', '_', $value)));
     }
 
-    public function sendGangguanPenglihatan(string $idSkrining): void
+    public function sendGangguanPenglihatan(string $idSkrining): array
     {
         $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $penglihatan = GangguanPenglihatan::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
-        $idPelayanan = $skrining->idPelayanan;
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
         $practitionerId = $skrining->id_petugas;
-        $effectiveAt = now()->toIso8601String();
+        $effectiveAt    = now()->toIso8601String();
 
-        $entries = [];
+        $result = [];
 
         foreach (['od', 'os'] as $side) {
-            // ─── Visus 
+            //    Visus                             ─
             $visusValue = $penglihatan->{"visus_{$side}"};
             if ($visusValue) {
                 $code = [
@@ -343,14 +380,19 @@ class GangguanPenglihatanObservationService
                 $bodySite   = $this->bodySite[$side]['eye'];
                 $existingId = $this->findExisting($encounterId, $code['code'], $bodySite['code']);
 
-                if (!$existingId) {
-                    $entries[] = $this->buildRatioEntry($code, $bodySite, $visusValue, $patientId, $encounterId, $effectiveAt, $practitionerId);
+                if ($existingId) {
+                    Log::info("Observation visus_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_visus_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation visus_{$side} sudah ada, skip");
+                    $result["observation_visus_{$side}_id"] = $this->createObservation(
+                        $this->buildRatioPayload($code, $bodySite, $visusValue, $patientId, $encounterId, $effectiveAt, $practitionerId),
+                        $idPelayanan,
+                        "Visus-{$side}",
+                    );
                 }
             }
 
-            // ─── Pinhole 
+            //    Pinhole                           ──
             $pinholeValue = $penglihatan->{"pinhole_{$side}"};
             if ($pinholeValue) {
                 $code = [
@@ -361,33 +403,38 @@ class GangguanPenglihatanObservationService
                 $bodySite   = $this->bodySite[$side]['eye'];
                 $existingId = $this->findExisting($encounterId, $code['code'], $bodySite['code']);
 
-                if (!$existingId) {
-                    $entries[] = $this->buildRatioEntry(
-                        code: $code,
-                        bodySite: $bodySite,
-                        value: $pinholeValue,
-                        patientId: $patientId,
-                        encounterId: $encounterId,
-                        effectiveAt: $effectiveAt,
-                        practitionerId: $practitionerId,
-                        referenceRange: [
-                            ['text' => 'Kelainan Refraksi: 6/12 - 6/6'],
-                            ['text' => 'Kelainan Organik: 3/60- <6/12'],
-                        ],
-                        interpretation: [[
-                            'coding' => [[
-                                'system'  => 'http://snomed.info/sct',
-                                'code'    => '39021009',
-                                'display' => 'Disorder of refraction',
-                            ]],
-                        ]],
-                    );
+                if ($existingId) {
+                    Log::info("Observation pinhole_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_pinhole_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation pinhole_{$side} sudah ada, skip");
+                    $result["observation_pinhole_{$side}_id"] = $this->createObservation(
+                        $this->buildRatioPayload(
+                            code: $code,
+                            bodySite: $bodySite,
+                            value: $pinholeValue,
+                            patientId: $patientId,
+                            encounterId: $encounterId,
+                            effectiveAt: $effectiveAt,
+                            practitionerId: $practitionerId,
+                            referenceRange: [
+                                ['text' => 'Kelainan Refraksi: 6/12 - 6/6'],
+                                ['text' => 'Kelainan Organik: 3/60- <6/12'],
+                            ],
+                            interpretation: [[
+                                'coding' => [[
+                                    'system'  => 'http://snomed.info/sct',
+                                    'code'    => '39021009',
+                                    'display' => 'Disorder of refraction',
+                                ]],
+                            ]],
+                        ),
+                        $idPelayanan,
+                        "Pinhole-{$side}",
+                    );
                 }
             }
 
-            // ─── Anterior 
+            //    Anterior                           ─
             $anteriorValue = $penglihatan->{"anterior_{$side}"};
             if ($anteriorValue) {
                 $code = [
@@ -395,19 +442,24 @@ class GangguanPenglihatanObservationService
                     'code'    => '40137007',
                     'display' => 'Pupil light reflex',
                 ];
-                $bodySite        = $this->bodySite[$side]['anterior'];
-                $existingId      = $this->findExisting($encounterId, $code['code'], $bodySite['code']);
-                $normalized      = $this->normalizeValue($anteriorValue);
-                $valueCodeable   = $this->anteriorMap[$normalized] ?? $this->anteriorMap['normal'];
+                $bodySite      = $this->bodySite[$side]['anterior'];
+                $existingId    = $this->findExisting($encounterId, $code['code'], $bodySite['code']);
+                $normalized    = $this->normalizeValue($anteriorValue);
+                $valueCodeable = $this->anteriorMap[$normalized] ?? $this->anteriorMap['normal'];
 
-                if (!$existingId) {
-                    $entries[] = $this->buildCodeableEntry($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId);
+                if ($existingId) {
+                    Log::info("Observation anterior_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_anterior_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation anterior_{$side} sudah ada, skip");
+                    $result["observation_anterior_{$side}_id"] = $this->createObservation(
+                        $this->buildCodeablePayload($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId),
+                        $idPelayanan,
+                        "Anterior-{$side}",
+                    );
                 }
             }
 
-            // ─── Shadow 
+            //    Shadow                             
             $shadowValue = $penglihatan->{"shadow_{$side}"};
             if ($shadowValue) {
                 $code = [
@@ -420,14 +472,19 @@ class GangguanPenglihatanObservationService
                 $normalized    = $this->normalizeValue($shadowValue);
                 $valueCodeable = $this->shadowMap[$normalized] ?? $this->shadowMap['negatif'];
 
-                if (!$existingId) {
-                    $entries[] = $this->buildCodeableEntry($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId);
+                if ($existingId) {
+                    Log::info("Observation shadow_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_shadow_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation shadow_{$side} sudah ada, skip");
+                    $result["observation_shadow_{$side}_id"] = $this->createObservation(
+                        $this->buildCodeablePayload($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId),
+                        $idPelayanan,
+                        "Shadow-{$side}",
+                    );
                 }
             }
 
-            // ─── Refleks 
+            //    Refleks                           ──
             $refleksValue = $penglihatan->{"refleks_{$side}"};
             if ($refleksValue) {
                 $code = [
@@ -440,14 +497,19 @@ class GangguanPenglihatanObservationService
                 $normalized    = $this->normalizeValue($refleksValue);
                 $valueCodeable = $this->refleksMap[$normalized] ?? $this->refleksMap['normal'];
 
-                if (!$existingId) {
-                    $entries[] = $this->buildCodeableEntry($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId);
+                if ($existingId) {
+                    Log::info("Observation refleks_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_refleks_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation refleks_{$side} sudah ada, skip");
+                    $result["observation_refleks_{$side}_id"] = $this->createObservation(
+                        $this->buildCodeablePayload($code, $bodySite, $valueCodeable, $patientId, $encounterId, $effectiveAt, $practitionerId),
+                        $idPelayanan,
+                        "Refleks-{$side}",
+                    );
                 }
             }
 
-            // ─── Glaukoma 
+            //    Glaukoma 
             $glaukomaValue = $penglihatan->{"glaukoma_{$side}"};
             if ($glaukomaValue) {
                 $code = [
@@ -459,14 +521,19 @@ class GangguanPenglihatanObservationService
                 ];
                 $existingId = $this->findExisting($encounterId, $code['code'], '');
 
-                if (!$existingId) {
-                    $entries[] = $this->buildGlaukomaEntry($code, (float) $glaukomaValue, $patientId, $encounterId, $effectiveAt, $practitionerId);
+                if ($existingId) {
+                    Log::info("Observation glaukoma_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_glaukoma_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation glaukoma_{$side} sudah ada, skip");
+                    $result["observation_glaukoma_{$side}_id"] = $this->createObservation(
+                        $this->buildGlaukomaPayload($code, (float) $glaukomaValue, $patientId, $encounterId, $effectiveAt, $practitionerId),
+                        $idPelayanan,
+                        "Glaukoma-{$side}",
+                    );
                 }
             }
 
-            // ─── Retinopati ──────────────────────────────────────────
+            //    Retinopati 
             $retinoValue = $penglihatan->{"retinopati_{$side}"};
             if (!is_null($retinoValue)) {
                 $code = [
@@ -477,31 +544,36 @@ class GangguanPenglihatanObservationService
                 $bodySite   = $this->bodySite[$side]['eye'];
                 $existingId = $this->findExisting($encounterId, $code['code'], $bodySite['code']);
 
-                if (!$existingId) {
-                    $entries[] = $this->buildBooleanEntry(
-                        code: $code,
-                        bodySite: $bodySite,
-                        value: filter_var($retinoValue, FILTER_VALIDATE_BOOLEAN),
-                        patientId: $patientId,
-                        encounterId: $encounterId,
-                        effectiveAt: $effectiveAt,
-                        practitionerId: $practitionerId,
-                    );
+                if ($existingId) {
+                    Log::info("Observation retinopati_{$side} sudah ada, skip", ['id' => $existingId]);
+                    $result["observation_retinopati_{$side}_id"] = $existingId;
                 } else {
-                    Log::info("Observation retinopati_{$side} sudah ada, skip");
+                    $result["observation_retinopati_{$side}_id"] = $this->createObservation(
+                        $this->buildBooleanPayload(
+                            code: $code,
+                            bodySite: $bodySite,
+                            value: filter_var($retinoValue, FILTER_VALIDATE_BOOLEAN),
+                            patientId: $patientId,
+                            encounterId: $encounterId,
+                            effectiveAt: $effectiveAt,
+                            practitionerId: $practitionerId,
+                        ),
+                        $idPelayanan,
+                        "Retinopati-{$side}",
+                    );
                 }
             }
         }
 
-        if (empty($entries)) {
-            Log::info('Bundle Gangguan Penglihatan skip, semua sudah ada atau null');
-            return;
+        if (empty($result)) {
+            Log::info('Gangguan Penglihatan skip, semua sudah ada atau null');
+            return $result;
         }
 
-        $this->sendBundle($entries, $idPelayanan);
+        $penglihatan->update(array_merge($result, ['sent_at' => now()]));
 
-        Log::info('Bundle Gangguan Penglihatan berhasil', ['total' => count($entries)]);
+        Log::info('Semua Observation Gangguan Penglihatan berhasil dikirim', ['total' => count($result)]);
 
-        $penglihatan->update(['sent_at' => now()]);
+        return $result;
     }
 }

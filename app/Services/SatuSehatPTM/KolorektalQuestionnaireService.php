@@ -417,7 +417,7 @@ class KolorektalQuestionnaireService
             Log::info('Observation Darah Samar skip, tidak dilakukan');
         }
 
-        // ─── Condition berdasarkan hasil kuesioner ───────────────────
+        //  Condition berdasarkan hasil kuesioner 
         $conditionId    = null;
         $hasilKuesioner = $kolorektal->hasil_kuesioner ?? '';
 
