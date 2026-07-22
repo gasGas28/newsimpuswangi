@@ -11,36 +11,6 @@
     </div>
 
     <div class="action-grid">
-      <!-- <button type="button" class="action-item">
-        <span class="action-icon">
-          <i class="bi bi-file-earmark-text"></i>
-        </span>
-        <span class="action-copy">
-          <strong>Surat Keterangan</strong>
-          <small>Dokumen keterangan pasien</small>
-        </span>
-      </button>
-
-      <button type="button" class="action-item">
-        <span class="action-icon">
-          <i class="bi bi-send"></i>
-        </span>
-        <span class="action-copy">
-          <strong>Surat Rujukan</strong>
-          <small>Rujukan layanan lanjutan</small>
-        </span>
-      </button>
-
-      <button type="button" class="action-item">
-        <span class="action-icon">
-          <i class="bi bi-clock-history"></i>
-        </span>
-        <span class="action-copy">
-          <strong>Riwayat Pasien</strong>
-          <small>Kunjungan dan pelayanan</small>
-        </span>
-      </button> -->
-
       <Link :href="registerPasien" class="action-item">
         <span class="action-icon">
           <i class="bi bi-file-text"></i>
@@ -50,25 +20,7 @@
           <small>Catatan Registrasi Pasien PTM</small>
         </span>
       </Link>
-      <Link :href="riwayatPasien" class="action-item">
-        <span class="action-icon">
-          <i class="bi bi-file-text"></i>
-        </span>
-        <span class="action-copy">
-          <strong>Riwayat Pasien</strong>
-          <small>Catatan Riwayat pasien</small>
-        </span>
-      </Link>
 
-      <Link :href="cpptHref" class="action-item">
-        <span class="action-icon">
-          <i class="bi bi-file-text"></i>
-        </span>
-        <span class="action-copy">
-          <strong>CPPT</strong>
-          <small>Catatan Pengembangan Pasien Terintegrasi</small>
-        </span>
-      </Link>
 
       <button
         v-if="!sudahMulai"
@@ -113,27 +65,10 @@
   });
 
   defineEmits(['mulai-pemeriksaan']);
-
-  const riwayatPasien = computed(() => {
-    return route('ruang-layanan.riwayat-ptm', {
-      idSkrining: props.DataPasien?.idSkrining,
-    });
-  });
   const registerPasien = computed(() => {
     return route('ruang-layanan.register-ptm');
   });
-  // const riwayatPasien = computed(() => {
-  //   return route('ruang-layanan.riwayat-ptm', {
-  //     idPoli: props.DataPasien?.kdPoli,
-  //     idPasien: props.DataPasien?.ID,
-  //   });
-  // });
-  const cpptHref = computed(() => {
-    return route('ruang-layanan.cppt', {
-      idPoli: props.DataPasien?.kdPoli,
-      idPasien: props.DataPasien?.ID,
-    });
-  });
+
 </script>
 
 <style scoped>

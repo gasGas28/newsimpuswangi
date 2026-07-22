@@ -91,9 +91,9 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Data Kanker Kolorektal (Observation)',
+          logTitle: 'Pengiriman Data Kanker Kolorektal (Questionnaire Response)',
           routeFn: () => route('satusehat.send-kolorektal', props.DataPasien?.idSkrining),
-          idField: 'observationId',
+          idField: 'questionnaire_response_id',
         },
       ],
     });

@@ -55,7 +55,7 @@ class TindakanProcedureService
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
-            resource: "Procedure-Tindakan-{$label}",
+            resource: "Procedure-{$label}",
             idResponse: $procedureId,
             method: 'POST',
             kirim: $payload,

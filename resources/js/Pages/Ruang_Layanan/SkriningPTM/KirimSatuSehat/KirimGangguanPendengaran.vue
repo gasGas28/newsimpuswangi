@@ -107,12 +107,12 @@
   const showDuplicateModal = ref(false);
   const validationMessages = ref([]);
 
-  // ─── Log ─────────────────────────────────────────────────────
+  //    Log   
   const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
     `gangguan-pendengaran_logs_${props.DataPasien?.idSkrining ?? 'default'}`
   );
 
-  // ─── Kirim ───────────────────────────────────────────────────
+  //    Kirim                                   
   const sendSatuSehat = () => {
     submit({
       routerPost: router.post.bind(router),
@@ -121,7 +121,7 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Data Gangguan Pendengaran (Observation)',
+          logTitle: 'Pengiriman Data Gangguan Pendengaran',
           routeFn: () => route('satusehat.gangguan-pendengaran', props.DataPasien?.idSkrining),
           idField: 'observationId',
         },

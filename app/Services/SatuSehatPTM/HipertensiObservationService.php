@@ -113,15 +113,6 @@ class HipertensiObservationService
                 'observation_id' => $existingId,
             ]);
 
-            $this->simpanLog(
-                idPelayanan: $idPelayanan,
-                resource: 'Observation-BloodPressure',
-                idResponse: $existingId,
-                method: 'GET',
-                kirim: ['encounter' => $encounterId, 'code' => '55284-4'],
-                terima: ['observation_id' => $existingId, 'note' => 'sudah ada, skip create'],
-            );
-
             return ['observation_id' => $existingId];
         }
 

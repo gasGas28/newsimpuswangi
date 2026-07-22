@@ -66,7 +66,9 @@ class SatuSehatController extends Controller
             $encounterId = $this->encounterService->kirimEncounter($idSkrining);
             return redirect()->back()->with([
                 'success'      => true,
-                'encounter_id' => $encounterId,
+                'data' => [
+                    'encounterId' => $encounterId,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -121,9 +123,11 @@ class SatuSehatController extends Controller
 
             return redirect()->back()->with([
                 'message'          => 'Data obesitas berhasil dikirim',
-                'observation_id'   => $antropometri['observation_id'],
-                'condition_imt_id' => $condition['condition_imt_id'],
-                'condition_lp_id'  => $condition['condition_lp_id'],
+                'data' => [
+                    'observation_id'   => $antropometri['observation_id'],
+                    'condition_imt_id' => $condition['condition_imt_id'],
+                    'condition_lp_id'  => $condition['condition_lp_id'],
+                ],
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -135,9 +139,10 @@ class SatuSehatController extends Controller
             $diabetes = $this->diabetesObservationService->sendDiabetes($idSkrining);
 
             return redirect()->back()->with([
-                'message'          => 'Data Diabetes berhasil dikirim',
+                'message' => 'Data Diabetes berhasil dikirim',
                 'data' => [
-                    'condition_id' => $diabetes['condition_id'],
+                    'observation_id' => $diabetes['observation_id'],
+                    'condition_id'   => $diabetes['condition_id'],
                 ],
             ]);
         } catch (\Exception $e) {
@@ -151,8 +156,10 @@ class SatuSehatController extends Controller
 
             return redirect()->back()->with([
                 'message'          => 'Data Asam Urat berhasil dikirim',
-                'observation_id'   => $asamUrat['observation_id'],
-                'condition_id' => $asamUrat['condition_id'],
+                'data' => [
+                    'observation_id'   => $asamUrat['observation_id'],
+                    'condition_id' => $asamUrat['condition_id'],
+                ],
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -161,10 +168,14 @@ class SatuSehatController extends Controller
     public function sendProfilLipid(string $idSkrining)
     {
         try {
-            $this->profilLipidObservationService->sendProfilLipid($idSkrining);
+            $lipid = $this->profilLipidObservationService->sendProfilLipid($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Profil Lipid berhasil dikirim',
+                'data' => [
+                    'observation_id'   => $lipid['observation_id'],
+                    'condition_id' => $lipid['condition_id'],
+                ],
             ]);
         } catch (\Exception $e) {
             return redirect()->json(['message' => $e->getMessage()], 500);
@@ -173,10 +184,13 @@ class SatuSehatController extends Controller
     public function sendGangguanPendengaran(string $idSkrining)
     {
         try {
-            $this->gangguanPendengaranObservationService->sendGangguanPendengaran($idSkrining);
+            $pendengaran = $this->gangguanPendengaranObservationService->sendGangguanPendengaran($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Gangguan Pendengaran berhasil dikirim',
+                'data' => [
+                    'observationId' => $pendengaran['observationId'],
+                ],
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -185,10 +199,13 @@ class SatuSehatController extends Controller
     public function sendGangguanPenglihatan(string $idSkrining)
     {
         try {
-            $this->gangguanPenglihatanObservationService->sendGangguanPenglihatan($idSkrining);
+            $penglihatan = $this->gangguanPenglihatanObservationService->sendGangguanPenglihatan($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Gangguan Penglihatan berhasil dikirim',
+                'data' => [
+                    'results' => $penglihatan,
+                ]
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -197,10 +214,14 @@ class SatuSehatController extends Controller
     public function sendKankerParu(string $idSkrining)
     {
         try {
-            $this->kankerParuQuestionnaireService->sendKankerParu($idSkrining);
+            $paru = $this->kankerParuQuestionnaireService->sendKankerParu($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Kanker Paru berhasil dikirim',
+                'data' => [
+                    'qr_id' => $paru['questionnaire_response_id'],
+                    'condition_id' => $paru['condition_id']
+                ]
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -209,10 +230,14 @@ class SatuSehatController extends Controller
     public function sendKolorektal(string $idSkrining)
     {
         try {
-            $this->kolorektalQuestionnaireService->sendKolorektal($idSkrining);
+            $kolorektal = $this->kolorektalQuestionnaireService->sendKolorektal($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Kolorektal berhasil dikirim',
+                'data' => [
+                    'questionnaire_response_id'  => $kolorektal['questionnaire_response_id'],
+                    'darah_samar_observation_id' => $kolorektal['darah_samar_observation_id'],
+                ]
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -225,7 +250,9 @@ class SatuSehatController extends Controller
 
             return redirect()->back()->with([
                 'message' => 'Data Thalasemia berhasil dikirim',
-                'data'    => $result,
+                'data'    => [
+                    'thalasemia' => $result,
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -236,10 +263,14 @@ class SatuSehatController extends Controller
     public function sendEKG(string $idSkrining)
     {
         try {
-            $this->ekgObservationService->sendEkg($idSkrining);
+            $ekg = $this->ekgObservationService->sendEkg($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data EKG berhasil dikirim',
+                'data' => [
+                    'observation_id' => $ekg['observation_id'],
+                    'condition_id' => $ekg['condition_id'],
+                ]
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with(['message' => $e->getMessage()], 500);
@@ -248,13 +279,14 @@ class SatuSehatController extends Controller
     public function sendKankerServiks(string $idSkrining)
     {
         try {
-            $this->kankerServiksObservationService->sendIvaServiks($idSkrining);
+            $kankerServiks = $this->kankerServiksObservationService->sendIvaServiks($idSkrining);
 
             return redirect()->back()->with([
                 'message' => 'Data Kanker Serviks berhasil dikirim',
+                'data' => ['id' => $kankerServiks,]
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
     public function sendDiagnosis(string $pelayananId)

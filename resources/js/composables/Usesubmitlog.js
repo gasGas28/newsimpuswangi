@@ -112,7 +112,6 @@ export function useSubmitLog(storageKey) {
         {
           preserveScroll: true,
           showGlobalLoader: false,
-          only:['DataPasien'],
           onSuccess: () => {
             settled = true;
             const f = getFlash();

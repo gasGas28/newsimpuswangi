@@ -117,12 +117,7 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Deteksi Dini stroke (Observation)',
-          routeFn: () => route('satusehat.profil-lipid', props.DataPasien?.idSkrining),
-          idField: 'observation_id',
-        },
-        {
-          logTitle: 'Pengiriman Diagnosis Stroke (Condition)',
+          logTitle: 'Pengiriman Diagnosis Stroke (Observation and Condition)',
           routeFn: () => route('satusehat.profil-lipid', props.DataPasien?.idSkrining),
           idField: 'condition_id',
         },

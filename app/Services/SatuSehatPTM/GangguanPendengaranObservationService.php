@@ -12,13 +12,11 @@ use App\Models\RuangLayanan\SkriningPTM\SatuSehatLog;
 
 class GangguanPendengaranObservationService
 {
-    // ✅ bodySite SNOMED
     private array $bodySite = [
         'kanan' => ['code' => '25577004', 'display' => 'Right ear structure'],
         'kiri'  => ['code' => '89644007', 'display' => 'Left ear structure'],
     ];
 
-    // ✅ code per jenis pemeriksaan
     private array $codeMap = [
         'tuli'    => ['code' => 'OC000150', 'display' => 'Suspek tuli kongenital',  'system' => 'http://terminology.kemkes.go.id/CodeSystem/clinical-term'],
         'omsk'    => ['code' => 'OC000149', 'display' => 'Suspek OMSK',             'system' => 'http://terminology.kemkes.go.id/CodeSystem/clinical-term'],
@@ -27,10 +25,9 @@ class GangguanPendengaranObservationService
         'bisik'   => ['code' => '247301006', 'display' => 'Finding of ability to hear whisper', 'system' => 'http://snomed.info/sct'],
     ];
 
-    // ✅ valueCodeableConcept untuk bisik
     private array $bisikValueMap = [
-        'normal'  => ['code' => '275727004', 'display' => 'Hearing test normal'],
-        'gangguan'   => ['code' => '300221005', 'display' => 'Hearing for whisper impaired'],   // ⚠️ sesuaikan
+        'normal'   => ['code' => '275727004', 'display' => 'Hearing test normal'],
+        'gangguan' => ['code' => '300221005', 'display' => 'Hearing for whisper impaired'],
     ];
 
     public function __construct(
@@ -62,37 +59,73 @@ class GangguanPendengaranObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    private function sendBundle(array $entries, ?string $idPelayanan): void
+    /**
+     * Ekstrak id resource dari response SatuSehat.
+     * Prioritas: field 'id' di body → header Location → field 'location' di body.
+     */
+    private function extractResourceId($response, $terima): ?string
     {
-        $payload = [
-            'resourceType' => 'Bundle',
-            'type'         => 'transaction',
-            'entry'        => $entries,
-        ];
+        if (is_array($terima) && !empty($terima['id'])) {
+            return $terima['id'];
+        }
 
+        $location = $response->header('Location')
+            ?? (is_array($terima) ? ($terima['location'] ?? null) : null);
+
+        if ($location) {
+            $parts = explode('/', trim($location, '/'));
+            $idx = array_search('Observation', $parts);
+            if ($idx !== false && isset($parts[$idx + 1])) {
+                return $parts[$idx + 1];
+            }
+            return $parts[count($parts) - 3] ?? ($parts[1] ?? null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Kirim satu Observation langsung (bukan lewat Bundle) dan simpan log.
+     */
+    private function createObservation(array $payload, ?string $idPelayanan, string $label): ?string
+    {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
-            ->post(config('services.satusehat.fhir_url'), $payload);
+            ->post(config('services.satusehat.fhir_url') . '/Observation', $payload);
 
         $terima = $response->json() ?? $response->body();
+        $observationId = $this->extractResourceId($response, $terima);
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
-            resource: 'Observation',
-            idResponse: null,
+            resource: "Observation-Pendengaran-{$label}",
+            idResponse: $observationId,
             method: 'POST',
             kirim: $payload,
             terima: $terima,
         );
 
         if (!$response->successful()) {
-            Log::error('SatuSehat: gagal mengirim Bundle Gangguan Pendengaran', [
+            Log::error('SatuSehat: gagal membuat Observation Gangguan Pendengaran', [
                 'idPelayanan' => $idPelayanan,
+                'label'       => $label,
                 'status'      => $response->status(),
                 'body'        => $response->body(),
             ]);
-            throw new \Exception('Gagal mengirim Bundle Gangguan Pendengaran: ' . $response->body());
+            throw new \Exception("Gagal membuat Observation Pendengaran ({$label}): " . $response->body());
         }
+
+        if (!$observationId) {
+            Log::error('SatuSehat: Observation Pendengaran sukses tapi id tidak ditemukan', [
+                'idPelayanan' => $idPelayanan,
+                'label'       => $label,
+                'body'        => $response->body(),
+            ]);
+        }
+
+        Log::info("Observation Pendengaran {$label} berhasil", ['id' => $observationId]);
+
+        return $observationId;
     }
 
     protected function simpanLog(
@@ -136,8 +169,50 @@ class GangguanPendengaranObservationService
         }
     }
 
-    // ✅ Boolean entry (tuli, omsk, serumen, presbi)
-    private function buildBooleanEntry(
+    private function baseResource(
+        array $code,
+        string $side,
+        string $patientId,
+        string $encounterId,
+        string $effectiveAt,
+        string $practitionerId,
+    ): array {
+        $bodySite = $this->bodySite[$side];
+
+        return [
+            'resourceType'      => 'Observation',
+            'status'            => 'final',
+            'category'          => [[
+                'coding' => [[
+                    'system'  => 'http://terminology.hl7.org/CodeSystem/observation-category',
+                    'code'    => 'exam',
+                    'display' => 'Exam',
+                ]],
+            ]],
+            'code'              => [
+                'coding' => [[
+                    'system'  => $code['system'],
+                    'code'    => $code['code'],
+                    'display' => $code['display'],
+                ]],
+            ],
+            'bodySite'          => [
+                'coding' => [[
+                    'system'  => 'http://snomed.info/sct',
+                    'code'    => $bodySite['code'],
+                    'display' => $bodySite['display'],
+                ]],
+            ],
+            'subject'           => ['reference' => "Patient/{$patientId}"],
+            'encounter'         => ['reference' => "Encounter/{$encounterId}"],
+            'effectiveDateTime' => $effectiveAt,
+            'performer'         => [[
+                'reference' => 'Practitioner/' . $practitionerId,
+            ]],
+        ];
+    }
+
+    private function buildBooleanPayload(
         array $code,
         string $side,
         bool $value,
@@ -146,51 +221,13 @@ class GangguanPendengaranObservationService
         string $effectiveAt,
         string $practitionerId,
     ): array {
-        $bodySite = $this->bodySite[$side];
-
-        return [
-            'fullUrl'  => 'urn:uuid:' . \Str::uuid(),
-            'resource' => [
-                'resourceType'      => 'Observation',
-                'status'            => 'final',
-                'category'          => [[
-                    'coding' => [[
-                        'system'  => 'http://terminology.hl7.org/CodeSystem/observation-category',
-                        'code'    => 'exam',
-                        'display' => 'Exam',
-                    ]],
-                ]],
-                'code'              => [
-                    'coding' => [[
-                        'system'  => $code['system'],
-                        'code'    => $code['code'],
-                        'display' => $code['display'],
-                    ]],
-                ],
-                'bodySite'          => [
-                    'coding' => [[
-                        'system'  => 'http://snomed.info/sct',
-                        'code'    => $bodySite['code'],
-                        'display' => $bodySite['display'],
-                    ]],
-                ],
-                'subject'           => ['reference' => "Patient/{$patientId}"],
-                'encounter'         => ['reference' => "Encounter/{$encounterId}"],
-                'effectiveDateTime' => $effectiveAt,
-                'performer'         => [[
-                    'reference' => 'Practitioner/' . $practitionerId,
-                ]],
-                'valueBoolean' => $value,
-            ],
-            'request' => [
-                'method' => 'POST',
-                'url'    => 'Observation',
-            ],
-        ];
+        return array_merge(
+            $this->baseResource($code, $side, $patientId, $encounterId, $effectiveAt, $practitionerId),
+            ['valueBoolean' => $value]
+        );
     }
 
-    // ✅ valueCodeableConcept entry (bisik)
-    private function buildBisikEntry(
+    private function buildBisikPayload(
         string $side,
         string $value,
         string $patientId,
@@ -198,43 +235,13 @@ class GangguanPendengaranObservationService
         string $effectiveAt,
         string $practitionerId,
     ): array {
-        $bodySite = $this->bodySite[$side];
-        $code     = $this->codeMap['bisik'];
+        $code       = $this->codeMap['bisik'];
         $normalized = strtolower(trim($value));
         $bisikValue = $this->bisikValueMap[$normalized] ?? $this->bisikValueMap['normal'];
 
-        return [
-            'fullUrl'  => 'urn:uuid:' . \Str::uuid(),
-            'resource' => [
-                'resourceType'      => 'Observation',
-                'status'            => 'final',
-                'category'          => [[
-                    'coding' => [[
-                        'system'  => 'http://terminology.hl7.org/CodeSystem/observation-category',
-                        'code'    => 'exam',
-                        'display' => 'Exam',
-                    ]],
-                ]],
-                'code'              => [
-                    'coding' => [[
-                        'system'  => $code['system'],
-                        'code'    => $code['code'],
-                        'display' => $code['display'],
-                    ]],
-                ],
-                'bodySite'          => [
-                    'coding' => [[
-                        'system'  => 'http://snomed.info/sct',
-                        'code'    => $bodySite['code'],
-                        'display' => $bodySite['display'],
-                    ]],
-                ],
-                'subject'           => ['reference' => "Patient/{$patientId}"],
-                'encounter'         => ['reference' => "Encounter/{$encounterId}"],
-                'effectiveDateTime' => $effectiveAt,
-                'performer'         => [[
-                    'reference' => 'Practitioner/' . $practitionerId,
-                ]],
+        return array_merge(
+            $this->baseResource($code, $side, $patientId, $encounterId, $effectiveAt, $practitionerId),
+            [
                 'valueCodeableConcept' => [
                     'coding' => [[
                         'system'  => 'http://snomed.info/sct',
@@ -242,28 +249,24 @@ class GangguanPendengaranObservationService
                         'display' => $bisikValue['display'],
                     ]],
                 ],
-            ],
-            'request' => [
-                'method' => 'POST',
-                'url'    => 'Observation',
-            ],
-        ];
+            ]
+        );
     }
 
-    public function sendGangguanPendengaran(string $idSkrining): void
+    public function sendGangguanPendengaran(string $idSkrining): array
     {
         $skrining    = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
         $pendengaran = GangguanPendengaran::where('skriningID', $idSkrining)->firstOrFail();
 
-        $patientId   = $skrining->patient_id;
-        $encounterId = $skrining->encounter_id;
-        $idPelayanan = $skrining->idPelayanan;
-        $effectiveAt = now()->toIso8601String();
+        $patientId      = $skrining->patient_id;
+        $encounterId    = $skrining->encounter_id;
+        $idPelayanan    = $skrining->idPelayanan;
+        $effectiveAt    = now()->toIso8601String();
         $practitionerId = $skrining->id_petugas;
 
-        $entries = [];
+        $observationByKey = []; // field => observation_id
 
-        // ─── Boolean fields ──────────────────────────────────────────
+        // Boolean fields
         $booleanFields = [
             'tuli_kiri'     => ['jenis' => 'tuli',    'side' => 'kiri'],
             'tuli_kanan'    => ['jenis' => 'tuli',    'side' => 'kanan'],
@@ -284,21 +287,26 @@ class GangguanPendengaranObservationService
 
             if ($existingId) {
                 Log::info("Observation {$field} sudah ada, skip", ['observation_id' => $existingId]);
+                $observationByKey[$field] = $existingId;
                 continue;
             }
 
-            $entries[] = $this->buildBooleanEntry(
-                code: $code,
-                side: $meta['side'],
-                value: filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                patientId: $patientId,
-                encounterId: $encounterId,
-                effectiveAt: $effectiveAt,
-                practitionerId: $practitionerId,
+            $observationByKey[$field] = $this->createObservation(
+                $this->buildBooleanPayload(
+                    code: $code,
+                    side: $meta['side'],
+                    value: filter_var($value, FILTER_VALIDATE_BOOLEAN),
+                    patientId: $patientId,
+                    encounterId: $encounterId,
+                    effectiveAt: $effectiveAt,
+                    practitionerId: $practitionerId,
+                ),
+                $idPelayanan,
+                ucfirst($meta['jenis']) . '-' . $meta['side'],
             );
         }
 
-        // ─── Bisik fields ────────────────────────────────────────────
+        // Bisik fields
         $bisikFields = [
             'bisik_kiri'  => 'kiri',
             'bisik_kanan' => 'kanan',
@@ -312,28 +320,34 @@ class GangguanPendengaranObservationService
 
             if ($existingId) {
                 Log::info("Observation {$field} sudah ada, skip", ['observation_id' => $existingId]);
+                $observationByKey[$field] = $existingId;
                 continue;
             }
 
-            $entries[] = $this->buildBisikEntry(
-                side: $side,
-                value: $value,
-                patientId: $patientId,
-                encounterId: $encounterId,
-                effectiveAt: $effectiveAt,
-                practitionerId: $practitionerId,
+            $observationByKey[$field] = $this->createObservation(
+                $this->buildBisikPayload(
+                    side: $side,
+                    value: $value,
+                    patientId: $patientId,
+                    encounterId: $encounterId,
+                    effectiveAt: $effectiveAt,
+                    practitionerId: $practitionerId,
+                ),
+                $idPelayanan,
+                "Bisik-{$side}",
             );
         }
 
-        if (empty($entries)) {
-            Log::info('Bundle Gangguan Pendengaran skip, semua sudah ada atau null');
-            return;
+        if (empty($observationByKey)) {
+            Log::info('Gangguan Pendengaran skip, semua sudah ada atau null');
+        } else {
+            Log::info('Semua Observation Gangguan Pendengaran berhasil dikirim', ['total' => count($observationByKey)]);
         }
 
-        $this->sendBundle($entries, $idPelayanan);
-
-        Log::info('Bundle Gangguan Pendengaran berhasil', ['total' => count($entries)]);
-
         $pendengaran->update(['sent_at' => now()]);
+
+        return [
+            'observationId' => $observationByKey,
+        ];
     }
 }

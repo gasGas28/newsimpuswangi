@@ -14,7 +14,7 @@ class ObesitasConditionService
     private array $imtMap = [
         'kurus'   => ['code' => 'E46',  'display' => 'Unspecified protein-energy malnutrition'],
         'normal'  => ['code' => 'Z68.1', 'display' => 'Body mass index (BMI) 19 or less, adult'],
-        'overweight'   => ['code' => 'E66.09', 'display' => 'Other obesity due to excess calories'],
+        'overweight'   => ['code' => 'E66.9', 'display' => 'Other obesity due to excess calories'],
         'obesitas' => ['code' => 'E66.9', 'display' => 'Obesity, unspecified'],
     ];
 

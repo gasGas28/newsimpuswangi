@@ -84,9 +84,9 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Data Edukasi (Condition)',
+          logTitle: 'Pengiriman Data Edukasi',
           routeFn: () => route('satusehat.edukasi', props.DataPasien?.idSkrining),
-          idField: 'procedureId',
+          idField: 'results',
         },
       ],
     });

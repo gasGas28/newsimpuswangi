@@ -114,7 +114,7 @@
         {
           logTitle: 'Pengiriman Data Kanker Serviks (Observation)',
           routeFn: () => route('satusehat.kanker-serviks', props.DataPasien?.idSkrining),
-          idField: 'observationId',
+          idField: 'id',
         },
       ],
     });

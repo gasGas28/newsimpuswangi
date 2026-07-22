@@ -113,9 +113,23 @@ class KankerServiksObservationService
         return !empty($entries) ? ($entries[0]['resource']['id'] ?? null) : null;
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // HELPERS: create resource
-    // ────────────────────────────────────────────────────────────────
+    private function extractResourceId(array|string|null $terima, $response): ?string
+    {
+        if (is_array($terima) && !empty($terima['id'])) {
+            return $terima['id'];
+        }
+
+        // Fallback: parse from Location header, e.g.
+        // https://.../ServiceRequest/1234-5678/_history/1
+        $location = $response->header('Location') ?? ($terima['location'] ?? null);
+        if ($location) {
+            $parts = explode('/', $location);
+            // find the segment right after the resource type
+            return $parts[1] ?? null;
+        }
+
+        return null;
+    }
 
     private function createObservation(array $payload, ?string $idPelayanan, string $label): string
     {
@@ -158,7 +172,7 @@ class KankerServiksObservationService
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
-            resource: "Procedure-KankerServiks-{$label}",
+            resource: "Procedure-{$label}",
             idResponse: $procedureId,
             method: 'POST',
             kirim: $payload,
@@ -184,7 +198,7 @@ class KankerServiksObservationService
             ->post(config('services.satusehat.fhir_url') . '/ServiceRequest', $payload);
 
         $terima = $response->json() ?? $response->body();
-        $serviceRequestId = is_array($terima) ? ($terima['id'] ?? null) : null;
+        $serviceRequestId = $this->extractResourceId(is_array($terima) ? $terima : null, $response);
 
         $this->simpanLog(
             idPelayanan: $idPelayanan,
@@ -370,7 +384,7 @@ class KankerServiksObservationService
             $result['procedure_inspekulo_id'] = $procInspekId;
         }
 
-        // ── 2. Observation Hasil Inspekulo (jika dilakukan) ──────
+        // Observation Hasil Inspekulo (jika dilakukan)
         if ($iva->inspekulo !== 'Tidak Dilakukan' && isset($this->inspekValueMap[$iva->inspekulo])) {
             $existingObsInspek = $this->findExistingObservation($encounterId, '451024007');
 
@@ -398,7 +412,7 @@ class KankerServiksObservationService
             }
         }
 
-        // ── 3. Procedure IVA ──────────────────────────────────────
+        // Procedure IVA
         // Kode SNOMED IVA: 251422004
         $ivaStatus = ($iva->iva === 'Tidak Dilakukan') ? 'not-done' : 'completed';
         $existingProcIva = $this->findExistingProcedure($encounterId, '251422004');
@@ -425,7 +439,7 @@ class KankerServiksObservationService
             $result['procedure_iva_id'] = $procIvaId;
         }
 
-        // 4. Observation Hasil IVA (jika dilakukan)
+        // Observation Hasil IVA (jika dilakukan)
         if ($iva->iva !== 'Tidak Dilakukan' && isset($this->ivaValueMap[$iva->iva])) {
             $existingObsIva = $this->findExistingObservation($encounterId, 'X099241');
 
@@ -453,7 +467,7 @@ class KankerServiksObservationService
             }
         }
 
-        // ── 5. Tindak lanjut IVA Positif ─────────────────────────
+        // Tindak lanjut IVA Positif
         if ($iva->iva === 'positif') {
             foreach (self::TINDAK_LANJUT as $key => $tindakan) {
                 $dilakukan = (bool) $iva->{$key};
@@ -528,7 +542,7 @@ class KankerServiksObservationService
             }
         }
 
-        // ── 5b. Rujuk faskes (IVA positif atau Inspekulo curiga) ──
+        // Rujuk faskes (IVA positif atau Inspekulo curiga)
         $perluRujuk = $iva->rujuk_serviks
             || $iva->inspekulo === 'Suspected cervical cancer';
 
@@ -573,7 +587,7 @@ class KankerServiksObservationService
             }
         }
 
-        // 6. Observation HPV-DNA 
+        // Observation HPV-DNA 
         // LOINC 44550-2
         if ($iva->hpv_dna !== 'Tidak Dilakukan' && !empty($iva->hpv_dna)) {
             $hpvValueMap = [
@@ -608,7 +622,7 @@ class KankerServiksObservationService
             }
         }
 
-        // 7. Observation SADANIS
+        // Observation SADANIS
         // SNOMED 13607009
         if ($iva->sadanis !== 'Tidak Dilakukan' && !empty($iva->sadanis)) {
             $existingSadanis = $this->findExistingObservation($encounterId, '13607009');
@@ -671,7 +685,6 @@ class KankerServiksObservationService
             }
         }
 
-        // ── Simpan semua ID ke DB ────────────────────────────────
         $iva->update(array_merge($result, ['sent_at' => now()]));
 
         return $result;

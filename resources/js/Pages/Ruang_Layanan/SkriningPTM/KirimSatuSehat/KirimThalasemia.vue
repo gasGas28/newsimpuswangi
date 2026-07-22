@@ -98,12 +98,7 @@
         {
           logTitle: 'Pengiriman Thalasemia (Observation)',
           routeFn: () => route('satusehat.thalasemia', props.DataPasien?.idSkrining),
-          idField: 'observation_id',
-        },
-        {
-          logTitle: 'Pengiriman Diagnosis Thalasemia (Condition)',
-          routeFn: () => route('satusehat.thalasemia', props.DataPasien?.idSkrining),
-          idField: 'condition_id',
+          idField: 'thalasemia',
         },
       ],
     });

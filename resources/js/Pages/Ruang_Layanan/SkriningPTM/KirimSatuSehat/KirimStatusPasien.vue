@@ -91,7 +91,7 @@
         {
           logTitle: 'Pengiriman Encounter-Discharge Status Pasien',
           routeFn: () => route('satusehat.status-pasien', props.DataPasien?.idSkrining),
-          idField: 'service_request_id',
+          idField: 'results',
         },
       ],
     });

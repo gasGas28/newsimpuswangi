@@ -38,12 +38,6 @@ class StatusPasienService
             ];
         }
 
-        // TODO: tambahkan tabel penyakit lain di sini jika ada, contoh:
-        // $diabetes = SimpusDiabetes::where('skriningID', $idSkrining)->whereNotNull('condition_id')->first();
-        // if ($diabetes) {
-        //     $conditions[] = ['id' => $diabetes->condition_id, 'display' => 'Diabetes Mellitus'];
-        // }
-
         return $conditions;
     }
 
