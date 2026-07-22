@@ -38,11 +38,6 @@ class StatusPasienService
             ];
         }
 
-        // $diabetes = SimpusDiabetes::where('skriningID', $idSkrining)->whereNotNull('condition_id')->first();
-        // if ($diabetes) {
-        //     $conditions[] = ['id' => $diabetes->condition_id, 'display' => 'Diabetes Mellitus'];
-        // }
-
         return $conditions;
     }
 
