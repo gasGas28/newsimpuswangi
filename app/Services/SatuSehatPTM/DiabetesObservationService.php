@@ -59,22 +59,35 @@ class DiabetesObservationService
         array|string|null $terima,
         ?string $userId,
     ): void {
+        $data = [
+            'idPelayanan' => $idPelayanan,
+            'tanggal'     => now(),
+            'puskId'      => $puskId,
+            'resource'    => $resource,
+            'idResponse'  => $idResponse,
+            'method'      => $method,
+            'kirim'       => is_array($kirim) ? json_encode($kirim) : $kirim,
+            'terima'      => is_array($terima) ? json_encode($terima) : $terima,
+            'userId'      => $userId,
+        ];
+
         try {
-            SatuSehatLog::updateOrCreate([
+            $log = SatuSehatLog::create($data);
+
+            Log::info('SatuSehat: log tersimpan ke satu_sehat_log (Diabetes)', [
+                'id'          => $log->id ?? null,
                 'idPelayanan' => $idPelayanan,
-                'tanggal'     => now(),
-                'puskId'      => $puskId,
                 'resource'    => $resource,
-                'idResponse'  => $idResponse,
-                'method'      => $method,
-                'kirim'       => is_array($kirim) ? json_encode($kirim) : $kirim,
-                'terima'      => is_array($terima) ? json_encode($terima) : $terima,
-                'userId'      => $userId,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Gagal menyimpan SatuSehatLog (Diabetes)', [
-                'message'  => $e->getMessage(),
-                'resource' => $resource,
+            Log::error('SatuSehat: GAGAL menyimpan ke satu_sehat_log (Diabetes)', [
+                'message'        => $e->getMessage(),
+                'idPelayanan'    => $idPelayanan,
+                'resource'       => $resource,
+                'userId'         => $userId,
+                'panjang_kirim'  => strlen((string) $data['kirim']),
+                'panjang_terima' => strlen((string) $data['terima']),
+                'trace'          => $e->getTraceAsString(),
             ]);
         }
     }
@@ -110,7 +123,7 @@ class DiabetesObservationService
     }
 
 
-    private function sendBundle(array $entries)
+    private function sendBundle(array $entries, string $idSkrining, ?string $puskId): array
     {
         $payload = [
             'resourceType' => 'Bundle',
@@ -122,24 +135,70 @@ class DiabetesObservationService
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url'), $payload);
 
+        $terima = $response->json() ?? $response->body();
+
+        // Ambil observationId dari setiap entry hasil response bundle
+        $bundleResourceIds = [];
+        foreach ((is_array($terima) ? ($terima['entry'] ?? []) : []) as $respEntry) {
+            // SatuSehat biasanya mengembalikan response.location, contoh: "Observation/abcd-1234/_history/1"
+            $location = $respEntry['response']['location'] ?? null;
+            $resourceId = $respEntry['resource']['id'] ?? null;
+
+            if (!$resourceId && $location) {
+                // fallback: ambil id dari location, format "Observation/{id}/_history/{versionId}"
+                $parts = explode('/', $location);
+                $resourceId = $parts[1] ?? null;
+            }
+
+            if ($resourceId) {
+                $bundleResourceIds[] = $resourceId;
+            }
+        }
+        $observationId = !empty($bundleResourceIds) ? implode(',', $bundleResourceIds) : null;
+
+        $this->logSatuSehat(
+            idPelayanan: $idSkrining,
+            puskId: $puskId,
+            resource: 'Observation',
+            idResponse: $observationId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+            userId: $puskId,
+        );
+
         if (!$response->successful()) {
             throw new \Exception('Gagal mengirim Bundle Diabetes: ' . $response->body());
         }
 
-        return $response;
+        return $terima;
     }
 
-    private function createCondition(array $payload)
+    private function createCondition(array $payload, string $idSkrining, ?string $puskId): array
     {
         $response = Http::withToken($this->getToken())
             ->acceptJson()
             ->post(config('services.satusehat.fhir_url') . '/Condition', $payload);
 
+        $terima = $response->json() ?? $response->body();
+        $conditionId = is_array($terima) ? ($terima['id'] ?? null) : null;
+
+        $this->logSatuSehat(
+            idPelayanan: $idSkrining,
+            puskId: $puskId,
+            resource: 'Condition',
+            idResponse: $conditionId,
+            method: 'POST',
+            kirim: $payload,
+            terima: $terima,
+            userId: $puskId,
+        );
+
         if (!$response->successful()) {
             throw new \Exception('Gagal membuat Condition Diabetes: ' . $response->body());
         }
 
-        return $response;
+        return $terima;
     }
 
     private function resolveCategory(string $kategori): array
@@ -335,47 +394,9 @@ class DiabetesObservationService
         }
 
         if (!empty($entries)) {
-            $bundlePayload = [
-                'resourceType' => 'Bundle',
-                'type'         => 'transaction',
-                'entry'        => $entries,
-            ];
-
-            $response = $this->sendBundle($entries);
-            $responseJson = $response->json();
+            $this->sendBundle($entries, $idSkrining, $puskId);
 
             Log::info('Bundle Observation Diabetes berhasil', ['total' => count($entries)]);
-
-            // Ambil observationId dari setiap entry hasil response bundle
-            $bundleResourceIds = [];
-            foreach (($responseJson['entry'] ?? []) as $i => $respEntry) {
-                // SatuSehat biasanya mengembalikan response.location, contoh: "Observation/abcd-1234/_history/1"
-                $location = $respEntry['response']['location'] ?? null;
-                $resourceId = $respEntry['resource']['id'] ?? null;
-
-                if (!$resourceId && $location) {
-                    // fallback: ambil id dari location, format "Observation/{id}/_history/{versionId}"
-                    $parts = explode('/', $location);
-                    $resourceId = $parts[1] ?? null;
-                }
-
-                if ($resourceId) {
-                    $bundleResourceIds[] = $resourceId;
-                }
-            }
-
-            $observationId = !empty($bundleResourceIds) ? implode(',', $bundleResourceIds) : null;
-
-            $this->logSatuSehat(
-                idPelayanan: $idSkrining,
-                puskId: $puskId,
-                resource: 'Observation',
-                idResponse: $observationId,
-                method: 'POST',
-                kirim: $bundlePayload,
-                terima: $responseJson,
-                userId: $puskId,
-            );
         }
 
         //  Ambil kategori paling berat sebagai Condition utama
@@ -397,22 +418,10 @@ class DiabetesObservationService
                 $conditionId = $existingConditionId;
             } else {
                 $conditionPayload = $this->buildConditionPayload($icd, $patientId, $encounterId, $practitionerId);
-                $conditionResponse = $this->createCondition($conditionPayload);
-                $conditionResponseJson = $conditionResponse->json();
-                $conditionId = $conditionResponseJson['id'] ?? null;
+                $conditionResponseJson = $this->createCondition($conditionPayload, $idSkrining, $puskId);
+                $conditionId = is_array($conditionResponseJson) ? ($conditionResponseJson['id'] ?? null) : null;
 
                 Log::info('Condition Diabetes berhasil', ['condition_id' => $conditionId]);
-
-                $this->logSatuSehat(
-                    idPelayanan: $idSkrining,
-                    puskId: $puskId,
-                    resource: 'Condition',
-                    idResponse: $conditionId,
-                    method: 'POST',
-                    kirim: $conditionPayload,
-                    terima: $conditionResponseJson,
-                    userId: $puskId,
-                );
             }
         } else {
             Log::info('Condition Diabetes skip, semua kategori normal');

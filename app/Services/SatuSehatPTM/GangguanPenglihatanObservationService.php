@@ -27,19 +27,19 @@ class GangguanPenglihatanObservationService
         ],
     ];
 
-    // ✅ valueCodeableConcept map untuk anterior
+    //  valueCodeableConcept map untuk anterior
     private array $anteriorMap = [
         'normal'       => ['code' => '17621005',        'display' => 'Normal',             'system' => 'http://snomed.info/sct'],
         'tidak_normal' => ['code' => '1111451000000106', 'display' => 'Acute angle closure', 'system' => 'http://snomed.info/sct'],
     ];
 
-    // ✅ valueCodeableConcept map untuk refleks (shadow test)
+    //  valueCodeableConcept map untuk refleks (shadow test)
     private array $shadowMap = [
         'negatif' => ['code' => '260385009', 'display' => 'Negative', 'system' => 'http://snomed.info/sct'],
         'positif' => ['code' => '10828004',  'display' => 'Positive', 'system' => 'http://snomed.info/sct'],
     ];
 
-    // ✅ valueCodeableConcept map untuk refleks fundus
+    //  valueCodeableConcept map untuk refleks fundus
     private array $refleksMap = [
         'matur'   => ['code' => '34071009', 'display' => 'Mature',   'system' => 'http://snomed.info/sct'],
         'tidak_normal'  => ['code' => '34071009', 'display' => 'Immature', 'system' => 'http://snomed.info/sct'], // ⚠️ sesuaikan
@@ -330,7 +330,7 @@ class GangguanPenglihatanObservationService
         $entries = [];
 
         foreach (['od', 'os'] as $side) {
-            // ─── Visus ───────────────────────────────────────────────
+            // ─── Visus 
             $visusValue = $penglihatan->{"visus_{$side}"};
             if ($visusValue) {
                 $code = [
@@ -350,7 +350,7 @@ class GangguanPenglihatanObservationService
                 }
             }
 
-            // ─── Pinhole ─────────────────────────────────────────────
+            // ─── Pinhole 
             $pinholeValue = $penglihatan->{"pinhole_{$side}"};
             if ($pinholeValue) {
                 $code = [
@@ -387,7 +387,7 @@ class GangguanPenglihatanObservationService
                 }
             }
 
-            // ─── Anterior ────────────────────────────────────────────
+            // ─── Anterior 
             $anteriorValue = $penglihatan->{"anterior_{$side}"};
             if ($anteriorValue) {
                 $code = [
@@ -407,7 +407,7 @@ class GangguanPenglihatanObservationService
                 }
             }
 
-            // ─── Shadow ──────────────────────────────────────────────
+            // ─── Shadow 
             $shadowValue = $penglihatan->{"shadow_{$side}"};
             if ($shadowValue) {
                 $code = [
@@ -427,7 +427,7 @@ class GangguanPenglihatanObservationService
                 }
             }
 
-            // ─── Refleks ─────────────────────────────────────────────
+            // ─── Refleks 
             $refleksValue = $penglihatan->{"refleks_{$side}"};
             if ($refleksValue) {
                 $code = [
@@ -447,7 +447,7 @@ class GangguanPenglihatanObservationService
                 }
             }
 
-            // ─── Glaukoma ────────────────────────────────────────────
+            // ─── Glaukoma 
             $glaukomaValue = $penglihatan->{"glaukoma_{$side}"};
             if ($glaukomaValue) {
                 $code = [
