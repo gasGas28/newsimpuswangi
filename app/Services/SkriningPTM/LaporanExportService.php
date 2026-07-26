@@ -9,28 +9,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use RuntimeException;
 
-/**
- * Isi data skrining PTM Klaster 3 (Kardiovaskular & Metabolik) ke template resmi
- * "Klaster_3_PTM.xlsx" (header 6 baris, merged cell, warna, data validation/dropdown, dsb).
- *
- * Tidak pakai DTO -- $rows cukup Collection<object> (stdClass) yang propertinya
- * sudah dinamai persis sesuai COLUMN_MAP (lihat LaporanService::mapRow()).
- *
- * Alur dibuat serupa dengan ExportDataRegisterService (Register Kohort):
- *   - Controller yang bikin/siapkan Spreadsheet & yang men-stream hasil akhirnya.
- *   - Service ini cuma bertanggung jawab MENGISI DATA ke Spreadsheet yang diberikan.
- *
- * Bedanya dengan Register (yang bikin sheet dari nol via new Spreadsheet()):
- * di sini Spreadsheet WAJIB berasal dari template resmi (loadTemplate()), karena
- * file yang di-download harus identik formatnya dengan Klaster_3_PTM.xlsx.
- *
- * Cara pakai (di controller):
- *   $rows = $laporanService->build($filters);
- *   $spreadsheet = $exportService->loadTemplate();
- *   $exportService->fillData($spreadsheet, $rows);
- *   $writer = new Xlsx($spreadsheet);
- *   // ...stream seperti di RegisterExportController
- */
+
 class LaporanExportService
 {
     /** Nama sheet data pada file template asli. */
@@ -65,10 +44,10 @@ class LaporanExportService
         'H' => 'merokok_batang_per_hari',
         'I' => 'merokok_lama_tahun',
         'J' => 'terpapar_asap_rokok',
-        'K' => 'puma_napas_pendek',
-        'L' => 'puma_dahak',
-        'M' => 'puma_batuk',
-        'N' => 'puma_spirometri',
+        'K' => 'napas_pendek',
+        'L' => 'dahak',
+        'M' => 'batuk',
+        'N' => 'spirometri',
         'O' => 'konsumsi_gula_berlebih',
         'P' => 'konsumsi_garam_berlebih',
         'Q' => 'konsumsi_minyak_berlebih',
@@ -175,9 +154,6 @@ class LaporanExportService
      * Kalau data lebih banyak dari baris yang sudah disiapkan template asli
      * (style + dropdown/data validation cuma sampai baris 106), copy style &
      * validation dari baris terakhir template ke baris-baris tambahan.
-     *
-     * Best-effort: setelah export, cek ulang beberapa baris terakhir di Excel
-     * untuk memastikan dropdown & format ikut ke-copy dengan benar.
      */
     private function extendStyleAndValidation(Worksheet $sheet, int $lastRowNeeded): void
     {

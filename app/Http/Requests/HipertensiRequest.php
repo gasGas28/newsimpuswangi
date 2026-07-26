@@ -23,33 +23,39 @@ class HipertensiRequest extends FormRequest
     {
         return [
             'skriningId' => ['required'],
-            'sistolik' => ['required', 'integer'],
-            'diastolik' => ['required', 'integer'],
+            'sistolik' => ['required', 'integer', 'min:60', 'max:600'],
+            'diastolik' => ['required', 'integer', 'min:40', 'max:200'],
             'kategori_hipertensi' => ['nullable', 'string'],
-            'suhu' => ['nullable', 'numeric'],
-            'nadi' => ['nullable', 'integer'],
-            'pernapasan' => ['nullable', 'integer'],
-
+            'suhu' => ['nullable', 'numeric', 'min:25', 'max:45'],
+            'nadi' => ['nullable', 'integer', 'min:20', 'max:300'],
+            'pernapasan' => ['nullable', 'integer', 'min:5', 'max:100'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'sistolik.required' => 'Tekanan Sistolik Masih Belum Diisi.',
-            'diastolik.required' => 'Tekanan Diastolik Masih Belum Diisi.',
+            'sistolik.required' => 'Tekanan sistolik wajib diisi.',
+            'sistolik.integer' => 'Tekanan sistolik harus berupa angka.',
+            'sistolik.min' => 'Tekanan sistolik minimal 60 mmHg.',
+            'sistolik.max' => 'Tekanan sistolik maksimal 300 mmHg.',
 
-        ];
-    }
+            'diastolik.required' => 'Tekanan diastolik wajib diisi.',
+            'diastolik.integer' => 'Tekanan diastolik harus berupa angka.',
+            'diastolik.min' => 'Tekanan diastolik minimal 40 mmHg.',
+            'diastolik.max' => 'Tekanan diastolik maksimal 200 mmHg.',
 
-    public function attributes(): array
-    {
-        return [
-            'sistolik' => 'dokter/petugas',
-            'diastolik' => 'tanggal skrining',
-            'suhu' => 'keluhan utama',
-            'nadi' => 'keluhan utama',
-            'pernapasan' => 'keluhan utama',
+            'kategori_hipertensi.string' => 'Kategori hipertensi tidak valid.',
+
+            'suhu.numeric' => 'Suhu tubuh harus berupa angka.',
+
+            'nadi.integer' => 'Nadi harus berupa angka.',
+            'nadi.min' => 'Nadi minimal 20 kali/menit.',
+            'nadi.max' => 'Nadi maksimal 300 kali/menit.',
+
+            'pernapasan.integer' => 'Frekuensi pernapasan harus berupa angka.',
+            'pernapasan.min' => 'Frekuensi pernapasan minimal 5 kali/menit.',
+            'pernapasan.max' => 'Frekuensi pernapasan maksimal 100 kali/menit.',
         ];
     }
 }

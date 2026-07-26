@@ -173,7 +173,6 @@ class SatuSehatController extends Controller
             return redirect()->back()->with([
                 'message' => 'Data Profil Lipid berhasil dikirim',
                 'data' => [
-                    'observation_id'   => $lipid['observation_id'],
                     'condition_id' => $lipid['condition_id'],
                 ],
             ]);

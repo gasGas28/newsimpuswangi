@@ -745,10 +745,7 @@
 
   const scoreClass = computed(() => `risk-score-${riskScore.value.level}`);
 
-  // ============================================================
-  // SINKRONISASI HASIL KALKULASI → form fields
-  // watchEffect akan berjalan otomatis setiap riskScore berubah
-  // ============================================================
+
   watchEffect(() => {
     form.skor_faktor_risiko = riskScore.value.total;
     form.kategori_faktor_risiko = riskScore.value.category;
