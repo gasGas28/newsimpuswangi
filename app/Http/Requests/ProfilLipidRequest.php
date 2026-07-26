@@ -23,13 +23,13 @@ class ProfilLipidRequest extends FormRequest
     {
         return [
             'skriningId' => ['required'],
-            'kolesterol_total' => ['required', 'numeric'],
+            'kolesterol_total' => ['required', 'numeric', 'max:1000'],
             'interpretasi_kolesterol_total' => ['required', 'string'],
-            'ldl' => ['required', 'numeric'],
+            'ldl' => ['required', 'numeric', 'max:1000'],
             'interpretasi_ldl' => ['required', 'string'],
-            'hdl' => ['required', 'numeric'],
+            'hdl' => ['required', 'numeric', 'max:1000'],
             'interpretasi_hdl' => ['required', 'string'],
-            'trigliserida' => ['required', 'numeric'],
+            'trigliserida' => ['required', 'numeric', 'max:1000'],
             'interpretasi_trigliserida' => ['required', 'string'],
         ];
     }
@@ -37,24 +37,33 @@ class ProfilLipidRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'required' => ':attribute wajib diisi.',
-            'numeric' => ':attribute harus berupa angka.',
-            'string' => ':attribute harus berupa teks.',
-        ];
-    }
+            'kolesterol_total.required' => 'Kolesterol total wajib diisi.',
+            'kolesterol_total.numeric' => 'Kolesterol total harus berupa angka.',
+            'kolesterol_total.max' => 'Kolesterol total maksimal 1000 mg/dL.',
 
-    public function attributes(): array
-    {
-        return [
-            'skriningId' => 'Data skrining',
-            'kolesterol_total' => 'Kolesterol total',
-            'interpretasi_kolesterol_total' => 'Interpretasi kolesterol total',
-            'ldl' => 'Nilai LDL',
-            'interpretasi_ldl' => 'Interpretasi LDL',
-            'hdl' => 'Nilai HDL',
-            'interpretasi_hdl' => 'Interpretasi HDL',
-            'trigliserida' => 'Nilai trigliserida',
-            'interpretasi_trigliserida' => 'Interpretasi trigliserida',
+            'interpretasi_kolesterol_total.required' => 'Interpretasi kolesterol total wajib diisi.',
+            'interpretasi_kolesterol_total.string' => 'Interpretasi kolesterol total tidak valid.',
+
+            'ldl.required' => 'Kolesterol LDL wajib diisi.',
+            'ldl.numeric' => 'Kolesterol LDL harus berupa angka.',
+            'ldl.max' => 'Kolesterol LDL maksimal 1000 mg/dL.',
+
+            'interpretasi_ldl.required' => 'Interpretasi LDL wajib diisi.',
+            'interpretasi_ldl.string' => 'Interpretasi LDL tidak valid.',
+
+            'hdl.required' => 'Kolesterol HDL wajib diisi.',
+            'hdl.numeric' => 'Kolesterol HDL harus berupa angka.',
+            'hdl.max' => 'Kolesterol HDL maksimal 1000 mg/dL.',
+
+            'interpretasi_hdl.required' => 'Interpretasi HDL wajib diisi.',
+            'interpretasi_hdl.string' => 'Interpretasi HDL tidak valid.',
+
+            'trigliserida.required' => 'Trigliserida wajib diisi.',
+            'trigliserida.numeric' => 'Trigliserida harus berupa angka.',
+            'trigliserida.max' => 'Trigliserida maksimal 1000 mg/dL.',
+
+            'interpretasi_trigliserida.required' => 'Interpretasi trigliserida wajib diisi.',
+            'interpretasi_trigliserida.string' => 'Interpretasi trigliserida tidak valid.',
         ];
     }
 }

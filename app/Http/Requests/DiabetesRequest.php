@@ -23,23 +23,34 @@ class DiabetesRequest extends FormRequest
     {
         return [
             'skriningId' => ['required'],
-            'gdp' => ['required', 'numeric'],
+            'gdp' => ['required', 'numeric', 'min:40', 'max:650'],
             'interpretasi_gdp' => ['required', 'string'],
-            'gds' => ['required', 'numeric'],
+            'gds' => ['required', 'numeric', 'min:40', 'max:650'],
             'interpretasi_gds' => ['required', 'string'],
-            'hba1c' => ['required', 'numeric'],
+            'hba1c' => ['required', 'numeric', 'max:15'],
             'interpretasi_hba1c' => ['required', 'string'],
-            'gd2pp' => ['required', 'numeric'],
+            'gd2pp' => ['required', 'numeric', 'min:40', 'max:650'],
             'interpretasi_gd2pp' => ['required', 'string'],
         ];
     }
-        public function messages(): array
+    public function messages(): array
     {
         return [
             'gdp.required' => 'Data Gula Darah Puasa wajib diisi.',
+            'gdp.min' => 'GDP minimal 40 mg/dL.',
+            'gdp.max' => 'GDP maksimal 650 mg/dL.',
+
             'gds.required' => 'Data Gula Darah Sewaktu wajib diisi.',
-            'hba1c.required' => 'Data hba1c wajib diisi.',
-            'gd2pp.required' => 'Data Gula Dara 2 Jam Pospradial wajib diisi.',
+            'gds.min' => 'GDS minimal 40 mg/dL.',
+            'gds.max' => 'GDS maksimal 650 mg/dL.',
+
+            'hba1c.required' => 'Data HbA1c wajib diisi.',
+            'hba1c.min' => 'HbA1c minimal 3%.',
+            'hba1c.max' => 'HbA1c maksimal 15%.',
+
+            'gd2pp.required' => 'Data Gula Darah 2 Jam Postprandial wajib diisi.',
+            'gd2pp.min' => 'GD2PP minimal 40 mg/dL.',
+            'gd2pp.max' => 'GD2PP maksimal 650 mg/dL.',
         ];
     }
 }
