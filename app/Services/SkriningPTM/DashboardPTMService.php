@@ -112,11 +112,7 @@ class DashboardPTMService
         return $out;
     }
 
-    /**
-     * Query dasar: tabel penyakit -> skrining -> pelayanan -> loket,
-     * plus join ke kunjungan_ptm untuk status baru/lama,
-     * difilter ke poli PTM (006) dan rentang tanggal kunjungan.
-     */
+
     protected function baseKeyQuery(array $cfg, array $filters)
     {
         return DB::table($cfg['table'] . ' as t')
