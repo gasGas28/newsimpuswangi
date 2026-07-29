@@ -55,7 +55,7 @@ class EncounterService
         string $caraKeluar,
         string $periodEnd,
         ?string $idPelayanan = null,
-        array $conditionIds = [], // <-- baru: array of ['id' => ..., 'display' => ...]
+        array $conditionIds = [],
     ): array {
         $token = $this->getAccessToken();
 
@@ -81,7 +81,6 @@ class EncounterService
             default    => 'Other',
         };
 
-        // --- Perbaikan statusHistory: pastikan semua entry punya start & end ---
         $statusHistory = $existing['statusHistory'] ?? [];
 
         $statusHistory = array_map(function ($item) use ($periodEnd) {
@@ -100,7 +99,6 @@ class EncounterService
             ],
         ];
 
-        // --- Perbaikan diagnosis: wajib merujuk ke Condition ---
         $diagnosis = array_map(function ($cond) {
             return [
                 'condition' => [
@@ -152,7 +150,7 @@ class EncounterService
 
         return $terima;
     }
-    public function createEncounter(array $payload, ?string $idPelayanan, ?string $idEncounter = null): string
+    public function createEncounter(array $payload, ?string $idPelayanan, ?string $idEncounter = null): array
     {
         $token = $this->getAccessToken();
 
@@ -193,7 +191,10 @@ class EncounterService
             throw new \Exception($response->body());
         }
 
-        return $encounterId;
+        return [
+            'encounterId' => $encounterId,
+            'accessToken' => $token,
+        ];
     }
 
     protected function simpanLog(
@@ -237,7 +238,7 @@ class EncounterService
         }
     }
 
-    public function kirimEncounter(string $idSkrining): string
+    public function kirimEncounter(string $idSkrining): array
     {
         Log::info('SatuSehat: mulai kirimEncounter', ['idSkrining' => $idSkrining]);
 
@@ -332,7 +333,9 @@ class EncounterService
             ],
         ];
 
-        $encounterId = $this->createEncounter($payload, $idPelayanan);
+        $result = $this->createEncounter($payload, $idPelayanan);
+        $encounterId = $result['encounterId'];
+        $accessToken = $result['accessToken'];
 
         try {
             KunjunganPTM::updateOrCreate(
@@ -357,6 +360,9 @@ class EncounterService
             'encounterId' => $encounterId,
         ]);
 
-        return $encounterId;
+        return [
+            'encounterId' => $encounterId,
+            'accessToken' => $accessToken,
+        ];
     }
 }

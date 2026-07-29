@@ -619,7 +619,7 @@ Route::prefix('ruang_layanan')->middleware(['auth'])
         // Route::post('/simpus/skrining-ptm/satusehat', [SatusehatFhirController::class, 'submitPtmPelayanan'])
         //     ->name('satusehat.submit-ptm');
 
-        Route::post('/satusehat/encounter/{idSkrining}', [SatuSehatController::class, 'testEncounter'])
+        Route::post('/satusehat/encounter/{idSkrining}', [SatuSehatController::class, 'sendEncounter'])
             ->name('satusehat.encounter');
         Route::post('/satusehat/observation/{idSkrining}', [SatuSehatController::class, 'sendRiskFactor'])
             ->name('satusehat.observation');

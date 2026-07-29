@@ -60,14 +60,15 @@ class SatuSehatController extends Controller
 
     ) {}
 
-    public function testEncounter(string $idSkrining)
+    public function sendEncounter(string $idSkrining)
     {
         try {
-            $encounterId = $this->encounterService->kirimEncounter($idSkrining);
+            $result = $this->encounterService->kirimEncounter($idSkrining);
             return redirect()->back()->with([
                 'success'      => true,
                 'data' => [
-                    'encounterId' => $encounterId,
+                    'encounterId' => $result['encounterId'],
+                    'accessToken' => $result['accessToken'],
                 ],
             ]);
         } catch (\Exception $e) {

@@ -110,11 +110,6 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Data Deteksi Dini Diabetes (Observation)',
-          routeFn: () => route('satusehat.diabetes', props.DataPasien?.idSkrining),
-          idField: 'observation_id',
-        },
-        {
           logTitle: 'Pengiriman Diagnosis Diabetes (Condition)',
           routeFn: () => route('satusehat.diabetes', props.DataPasien?.idSkrining),
           idField: 'condition_id',
