@@ -97,18 +97,15 @@
   const tglSkrining =
     toDateInput(props.DataPasien?.tglKunjungan) || new Date().toISOString().split('T')[0];
 
-  // ─── Log ─────────────────────────────────────────────────────
   const { logs, isSending, lastStatus, statusMessage, clearLogs, submit } = useSubmitLog(
     `encounter_logs_${props.DataPasien?.idSkrining ?? 'default'}`
   );
 
-  // ─── Kirim ───────────────────────────────────────────────────
   const kirimEncounter = () => {
     submit({
       routerPost: router.post.bind(router),
       getFlash: () => page.props.flash,
       successMessage: 'Data kunjungan berhasil dikirim ke SATUSEHAT.',
-
       steps: [
         {
           logTitle: 'Pengiriman Data Kunjungan (Encounter)',

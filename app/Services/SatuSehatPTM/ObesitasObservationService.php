@@ -142,6 +142,27 @@ class ObesitasObservationService
         ];
     }
 
+    /**
+     * Ekstrak ID resource dari header/field "location" FHIR.
+     * Menangani dua format:
+     *   - "Observation/1234"
+     *   - "Observation/1234/_history/1"
+     * Mengambil segmen tepat setelah nama resource ("Observation"),
+     * bukan segmen terakhir — supaya tidak keliru ambil nomor versi history.
+     */
+    private function extractIdFromLocation(string $location): ?string
+    {
+        $parts = explode('/', trim($location, '/'));
+        $resourceIndex = array_search('Observation', $parts);
+
+        if ($resourceIndex !== false && isset($parts[$resourceIndex + 1])) {
+            return $parts[$resourceIndex + 1];
+        }
+
+        // Fallback kalau format tidak sesuai dugaan
+        return end($parts) ?: null;
+    }
+
     public function sendAntropometri(string $idSkrining): array
     {
         $skrining  = KunjunganPTM::where('idSkrining', $idSkrining)->firstOrFail();
@@ -175,8 +196,10 @@ class ObesitasObservationService
             return ['observation_id' => $existingId];
         }
 
-        $entries = [
-            $this->buildObservation(
+        // Pakai key deskriptif, bukan index numerik, supaya tidak salah ambil
+        // observation saat mencocokkan balik ke response bundle.
+        $entriesMap = [
+            'berat_badan' => $this->buildObservation(
                 loincCode: '29463-7',
                 loincDisplay: 'Body weight',
                 value: (float) $obesitas->berat_badan,
@@ -188,7 +211,7 @@ class ObesitasObservationService
                 fullUrl: 'urn:uuid:' . \Str::uuid(),
                 practitionerId: $practitionerId,
             ),
-            $this->buildObservation(
+            'tinggi_badan' => $this->buildObservation(
                 loincCode: '8302-2',
                 loincDisplay: 'Body height',
                 value: (float) $obesitas->tinggi_badan,
@@ -199,9 +222,8 @@ class ObesitasObservationService
                 effectiveAt: $effectiveAt,
                 fullUrl: 'urn:uuid:' . \Str::uuid(),
                 practitionerId: $practitionerId,
-
             ),
-            $this->buildObservation(
+            'imt' => $this->buildObservation(
                 loincCode: '39156-5',
                 loincDisplay: 'Body mass index (BMI) [Ratio]',
                 value: (float) $obesitas->imt,
@@ -212,9 +234,8 @@ class ObesitasObservationService
                 effectiveAt: $effectiveAt,
                 fullUrl: 'urn:uuid:' . \Str::uuid(),
                 practitionerId: $practitionerId,
-
             ),
-            $this->buildObservation(
+            'lingkar_pinggang' => $this->buildObservation(
                 loincCode: '56086-2',
                 loincDisplay: 'Waist circumference',
                 value: (float) $obesitas->lingkar_pinggang,
@@ -225,23 +246,24 @@ class ObesitasObservationService
                 effectiveAt: $effectiveAt,
                 fullUrl: 'urn:uuid:' . \Str::uuid(),
                 practitionerId: $practitionerId,
-
             ),
         ];
 
         $bundlePayload = [
             'resourceType' => 'Bundle',
             'type'         => 'transaction',
-            'entry'        => $entries,
+            'entry'        => array_values($entriesMap),
         ];
+
+
+        $keys = array_keys($entriesMap);
 
         try {
             $result = $this->sendBundle($bundlePayload);
 
-            $observationId = $result['entry'][2]['response']['location'] ?? null;
-            if ($observationId) {
-                $observationId = last(explode('/', $observationId));
-            }
+            $imtIndex = array_search('imt', $keys);
+            $location = $result['entry'][$imtIndex]['response']['location'] ?? null;
+            $observationId = $location ? $this->extractIdFromLocation($location) : null;
 
             Log::info('Bundle Antropometri berhasil', [
                 'observation_imt_id' => $observationId,

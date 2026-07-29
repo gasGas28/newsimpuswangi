@@ -574,7 +574,7 @@
   import { route } from 'ziggy-js';
   import ModalAlert from '../../../../Components/Layouts/Modal/ModalAlert.vue';
 
-  // --- Props ---
+  // Props
   const props = defineProps({
     DataPasien: Object,
   });
@@ -643,9 +643,7 @@
     return toNumber(value) >= threshold ? highLabel : normalLabel;
   }
 
-  // ============================================================
   // KALKULASI & INTERPRETASI
-  // ============================================================
   function hitungIMT() {
     const bb = toNumber(formObesitas.berat_badan);
     const tb = toNumber(formObesitas.tinggi_badan);
