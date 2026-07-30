@@ -35,6 +35,7 @@ class PasienController extends Controller
     public function update(Request $request, $id)
     {
         $validated = Validator::make($request->all(), [
+            'ihs_pasien' => 'required',
             'nama' => 'required|string|max:60',
             'nik' => 'required|string|max:16',
             'alamat' => 'required|string|max:160',
@@ -44,6 +45,8 @@ class PasienController extends Controller
             'kecamatan' => 'required',
             'kelurahan' => 'required',
         ])->validate();
+
+        // dd($validated);
         $this->pasienService->updatePasien($id, $validated);
         return Inertia::location(route('loket.search'));
     }

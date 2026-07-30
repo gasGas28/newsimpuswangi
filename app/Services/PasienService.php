@@ -69,6 +69,7 @@ class PasienService
         $pasien = Pasien::findOrFail($id);
 
         $pasien->update([
+            'IHS_NUMBER' => $data['ihs_pasien'],
             'NAMA_LGKP' => $data['nama'],
             'NIK' => $data['nik'],
             'ALAMAT' => $data['alamat'],
@@ -78,6 +79,8 @@ class PasienService
             'NO_KEC' => $data['kecamatan'],
             'NO_KEL' => $data['kelurahan'],
         ]);
+
+        // dd($pasien);
 
         return $pasien;
     }
