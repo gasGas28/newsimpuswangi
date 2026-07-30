@@ -50,102 +50,6 @@ use App\Http\Controllers\RuangLayanan\SkriningPTM\RegisterPTMController;
 use App\Http\Controllers\RuangLayanan\SkriningPTM\SkriningPTMExportController;
 
 
-use App\Http\Requests\StoreKunjunganPTMRequest;
-
-Route::get('/test-request-object', function () {
-    $request = app(StoreKunjunganPTMRequest::class);
-
-    dd([
-        'class' => get_class($request),
-        'container' => $request->getContainer(),
-        'redirector' => $request->getRedirector(),
-    ]);
-});
-
-Route::get('/test-token', function () {
-
-    $response = Http::asForm()->post(
-        'https://api-satusehat-stg.dto.kemkes.go.id/oauth2/v1/accesstoken',
-        [
-            'grant_type' => 'client_credentials',
-            'client_id' => 'uEsVwq1Q72nypypRgwpAw3RZAhWsk5LVIMjvxTip8Y2kAGqq',
-            'client_secret' => 'nADFUIufwpzAHduGo9nNFTRQm9ukgGvaDVNVHzpKaAkS4JftVC8f3Cv8lNLo2bJW',
-        ]
-    );
-
-    return [
-        'status' => $response->status(),
-        'body' => $response->body(),
-    ];
-});
-
-Route::get('/satusehat-test', function () {
-
-    $clientId = 'uEsVwq1Q72nypypRgwpAw3RZAhWsk5LVIMjvxTip8Y2kAGqq';
-    $clientSecret = 'nADFUIufwpzAHduGo9nNFTRQm9ukgGvaDVNVHzpKaAkS4JftVC8f3Cv8lNLo2bJW';
-
-    $response = Http::asForm()->post(
-        'https://api-satusehat-stg.dto.kemkes.go.id/oauth2/v1/accesstoken',
-        [
-            'grant_type' => 'client_credentials',
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-        ]
-    );
-
-    return [
-        'status' => $response->status(),
-        'body' => $response->body(),
-    ];
-});
-
-Route::get('/cek-validator', function () {
-    $request = app(StoreKunjunganPTMRequest::class);
-
-    $ref = new ReflectionClass($request);
-
-    $property = $ref->getProperty('validator');
-    $property->setAccessible(true);
-
-    dd([
-        'validator' => $property->getValue($request),
-    ]);
-});
-
-Route::get('/cek-provider', function () {
-    dd(
-        app()->getLoadedProviders()[\Illuminate\Foundation\Providers\FormRequestServiceProvider::class] ?? false
-    );
-});
-
-Route::get('/cek-formrequest', function () {
-    $reflection = new ReflectionClass(StoreKunjunganPTMRequest::class);
-
-    dd([
-        'parent' => get_parent_class(StoreKunjunganPTMRequest::class),
-        'methods' => collect($reflection->getMethods())
-            ->pluck('name')
-            ->contains('validated'),
-    ]);
-});
-
-
-Route::get('/debug-request', function (Request $request) {
-    $reflection = new ReflectionClass($request);
-
-    dd(
-        $reflection->getStaticProperties()['macros'] ?? []
-    );
-});
-
-Route::post('/test-form-request', function (SimpanTindakanRequest $request) {
-    dd([
-        'validated' => $request->validated(),
-        'all' => $request->all(),
-        'class' => get_class($request),
-    ]);
-});
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])
         ->name('profile.index');
@@ -153,11 +57,10 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/ping-google', function () {
     try {
-        // ping ke endpoint 204 Google; cukup untuk ukur latency & konektivitas
         Http::timeout(4)->get('https://www.google.com/generate_204');
         return response()->noContent(); // 204
     } catch (\Throwable $e) {
-        return response()->noContent(503); // dianggap offline
+        return response()->noContent(503);
     }
 });
 
@@ -204,10 +107,7 @@ Route::middleware('auth')->group(function () {
     // Semua role boleh dashboard
     Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
 
-    // OWNER ONLY
-    Route::middleware('role:owner')->group(function () {
-        Route::get('/reports', fn() => Inertia::render('Reports/Index'))->name('reports.index');
-    });
+
 });
 
 // LOGOUTT
@@ -230,10 +130,8 @@ Route::prefix('home')->group(function () {
 
 Route::get('/dashboard-ptm', [DashboardPTMController::class, 'dashboardPTM'])
     ->name('ptm.dashboard')
-    ->middleware('auth'); // Protect home (wajib login)
-// Route::get('/', function () {
-//     return Inertia::render('Home/DashboardPTM');
-// });;
+    ->middleware('auth');
+
 
 
 
@@ -458,23 +356,11 @@ Route::prefix('mal-sehat')->name('mal-sehat.')->group(function () {
     // Yankes Primer
     Route::prefix('yankes-primer')->name('yankes-primer.')->group(function () {
         Route::inertia('/', 'MalSehat/YankesPrimer/Index')->name('index');
-
-        // Route::get('kunjungankonsultasitradisional', [\App\Http\Controllers\MalSehat\YankesController::class, 'kunjunganKonsultasiTradisional'])
-        //     ->name('kunjungankonsultasitradisional');
-
-        // Route::get('kunjunganketerangansehat', [\App\Http\Controllers\MalSehat\YankesController::class, 'kunjunganKeteranganSehat'])
-        //     ->name('kunjunganketerangansehat');
     });
 
     // Farmasi
     Route::prefix('farmasi')->name('farmasi.')->group(function () {
         Route::inertia('/', 'MalSehat/Farmasi/Index')->name('index');
-        // Route::get('permintaanobat', [\App\Http\Controllers\MalSehat\FarmasiController::class, 'permintaanObat'])
-        //     ->name('permintaanobat');
-
-        // Route::get('permintaanobat/pelayanan/{no_mr}', [\App\Http\Controllers\MalSehat\FarmasiController::class, 'pelayanan'])
-        //     ->name('permintaanobat.pelayanan')
-        //     ->middleware('web');
     });
 
     // Biakes
