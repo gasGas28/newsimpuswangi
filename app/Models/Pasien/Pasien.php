@@ -10,6 +10,7 @@ class Pasien extends Model
     protected $primaryKey = 'ID';         // sesuaikan dengan kolom PK di DB
     public $timestamps = false;
     protected $fillable = [
+        'IHS_NUMBER',
         'NAMA_LGKP',
         'NIK',
         'ALAMAT',
