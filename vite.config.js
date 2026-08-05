@@ -4,8 +4,7 @@ import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import path from 'path';
 import ziggy from 'vite-plugin-ziggy';
-import { fileURLToPath, URL } from 'node:url'
-
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [
@@ -28,5 +27,16 @@ export default defineConfig({
     port: 5179,
     strictPort: true,
     cors: true,
+  },
+
+  test: {
+    environment: 'jsdom',
+    globals: true, // supaya describe/it/expect tidak perlu di-import manual
+    include: ['resources/js/**/*.spec.js', 'resources/js/**/*.test.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      exclude: ['**/*.spec.js', '**/*.test.js'],
+    },
   },
 });

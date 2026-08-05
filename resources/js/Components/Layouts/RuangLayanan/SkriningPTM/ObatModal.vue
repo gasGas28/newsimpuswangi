@@ -64,7 +64,7 @@
                     <span class="kode-badge">{{ getKode(item) }}</span>
                   </td>
                   <td class="col-nama">
-                    <span class="nama-text" v-html="highlight(getNama(item))"></span>
+                    <span class="nama-text">{{ getNama(item) }}</span>
                   </td>
                   <td class="col-satuan">
                     <span class="satuan-badge">{{ getSatuan(item) }}</span>
@@ -213,13 +213,6 @@ const prevPage = () => { if (currentPage.value > 1) currentPage.value--; };
 const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
 
 watch(keyword, () => (currentPage.value = 1));
-
-// Highlight keyword di nama obat
-const highlight = (text) => {
-  if (!keyword.value) return text;
-  const escaped = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
-};
 
 const closeModal = () => emit('close');
 const pilihObat  = (item) => { emit('select', item); emit('close'); };
@@ -456,13 +449,6 @@ const getSatuan = (item) => item.SATUAN      || item.satuan     || item.satuan_o
   font-weight: 600;
   color: #0f172a;
   line-height: 1.4;
-}
-
-.nama-text :deep(mark) {
-  background: #fef9c3;
-  color: #854d0e;
-  border-radius: 3px;
-  padding: 0 2px;
 }
 
 .satuan-badge {

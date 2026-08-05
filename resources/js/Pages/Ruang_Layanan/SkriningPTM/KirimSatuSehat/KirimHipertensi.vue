@@ -110,14 +110,9 @@
 
       steps: [
         {
-          logTitle: 'Pengiriman Tekanan Darah (Observation)',
+          logTitle: 'Pengiriman Tekanan Darah (Observation dan Condition)',
           routeFn:  () => route('satusehat.hipertensi', props.DataPasien?.idSkrining),
           idField:  'observation_id',
-        },
-        {
-          logTitle: 'Pengiriman Diagnosis Hipertensi (Condition)',
-          routeFn:  () => route('satusehat.hipertensi', props.DataPasien?.idSkrining),
-          idField:  'condition_id',
         },
       ],
     });

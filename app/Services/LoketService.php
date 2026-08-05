@@ -6,6 +6,8 @@ use App\Models\Loket;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
 
 class LoketService
 {
@@ -16,7 +18,7 @@ class LoketService
             ->leftJoin('simpus_pasien as p', 'a.pasienId', '=', 'p.ID')
             ->leftJoin('unit_profiles as u', 'a.puskId', '=', 'u.unit_id')
             ->select('a.*', 'p.NO_MR', 'p.NAMA_LGKP', 'p.NIK', 'u.nama_unit')
-            ->orderBy('a.tglKunjungan', 'desc');
+            ->orderBy('a.tglKunjungan', 'desc')->where('a.puskId', Auth::user()->unit);
 
         // Jika DataTables send start/length/search
         $start = (int) ($request['start'] ?? 0);
@@ -95,7 +97,7 @@ class LoketService
         if (empty($data['TGL_LHR'])) {
             Log::warning('TGL_LHR tidak ditemukan, menggunakan default values');
             $data['kelUmur'] = $data['kelUmur'] ?? 1;
-            $data['umur'] = $data['umur'] ?? 30;
+            $data['umur'] = $data['umur'] ?? 0;
             $data['umur_bulan'] = $data['umur_bulan'] ?? 0;
             $data['umur_hari'] = $data['umur_hari'] ?? 0;
             return;
@@ -109,7 +111,7 @@ class LoketService
             if ($dob->greaterThan($today)) {
                 Log::warning('Tanggal lahir lebih besar dari hari ini: ' . $data['TGL_LHR']);
                 $data['kelUmur'] = $data['kelUmur'] ?? 1;
-                $data['umur'] = $data['umur'] ?? 30;
+                $data['umur'] = $data['umur'] ?? 0;
                 $data['umur_bulan'] = $data['umur_bulan'] ?? 0;
                 $data['umur_hari'] = $data['umur_hari'] ?? 0;
                 return;
@@ -175,7 +177,7 @@ class LoketService
             Log::error('Error calculateAgeGroups: ' . $e->getMessage());
             // Fallback values
             $data['kelUmur'] = $data['kelUmur'] ?? 1;
-            $data['umur'] = $data['umur'] ?? 30;
+            $data['umur'] = $data['umur'] ?? 0;
             $data['umur_bulan'] = $data['umur_bulan'] ?? 0;
             $data['umur_hari'] = $data['umur_hari'] ?? 0;
         }

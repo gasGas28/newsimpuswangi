@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MasterObatController extends Controller
 {
@@ -25,7 +27,6 @@ class MasterObatController extends Controller
             'today'    => Carbon::now()->format('d-m-Y')
         ]);
     }
-
 
     public function create()
     {
@@ -50,7 +51,12 @@ class MasterObatController extends Controller
             return redirect()->route('farmasi.master-obat.data')
                 ->with('success', 'Data obat berhasil ditambahkan');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Gagal menyimpan data obat', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::user()->id ?? null,
+            ]);
+            return back()->with('error', 'Gagal menyimpan data obat. Silakan coba lagi atau hubungi administrator.');
         }
     }
 

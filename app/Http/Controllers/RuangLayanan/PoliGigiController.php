@@ -272,7 +272,6 @@ class PoliGigiController extends Controller
     }
     public function setPlanningTindakan(Request $request)
     {
-        dd($request->all());
         SimpusTindakan::create([
             'idPelayanan' => 1,
             'loketId' => $request->loketId,

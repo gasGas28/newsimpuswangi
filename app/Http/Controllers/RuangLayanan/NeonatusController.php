@@ -206,7 +206,6 @@ class NeonatusController extends Controller
             'loketId' => $request->loketId,
             'pelayananId' => $request->pelayananId,
         ]);
-        dd($data);
         return redirect()->back();
     }
     public function hapusDataDiagnosa($id)
