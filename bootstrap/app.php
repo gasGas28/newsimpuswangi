@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\Auth\CheckRole;
 use App\Http\Middleware\VerifyRecaptcha;
+use Inertia\Inertia;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -71,5 +73,24 @@ return Application::configure(basePath: dirname(__DIR__))
         //         return response()->json(['message' => 'CSRF token mismatch'], 419);
         //     }
         // });
+
+        // ⬇️ BARU: render error 403/404/419/500/503 lewat Inertia (Error.vue),
+        // bukan HTML mentah -- ini yang tadinya bikin muncul "modal" aneh
+        // saat CheckRole memanggil abort(403).
+        $exceptions->respond(function ($response, \Throwable $e, $request) {
+            if (
+                !app()->environment(['local', 'testing'])
+                && in_array($response->getStatusCode(), [403, 404, 419, 500, 503])
+            ) {
+                return Inertia::render('Error', [
+                    'status'  => $response->getStatusCode(),
+                    'message' => $e->getMessage() ?: null,
+                ])
+                    ->toResponse($request)
+                    ->setStatusCode($response->getStatusCode());
+            }
+
+            return $response;
+        });
     })
     ->create();

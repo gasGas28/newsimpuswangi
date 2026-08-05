@@ -103,8 +103,12 @@ class LoketController extends Controller
             return redirect()->route('loket.index')->with('success', 'Pasien berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error storing pasien: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            Log::error('Gagal menyimpan data pasien', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::user()->id ?? null,
+            ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan data pasien. Silakan coba lagi atau hubungi administrator.');
         }
     }
 
@@ -133,7 +137,6 @@ class LoketController extends Controller
     public function register(Request $request)
     {
         $data = $request->all();
-        Log::info('Data register:', $data);
 
         // Generate nomor urut berdasarkan tanggal kunjungan
         $lastNoUrut = Loket::whereDate('tglKunjungan', $data['tglKunjungan'] ?? date('Y-m-d'))
@@ -156,8 +159,8 @@ class LoketController extends Controller
             'statusKartu' => ($data['kategori'] ?? '') === 'BPJS' ? 'AKTIF' : '',
             'noKartu' => ($data['kategori'] ?? '') === 'BPJS' ? ($data['no_bpjs'] ?? '') : '',
             'kdKegiatan' => 1,
-            'puskId' => 1,
-            'unitId' => 1,
+            'puskId' => Auth::user()?->unit,
+            'unitId' => Auth::user()?->unit,
             'kategoriUnitId' => 1,
         ];
 
@@ -169,8 +172,15 @@ class LoketController extends Controller
 
             return redirect()->route('loket.index')->with('success', 'Pasien berhasil didaftarkan');
         } catch (\Exception $e) {
-            Log::error('Error creating loket: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Gagal mendaftarkan pasien: ' . $e->getMessage())->withInput();
+            DB::rollBack();
+            Log::error('Gagal menyimpan data loket', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+                'user_id' => Auth::user()->id ?? null,
+            ]);
+
+            return redirect()->back()->with('error', 'Gagal menyimpan data loket. Silakan coba lagi atau hubungi administrator.');
         }
     }
 
@@ -316,7 +326,11 @@ class LoketController extends Controller
 
             return $idWilayah;
         } catch (\Exception $e) {
-            Log::error('Error menentukan wilayah dengan unit: ' . $e->getMessage());
+            Log::error("Error menentukan wilayah otomatis: " . $e->getMessage(), [
+                'pasienId' => $pasienId,
+                'userUnit' => $userUnit,
+                'trace' => $e->getTraceAsString(),
+            ]);
             return '';
         }
     }
@@ -553,7 +567,7 @@ class LoketController extends Controller
             abort(404);
         }
 
-        $alamat = DB::table('unit_profiles')->where('unit_id', Auth::user()?->unit ?? 1)->first();
+        $alamat = DB::table('unit_profiles')->where('unit_id', Auth::user()?->unit)->first();
 
         return Inertia::render('Loket/CetakKartu', [
             'pasien' => $pasien,
@@ -626,8 +640,6 @@ class LoketController extends Controller
         // Hapus field yang tidak ada di database
         unset($data['jenisPengunjung'], $data['jenisKunjungan'], $data['kategori']);
 
-        // DEBUG: Log data sebelum calculateAgeGroups
-        Log::info('Data sebelum calculateAgeGroups:', $data);
 
         // Hitung umur/kelompok umur via service - DENGAN FALLBACK
         try {
@@ -636,14 +648,14 @@ class LoketController extends Controller
             Log::error('Error calculateAgeGroups: ' . $e->getMessage());
             // FALLBACK: Set default values jika calculateAgeGroups gagal
             $data['kelUmur'] = $data['kelUmur'] ?? 1;
-            $data['umur'] = $data['umur'] ?? 30;
+            $data['umur'] = $data['umur'] ?? 0;
             $data['umur_bulan'] = $data['umur_bulan'] ?? 0;
             $data['umur_hari'] = $data['umur_hari'] ?? 0;
         }
 
         if ($data['umur'] < 0 || $data['umur'] > 150) {
-            Log::warning('Umur tidak valid: ' . $data['umur'] . ', menggunakan default 30');
-            $data['umur'] = 30;
+            Log::warning('Umur tidak valid: ' . $data['umur'] . ', menggunakan default 0');
+            $data['umur'] = 0;
             $data['kelUmur'] = 8; // Default untuk usia 20-44
         }
 
@@ -658,27 +670,23 @@ class LoketController extends Controller
             $data['kelUmur'] = 1; // Default value
         }
 
-        // DEBUG: Log data setelah calculateAgeGroups
-        Log::info('Data setelah calculateAgeGroups:', $data);
 
         // sanitize unset fields
         unset($data['TGL_LHR'], $data['NO_MR'], $data['NIK']);
 
         $data['idLoket'] = \Illuminate\Support\Str::uuid()->toString();
-        $data['puskId'] = Auth::user()?->unit ?? 1;
+        $data['puskId'] = Auth::user()?->unit;
         $data['createdBy'] = Auth::user()?->username ?? 'system';
 
         // Generate nomor urut
         $lastNoUrut = DB::table('simpus_loket')
             ->whereDate('tglKunjungan', $data['tglKunjungan'])
+            ->where('puskId', Auth::user()->unit)
             ->max('noUrut') ?? 0;
         $data['noUrut'] = str_pad($lastNoUrut + 1, 4, '0', STR_PAD_LEFT);
 
         try {
             DB::beginTransaction();
-
-            // DEBUG: Log data sebelum insert
-            Log::info('Data sebelum insert ke simpus_loket:', $data);
 
             // Insert ke tabel loket
             DB::table('simpus_loket')->insert($data);
@@ -718,15 +726,13 @@ class LoketController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error simpan loket: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
-            Log::error('Data yang gagal disimpan:', $data);
-
             //Return Inertia redirect dengan error
-            return redirect()->back()->with([
-                'error' => 'Gagal mendaftarkan pasien: ' . $e->getMessage(),
-                'input_data' => $request->all() // Untuk prepopulate form jika needed
+            Log::error('❌ Gagal menyimpan data loket: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+                'user_id' => Auth::user()->id ?? null,
             ]);
+            return redirect()->back()->with('error', 'Gagal menyimpan data loket. Silakan coba lagi atau hubungi administrator.');
         }
     }
 
@@ -798,8 +804,15 @@ class LoketController extends Controller
             return response()->json(['status' => 'done', 'message' => 'update']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error update loket: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Gagal update data', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::user()->id ?? null,
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal menyimpan data. Silakan coba lagi atau hubungi administrator.'
+            ], 500);
         }
     }
 
@@ -813,7 +826,7 @@ class LoketController extends Controller
         }
 
         $del = [
-            'puskId' => Auth::user()?->unit ?? 1,
+            'puskId' => Auth::user()?->unit,
             'agent' => $agent,
             'platform' => php_uname('s'),
             'ip_address' => request()->ip(),
@@ -873,7 +886,7 @@ class LoketController extends Controller
                 AND a.`puskId` = ?
                 AND a.`pasienId` = ?
             ) prov GROUP BY pasienId
-        ", [$PPK, $tglcek, Auth::user()?->unit ?? 1, $pasienId]);
+        ", [$PPK, $tglcek, Auth::user()?->unit, $pasienId]);
 
         $jmlbridging = $cek->bridging ?? 0;
 

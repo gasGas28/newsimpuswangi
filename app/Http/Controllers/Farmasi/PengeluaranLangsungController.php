@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Farmasi;
 
 use App\Http\Controllers\Controller;
+use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -135,9 +136,9 @@ class PengeluaranLangsungController extends Controller
                     'sample'         => $item['sample'] ?? 0,
                     'setujui'        => $item['setujui'] ?? 1,
                     'createdDate'    => $validated['tanggal'],
-                    'createdBy'      => auth()->user()->name ?? 'system',
+                    'createdBy'      => Auth::user()->name ?? 'system',
                     'modifiedDate'   => now(),
-                    'modifiedBy'     => auth()->user()->name ?? 'system',
+                    'modifiedBy'     => Auth::user()->name ?? 'system',
                 ]);
             }
 
@@ -152,10 +153,16 @@ class PengeluaranLangsungController extends Controller
                 'data'    => $latest,
             ]);
         } catch (\Throwable $e) {
-            \Log::error('GAGAL SIMPAN PENGELUARAN LANGSUNG:', ['error' => $e->getMessage()]);
+            // Log error dengan detail
+            \Log::error('Gagal menyimpan data pengeluaran langsung', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::user()->id ?? null,
+            ]);
+
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Gagal menyimpan data: ' . $e->getMessage(),
+                'message' => 'Gagal menyimpan data pengeluaran langsung. Silakan coba lagi atau hubungi administrator.',
             ], 500);
         }
     }

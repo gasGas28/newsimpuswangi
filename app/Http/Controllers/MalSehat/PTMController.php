@@ -13,7 +13,6 @@ class PTMController extends Controller
     public function index()
     {
         $puskesmas = KategoriUnit::all();
-        dd($puskesmas);
 
         return Inertia::render('MalSehat/PTM/KonselingBerhentiMerokok', [
             'puskesmas' => $puskesmas
